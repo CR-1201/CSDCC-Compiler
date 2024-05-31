@@ -1,7 +1,10 @@
 .idea
 /out
 *.iml
+testfile.txt
 output.txt
+llvm_ir.txt
+error.txt
 .idea/workspace.xml
 
 ### IntelliJ IDEA ###

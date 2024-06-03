@@ -29,7 +29,7 @@ public class LexicalAnalyze {
         put("break", Token.tokenType.BREAKTK);
         put("continue", Token.tokenType.CONTINUETK);
         put("if", Token.tokenType.IFTK);
-        put("for", Token.tokenType.WHILETK);
+        put("while", Token.tokenType.WHILETK);
         put("else", Token.tokenType.ELSETK);
         put("printf", Token.tokenType.PRINTFTK);
         put("return", Token.tokenType.RETURNTK);
@@ -133,7 +133,7 @@ public class LexicalAnalyze {
                 }
 
                 if (isFloat) {
-                    tokens.add(new Token(Token.tokenType.FLOATTK, lineNum, num.toString()));
+                    tokens.add(new Token(Token.tokenType.FLTCON, lineNum, num.toString()));
                 } else {
                     if (isHex) {// 将十六进制字符串转换为十进制字符串
                         int decimalValue = Integer.parseInt(num.substring(2), 16);

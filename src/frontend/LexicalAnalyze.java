@@ -106,7 +106,7 @@ public class LexicalAnalyze {
                     }
                 } else tokens.add(new Token(Token.tokenType.DIV, lineNum, "/"));
             } else if (Character.isDigit(s)) {//数字
-                StringBuilder num = new StringBuilder("" + s);
+                StringBuilder num = new StringBuilder("");
                 boolean isFloat = false;
                 boolean isHex = false;
                 boolean isOct = (s == '0');

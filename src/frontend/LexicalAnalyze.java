@@ -35,6 +35,19 @@ public class LexicalAnalyze {
         put("return", Token.tokenType.RETURNTK);
         put("void", Token.tokenType.VOIDTK);
         put("float", Token.tokenType.FLOATTK);
+        put("getint", Token.tokenType.GETINTTK);
+        put("getch", Token.tokenType.GETCHTK);
+        put("getfloat", Token.tokenType.GETFLOATTK);
+        put("getarray", Token.tokenType.GETARRAYTK);
+        put("getfarray", Token.tokenType.GETFARRAYTK);
+        put("putint", Token.tokenType.PUTINTTK);
+        put("putch", Token.tokenType.PUTCHTK);
+        put("putfloat", Token.tokenType.PUTFLOATTK);
+        put("putarray", Token.tokenType.PUTARRAYTK);
+        put("putfarray", Token.tokenType.PUTFARRAYTK);
+        put("putf", Token.tokenType.PUTFTK);
+        put("starttime", Token.tokenType.STARTTIMETK);
+        put("stoptime", Token.tokenType.STOPTIMETK);
     }};
 
     private final Map<String, Token.tokenType> singleSymbols = new HashMap<>() {{

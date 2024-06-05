@@ -22,47 +22,47 @@ public class LexicalAnalyze {
         return tokens;
     }
 
-    private final Map<String, Token.tokenType> keywords = new HashMap<>() {{
-        put("main", Token.tokenType.MAINTK);
-        put("const", Token.tokenType.CONSTTK);
-        put("int", Token.tokenType.INTTK);
-        put("break", Token.tokenType.BREAKTK);
-        put("continue", Token.tokenType.CONTINUETK);
-        put("if", Token.tokenType.IFTK);
-        put("while", Token.tokenType.WHILETK);
-        put("else", Token.tokenType.ELSETK);
-        put("printf", Token.tokenType.PRINTFTK);
-        put("return", Token.tokenType.RETURNTK);
-        put("void", Token.tokenType.VOIDTK);
-        put("float", Token.tokenType.FLOATTK);
-        put("getint", Token.tokenType.GETINTTK);
-        put("getch", Token.tokenType.GETCHTK);
-        put("getfloat", Token.tokenType.GETFLOATTK);
-        put("getarray", Token.tokenType.GETARRAYTK);
-        put("getfarray", Token.tokenType.GETFARRAYTK);
-        put("putint", Token.tokenType.PUTINTTK);
-        put("putch", Token.tokenType.PUTCHTK);
-        put("putfloat", Token.tokenType.PUTFLOATTK);
-        put("putarray", Token.tokenType.PUTARRAYTK);
-        put("putfarray", Token.tokenType.PUTFARRAYTK);
-        put("putf", Token.tokenType.PUTFTK);
-        put("starttime", Token.tokenType.STARTTIMETK);
-        put("stoptime", Token.tokenType.STOPTIMETK);
+    private final Map<String, Token.TokenType> keywords = new HashMap<>() {{
+        put("main", Token.TokenType.MAINTK);
+        put("const", Token.TokenType.CONSTTK);
+        put("int", Token.TokenType.INTTK);
+        put("break", Token.TokenType.BREAKTK);
+        put("continue", Token.TokenType.CONTINUETK);
+        put("if", Token.TokenType.IFTK);
+        put("while", Token.TokenType.WHILETK);
+        put("else", Token.TokenType.ELSETK);
+        put("printf", Token.TokenType.PRINTFTK);
+        put("return", Token.TokenType.RETURNTK);
+        put("void", Token.TokenType.VOIDTK);
+        put("float", Token.TokenType.FLOATTK);
+        put("getint", Token.TokenType.GETINTTK);
+        put("getch", Token.TokenType.GETCHTK);
+        put("getfloat", Token.TokenType.GETFLOATTK);
+        put("getarray", Token.TokenType.GETARRAYTK);
+        put("getfarray", Token.TokenType.GETFARRAYTK);
+        put("putint", Token.TokenType.PUTINTTK);
+        put("putch", Token.TokenType.PUTCHTK);
+        put("putfloat", Token.TokenType.PUTFLOATTK);
+        put("putarray", Token.TokenType.PUTARRAYTK);
+        put("putfarray", Token.TokenType.PUTFARRAYTK);
+        put("putf", Token.TokenType.PUTFTK);
+        put("starttime", Token.TokenType.STARTTIMETK);
+        put("stoptime", Token.TokenType.STOPTIMETK);
     }};
 
-    private final Map<String, Token.tokenType> singleSymbols = new HashMap<>() {{
-        put("+", Token.tokenType.PLUS);
-        put("-", Token.tokenType.MINU);
-        put("*", Token.tokenType.MULT);
-        put("%", Token.tokenType.MOD);
-        put(";", Token.tokenType.SEMICN);
-        put(",", Token.tokenType.COMMA);
-        put("(", Token.tokenType.LPARENT);
-        put(")", Token.tokenType.RPARENT);
-        put("[", Token.tokenType.LBRACK);
-        put("]", Token.tokenType.RBRACK);
-        put("{", Token.tokenType.LBRACE);
-        put("}", Token.tokenType.RBRACE);
+    private final Map<String, Token.TokenType> singleSymbols = new HashMap<>() {{
+        put("+", Token.TokenType.PLUS);
+        put("-", Token.TokenType.MINU);
+        put("*", Token.TokenType.MULT);
+        put("%", Token.TokenType.MOD);
+        put(";", Token.TokenType.SEMICN);
+        put(",", Token.TokenType.COMMA);
+        put("(", Token.TokenType.LPARENT);
+        put(")", Token.TokenType.RPARENT);
+        put("[", Token.TokenType.LBRACK);
+        put("]", Token.TokenType.RBRACK);
+        put("{", Token.TokenType.LBRACE);
+        put("}", Token.TokenType.RBRACE);
     }};
 
     public void analyze(String str) {
@@ -82,8 +82,8 @@ public class LexicalAnalyze {
                         break;
                     }
                 }
-                Token.tokenType type;//检查是否是关键词
-                type = keywords.getOrDefault(idenfr, Token.tokenType.IDENFR);
+                Token.TokenType type;//检查是否是关键词
+                type = keywords.getOrDefault(idenfr, Token.TokenType.IDENFR);
                 tokens.add(new Token(type, lineNum, idenfr));
             } else if (s == '/') {//单行注释 多行注释 除号
                 if (next == '/') {
@@ -104,7 +104,7 @@ public class LexicalAnalyze {
                             break;
                         }
                     }
-                } else tokens.add(new Token(Token.tokenType.DIV, lineNum, "/"));
+                } else tokens.add(new Token(Token.TokenType.DIV, lineNum, "/"));
             } else if (Character.isDigit(s)) {//数字
                 StringBuilder num = new StringBuilder("");
                 boolean isFloat = false;
@@ -142,11 +142,11 @@ public class LexicalAnalyze {
                 i--;
                 String Num = num.toString();
                 if (Num.equals("0")) isOct = false;
-                if (isFloat && isHex) tokens.add(new Token(Token.tokenType.HEXFLTCON, lineNum, Num));
-                else if (isFloat) tokens.add(new Token(Token.tokenType.DECFLTCON, lineNum, Num));
-                else if (isHex) tokens.add(new Token(Token.tokenType.HEXCON, lineNum, Num));
-                else if (isOct) tokens.add(new Token(Token.tokenType.OCTCON, lineNum, Num));
-                else tokens.add(new Token(Token.tokenType.DECCON, lineNum, Num));
+                if (isFloat && isHex) tokens.add(new Token(Token.TokenType.HEXFLTCON, lineNum, Num));
+                else if (isFloat) tokens.add(new Token(Token.TokenType.DECFLTCON, lineNum, Num));
+                else if (isHex) tokens.add(new Token(Token.TokenType.HEXCON, lineNum, Num));
+                else if (isOct) tokens.add(new Token(Token.TokenType.OCTCON, lineNum, Num));
+                else tokens.add(new Token(Token.TokenType.DECCON, lineNum, Num));
 
 
 //                boolean isHex = false;
@@ -209,39 +209,39 @@ public class LexicalAnalyze {
                         break;
                     }
                 }
-                tokens.add(new Token(Token.tokenType.STRCON, lineNum, _str.toString()));
+                tokens.add(new Token(Token.TokenType.STRCON, lineNum, _str.toString()));
             } else if (s == '!') {//  ! 或 !=
                 if (next == '=') {
                     i++;
-                    tokens.add(new Token(Token.tokenType.NEQ, lineNum, "!="));
+                    tokens.add(new Token(Token.TokenType.NEQ, lineNum, "!="));
                 } else {
-                    tokens.add(new Token(Token.tokenType.NOT, lineNum, "!"));
+                    tokens.add(new Token(Token.TokenType.NOT, lineNum, "!"));
                 }
             } else if (s == '&') {//  &&
                 if (next == '&') {
                     i++;
-                    tokens.add(new Token(Token.tokenType.AND, lineNum, "&&"));
+                    tokens.add(new Token(Token.TokenType.AND, lineNum, "&&"));
                 }
             } else if (s == '|') {//  ||
                 if (next == '|') {
                     i++;
-                    tokens.add(new Token(Token.tokenType.OR, lineNum, "||"));
+                    tokens.add(new Token(Token.TokenType.OR, lineNum, "||"));
                 }
             } else if (s == '<') {//  <= 或 <
                 if (next == '=') {
                     i++;
-                    tokens.add(new Token(Token.tokenType.LEQ, lineNum, "<="));
-                } else tokens.add(new Token(Token.tokenType.LSS, lineNum, "<"));
+                    tokens.add(new Token(Token.TokenType.LEQ, lineNum, "<="));
+                } else tokens.add(new Token(Token.TokenType.LSS, lineNum, "<"));
             } else if (s == '>') {//  >= 或 >
                 if (next == '=') {
                     i++;
-                    tokens.add(new Token(Token.tokenType.GEQ, lineNum, ">="));
-                } else tokens.add(new Token(Token.tokenType.GRE, lineNum, ">"));
+                    tokens.add(new Token(Token.TokenType.GEQ, lineNum, ">="));
+                } else tokens.add(new Token(Token.TokenType.GRE, lineNum, ">"));
             } else if (s == '=') {//  == 或 =
                 if (next == '=') {
                     i++;
-                    tokens.add(new Token(Token.tokenType.EQL, lineNum, "=="));
-                } else tokens.add(new Token(Token.tokenType.ASSIGN, lineNum, "="));
+                    tokens.add(new Token(Token.TokenType.EQL, lineNum, "=="));
+                } else tokens.add(new Token(Token.TokenType.ASSIGN, lineNum, "="));
             } else if (singleSymbols.containsKey(s + "")) {
                 tokens.add(new Token(singleSymbols.get(s + ""), lineNum, "" + s));
             } else {

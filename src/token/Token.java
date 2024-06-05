@@ -1,25 +1,25 @@
 package token;
 
 public class Token {
-    public enum tokenType {
+    public enum TokenType {
         IDENFR, HEXCON, DECCON, OCTCON, HEXFLTCON, DECFLTCON, STRCON, MAINTK, CONSTTK, INTTK, BREAKTK, CONTINUETK, IFTK, ELSETK,
         NOT, AND, OR, WHILETK, PRINTFTK, RETURNTK, PLUS, MINU, VOIDTK, FLOATTK,
         MULT, DIV, MOD, LSS, LEQ, GRE, GEQ, EQL, NEQ,
         ASSIGN, SEMICN, COMMA, LPARENT, RPARENT, LBRACK, RBRACK, LBRACE, RBRACE,
         GETINTTK, GETCHTK, GETFLOATTK, GETARRAYTK, GETFARRAYTK, PUTINTTK, PUTCHTK, PUTFLOATTK, PUTARRAYTK, PUTFARRAYTK, PUTFTK, STARTTIMETK, STOPTIMETK;
     }
-    private final tokenType type;
+    private final TokenType type;
     private final int lineNum;
     private final String content;
 
-    public Token(tokenType type, int lineNum, String content) {
+    public Token(TokenType type, int lineNum, String content) {
         this.type = type;
         this.lineNum = lineNum;
         this.content = content;
     }
 
     //final只允许访问
-    public tokenType getType() {
+    public TokenType getType() {
         return type;
     }
 

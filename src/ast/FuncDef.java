@@ -3,7 +3,7 @@ package ast;
 import token.Token;
 
 // TODO
-//  FuncDef -> FuncType Ident '(' [FuncFParams] ')' Block
+// FuncDef -> FuncType Ident '(' [FuncFParams] ')' Block
 public class FuncDef extends Node{
     private FuncType funcType = null;
     private Token identToken = null;

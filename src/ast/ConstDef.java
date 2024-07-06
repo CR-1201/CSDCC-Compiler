@@ -11,10 +11,6 @@ public class ConstDef extends Node{
     private Token identToken;
     private List<ConstExp> constExps = null;
     private ConstInitVal constInitVal = null;
-    public ConstDef(Token identToken, ConstInitVal constInitVal) {
-        this.identToken = identToken;
-        this.constInitVal = constInitVal;
-    }
 
     public ConstDef(Token identToken, List<ConstExp> constExps, ConstInitVal constInitVal) {
         this.identToken = identToken;

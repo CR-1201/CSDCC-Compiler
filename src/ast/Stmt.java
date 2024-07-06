@@ -15,16 +15,13 @@ public class Stmt extends Node{
     private Exp exp;
     private LVal lVal;
     private int type;
-
     private Block block;
-
     private Cond cond;
     private Stmt stmt1;
     private Stmt stmt2;
-
     private Stmt stmt;
-
     private Token conBreakTk;
+
     public Stmt(int type, LVal lVal, Exp exp) {
        // LVal '=' Exp ';'
        this.type = type;
@@ -33,7 +30,7 @@ public class Stmt extends Node{
     }
 
     public Stmt(int type, Exp exp) {
-        // [Exp] ';'
+        // [Exp] ';' || 'return' [Exp] ';'
         this.type = type;
         this.exp = exp;
     }

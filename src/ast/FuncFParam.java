@@ -9,11 +9,15 @@ import java.util.List;
 public class FuncFParam extends Node{
     private BType bType = null;
     private Token identToken = null;
-    private List<Exp> exps;
-    public FuncFParam(Token identToken, BType bType, List<Exp> exps) {
+    private List<ConstExp> constExps;
+    private Token lbrack;
+    private Token rbrack;
+    public FuncFParam( BType bType, Token identToken, Token lbrack, Token rbrack, List<ConstExp> constExps) {
         this.identToken = identToken;
+        this.lbrack = lbrack;
+        this.rbrack = rbrack;
         this.bType = bType;
-        this.exps = exps;
+        this.constExps = constExps;
     }
     @Override
     public void accept() {

@@ -9,12 +9,7 @@ public class FuncDef extends Node{
     private Token identToken = null;
     private FuncFParams funcFParams = null;
     private Block block = null;
-    public FuncDef(Token identToken, FuncType funcType, Block block) {
-        this.identToken = identToken;
-        this.funcType = funcType;
-        this.block = block;
-    }
-    public FuncDef(Token identToken, FuncType funcType, FuncFParams funcFParams, Block block) {
+    public FuncDef(FuncType funcType, Token identToken, FuncFParams funcFParams, Block block) {
         this.identToken = identToken;
         this.funcType = funcType;
         this.funcFParams = funcFParams;

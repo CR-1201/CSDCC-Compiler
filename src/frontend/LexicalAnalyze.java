@@ -148,7 +148,6 @@ public class LexicalAnalyze {
                 else if (isOct) tokens.add(new Token(Token.TokenType.OCTCON, lineNum, Num));
                 else tokens.add(new Token(Token.TokenType.DECCON, lineNum, Num));
 
-
 //                boolean isHex = false;
 //                boolean isFloat = false;
 //                boolean isExponent = false;

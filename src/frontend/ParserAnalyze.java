@@ -113,22 +113,20 @@ public class ParserAnalyze {
         // ConstDef → Ident { '[' ConstExp ']' } '=' ConstInitVal
         Token identToken = match(Token.TokenType.IDENFR);
         List<ConstExp> constExp = new ArrayList<>();
-        ConstInitVal constInitVal;
         while (currentToken.getType() != Token.TokenType.ASSIGN) {
             match(Token.TokenType.LBRACK);
             constExp.add(ConstExp());
             match(Token.TokenType.RBRACK);
         }
         match(Token.TokenType.ASSIGN);
-        constInitVal = ConstInitVal();
+        ConstInitVal constInitVal = ConstInitVal();
         return new ConstDef(identToken,constExp,constInitVal);
     }
 
     private  ConstInitVal ConstInitVal(){
         // ConstInitVal → ConstExp | '{' [ ConstInitVal { ',' ConstInitVal } ] '}'
-        ConstExp constExp = null;
-        List<ConstInitVal> constInitVals = new ArrayList<>();
         if( currentToken.getType() == Token.TokenType.LBRACE ){
+            List<ConstInitVal> constInitVals = new ArrayList<>();
             match(Token.TokenType.LBRACE);
             if(currentToken.getType() != Token.TokenType.RBRACE ) { // constInitVals不为空
                 constInitVals.add(ConstInitVal());
@@ -140,7 +138,7 @@ public class ParserAnalyze {
             match(Token.TokenType.RBRACE);
             return new ConstInitVal(constInitVals);
         }else {
-            constExp = ConstExp();
+            ConstExp constExp = ConstExp();
             return new ConstInitVal(constExp);
         }
     }
@@ -329,7 +327,11 @@ public class ParserAnalyze {
     
     private Number Number(){
         // Number → IntConst | floatConst
-        return new Number(currentToken);
+        Token tmp = currentToken;
+        if (index < tokens.size() - 1) {
+            currentToken = tokens.get(++index);
+        }
+        return new Number(tmp);
     }
 
     private BType BType(){
@@ -600,5 +602,9 @@ public class ParserAnalyze {
         }  else {
             throw new RuntimeException("Syntax error at line " + currentToken.getLineNum() + ": " + currentToken.getContent() + " is not " + type);
         }
+    }
+
+    public void printParseAns() {
+        compUnit.output(ps);
     }
 }

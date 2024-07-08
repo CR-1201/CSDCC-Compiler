@@ -17,7 +17,7 @@ public class Compiler {
         // 语法分析
         ParserAnalyze.getParser().setTokens(LexicalAnalyze.getLexical().getTokens());
         ParserAnalyze.getParser().analyze();
-
+        ParserAnalyze.getParser().printParseAns();
 
     }
 }

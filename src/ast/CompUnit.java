@@ -1,5 +1,7 @@
 package ast;
 
+import java.io.PrintStream;
+
 // TODO
 //  CompUnit -> [ CompUnit ] ( Decl | FuncDef )
 public class CompUnit extends Node{
@@ -18,6 +20,7 @@ public class CompUnit extends Node{
     public CompUnit( MainFuncDef mainFuncDef) {
         this.mainFuncDef = mainFuncDef;
     }
+
     @Override
     public void accept() {
         

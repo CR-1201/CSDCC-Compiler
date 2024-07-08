@@ -1,5 +1,7 @@
 package ast;
 
+import java.io.PrintStream;
+
 // TODO
 //  Decl -> ConstDecl | VarDecl
 public class Decl extends Node{

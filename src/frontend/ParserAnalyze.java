@@ -380,10 +380,12 @@ public class ParserAnalyze {
         List<InitVal> initVals = new ArrayList<>();
         if( currentToken.getType() == Token.TokenType.LBRACE ){
             match(Token.TokenType.LBRACE);
-            initVals.add(InitVal());
-            while( currentToken.getType() == Token.TokenType.COMMA ){
-                match(Token.TokenType.COMMA);
+            if (currentToken.getType() != Token.TokenType.RBRACE) {
                 initVals.add(InitVal());
+                while (currentToken.getType() == Token.TokenType.COMMA) {
+                    match(Token.TokenType.COMMA);
+                    initVals.add(InitVal());
+                }
             }
             match(Token.TokenType.RBRACE);
             return new InitVal(initVals);
@@ -605,6 +607,6 @@ public class ParserAnalyze {
     }
 
     public void printParseAns() {
-        compUnit.output(ps);
+//        compUnit.output(ps);
     }
 }

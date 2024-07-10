@@ -35,19 +35,19 @@ public class LexicalAnalyze {
         put("return", Token.TokenType.RETURNTK);
         put("void", Token.TokenType.VOIDTK);
         put("float", Token.TokenType.FLOATTK);
-        put("getint", Token.TokenType.GETINTTK);
-        put("getch", Token.TokenType.GETCHTK);
-        put("getfloat", Token.TokenType.GETFLOATTK);
-        put("getarray", Token.TokenType.GETARRAYTK);
-        put("getfarray", Token.TokenType.GETFARRAYTK);
-        put("putint", Token.TokenType.PUTINTTK);
-        put("putch", Token.TokenType.PUTCHTK);
-        put("putfloat", Token.TokenType.PUTFLOATTK);
-        put("putarray", Token.TokenType.PUTARRAYTK);
-        put("putfarray", Token.TokenType.PUTFARRAYTK);
-        put("putf", Token.TokenType.PUTFTK);
-        put("starttime", Token.TokenType.STARTTIMETK);
-        put("stoptime", Token.TokenType.STOPTIMETK);
+//        put("getint", Token.TokenType.GETINTTK);
+//        put("getch", Token.TokenType.GETCHTK);
+//        put("getfloat", Token.TokenType.GETFLOATTK);
+//        put("getarray", Token.TokenType.GETARRAYTK);
+//        put("getfarray", Token.TokenType.GETFARRAYTK);
+//        put("putint", Token.TokenType.PUTINTTK);
+//        put("putch", Token.TokenType.PUTCHTK);
+//        put("putfloat", Token.TokenType.PUTFLOATTK);
+//        put("putarray", Token.TokenType.PUTARRAYTK);
+//        put("putfarray", Token.TokenType.PUTFARRAYTK);
+//        put("putf", Token.TokenType.PUTFTK);
+//        put("starttime", Token.TokenType.STARTTIMETK);
+//        put("stoptime", Token.TokenType.STOPTIMETK);
     }};
 
     private final Map<String, Token.TokenType> singleSymbols = new HashMap<>() {{

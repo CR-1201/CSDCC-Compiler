@@ -210,6 +210,7 @@ public class ParserAnalyze {
                 currentToken.getType() == Token.TokenType.PLUS ||
                 currentToken.getType() == Token.TokenType.MINU ||
                 currentToken.getType() == Token.TokenType.NOT ||
+                currentToken.getType() == Token.TokenType.STRCON ||
                 currentToken.getType() == Token.TokenType.LPARENT ||
                 currentToken.getType() == Token.TokenType.DECCON ||
                 currentToken.getType() == Token.TokenType.OCTCON ||
@@ -230,9 +231,23 @@ public class ParserAnalyze {
     }
 
     private Exp Exp(){
-        // Exp → AddExp
-        AddExp addExp = AddExp();
-        return new Exp(addExp);
+        // Exp → AddExp | StrExp
+        if( currentToken.getType() == Token.TokenType.STRCON ){
+            StrExp strExp = StrExp();
+            return new Exp(strExp);
+        } else {
+            AddExp addExp = AddExp();
+            return new Exp(addExp);
+        }
+    }
+
+    private StrExp StrExp(){
+        // StrExp → StrConst
+        Token tmp = currentToken;
+        if (index < tokens.size() - 1) {
+            currentToken = tokens.get(++index);
+        }
+        return new StrExp(currentToken);
     }
 
     private UnaryOp UnaryOp(){
@@ -380,10 +395,12 @@ public class ParserAnalyze {
         List<InitVal> initVals = new ArrayList<>();
         if( currentToken.getType() == Token.TokenType.LBRACE ){
             match(Token.TokenType.LBRACE);
-            initVals.add(InitVal());
-            while( currentToken.getType() == Token.TokenType.COMMA ){
-                match(Token.TokenType.COMMA);
+            if( currentToken.getType() != Token.TokenType.RBRACE ){
                 initVals.add(InitVal());
+                while( currentToken.getType() == Token.TokenType.COMMA ){
+                    match(Token.TokenType.COMMA);
+                    initVals.add(InitVal());
+                }
             }
             match(Token.TokenType.RBRACE);
             return new InitVal(initVals);
@@ -604,7 +621,4 @@ public class ParserAnalyze {
         }
     }
 
-    public void printParseAns() {
-        compUnit.output(ps);
-    }
 }

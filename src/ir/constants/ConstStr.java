@@ -14,6 +14,7 @@ import static utils.HandlePrintf.StringLength;
  */
 public class ConstStr extends Constant{
     private final String content;
+
     public ConstStr(String str){
         super(new ArrayType(new IntType(8), StringLength(str) + 1));
         this.content = str;

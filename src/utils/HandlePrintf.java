@@ -17,7 +17,18 @@ public class HandlePrintf {
         if (formString.length() > 2){
             formString = formString.substring(1, formString.length() - 1); // 去除两端引号
             while (cur < formString.length()) {
-                int index = formString.indexOf("%d", cur);
+                int index1 = formString.indexOf("%d", cur);
+                int index2 = formString.indexOf("%f", cur);
+                int index;
+                if( index1 == -1 && index2 == -1){
+                    index = -1;
+                } else if (index1 == -1){
+                    index = index2;
+                } else if (index2 == -1){
+                    index = index1;
+                } else {
+                    index = Math.min(index1, index2);
+                }
                 if (index == -1){
                     ans.add(formString.substring(cur));
                     break;

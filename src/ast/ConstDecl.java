@@ -10,6 +10,8 @@ public class ConstDecl extends Node{
     public ConstDecl(BType bType, List<ConstDef> constDefs) {
         this.bType = bType;
         this.constDefs = constDefs;
+        childNode.add(bType);
+        childNode.addAll(constDefs);
     }
 
     public boolean getIsConst() {
@@ -22,6 +24,13 @@ public class ConstDecl extends Node{
 
     public List<ConstDef> getConstDefs() {
         return constDefs;
+    }
+
+    @Override
+    public void buildIrTree() {
+        for (Node node : childNode) {
+            node.buildIrTree();
+        }
     }
 
     @Override

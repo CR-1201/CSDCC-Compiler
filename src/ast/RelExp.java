@@ -15,6 +15,8 @@ public class RelExp extends Node{
         this.relExp = relExp;
         this.addExp = addExp;
         this.op = op;
+        childNode.add(addExp);
+        childNode.add(relExp);
     }
     @Override
     public void accept() {

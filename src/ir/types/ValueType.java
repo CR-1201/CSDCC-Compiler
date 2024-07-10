@@ -10,4 +10,8 @@ public abstract class ValueType {
     public boolean isI1() {
         return false;
     }
+
+    public boolean isFloat() {
+        return false;
+    }
 }

@@ -23,7 +23,7 @@ public class Function extends Value{
     public static Function putfloat = null;
     public static Function putarray = null;
     public static Function putfarray = null;
-    public static Function putf = null;
+    public static Function putstr = null;
 
     public static Function starttime = null;
     public static Function stoptime = null;

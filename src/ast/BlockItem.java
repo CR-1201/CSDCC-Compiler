@@ -7,10 +7,20 @@ public class BlockItem extends Node{
     private Stmt stmt = null;
     public BlockItem(Decl decl) {
         this.decl = decl;
+        childNode.add(decl);
     }
     public BlockItem(Stmt stmt) {
         this.stmt = stmt;
+        childNode.add(stmt);
     }
+
+    @Override
+    public void buildIrTree() {
+        for (Node node : childNode) {
+            node.buildIrTree();
+        }
+    }
+
     @Override
     public void accept() {
 

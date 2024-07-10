@@ -10,4 +10,8 @@ public class ConstFloat extends Constant{
         super(new FloatType());
         this.value = value;
     }
+
+    public float getValue() {
+        return value;
+    }
 }

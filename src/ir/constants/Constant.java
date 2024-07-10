@@ -13,7 +13,6 @@ import java.util.ArrayList;
  常量包括 ConstInt, ConstArray, ConstStr, ConstFloat
  常量没有名字 也没有 parent
  */
-// TODO : ConstFloat
 public class Constant extends User {
     public Constant(ValueType valueType){
         super(null, valueType, null);

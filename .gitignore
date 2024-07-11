@@ -1,5 +1,6 @@
 .idea
 /out
+/llvmgen
 *.iml
 testfile.txt
 output.txt

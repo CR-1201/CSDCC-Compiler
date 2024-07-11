@@ -2,7 +2,7 @@ package pass;
 
 import ir.Module;
 
-public class PassController {
+public class PassManager {
     private Module module = Module.getModule();
 
 }

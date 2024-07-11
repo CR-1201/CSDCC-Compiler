@@ -65,6 +65,7 @@ public class FuncDef extends Node{
             funcFParams.buildFParamsSSA();
         }
         irSymbolTable.pushBlockLayer();
+        block.setReturnType(returnType);
         // 建立函数体
         block.buildIrTree();
         irSymbolTable.popBlockLayer();

@@ -2,6 +2,10 @@ package ast;
 
 import ir.BasicBlock;
 import ir.Value;
+import ir.constants.ConstInt;
+import ir.types.DataType;
+import ir.types.FloatType;
+import ir.types.IntType;
 import token.Token;
 
 // TODO
@@ -16,13 +20,15 @@ public class Stmt extends Node{
 
     private Exp exp;
     private LVal lVal;
-    private int type;
+    private final int type;
     private Block block;
     private Cond cond;
     private Stmt stmt1;
     private Stmt stmt2;
     private Stmt stmt;
     private Token conBreakTk;
+
+    private DataType returnType;
 
     public Stmt(int type, LVal lVal, Exp exp) {
        // LVal '=' Exp ';'
@@ -61,6 +67,10 @@ public class Stmt extends Node{
     public Stmt(int type, Token conBreakTk) {
         this.type = type;
         this.conBreakTk = conBreakTk;
+    }
+
+    public void setReturnType(DataType returnType) {
+        this.returnType = returnType;
     }
 
     @Override
@@ -164,7 +174,13 @@ public class Stmt extends Node{
                 if (exp != null) {
                     // 这里也有一个和 Break 类似的操作,不知道合不合理
                     exp.buildIrTree();
-                    builder.buildRet(curBlock, valueUp);
+                    Value sum = valueUp;
+                    if( returnType instanceof FloatType && valueUp.getValueType() instanceof IntType){
+                        sum = builder.buildConversion(curBlock,"sitofp",new FloatType(), valueUp);
+                    } else if( returnType instanceof IntType && valueUp.getValueType() instanceof FloatType ){
+                        sum = builder.buildConversion(curBlock,"fptosi",new IntType(32), valueUp);
+                    }
+                    builder.buildRet(curBlock, sum);
                 } else {
                     builder.buildRet(curBlock);
                 }

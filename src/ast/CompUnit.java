@@ -88,6 +88,12 @@ public class CompUnit extends Node{
             ArrayList<DataType> printfArgs = new ArrayList<>();
             printfArgs.add(new PointerType(new IntType(8)));
             Function.putstr = builder.buildFunction("putstr", new FunctionType(printfArgs, new VoidType()), true);
+
+            /*================================ starttime ================================*/
+            Function.starttime = builder.buildFunction("starttime", new FunctionType(new ArrayList<>(), new VoidType()), true);
+
+            /*================================ stoptime ================================*/
+            Function.stoptime = builder.buildFunction("stoptime", new FunctionType(new ArrayList<>(), new VoidType()), true);
         }
         for (Node node : childNode) {
             node.buildIrTree();

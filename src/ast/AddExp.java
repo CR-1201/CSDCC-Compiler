@@ -118,6 +118,10 @@ public class AddExp extends Node{
                     dataType = new FloatType();
                 }
 
+                if( adder.getValueType().isFloat() && sum.getValueType().isFloat() ){
+                    dataType = new FloatType();
+                }
+
                 if ( op.getType() == Token.TokenType.PLUS ){
                     sum = builder.buildAdd(curBlock, dataType, sum, adder);
                 } else if( op.getType() == Token.TokenType.MINU ){

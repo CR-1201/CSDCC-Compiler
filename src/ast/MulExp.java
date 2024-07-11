@@ -119,6 +119,10 @@ public class MulExp extends Node{
                     dataType = new FloatType();
                 }
 
+                if( multer.getValueType().isFloat() && multer.getValueType().isFloat() ){
+                    dataType = new FloatType();
+                }
+
                 if ( op.getType() == Token.TokenType.MULT ){
                     mul = builder.buildMul(curBlock, dataType, mul, multer);
                 } else if( op.getType() == Token.TokenType.DIV ){

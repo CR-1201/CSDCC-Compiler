@@ -19,4 +19,9 @@ public class ConstFloat extends Constant{
     public String toString(){
         return String.valueOf(value);
     }
+
+    @Override
+    public String getName(){
+        return toString();
+    }
 }

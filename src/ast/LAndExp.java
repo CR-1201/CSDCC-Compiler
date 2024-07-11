@@ -2,7 +2,7 @@ package ast;
 
 import ir.BasicBlock;
 import ir.constants.ConstInt;
-import ir.instructions.Binary_Instructions.Icmp;
+import ir.instructions.binaryInstructions.Icmp;
 import token.Token;
 
 // TODO

@@ -5,7 +5,7 @@ import ir.Function;
 import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
-import ir.instructions.Binary_Instructions.Icmp;
+import ir.instructions.binaryInstructions.Icmp;
 import ir.types.DataType;
 import ir.types.FloatType;
 import ir.types.IntType;

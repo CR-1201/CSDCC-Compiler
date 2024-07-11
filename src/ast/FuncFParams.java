@@ -1,7 +1,7 @@
 package ast;
 
 import ir.Argument;
-import ir.instructions.Memory_Instructions.Alloca;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.types.DataType;
 
 import java.util.ArrayList;

@@ -6,7 +6,7 @@ import ir.constants.ConstArray;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.constants.Constant;
-import ir.instructions.Memory_Instructions.Alloca;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.types.*;
 import token.Token;
 

@@ -1,9 +1,8 @@
-package ir.instructions.Binary_Instructions;
+package ir.instructions.binaryInstructions;
 
 import ir.BasicBlock;
 import ir.Value;
 import ir.types.DataType;
-import ir.types.IntType;
 
 /**
  @author Conroy

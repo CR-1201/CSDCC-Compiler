@@ -1,4 +1,4 @@
-package ir.instructions.Binary_Instructions;
+package ir.instructions.binaryInstructions;
 
 import ir.BasicBlock;
 import ir.Value;

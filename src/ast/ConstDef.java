@@ -2,13 +2,11 @@ package ast;
 
 
 import ir.GlobalVariable;
-import ir.Value;
 import ir.constants.ConstArray;
-import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.constants.Constant;
-import ir.instructions.Memory_Instructions.Alloca;
-import ir.instructions.Memory_Instructions.GEP;
+import ir.instructions.memoryInstructions.Alloca;
+import ir.instructions.memoryInstructions.GEP;
 import ir.types.ArrayType;
 import ir.types.DataType;
 import ir.types.FloatType;

@@ -25,6 +25,7 @@ public class ConstDef extends Node{
     private List<ConstExp> constExps = null;
     private ConstInitVal constInitVal = null;
 
+    Constant constant = ConstInt.ZERO;
 
     // 用于记录数组的维数,比如说 a[1][2] 的 dims 就是 {1, 2}
     private final ArrayList<Integer> dims = new ArrayList<>();
@@ -37,10 +38,16 @@ public class ConstDef extends Node{
         childNode.add(constInitVal);
     }
 
+    public void setConstant(Constant constant){
+        this.constant = constant;
+    }
+
     @Override
     public void buildIrTree(){
         // 获得常量的名字
         String ident = identToken.getContent();
+
+        constInitVal.setConstant(constant);
         // 单变量
         if (constExps.isEmpty()){
             constInitVal.buildIrTree();

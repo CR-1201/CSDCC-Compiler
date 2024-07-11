@@ -7,9 +7,11 @@ import java.util.List;
 public class VarDecl extends Node{
     private BType bType = null;
     private List<VarDef> varDefs = null;
+
     public VarDecl(BType bType, List<VarDef> varDefs) {
         this.bType = bType;
         this.varDefs = varDefs;
+        childNode.addAll(varDefs);
     }
 
     public BType getBType() {
@@ -18,6 +20,14 @@ public class VarDecl extends Node{
 
     public List<VarDef> getVarDefs() {
         return varDefs;
+    }
+
+    @Override
+    public void buildIrTree() {
+        for (VarDef varDef : varDefs) {
+            varDef.setBType(bType);
+            varDef.buildIrTree();
+        }
     }
 
     @Override

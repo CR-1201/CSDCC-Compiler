@@ -32,7 +32,6 @@ public class MainFuncDef extends Node{
 
         irSymbolTable.addValue(funcName, curFunc);
         BasicBlock entryBlock = builder.buildBasicBlock(curFunc);
-
         // 进入一个函数,就会加一层
         irSymbolTable.pushFuncLayer();
         curBlock = entryBlock;

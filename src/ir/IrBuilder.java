@@ -1,5 +1,6 @@
 package ir;
 
+import ast.CompUnit;
 import ast.Node;
 import ir.constants.ConstArray;
 import ir.constants.ConstStr;
@@ -42,8 +43,8 @@ public class IrBuilder {
     }
 
     // 遍历AST构建Ir tree
-    public void buildModule(Node root) {
-//        root.buildIrTree();
+    public void buildModule(CompUnit root) {
+        root.buildIrTree();
     }
 
     /**
@@ -73,7 +74,7 @@ public class IrBuilder {
         }
     }
 
-    // 是否是内联函数
+    // 是否是内建函数
     public Function buildFunction(String ident, FunctionType type, boolean isBuiltIn){
         Function function = new Function(ident, type, isBuiltIn);
         module.addFunction(function);
@@ -243,6 +244,5 @@ public class IrBuilder {
         parent.insertHead(phi);
         return phi;
     }
-
 
 }

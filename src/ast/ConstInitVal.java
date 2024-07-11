@@ -15,6 +15,8 @@ public class ConstInitVal extends Node{
     private ConstExp constExp = null;
     private List<ConstInitVal> constInitVals = null;
 
+    Constant constant = ConstInt.ZERO;
+
     private final ArrayList<Integer> dims = new ArrayList<>();
 
     public ConstInitVal(ConstExp constExp) {
@@ -28,6 +30,10 @@ public class ConstInitVal extends Node{
 
     public void setDims(ArrayList<Integer> dims){
         this.dims.addAll(dims);
+    }
+
+    public void setConstant(Constant constant){
+        this.constant = constant;
     }
 
     @Override
@@ -49,19 +55,25 @@ public class ConstInitVal extends Node{
                             array.add((ConstFloat)valueUp);
                         }
                     }
+                    // 不全 补0即可
+                    for(int i = constInitVals.size() ; i < dims.get(0) ; i++ ){
+                        array.add(constant);
+                    }
                 } else {
                     // 多维数组
+                    int temp = constInitVals.size();
+                    for(int i =  temp; i < dims.get(0) ; i++ ){
+                        constInitVals.add(new ConstInitVal(new ArrayList<>()));
+                    }
                     for (ConstInitVal constInitVal : constInitVals){
                         // 去掉一维,递归赋值
                         constInitVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
                         constInitVal.buildIrTree();
-                        if(valueUp instanceof ConstInt){
-                            array.add((ConstInt)valueUp);
-                        } else if(valueUp instanceof ConstFloat){
-                            array.add((ConstFloat)valueUp);
-                        }
+                        array.add((ConstArray) valueUp);
                     }
+
                 }
+
                 valueUp = new ConstArray(array);
             } else {
                 // 局部常量数组,和变量数组的初始化类似,因为局部常量数组本质上也是个局部变量数组,所以方法都一样
@@ -81,8 +93,18 @@ public class ConstInitVal extends Node{
                         } else if(valueUp instanceof ConstFloat){
                             array.add((ConstFloat)valueUp);
                         }
+
+                        // 不全 补0即可
+                        for(int i = constInitVals.size() ; i < dims.get(0) ; i++ ){
+                            array.add(constant);
+                        }
                     }
                 } else {
+                    int temp = constInitVals.size();
+                    for(int i =  temp; i < dims.get(0) ; i++ ){
+                        constInitVals.add(new ConstInitVal(new ArrayList<>()));
+                    }
+
                     for (ConstInitVal constInitVal : constInitVals){
                         constInitVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
                         constInitVal.buildIrTree();

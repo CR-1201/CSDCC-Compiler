@@ -14,12 +14,6 @@ public class BlockItem extends Node{
         childNode.add(stmt);
     }
 
-    @Override
-    public void buildIrTree() {
-        for (Node node : childNode) {
-            node.buildIrTree();
-        }
-    }
 
     @Override
     public void accept() {

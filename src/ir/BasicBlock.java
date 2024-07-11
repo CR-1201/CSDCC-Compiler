@@ -156,4 +156,17 @@ public class BasicBlock extends Value{
         return (Function) super.getParent();
     }
 
+    @Override
+    public String toString(){
+        // 将 % 去掉,因为只有在跳转指令里需要加上这个
+        StringBuilder s = new StringBuilder(getName().substring(1)).append(":\n");
+        for (Instruction instructionNode : instructions){
+            s.append('\t').append(instructionNode).append('\n');
+        }
+        if (!instructions.isEmpty()) {
+            s.deleteCharAt(s.length() - 1);
+        }
+        return s.toString();
+    }
+
 }

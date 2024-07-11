@@ -1,5 +1,9 @@
 package ast;
 
+import ir.constants.ConstFloat;
+import ir.constants.ConstInt;
+import token.Token;
+
 import java.util.List;
 
 // TODO
@@ -28,8 +32,11 @@ public class ConstDecl extends Node{
 
     @Override
     public void buildIrTree() {
-        for (Node node : childNode) {
-            node.buildIrTree();
+        for (ConstDef constDef : constDefs) {
+            if( bType.getToken().getType() == Token.TokenType.INTTK ){
+                constDef.setConstant(ConstInt.ZERO);
+            } else constDef.setConstant(ConstFloat.ZERO);
+            constDef.buildIrTree();
         }
     }
 

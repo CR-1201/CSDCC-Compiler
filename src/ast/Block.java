@@ -18,7 +18,7 @@ public class Block extends Node{
     @Override
     public void buildIrTree(){
         irSymbolTable.pushBlockLayer();
-        for (Node blockItem : blockItems) {
+        for (BlockItem blockItem : blockItems) {
             blockItem.buildIrTree();
         }
         irSymbolTable.popBlockLayer();

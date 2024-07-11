@@ -3,6 +3,7 @@ package ast;
 import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
+import ir.constants.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,8 @@ public class InitVal extends Node{
 
     private final ArrayList<Integer> dims = new ArrayList<>();
 
+    Constant constant = ConstInt.ZERO;
+
     public InitVal(Exp exp) {
         this.exp = exp;
         childNode.add(exp);
@@ -26,6 +29,10 @@ public class InitVal extends Node{
 
     public void setDims(ArrayList<Integer> dims) {
         this.dims.addAll(dims);
+    }
+
+    public void setConstant(Constant constant){
+        this.constant = constant;
     }
 
     /*
@@ -49,8 +56,8 @@ public class InitVal extends Node{
         } else {
             // 在进行数组初始化
             ArrayList<Value> flattenArray = new ArrayList<>();
-            // 一维数组
-            if (dims.size() == 1) {
+
+            if (dims.size() == 1) {  // 一维数组
                 for (InitVal initVal : initVals) {
                     // 全局变量数组初始化,这里的值一定是可以被计算出来的
                     if (globalInitDown) {
@@ -63,8 +70,18 @@ public class InitVal extends Node{
                         flattenArray.add(valueUp);
                     }
                 }
+                // 不全 补0即可
+                for(int i = initVals.size() ; i < dims.get(0) ; i++ ){
+                    flattenArray.add(constant);
+                }
+
             } else { // 多维数组
                 // 此时在遍历每个一维数组
+                int temp = initVals.size();
+                for(int i =  temp; i < dims.get(0) ; i++ ){
+                    initVals.add(new InitVal(new ArrayList<>()));
+                }
+
                 for (InitVal initVal : initVals) {
                     // 先减少一维
                     initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));

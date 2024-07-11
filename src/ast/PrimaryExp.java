@@ -62,8 +62,6 @@ public class PrimaryExp extends Node{
                 number.buildIrTree();
             }
         }
-
-
     }
 
     @Override

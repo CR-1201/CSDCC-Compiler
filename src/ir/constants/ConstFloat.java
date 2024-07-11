@@ -14,4 +14,9 @@ public class ConstFloat extends Constant{
     public float getValue() {
         return value;
     }
+
+    @Override
+    public String toString(){
+        return String.valueOf(value);
+    }
 }

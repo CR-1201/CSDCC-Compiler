@@ -10,10 +10,12 @@ public class Decl extends Node{
 
     public Decl(ConstDecl constDecl) {
         this.constDecl = constDecl;
+        childNode.add(constDecl);
     }
 
     public Decl(VarDecl varDecl) {
         this.varDecl = varDecl;
+        childNode.add(varDecl);
     }
 
     public ConstDecl getConstDecl() {
@@ -22,6 +24,13 @@ public class Decl extends Node{
 
     public VarDecl getVarDecl() {
         return varDecl;
+    }
+
+    @Override
+    public void buildIrTree() {
+        for (Node node : childNode) {
+            node.buildIrTree();
+        }
     }
 
     @Override

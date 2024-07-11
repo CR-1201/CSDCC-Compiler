@@ -1,6 +1,9 @@
+import ast.CompUnit;
 import config.Config;
 import frontend.LexicalAnalyze;
 import frontend.ParserAnalyze;
+import ir.IrBuilder;
+import ir.Module;
 import utils.IOFunc;
 
 import java.io.IOException;
@@ -17,7 +20,10 @@ public class Compiler {
         // 语法分析
         ParserAnalyze.getParser().setTokens(LexicalAnalyze.getLexical().getTokens());
         ParserAnalyze.getParser().analyze();
-        ParserAnalyze.getParser().printParseAns();
 
+        // ir build
+        CompUnit syntaxTreeRoot = ParserAnalyze.getParser().getCompUnit();
+        IrBuilder.getIrBuilder().buildModule(syntaxTreeRoot);
+        IOFunc.output(Module.getModule().toString(),Config.irOutPutPath);
     }
 }

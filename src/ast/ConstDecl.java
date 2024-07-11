@@ -1,5 +1,9 @@
 package ast;
 
+import ir.constants.ConstFloat;
+import ir.constants.ConstInt;
+import token.Token;
+
 import java.util.List;
 
 // TODO
@@ -10,6 +14,8 @@ public class ConstDecl extends Node{
     public ConstDecl(BType bType, List<ConstDef> constDefs) {
         this.bType = bType;
         this.constDefs = constDefs;
+        childNode.add(bType);
+        childNode.addAll(constDefs);
     }
 
     public boolean getIsConst() {
@@ -22,6 +28,16 @@ public class ConstDecl extends Node{
 
     public List<ConstDef> getConstDefs() {
         return constDefs;
+    }
+
+    @Override
+    public void buildIrTree() {
+        for (ConstDef constDef : constDefs) {
+            if( bType.getToken().getType() == Token.TokenType.INTTK ){
+                constDef.setConstant(ConstInt.ZERO);
+            } else constDef.setConstant(ConstFloat.ZERO);
+            constDef.buildIrTree();
+        }
     }
 
     @Override

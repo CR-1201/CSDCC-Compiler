@@ -35,6 +35,10 @@ public class InitVal extends Node{
         this.constant = constant;
     }
 
+    public Exp getExp() {
+        return exp;
+    }
+
     /*
      * 对于单变量初始值,通过 valueUp 返回
      * 对于数组初始值,通过 valueArrayUp 返回
@@ -51,11 +55,18 @@ public class InitVal extends Node{
                 canCalValueDown = false;
             } else {
                 // 在进行局部变量初始化,没法确定初始值是否可以直接求值,所以用一个 value 代替
+                paramNotNeedLoadDown = false;
                 exp.buildIrTree();
+                paramNotNeedLoadDown = true;
             }
         } else {
             // 在进行数组初始化
             ArrayList<Value> flattenArray = new ArrayList<>();
+
+            int sum_dims = 1;
+            for (int dim : dims) {
+                sum_dims *= dim;
+            }
 
             if (dims.size() == 1) {  // 一维数组
                 for (InitVal initVal : initVals) {
@@ -77,19 +88,25 @@ public class InitVal extends Node{
 
             } else { // 多维数组
                 // 此时在遍历每个一维数组
-                int temp = initVals.size();
-                for(int i =  temp; i < dims.get(0) ; i++ ){
-                    initVals.add(new InitVal(new ArrayList<>()));
-                }
-
                 for (InitVal initVal : initVals) {
-                    // 先减少一维
-                    initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
+//                    initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
+                    if( initVal.getExp() == null ){
+                        // 如果当前初值包含括号,先减少一维
+                        initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
+                    }
                     initVal.buildIrTree();
-                    flattenArray.addAll(valueArrayUp);
+                    if( initVal.getExp() != null ){
+                        flattenArray.add(valueUp);
+                    } else {
+                        flattenArray.addAll(valueArrayUp);
+                    }
                 }
             }
             valueArrayUp = flattenArray; // 返回
+            int x = flattenArray.size();
+            for( int i = x ; i < sum_dims; i++ ){
+                flattenArray.add(constant);
+            }
         }
 
     }

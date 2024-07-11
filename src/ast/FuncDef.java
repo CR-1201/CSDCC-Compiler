@@ -3,8 +3,8 @@ package ast;
 import ir.BasicBlock;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
-import ir.instructions.Terminator_Instructions.Br;
-import ir.instructions.Terminator_Instructions.Ret;
+import ir.instructions.terminatorInstructions.Br;
+import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
 import token.Token;
 

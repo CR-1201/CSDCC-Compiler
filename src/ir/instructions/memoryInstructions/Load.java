@@ -1,4 +1,4 @@
-package ir.instructions.Memory_Instructions;
+package ir.instructions.memoryInstructions;
 
 import ir.BasicBlock;
 import ir.Value;

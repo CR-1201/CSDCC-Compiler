@@ -6,6 +6,7 @@ import ir.constants.ConstInt;
 import ir.types.DataType;
 import ir.types.FloatType;
 import ir.types.IntType;
+import ir.types.PointerType;
 import token.Token;
 
 // TODO
@@ -82,6 +83,11 @@ public class Stmt extends Node{
                 Value target = valueUp;
                 exp.buildIrTree();
                 Value source = valueUp;
+                if( ((PointerType) target.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
+                    source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
+                } else if( ((PointerType) target.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){
+                    source = builder.buildConversion(curBlock,"sitofp",new FloatType(), source);
+                }
                 // 最后是以一个 store 结尾的,说明将其存入内存,就算完成了赋值
                 builder.buildStore(curBlock, source, target);
             }

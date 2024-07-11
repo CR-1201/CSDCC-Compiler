@@ -11,8 +11,7 @@ import java.util.ArrayList;
  也是使用 指令%2 与 常数3 的 user
  Function,没有初始化的 GlobalVariable,ConstantData 不会使用 value,其他 user 会使用至少一个 value
  */
-public abstract class User extends Value{
-
+public abstract class User extends Value {
     // 记录当前 user 使用过的 value
     private final ArrayList<Value> operators = new ArrayList<>();
 

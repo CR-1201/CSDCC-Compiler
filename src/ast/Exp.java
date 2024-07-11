@@ -1,7 +1,5 @@
 package ast;
 
-import ir.instructions.Binary_Instructions.Sdiv;
-
 // TODO
 //  Exp -> AddExp | StrExp
 public class Exp extends Node{

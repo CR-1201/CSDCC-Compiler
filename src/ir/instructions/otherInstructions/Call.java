@@ -1,4 +1,4 @@
-package ir.instructions.Other_Instructions;
+package ir.instructions.otherInstructions;
 
 import ir.BasicBlock;
 import ir.Function;

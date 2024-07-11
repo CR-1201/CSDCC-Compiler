@@ -1,7 +1,7 @@
 package ast;
 
 import ir.Value;
-import ir.instructions.Binary_Instructions.Icmp;
+import ir.instructions.binaryInstructions.Icmp;
 import token.Token;
 
 // TODO

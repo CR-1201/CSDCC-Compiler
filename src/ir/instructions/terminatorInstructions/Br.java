@@ -1,4 +1,4 @@
-package ir.instructions.Terminator_Instructions;
+package ir.instructions.terminatorInstructions;
 
 import ir.BasicBlock;
 import ir.Value;

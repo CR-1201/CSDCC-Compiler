@@ -55,7 +55,7 @@ public class CompUnit extends Node{
             /*================================ getfarray ================================*/
             ArrayList<DataType> getfarrayArgs = new ArrayList<>();
             getfarrayArgs.add(new PointerType(new FloatType()));
-            Function.getfarray = builder.buildFunction("getarray", new FunctionType(getfarrayArgs, new IntType(32)), true);
+            Function.getfarray = builder.buildFunction("getfarray", new FunctionType(getfarrayArgs, new IntType(32)), true);
 
             /*================================ putint ================================*/
             ArrayList<DataType> putintArgs = new ArrayList<>();

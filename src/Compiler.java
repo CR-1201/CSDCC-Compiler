@@ -4,6 +4,7 @@ import frontend.LexicalAnalyze;
 import frontend.ParserAnalyze;
 import ir.IrBuilder;
 import ir.Module;
+import pass.PassManager;
 import utils.IOFunc;
 
 import java.io.IOException;
@@ -11,24 +12,24 @@ import java.io.IOException;
 public class Compiler {
     public static void main(String[] args) throws IOException {
         // 设置默认值
-        String fileInPutPath = "testfile.txt";
-        String fileOutPutPath = "output.txt";
-        String irOutPutPath = "llvm_ir.txt";
+        String fileInputPath = "testfile.txt";
+        String fileOutputPath = "output.txt";
+        String irOutputPath = "llvm_ir.txt";
         // 解析命令行参数
         for (int i = 0; i < args.length; i++) {
             if ("-f".equals(args[i]) && i + 1 < args.length) {
-                fileInPutPath = args[i + 1];
+                fileInputPath = args[i + 1];
             } else if ("-ll".equals(args[i]) && i + 1 < args.length) {
-                irOutPutPath = args[i + 1];
+                irOutputPath = args[i + 1];
             } else if ("-o".equals(args[i]) && i + 1 < args.length) {
-                fileOutPutPath = args[i + 1];
+                fileOutputPath = args[i + 1];
             }
         }
         // 初始化
-        Config.init(fileInPutPath,irOutPutPath,fileOutPutPath);
+        Config.init(fileInputPath,irOutputPath,fileOutputPath);
 
         // 词法分析
-        LexicalAnalyze.getLexical().analyze(IOFunc.input(Config.fileInPutPath));
+        LexicalAnalyze.getLexical().analyze(IOFunc.input(Config.fileInputPath));
         LexicalAnalyze.getLexical().printTokens();
 
         // 语法分析
@@ -38,6 +39,10 @@ public class Compiler {
         // ir build
         CompUnit syntaxTreeRoot = ParserAnalyze.getParser().getCompUnit();
         IrBuilder.getIrBuilder().buildModule(syntaxTreeRoot);
-        IOFunc.output(Module.getModule().toString(),Config.irOutPutPath);
+        IOFunc.output(Module.getModule().toString(),Config.irOutputPath);
+
+        // pass
+        PassManager passManager = new PassManager();
+        passManager.run();
     }
 }

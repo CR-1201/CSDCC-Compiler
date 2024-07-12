@@ -1,5 +1,6 @@
 package pass.analysis;
 
+import ir.BasicBlock;
 import ir.Function;
 import ir.Module;
 import pass.Pass;
@@ -13,11 +14,30 @@ public class CFG implements Pass {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
                 // 针对每一个函数去新建CFG
-
+                printCFG(function);
             }
         }
     }
+
     private void buildCFG(Function function) {
         //
+    }
+
+    private void printCFG(Function curFunction)
+    {
+        for (BasicBlock basicBlock : curFunction.getBasicBlocksArray())
+        {
+            System.out.println("blockName: " + basicBlock.getName());
+            System.out.println("pred: ");
+            for (BasicBlock predecessor : basicBlock.getPrecursors())
+            {
+                System.out.println("\t" + predecessor.getName());
+            }
+            System.out.println("succ: ");
+            for (BasicBlock successor : basicBlock.getSuccessors())
+            {
+                System.out.println("\t" + successor.getName());
+            }
+        }
     }
 }

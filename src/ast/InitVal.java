@@ -57,7 +57,6 @@ public class InitVal extends Node{
                 // 在进行局部变量初始化,没法确定初始值是否可以直接求值,所以用一个 value 代替
                 paramNotNeedLoadDown = false;
                 exp.buildIrTree();
-                paramNotNeedLoadDown = true;
             }
         } else {
             // 在进行数组初始化

@@ -52,6 +52,7 @@ public class LAndExp extends Node{
             builder.buildBr(curBlock, trueBlock);
         } else {
             lAndExp.setTrueBlock(trueBlock);
+            lAndExp.setFalseBlock(falseBlock);
             lAndExp.buildIrTree();
         }
     }

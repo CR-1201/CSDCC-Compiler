@@ -90,10 +90,10 @@ public class CompUnit extends Node{
             Function.putstr = builder.buildFunction("putstr", new FunctionType(printfArgs, new VoidType()), true);
 
             /*================================ starttime ================================*/
-            Function.starttime = builder.buildFunction("starttime", new FunctionType(new ArrayList<>(), new VoidType()), true);
+            Function.starttime = builder.buildFunction("_sysy_starttime", new FunctionType(new ArrayList<>(), new VoidType()), true);
 
             /*================================ stoptime ================================*/
-            Function.stoptime = builder.buildFunction("stoptime", new FunctionType(new ArrayList<>(), new VoidType()), true);
+            Function.stoptime = builder.buildFunction("_sysy_stoptime", new FunctionType(new ArrayList<>(), new VoidType()), true);
         }
         for (Node node : childNode) {
             node.buildIrTree();

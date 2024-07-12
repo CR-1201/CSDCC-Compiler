@@ -25,11 +25,13 @@ def init():
         f = lambda x: [s[len(TEST_DIR) + 1:] if s.startswith(TEST_DIR) else s for s in x]
         test_files = f(test_files)
         input_files = f(input_files)
+        ans_files = f(ans_files)
 
         for test_file in test_files:
-            input_file = os.path.join(dir, f'{test_file.replace(".sy", ".in")}')
-            ans_file = os.path.join(dir, f'{test_file.replace(".sy", ".out")}')
-            if input_file in input_files:
+            input_file = f'{test_file.replace(".sy", ".in")}'
+            ans_file = f'{test_file.replace(".sy", ".out")}'
+            print(test_file, input_file)
+            if input_file in input_files and ans_file in ans_files:
                 TEST_CASES.append(
                     {
                         'test_file': test_file,

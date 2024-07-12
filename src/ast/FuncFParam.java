@@ -1,5 +1,6 @@
 package ast;
 
+import ir.constants.ConstInt;
 import ir.types.*;
 import token.Token;
 
@@ -45,7 +46,7 @@ public class FuncFParam extends Node{
                 canCalValueDown = true;
                 constExps.get(i).buildIrTree();
                 canCalValueDown = false;
-                argType = new ArrayType(argType, valueIntUp);
+                argType = new ArrayType(argType, ((ConstInt)valueUp).getValue());
             }
             // 最终做一个指针,和 C 语言逻辑一模一样
             argType = new PointerType(argType);

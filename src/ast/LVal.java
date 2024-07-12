@@ -75,7 +75,7 @@ public class LVal extends Node{
                 // 这里存着实际的指针
                 Value ptr = builder.buildLoad(curBlock, lVal);
 
-                System.out.println(ptr.toString());
+//                System.out.println(ptr.toString());
 
                 // FIXME 这里估计有bug
                 if (exps.isEmpty()) {

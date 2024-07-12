@@ -18,8 +18,6 @@ public class ParserAnalyze {
     private int index = 0;
     // 词法分析后的 token 流
     private List<Token> tokens;
-    // 输出语法分析后的结果
-    PrintStream ps;
     private CompUnit compUnit;
     public static ParserAnalyze getParser() {
         return parser;
@@ -34,13 +32,6 @@ public class ParserAnalyze {
     }
     public CompUnit getCompUnit() {
         return compUnit;
-    }
-    {
-        try {
-            ps = new PrintStream("output.txt");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private CompUnit CompUnit() {

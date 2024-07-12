@@ -1,0 +1,25 @@
+name: Auto test
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v2
+    
+    - name: install java 17
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '17'
+    
+    - name: install clang
+      run: sudo apt install -y clang
+
+    - name: test all
+      run: make test-all

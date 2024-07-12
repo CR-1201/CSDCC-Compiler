@@ -10,6 +10,7 @@ tests/ir
 tests/ir_std
 tests/asm
 tests/ans
+tests/output
 tests/error.txt
 compiler.jar
 tests/lib/libsysy.so

@@ -30,7 +30,7 @@ public class IOFunc {
         }
     }
     public static void output(String content) {
-        output(content, Config.fileOutPutPath);
+        output(content, Config.fileOutputPath);
     }
     public static void delete(String filename) {
         File file = new File(filename);

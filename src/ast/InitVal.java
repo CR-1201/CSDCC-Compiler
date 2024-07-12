@@ -102,11 +102,14 @@ public class InitVal extends Node{
                     }
                 }
             }
-            valueArrayUp = flattenArray; // 返回
+
             int x = flattenArray.size();
             for( int i = x ; i < sum_dims; i++ ){
                 flattenArray.add(constant);
             }
+
+            valueArrayUp = flattenArray; // 返回
+
         }
 
     }

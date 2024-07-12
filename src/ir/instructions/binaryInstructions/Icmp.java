@@ -22,9 +22,27 @@ public class Icmp extends BinaryInstruction {
 
     public enum Condition{
         EQ, LE, LT, GE, GT, NE;
-        @Override
-        public String toString(){
-            return switch (this) {
+    }
+
+    // icmp 的类型
+    private final Condition condition;
+
+    public Condition getCondition(){
+        return condition;
+    }
+
+    private String getConditionString(boolean flag,Condition condition){
+        if( flag ){
+            return switch (condition) {
+                case EQ -> "oeq";
+                case GE -> "oge";
+                case GT -> "ogt";
+                case LE -> "ole";
+                case LT -> "olt";
+                default -> "one";
+            };
+        } else {
+            return switch (condition) {
                 case EQ -> "eq";
                 case GE -> "sge";
                 case GT -> "sgt";
@@ -35,13 +53,6 @@ public class Icmp extends BinaryInstruction {
         }
     }
 
-    // icmp 的类型
-    private final Condition condition;
-
-    public Condition getCondition(){
-        return condition;
-    }
-
     @Override
     public boolean isCommutative(){
         // 只有等于和不等于才能交换操作数
@@ -50,7 +61,8 @@ public class Icmp extends BinaryInstruction {
 
     @Override
     public String toString(){
-        return getName() + " = "+ ((getValue(0).getValueType() instanceof FloatType) ? "f" : "i") +  "cmp " + condition.toString() + " " +
+        boolean flag = (getValue(0).getValueType() instanceof FloatType);
+        return getName() + " = "+ ( flag ? "f" : "i") +  "cmp " + getConditionString(flag,condition) + " " +
                 getValue(0).getValueType() + " " + getValue(0).getName() + ", " + getValue(1).getName();
     }
 }

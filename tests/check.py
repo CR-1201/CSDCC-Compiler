@@ -12,6 +12,7 @@ def init():
     subprocess.run('make build', cwd=ROOT_DIR, shell=True)
     lib_file = 'lib/libsysy.so'
     cmd = f'clang -shared -fPIC lib/sylib.c -o {lib_file}'
+    print(f'Running {cmd}')
     subprocess.run(cmd, cwd=TEST_DIR, shell=True, check=True)
 
     # setup testcases

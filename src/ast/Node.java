@@ -2,6 +2,8 @@ package ast;
 
 
 import ir.*;
+import ir.constants.ConstArray;
+import ir.constants.Constant;
 import ir.types.*;
 
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ public abstract class Node {
      public static int valueIntUp = 0;
      // 综合属性:各种 buildIr 的结果(数组形式)如果会被其更高的节点应用,那么需要利用这个值进行通信
      public static ArrayList<Value> valueArrayUp = new ArrayList<>();
+     // 综合属性:初始化Const的时候,需要补全空白
+     public static ConstArray valueConstantUp = null;
      // 综合属性:函数的参数类型通过这个上传
      public static DataType argTypeUp = null;
      // 综合属性:函数的参数类型数组通过这个上传

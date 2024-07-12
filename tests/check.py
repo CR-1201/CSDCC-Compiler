@@ -19,20 +19,22 @@ def init():
     dir_list = ['testcases']
     for dir in dir_list:
         testcase_dir = f'{TEST_DIR}/{dir}'
-        test_files = glob.glob(os.path.join(testcase_dir, 'testfile*.txt'))
-        input_files = glob.glob(os.path.join(testcase_dir, 'input*.txt'))
+        test_files = glob.glob(os.path.join(testcase_dir, '*.sy'))
+        input_files = glob.glob(os.path.join(testcase_dir, '*.in'))
+        ans_files = glob.glob(os.path.join(testcase_dir, '*.out'))
         f = lambda x: [s[len(TEST_DIR) + 1:] if s.startswith(TEST_DIR) else s for s in x]
         test_files = f(test_files)
         input_files = f(input_files)
 
         for test_file in test_files:
-            test_number = os.path.basename(test_file).replace('testfile', '').replace('.txt', '')
-            input_file = os.path.join(dir, f'input{test_number}.txt')
+            input_file = os.path.join(dir, f'{test_file.replace(".sy", ".in")}')
+            ans_file = os.path.join(dir, f'{test_file.replace(".sy", ".out")}')
             if input_file in input_files:
                 TEST_CASES.append(
                     {
                         'test_file': test_file,
-                        'input_file': input_file
+                        'input_file': input_file,
+                        'ans_file':  ans_file
                     }
                 )
 

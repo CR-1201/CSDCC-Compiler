@@ -39,6 +39,10 @@ public class InitVal extends Node{
         return exp;
     }
 
+    public List<InitVal> getInitVals() {
+        return initVals;
+    }
+
     /*
      * 对于单变量初始值,通过 valueUp 返回
      * 对于数组初始值,通过 valueArrayUp 返回

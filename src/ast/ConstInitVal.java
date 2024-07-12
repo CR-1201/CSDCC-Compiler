@@ -54,6 +54,7 @@ public class ConstInitVal extends Node{
             ArrayList<Value> flattenArray = new ArrayList<>();
             // 全局常量数组
             if( irSymbolTable.isGlobalLayer() ){
+
                 if( dims.size()  == 1 ){
                     // 一维数组
                     for (ConstInitVal constInitVal : constInitVals){

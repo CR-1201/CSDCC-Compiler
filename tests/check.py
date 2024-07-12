@@ -30,7 +30,6 @@ def init():
         for test_file in test_files:
             input_file = f'{test_file.replace(".sy", ".in")}'
             ans_file = f'{test_file.replace(".sy", ".out")}'
-            print(test_file, input_file)
             if input_file in input_files and ans_file in ans_files:
                 TEST_CASES.append(
                     {

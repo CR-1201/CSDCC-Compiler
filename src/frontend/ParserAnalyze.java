@@ -2,14 +2,12 @@ package frontend;
 
 import ast.*;
 import ast.Number;
-import token.Token;
-
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.TooManyListenersException;
+import token.Token;
 
 public class ParserAnalyze {
     // 唯一实例

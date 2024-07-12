@@ -1,6 +1,7 @@
 import os
 import subprocess
 import glob
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
@@ -47,7 +48,7 @@ def create_folder_for(file):
         except:
             return
 
-def check(test_file, input_file, ans_file=''):
+def check(stop_event, test_file, input_file, ans_file=''):
     filename = os.path.splitext(test_file)[0]
     ir_file = f'ir/{filename}.ll'
     ir_runnable = f'ir/{filename}'
@@ -64,7 +65,9 @@ def check(test_file, input_file, ans_file=''):
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
+        print(f'[ERROR FILE] {test_file}')
         print(f'Error running compiler for {test_file}:\n{e.output.decode()}')
+        stop_event.set()
         return False
 
     # link with lib.ll
@@ -73,7 +76,9 @@ def check(test_file, input_file, ans_file=''):
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
+        print(f'[ERROR FILE] {test_file}')
         print(f'Error running clang for {ir_file}:\n{e.output.decode()}')
+        stop_event.set()
         return False
 
     # run ir
@@ -83,7 +88,9 @@ def check(test_file, input_file, ans_file=''):
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
+        print(f'[ERROR FILE] {test_file}')
         print(f'Error running {ir_runnable}:\n{e.output.decode()}')
+        stop_event.set()
         return False
     
     # TODO: run asm
@@ -97,21 +104,36 @@ def check(test_file, input_file, ans_file=''):
         create_folder_for(ans_file)
         subprocess.run(f'./{ir_std_runnable} < {input_file} > {ans_file}', cwd=TEST_DIR, shell=True)
 
-    r = subprocess.run(f'diff {output_file} {ans_file}', cwd=TEST_DIR, shell=True, check=False)
+    r = subprocess.run(f'diff {output_file} {ans_file}', cwd=TEST_DIR, shell=True, capture_output=True, text=True, check=False)
     if r.returncode != 0:
+        print(f'[ERROR FILE] {test_file}')
         print(f'{test_file} WA')
         print(r.stdout)
+        stop_event.set()
         return False
     print(f'{test_file} AC')
     return True
 
 if __name__ == '__main__':
+    stop_event = threading.Event()
     init()
 
     with ThreadPoolExecutor(max_workers=16) as executor:
-        tasks = {executor.submit(check, **case): case for case in TEST_CASES}
+        tasks = {executor.submit(check, stop_event=stop_event, **case): case for case in TEST_CASES}
+        
         for task in as_completed(tasks):
-            case = tasks[task]
-            if not task.result():
-                print(f'Stopping due to error in processing {case}')
-                exit(1)
+            if stop_event.is_set():
+                for t in tasks:
+                    if not t.done():
+                        t.cancel()
+                break
+            try:
+                if not task.result():
+                    case = tasks[task]
+                    print(f'Stopping due to error in processing {case}')
+                    stop_event.set()
+                    break
+            except Exception as e:
+                print(f'Exception: {e}')
+                stop_event.set()
+                break

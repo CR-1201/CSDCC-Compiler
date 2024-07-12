@@ -48,6 +48,15 @@ def create_folder_for(file):
         except:
             return
 
+def ensure_newline_at_end_of_file(file_path):
+    with open(f'{TEST_DIR}/{file_path}', 'a+') as file:
+        file.seek(0, os.SEEK_END)
+        if file.tell() > 0:
+            file.seek(-1, os.SEEK_END)
+            last_char = file.read(1)
+            if last_char != '\n':
+                file.write('\n')
+
 def check(stop_event, test_file, input_file, ans_file=''):
     filename = os.path.splitext(test_file)[0]
     ir_file = f'ir/{filename}.ll'
@@ -104,6 +113,8 @@ def check(stop_event, test_file, input_file, ans_file=''):
         create_folder_for(ans_file)
         subprocess.run(f'./{ir_std_runnable} < {input_file} > {ans_file}', cwd=TEST_DIR, shell=True)
 
+    ensure_newline_at_end_of_file(output_file)
+    ensure_newline_at_end_of_file(ans_file)
     r = subprocess.run(f'diff {output_file} {ans_file}', cwd=TEST_DIR, shell=True, capture_output=True, text=True, check=False)
     if r.returncode != 0:
         print(f'[ERROR FILE] {test_file}')

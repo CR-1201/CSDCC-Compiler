@@ -2,6 +2,7 @@ package ast;
 
 import ir.Value;
 import ir.instructions.binaryInstructions.Icmp;
+import ir.types.FloatType;
 import token.Token;
 
 // TODO
@@ -37,6 +38,12 @@ public class RelExp extends Node{
             }
             if( adder.getValueType().isI1() ){
                 adder = builder.buildZext(curBlock, adder);
+            }
+            if( (result.getValueType() instanceof FloatType) && !(adder.getValueType() instanceof FloatType) ){
+                adder = builder.buildConversion(curBlock,"sitofp",new FloatType(), adder);
+            }
+            if( !(result.getValueType() instanceof FloatType) && (adder.getValueType() instanceof FloatType) ){
+                result = builder.buildConversion(curBlock,"sitofp",new FloatType(), result);
             }
             if( op.getType() == Token.TokenType.LEQ ){
                 result = builder.buildIcmp(curBlock, Icmp.Condition.LE, result, adder);

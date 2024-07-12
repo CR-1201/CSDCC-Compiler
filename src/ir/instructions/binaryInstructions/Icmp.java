@@ -2,6 +2,7 @@ package ir.instructions.binaryInstructions;
 
 import ir.BasicBlock;
 import ir.Value;
+import ir.types.FloatType;
 import ir.types.IntType;
 
 /**
@@ -49,7 +50,7 @@ public class Icmp extends BinaryInstruction {
 
     @Override
     public String toString(){
-        return getName() + " = icmp " + condition.toString() + " " +
+        return getName() + " = "+ ((getValue(0).getValueType() instanceof FloatType) ? "f" : "i") +  "cmp " + condition.toString() + " " +
                 getValue(0).getValueType() + " " + getValue(0).getName() + ", " + getValue(1).getName();
     }
 }

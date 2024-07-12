@@ -78,7 +78,10 @@ public class UnaryExp extends Node{
                     unaryValue = builder.buildZext(curBlock,unaryValue);
                 }
                 if ( unaryOp.getToken().getType() == Token.TokenType.NOT ) {
-                    valueUp = builder.buildIcmp(curBlock, Icmp.Condition.EQ, unaryValue, ConstInt.ZERO);
+                    if( dataType instanceof IntType ){
+                        valueUp = builder.buildIcmp(curBlock, Icmp.Condition.EQ, unaryValue, ConstInt.ZERO);
+                    } else valueUp = builder.buildIcmp(curBlock, Icmp.Condition.EQ, unaryValue, ConstFloat.ZERO);
+
                 } else if ( unaryOp.getToken().getType() == Token.TokenType.MINU ) {
                     if( dataType instanceof IntType ){
                         valueUp = builder.buildSub(curBlock, dataType, ConstInt.ZERO, unaryValue);

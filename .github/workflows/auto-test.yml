@@ -21,5 +21,8 @@ jobs:
     - name: install clang
       run: sudo apt install -y clang
 
+    - name: set LD_LIBRARY_PATH
+      run: echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$(pwd)/tests/lib" >> $GITHUB_ENV
+
     - name: test all
       run: make test-all

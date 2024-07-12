@@ -126,14 +126,14 @@ if __name__ == '__main__':
                 for t in tasks:
                     if not t.done():
                         t.cancel()
-                break
+                exit(1)
             try:
                 if not task.result():
                     case = tasks[task]
                     print(f'Stopping due to error in processing {case}')
                     stop_event.set()
-                    break
+                    exit(1)
             except Exception as e:
                 print(f'Exception: {e}')
                 stop_event.set()
-                break
+                exit(1)

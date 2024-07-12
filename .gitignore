@@ -6,6 +6,13 @@ testfile.txt
 output.txt
 llvm_ir.txt
 error.txt
+tests/ir
+tests/ir_std
+tests/asm
+tests/ans
+tests/error.txt
+compiler.jar
+tests/lib/libsysy.so
 .idea/workspace.xml
 
 ### IntelliJ IDEA ###

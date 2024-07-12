@@ -31,23 +31,9 @@ public class LexicalAnalyze {
         put("if", Token.TokenType.IFTK);
         put("while", Token.TokenType.WHILETK);
         put("else", Token.TokenType.ELSETK);
-        put("printf", Token.TokenType.PRINTFTK);
         put("return", Token.TokenType.RETURNTK);
         put("void", Token.TokenType.VOIDTK);
         put("float", Token.TokenType.FLOATTK);
-//        put("getint", Token.TokenType.GETINTTK);
-//        put("getch", Token.TokenType.GETCHTK);
-//        put("getfloat", Token.TokenType.GETFLOATTK);
-//        put("getarray", Token.TokenType.GETARRAYTK);
-//        put("getfarray", Token.TokenType.GETFARRAYTK);
-//        put("putint", Token.TokenType.PUTINTTK);
-//        put("putch", Token.TokenType.PUTCHTK);
-//        put("putfloat", Token.TokenType.PUTFLOATTK);
-//        put("putarray", Token.TokenType.PUTARRAYTK);
-//        put("putfarray", Token.TokenType.PUTFARRAYTK);
-//        put("putf", Token.TokenType.PUTFTK);
-//        put("starttime", Token.TokenType.STARTTIMETK);
-//        put("stoptime", Token.TokenType.STOPTIMETK);
     }};
 
     private final Map<String, Token.TokenType> singleSymbols = new HashMap<>() {{
@@ -244,7 +230,7 @@ public class LexicalAnalyze {
             } else if (singleSymbols.containsKey(s + "")) {
                 tokens.add(new Token(singleSymbols.get(s + ""), lineNum, "" + s));
             } else {
-                if (s != ' ') {
+                if (!Character.isWhitespace(s)) {
                     System.out.println("LexicalAnalyze Error! " + s + " in the line " + lineNum + " is not a correct char");
                 }
             }

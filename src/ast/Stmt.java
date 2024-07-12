@@ -148,6 +148,8 @@ public class Stmt extends Node{
                 // 先由 curBlock 进入 condBlock
                 builder.buildBr(curBlock, condBlock);
                 // build condBlock, Br 在 LAndExp 短路求值的时候加了
+//                System.out.println(bodyBlock);
+//                System.out.println(nextBlock);
                 cond.setTrueBlock(bodyBlock);
                 cond.setFalseBlock(nextBlock);
                 curBlock = condBlock;

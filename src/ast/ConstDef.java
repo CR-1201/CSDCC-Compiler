@@ -50,7 +50,7 @@ public class ConstDef extends Node{
         if (constExps.isEmpty()){
             constInitVal.buildIrTree();
             // 单变量是不算 GlobalVariable 的,没意义,只放在符号表中;常量在符号表中对应一个 ConstInt 值,哪怕是在局部,也是不分配栈上空间的
-           irSymbolTable.addValue(ident, valueUp);
+            irSymbolTable.addValue(ident, valueUp);
         } else { // 常量数组
             // 解析维数 exp,然后存到 dim 中
             for (ConstExp constExp : constExps){

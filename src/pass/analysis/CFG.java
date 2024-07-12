@@ -45,22 +45,22 @@ public class CFG implements Pass {
         visited.add(entry);
         // 基本块的最后一条指令一定是终结指令
         Instruction tail = entry.getTailInstruction();
-        if (tail instanceof Br) {
-            if (!((Br) tail).getHasCondition()) {
-                BasicBlock target = (BasicBlock) ((Br) tail).getOps().getFirst();
+        if (tail instanceof Br br) {
+            if (!br.getHasCondition()) {
+                BasicBlock target = (BasicBlock) br.getOps().get(0);
                 entry.addSuccessor(target);
                 target.addPrecursor(entry);
                 if (!visited.contains(target)) {
                     setCFG(target);
                 }
             } else {
-                BasicBlock trueBlock = (BasicBlock) ((Br) tail).getOps().get(1);
+                BasicBlock trueBlock = (BasicBlock) br.getOps().get(1);
                 entry.addSuccessor(trueBlock);
                 trueBlock.addPrecursor(entry);
                 if (!visited.contains(trueBlock)) {
                     setCFG(trueBlock);
                 }
-                BasicBlock falseBlock = (BasicBlock) ((Br) tail).getOps().get(2);
+                BasicBlock falseBlock = (BasicBlock) br.getOps().get(2);
                 entry.addSuccessor(falseBlock);
                 falseBlock.addPrecursor(entry);
                 if (!visited.contains(falseBlock)) {

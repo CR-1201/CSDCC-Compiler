@@ -44,14 +44,15 @@ public class LAndExp extends Node{
             i32InRelUp = false;
             valueUp = builder.buildIcmp(curBlock, Icmp.Condition.NE, valueUp, ConstInt.ZERO);
         }
-        if( lAndExp != null ){
-            // 错了就直接进入 falseBlock
-            builder.buildBr(curBlock, valueUp, nextBlock, falseBlock);
-            curBlock = nextBlock;
+        // 错了就直接进入 falseBlock
+        builder.buildBr(curBlock, valueUp, nextBlock, falseBlock);
+        curBlock = nextBlock;
+
+        if( lAndExp == null ){
+            builder.buildBr(curBlock, trueBlock);
+        } else {
             lAndExp.setTrueBlock(trueBlock);
             lAndExp.buildIrTree();
-        } else {
-            builder.buildBr(curBlock, trueBlock);
         }
     }
 

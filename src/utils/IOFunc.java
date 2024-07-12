@@ -22,6 +22,7 @@ public class IOFunc {
     }
     public static void output(String content, String filename) {
         File outputFile = new File(filename);
+
         try (FileWriter writer = new FileWriter(outputFile, true)) {
             writer.write(content);
         } catch (Exception e) {

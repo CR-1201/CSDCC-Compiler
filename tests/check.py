@@ -111,4 +111,4 @@ if __name__ == '__main__':
             case = tasks[task]
             if not task.result():
                 print(f'Stopping due to error in processing {case}')
-                break
+                exit(1)

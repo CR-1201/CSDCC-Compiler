@@ -6,7 +6,7 @@ on:
       - '**'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
     - name: checkout repo
@@ -25,4 +25,6 @@ jobs:
       run: echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$(pwd)/tests/lib" >> $GITHUB_ENV
 
     - name: test all
-      run: make test-all
+      run: |
+        set -e
+        make test-all

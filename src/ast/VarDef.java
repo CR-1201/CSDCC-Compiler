@@ -101,14 +101,17 @@ public class VarDef extends Node{
         if (irSymbolTable.isGlobalLayer()) {
             if (initVal != null) { // 全局有初始值的数组
                 initVal.setDims(new ArrayList<>(dims));
-                globalInitDown = true;
+
                 if(initVal.getInitVals().isEmpty()){
                     ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
                     GlobalVariable globalVariable = builder.buildGlobalVariable(identToken.getContent(), zeroInitializer, false);
                     irSymbolTable.addValue(identToken.getContent(), globalVariable);
-                } else initVal.buildIrTree();
-                globalInitDown = false;
-                genGlobalInitArray(valueArrayUp);
+                } else {
+                    globalInitDown = true;
+                    initVal.buildIrTree();
+                    globalInitDown = false;
+                    genGlobalInitArray(valueArrayUp);
+                }
             } else { // 全局无初始值的数组,那么就初始化为 0
                 ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
                 GlobalVariable globalVariable = builder.buildGlobalVariable(identToken.getContent(), zeroInitializer, false);

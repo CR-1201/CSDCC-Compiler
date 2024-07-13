@@ -99,8 +99,11 @@ def check(stop_event, test_file, input_file, ans_file=''):
         cmd = f'./{ir_runnable} < {input_file} > {output_file}'
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+        subprocess.check_output(f'echo 0 >> {output_file}', cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        if not EXPECTED_PATTERN.search(e.output.decode()):
+        if EXPECTED_PATTERN.search(e.output.decode()):
+            subprocess.check_output(f'echo {e.returncode} >> {output_file}', cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+        else:
             print(f'[ERROR FILE] {test_file}')
             print(f'Error running {ir_runnable}:{e.output.decode()}')
             stop_event.set()

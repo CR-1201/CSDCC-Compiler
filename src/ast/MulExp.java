@@ -33,67 +33,50 @@ public class MulExp extends Node{
         // 可以计算就算出结果
         if( canCalValueDown ){
             unaryExp.buildIrTree();
-            float f_mul = 0;
-            int i_mul = 0;
+            Value unary = valueUp;
+            int i_sum = 0;float f_sum = 0;
+            int i_mul;float f_mul;
+            int i_unary;float f_unary;
             boolean float_flag = false;
-            if( valueUp instanceof ConstInt){
-                i_mul = ((ConstInt)valueUp).getValue();
-            } else {
-                f_mul = ((ConstFloat)valueUp).getValue();
-                float_flag = true;
-            }
             if( mulExp != null ){
                 mulExp.buildIrTree();
+                Value mul = valueUp;
+
+                if( mul.getValueType().isFloat() || unary.getValueType().isFloat() ){
+                    float_flag = true;
+                }
+
+                if(unary.getValueType().isFloat()){
+                    f_unary = ((ConstInt)unary).getValue();
+                    i_unary = ((ConstInt)unary).getValue();
+                } else {
+                    f_unary = ((ConstFloat)unary).getValue();
+                    i_unary = (int)(((ConstFloat)unary).getValue());
+                }
+
+                if(mul.getValueType().isFloat()){
+                    f_mul = ((ConstInt)mul).getValue();
+                    i_mul = ((ConstInt)mul).getValue();
+                } else {
+                    f_mul = ((ConstFloat)mul).getValue();
+                    i_mul = (int)(((ConstFloat)mul).getValue());
+                }
+
                 if( op.getType() == Token.TokenType.MULT ){
-                    if( valueUp instanceof  ConstInt ){
-                        if( !float_flag ){
-                            i_mul *= ((ConstInt)valueUp).getValue();
-                        } else {
-                            f_mul *= ((ConstInt)valueUp).getValue();
-                        }
-                    } else if( valueUp instanceof ConstFloat ){
-                        if( !float_flag ){
-                            f_mul = ((ConstFloat)valueUp).getValue() * i_mul;
-                            float_flag = true;
-                        } else {
-                            f_mul *= ((ConstFloat)valueUp).getValue();
-                        }
-                    }
+                    f_sum = f_unary * f_mul;
+                    i_sum = i_unary * i_mul;
                 } else if(op.getType() == Token.TokenType.DIV ){
-                    if( valueUp instanceof  ConstInt ){
-                        if( !float_flag ){
-                            i_mul /= ((ConstInt)valueUp).getValue();
-                        } else {
-                            f_mul /= ((ConstInt)valueUp).getValue();
-                        }
-                    } else if( valueUp instanceof ConstFloat ){
-                        if( !float_flag ){
-                            f_mul = i_mul / ((ConstFloat)valueUp).getValue();
-                            float_flag = true;
-                        } else {
-                            f_mul /= ((ConstFloat)valueUp).getValue();
-                        }
-                    }
+                    f_sum = f_unary / f_mul;
+                    i_sum = i_unary / i_mul;
                 } else if(op.getType() == Token.TokenType.MOD ){
-                    if( valueUp instanceof  ConstInt ){
-                        if( !float_flag ){
-                            i_mul %= ((ConstInt)valueUp).getValue();
-                        } else {
-                            f_mul %= ((ConstInt)valueUp).getValue();
-                        }
-                    } else if( valueUp instanceof ConstFloat ){
-                        if( !float_flag ){
-                            f_mul = i_mul % ((ConstFloat)valueUp).getValue();
-                            float_flag = true;
-                        } else {
-                            f_mul %= ((ConstFloat)valueUp).getValue();
-                        }
-                    }
+                    f_sum = f_unary % f_mul;
+                    i_sum = i_unary % i_mul;
                 }
             }
             if( float_flag ){
-                valueUp = new ConstFloat(f_mul);
-            } else valueUp = new ConstInt(i_mul);
+                valueUp = new ConstFloat(f_sum);
+            } else valueUp = new ConstInt(i_sum);
+
         } else { // 是不可直接计算的,要用表达式
             DataType dataType = new IntType(32);
             unaryExp.buildIrTree();

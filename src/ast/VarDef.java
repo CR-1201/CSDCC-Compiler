@@ -72,6 +72,9 @@ public class VarDef extends Node{
                 dataType = IntType.I32;
             } else dataType = new FloatType();
             Alloca alloca = builder.buildALLOCA(dataType, curBlock);
+
+//            System.out.println(identToken.getContent());
+
             // 从这里可以看出,可以从符号表这种查询到的东西是一个指针,即 int*
             irSymbolTable.addValue(identToken.getContent(), alloca);
             if (initVal != null) {

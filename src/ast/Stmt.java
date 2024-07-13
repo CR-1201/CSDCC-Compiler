@@ -108,11 +108,12 @@ public class Stmt extends Node{
                  * 所以在条件表达式中,会被拆成多个 BasicBlock,设置他们的目的是为了保证一开始和最后的块的正确性
                  */
                 BasicBlock trueBlock = builder.buildBasicBlock(curFunc);
-                BasicBlock nextBlock = builder.buildBasicBlock(curFunc);
-                BasicBlock falseBlock = (stmt2 == null) ? nextBlock : builder.buildBasicBlock(curFunc);
+                BasicBlock falseBlock = builder.buildBasicBlock(curFunc);
+                BasicBlock nextBlock = (stmt2 == null) ? falseBlock : builder.buildBasicBlock(curFunc);
 
-                cond.setFalseBlock(falseBlock);
                 cond.setTrueBlock(trueBlock);
+                cond.setFalseBlock(falseBlock);
+
 
                 cond.buildIrTree();
                 curBlock = trueBlock;
@@ -121,14 +122,12 @@ public class Stmt extends Node{
 
                 // 直接跳转到 nextBlock,这是不言而喻的,因为 trueBlock 执行完就是 nextBlock
                 builder.buildBr(curBlock, nextBlock);
-
                 // 对应有 else 的情况
                 if (stmt2 != null) {
                     curBlock = falseBlock;
                     stmt2.buildIrTree();
                     builder.buildBr(curBlock, nextBlock);
                 }
-
                 // 最终到了 nextBlock
                 curBlock = nextBlock;
             }

@@ -24,8 +24,8 @@ public abstract class Node {
 
      // 综合属性:各种 buildIr 的结果(单值形式)如果会被其更高的节点应用,那么需要利用这个值进行通信
      public static Value valueUp;
-     // 综合属性:返回值是一个布尔值, 如果是true, 则全0初始化全局数组
-//     public static boolean zeroInit = false;
+     // 综合属性:返回值是一个基本块,用来输出main函数最后的return结果
+     public static BasicBlock lastBasicBlockUp = null;
      // 综合属性:各种 buildIr 的结果(数组形式)如果会被其更高的节点应用,那么需要利用这个值进行通信
      public static ArrayList<Value> valueArrayUp = new ArrayList<>();
      // 综合属性:函数的参数类型通过这个上传

@@ -1,7 +1,10 @@
 package ast;
 
 import ir.BasicBlock;
+import ir.Function;
+import ir.Value;
 import ir.constants.ConstInt;
+import ir.constants.ConstStr;
 import ir.instructions.Instruction;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
@@ -35,14 +38,41 @@ public class MainFuncDef extends Node{
         // 进入一个函数,就会加一层
         irSymbolTable.pushFuncLayer();
         curBlock = entryBlock;
+        irSymbolTable.pushBlockLayer();
         // 建立函数体
         block.buildIrTree();
+        irSymbolTable.popBlockLayer();
         // 在解析完了函数后,开始处理善后工作, 如果没有默认的 return 语句
-        Instruction tailInstr = curBlock.getTailInstruction();
-        // 结尾没有指令或者指令不是跳转指令,null 指令被包含了
+        BasicBlock tempBlock = (lastBasicBlockUp != null) ? (BasicBlock) lastBasicBlockUp : curBlock;
+
+        Instruction tailInstr = tempBlock.getTailInstruction();
+        // 结尾没有指令或者指令不是跳转指令
         if (!(tailInstr instanceof Ret || tailInstr instanceof Br)) {
-            builder.buildRet(curBlock, ConstInt.ZERO);
+            builder.buildRet(tempBlock, ConstInt.ZERO);
+            Instruction nowTailInstr = tempBlock.getTailInstruction();
+            ArrayList<Value> argList = new ArrayList<>();
+            argList.add(ConstInt.ZERO);
+            builder.buildCallBeforeInstr(tempBlock, Function.putint, argList, nowTailInstr);
+        } else {
+            // TODO 输出main函数return的值,为了评测使用
+            // 实参表
+            ArrayList<Value> argList = new ArrayList<>();
+
+/*
+            ArrayList<Value> charN = new ArrayList<>();
+            charN.add(new ConstInt(10));
+*/
+            if(tailInstr.getValue(0).getValueType() instanceof IntType){
+                argList.add(tailInstr.getValue(0));
+            } else {
+                Instruction returnNUM = builder.buildConversionBeforeInstr(tempBlock,"fptosi",new IntType(32), tailInstr.getValue(0),tailInstr);
+                argList.add(returnNUM);
+            }
+//            builder.buildCallBeforeInstr(tempBlock, Function.putch, charN, tailInstr);
+            builder.buildCallBeforeInstr(tempBlock, Function.putint, argList, tailInstr);
+
         }
+
         irSymbolTable.popFuncLayer();
     }
 

@@ -99,9 +99,11 @@ def check(stop_event, test_file, input_file, ans_file=''):
         cmd = f'./{ir_runnable} < {input_file} > {output_file}'
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+        ensure_newline_at_end_of_file(output_file)
         subprocess.check_output(f'echo 0 >> {output_file}', cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
         if EXPECTED_PATTERN.search(e.output.decode()):
+            ensure_newline_at_end_of_file(output_file)
             subprocess.check_output(f'echo {e.returncode} >> {output_file}', cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
         else:
             print(f'[ERROR FILE] {test_file}')

@@ -49,11 +49,12 @@ public class MainFuncDef extends Node{
                 // TODO 输出main函数return的值,为了评测使用
                 // 实参表
                 ArrayList<Value> argList = new ArrayList<>();
-                argList.add(tailInstr.getValue(0));
                 if(tailInstr.getValue(0).getValueType() instanceof IntType){
+                    argList.add(tailInstr.getValue(0));
                     builder.buildCallBeforeInstr(lastBasicBlockUp, Function.putint, argList, tailInstr);
                 } else {
-                    builder.buildConversionBeforeInstr(lastBasicBlockUp,"fptosi",new IntType(32), tailInstr.getValue(0),tailInstr);
+                    Instruction returnNUM = builder.buildConversionBeforeInstr(lastBasicBlockUp,"fptosi",new IntType(32), tailInstr.getValue(0),tailInstr);
+                    argList.add(returnNUM);
                     builder.buildCallBeforeInstr(lastBasicBlockUp, Function.putint, argList, tailInstr);
                 }
 

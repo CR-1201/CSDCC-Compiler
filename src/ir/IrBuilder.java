@@ -134,9 +134,10 @@ public class IrBuilder {
         return conversion;
     }
 
-    public void buildConversionBeforeInstr(BasicBlock parent, String type, DataType dataType, Value value, Instruction before){
+    public Conversion buildConversionBeforeInstr(BasicBlock parent, String type, DataType dataType, Value value, Instruction before){
         Conversion conversion = new Conversion(nameNumCounter++,type, dataType, parent, value);
         parent.insertBefore(conversion, before);
+        return conversion;
     }
 
     /**

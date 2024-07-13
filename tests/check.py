@@ -33,14 +33,12 @@ def init():
         for test_file in test_files:
             input_file = f'{test_file.replace(".sy", ".in")}'
             ans_file = f'{test_file.replace(".sy", ".out")}'
-            if input_file in input_files and ans_file in ans_files:
-                TEST_CASES.append(
-                    {
-                        'test_file': test_file,
-                        'input_file': input_file,
-                        'ans_file':  ans_file
-                    }
-                )
+            case = {'test_file': test_file}
+            if input_file in input_files:
+                case['input_file'] = input_file
+            if ans_file in ans_files:
+                case['ans_file'] = ans_file
+            TEST_CASES.append(case)
 
 def create_folder_for(file):
     parent_dir = f'{TEST_DIR}/{os.path.dirname(file)}'
@@ -65,7 +63,7 @@ def append_return(file_path, return_val):
     with open(f'{TEST_DIR}/{file_path}', 'a+') as file:
         file.write(f'{return_val}\n')
 
-def check(stop_event, test_file, input_file, ans_file=''):
+def check(stop_event, test_file, input_file='', ans_file=''):
     filename = os.path.splitext(test_file)[0]
     ir_file = f'ir/{filename}.ll'
     ir_runnable = f'ir/{filename}'
@@ -102,6 +100,8 @@ def check(stop_event, test_file, input_file, ans_file=''):
     try:
         create_folder_for(output_file)
         cmd = f'./{ir_runnable} < {input_file} > {output_file}'
+        if not input_file:
+            cmd = f'./{ir_runnable} > {output_file}'
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
         append_return(output_file, 0)
@@ -123,7 +123,10 @@ def check(stop_event, test_file, input_file, ans_file=''):
         subprocess.run(f'clang -x c -S -emit-llvm {test_file} -o {ir_std} -O0 2>/dev/null', cwd=TEST_DIR, shell=True)
         subprocess.run(f'clang {ir_std} -L./lib -lsysy -o {ir_std_runnable}', cwd=TEST_DIR, shell=True)
         create_folder_for(ans_file)
-        subprocess.run(f'./{ir_std_runnable} < {input_file} > {ans_file}', cwd=TEST_DIR, shell=True)
+        cmd = f'./{ir_std_runnable} < {input_file} > {ans_file}'
+        if not input_file:
+            cmd = f'./{ir_std_runnable} > {ans_file}'
+        subprocess.run(cmd, cwd=TEST_DIR, shell=True)
 
     ensure_newline_at_end_of_file(output_file)
     ensure_newline_at_end_of_file(ans_file)

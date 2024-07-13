@@ -51,10 +51,16 @@ public class VarDef extends Node{
                 globalInitDown = false;
                 // "全局变量声明中指定的初值表达式必须是常量表达式",所以一定可以转为 ConstInt 或者 ConstFloat
                 GlobalVariable globalVariable;
-                if( valueUp instanceof ConstInt){
-                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstInt) valueUp, false);
+                Value temp = valueUp;
+                if( (bType.getToken().getType() == Token.TokenType.INTTK) && valueUp instanceof ConstFloat ){
+                    temp = new ConstInt((int)(((ConstFloat)valueUp).getValue()));
+                } else if( (bType.getToken().getType() == Token.TokenType.FLOATTK) && valueUp instanceof ConstInt ){
+                    temp = new ConstFloat((float) (((ConstInt)valueUp).getValue()));
+                }
+                if( temp instanceof ConstInt){
+                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstInt) temp, false);
                 } else {
-                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstFloat) valueUp, false);
+                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstFloat) temp, false);
                 }
                 irSymbolTable.addValue(identToken.getContent(), globalVariable);
             } else { // 没有初始值的全局变量

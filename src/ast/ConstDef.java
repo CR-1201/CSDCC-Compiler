@@ -23,6 +23,8 @@ public class ConstDef extends Node{
     private List<ConstExp> constExps = null;
     private ConstInitVal constInitVal = null;
 
+    private BType bType;
+
     Constant constant = ConstInt.ZERO;
 
     // 用于记录数组的维数,比如说 a[1][2] 的 dims 就是 {1, 2}
@@ -38,6 +40,10 @@ public class ConstDef extends Node{
 
     public void setConstant(Constant constant){
         this.constant = constant;
+    }
+
+    public void setBType(BType bType){
+        this.bType = bType;
     }
 
     @Override
@@ -73,7 +79,7 @@ public class ConstDef extends Node{
                 irSymbolTable.addValue(ident, globalVariable);
             } else { // 如果是局部数组
                 // FIXME 判断是Int数组还是Float数组
-                boolean isFloat = valueUp.getValueType() instanceof FloatType;
+                boolean isFloat = (bType.getToken().getType() == Token.TokenType.FLOATTK);
                 DataType dataType = isFloat ? (new FloatType()) : (IntType.I32);
 
                 // 根据维数信息创建数组标签,之前不用 是因为在 constInitVal 中递归生成了

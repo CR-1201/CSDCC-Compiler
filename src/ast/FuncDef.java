@@ -65,11 +65,11 @@ public class FuncDef extends Node{
         if (funcFParams != null) {
             funcFParams.buildFParamsSSA();
         }
-//        irSymbolTable.pushBlockLayer();
+        irSymbolTable.pushBlockLayer();
         block.setReturnType(returnType);
         // 建立函数体
         block.buildIrTree();
-//        irSymbolTable.popBlockLayer();
+        irSymbolTable.popBlockLayer();
 
         // 在解析完了函数后,开始处理善后工作
         // 如果没有默认的 return 语句 (语义正确保证了结尾有一个 return 语句)

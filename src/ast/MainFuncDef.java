@@ -38,8 +38,10 @@ public class MainFuncDef extends Node{
         // 进入一个函数,就会加一层
         irSymbolTable.pushFuncLayer();
         curBlock = entryBlock;
+        irSymbolTable.pushBlockLayer();
         // 建立函数体
         block.buildIrTree();
+        irSymbolTable.popBlockLayer();
         // 在解析完了函数后,开始处理善后工作, 如果没有默认的 return 语句
         BasicBlock tempBlock = (lastBasicBlockUp != null) ? (BasicBlock) lastBasicBlockUp : curBlock;
 

@@ -161,7 +161,6 @@ public class UnaryExp extends Node{
             case "putfloat" -> Function.putfloat;
             case "getfarray" -> Function.getfarray;
             case "putfarray" -> Function.putfarray;
-            case "putstr"    -> Function.putstr;
             case "starttime" -> Function.starttime;
             case "stoptime" -> Function.stoptime;
             default -> null;

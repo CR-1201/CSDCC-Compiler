@@ -55,15 +55,16 @@ public class MainFuncDef extends Node{
             // TODO 输出main函数return的值,为了评测使用
             // 实参表
             ArrayList<Value> argList = new ArrayList<>();
-            argList.add(new ConstStr("\\n"));
+            ArrayList<Value> charN = new ArrayList<>();
+            charN.add(new ConstInt(10));
             if(tailInstr.getValue(0).getValueType() instanceof IntType){
                 argList.add(tailInstr.getValue(0));
-                builder.buildCallBeforeInstr(tempBlock, Function.putint, argList, tailInstr);
             } else {
                 Instruction returnNUM = builder.buildConversionBeforeInstr(tempBlock,"fptosi",new IntType(32), tailInstr.getValue(0),tailInstr);
                 argList.add(returnNUM);
-                builder.buildCallBeforeInstr(tempBlock, Function.putint, argList, tailInstr);
             }
+            builder.buildCallBeforeInstr(tempBlock, Function.putch, charN, tailInstr);
+            builder.buildCallBeforeInstr(tempBlock, Function.putint, argList, tailInstr);
 
         }
 

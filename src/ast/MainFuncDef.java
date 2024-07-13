@@ -44,12 +44,12 @@ public class MainFuncDef extends Node{
         block.buildIrTree();
         irSymbolTable.popBlockLayer();
         // 在解析完了函数后,开始处理善后工作, 如果没有默认的 return 语句
-        BasicBlock tempBlock = (lastBasicBlockUp != null) ? lastBasicBlockUp : curBlock;
+//        BasicBlock tempBlock = (lastBasicBlockUp != null) ? lastBasicBlockUp : curBlock;
 
-        Instruction tailInstr = tempBlock.getTailInstruction();
+        Instruction tailInstr = curBlock.getTailInstruction();
         // 结尾没有指令或者指令不是跳转指令
         if (!(tailInstr instanceof Ret || tailInstr instanceof Br)) {
-            builder.buildRet(tempBlock, ConstInt.ZERO);
+            builder.buildRet(curBlock, ConstInt.ZERO);
 //            Instruction nowTailInstr = tempBlock.getTailInstruction();
 //            ArrayList<Value> argList = new ArrayList<>();
 //            argList.add(ConstInt.ZERO);

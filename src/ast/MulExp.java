@@ -46,7 +46,7 @@ public class MulExp extends Node{
                     float_flag = true;
                 }
 
-                if(unary.getValueType().isFloat()){
+                if(!unary.getValueType().isFloat()){
                     f_unary = ((ConstInt)unary).getValue();
                     i_unary = ((ConstInt)unary).getValue();
                 } else {
@@ -54,7 +54,7 @@ public class MulExp extends Node{
                     i_unary = (int)(((ConstFloat)unary).getValue());
                 }
 
-                if(mul.getValueType().isFloat()){
+                if(!mul.getValueType().isFloat()){
                     f_mul = ((ConstInt)mul).getValue();
                     i_mul = ((ConstInt)mul).getValue();
                 } else {

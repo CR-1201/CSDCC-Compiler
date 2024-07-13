@@ -40,6 +40,7 @@ public class MainFuncDef extends Node{
         curBlock = entryBlock;
         irSymbolTable.pushBlockLayer();
         // 建立函数体
+        block.setReturnType(returnType);
         block.buildIrTree();
         irSymbolTable.popBlockLayer();
         // 在解析完了函数后,开始处理善后工作, 如果没有默认的 return 语句

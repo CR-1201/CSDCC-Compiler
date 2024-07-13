@@ -99,6 +99,7 @@ public class Stmt extends Node{
             }
             case 3 ->{
                 // Block
+                block.setReturnType(returnType);
                 block.buildIrTree();
             }
             case 4 -> {
@@ -118,6 +119,7 @@ public class Stmt extends Node{
                 cond.buildIrTree();
                 curBlock = trueBlock;
                 // 遍历 if 块
+                stmt1.setReturnType(returnType);
                 stmt1.buildIrTree();
 
                 // 直接跳转到 nextBlock,这是不言而喻的,因为 trueBlock 执行完就是 nextBlock
@@ -125,6 +127,7 @@ public class Stmt extends Node{
                 // 对应有 else 的情况
                 if (stmt2 != null) {
                     curBlock = falseBlock;
+                    stmt2.setReturnType(returnType);
                     stmt2.buildIrTree();
                     builder.buildBr(curBlock, nextBlock);
                 }
@@ -153,6 +156,7 @@ public class Stmt extends Node{
                 cond.buildIrTree();
 
                 curBlock = bodyBlock;
+                stmt.setReturnType(returnType);
                 stmt.buildIrTree();
                 builder.buildBr(curBlock, condBlock);
 

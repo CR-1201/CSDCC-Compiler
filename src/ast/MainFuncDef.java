@@ -40,23 +40,24 @@ public class MainFuncDef extends Node{
         // 建立函数体
         block.buildIrTree();
         // 在解析完了函数后,开始处理善后工作, 如果没有默认的 return 语句
-        Instruction tailInstr = lastBasicBlockUp.getTailInstruction();
-        // 结尾没有指令或者指令不是跳转指令,null 指令被包含了
-
-        if (!(tailInstr instanceof Ret || tailInstr instanceof Br)) {
-            builder.buildRet(curBlock, ConstInt.ZERO);
-        } else {
-            // TODO 输出main函数return的值,为了评测使用
-            // 实参表
-            ArrayList<Value> argList = new ArrayList<>();
-            argList.add(tailInstr.getValue(0));
-            if(tailInstr.getValue(0).getValueType() instanceof IntType){
-                builder.buildCallBeforeInstr(lastBasicBlockUp, Function.putint, argList, tailInstr);
+        if( lastBasicBlockUp != null ){
+            Instruction tailInstr = lastBasicBlockUp.getTailInstruction();
+            // 结尾没有指令或者指令不是跳转指令
+            if (!(tailInstr instanceof Ret || tailInstr instanceof Br)) {
+                builder.buildRet(lastBasicBlockUp, ConstInt.ZERO);
             } else {
-                builder.buildConversionBeforeInstr(lastBasicBlockUp,"fptosi",new IntType(32), tailInstr.getValue(0),tailInstr);
-                builder.buildCallBeforeInstr(lastBasicBlockUp, Function.putint, argList, tailInstr);
-            }
+                // TODO 输出main函数return的值,为了评测使用
+                // 实参表
+                ArrayList<Value> argList = new ArrayList<>();
+                argList.add(tailInstr.getValue(0));
+                if(tailInstr.getValue(0).getValueType() instanceof IntType){
+                    builder.buildCallBeforeInstr(lastBasicBlockUp, Function.putint, argList, tailInstr);
+                } else {
+                    builder.buildConversionBeforeInstr(lastBasicBlockUp,"fptosi",new IntType(32), tailInstr.getValue(0),tailInstr);
+                    builder.buildCallBeforeInstr(lastBasicBlockUp, Function.putint, argList, tailInstr);
+                }
 
+            }
         }
         irSymbolTable.popFuncLayer();
     }

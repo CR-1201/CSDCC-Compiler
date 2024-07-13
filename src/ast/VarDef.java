@@ -74,6 +74,8 @@ public class VarDef extends Node{
             }
         } else { // 局部单变量
             DataType dataType;
+
+
             if( bType.getToken().getType() == Token.TokenType.INTTK ){
                 dataType = IntType.I32;
             } else dataType = new FloatType();

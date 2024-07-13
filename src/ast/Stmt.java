@@ -197,7 +197,7 @@ public class Stmt extends Node{
                 } else {
                     builder.buildRet(curBlock);
                 }
-                curBlock = new BasicBlock();
+                curBlock = builder.buildBasicBlock(curFunc);
             }
         }
 

@@ -147,6 +147,7 @@ public class IrBuilder {
      * @return Alloca 指令
      */
     public Alloca buildALLOCA(ValueType allocatedType, BasicBlock parent){
+//        System.out.println(parent.getParent());
         BasicBlock realParent = parent.getParent().getFirstBlock();
         Alloca alloca = new Alloca(nameNumCounter++, allocatedType, realParent);
         realParent.insertHead(alloca);

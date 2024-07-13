@@ -2,6 +2,7 @@ package ir;
 
 import ir.types.DataType;
 import ir.types.FunctionType;
+import ir.types.VoidType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,9 +59,10 @@ public class Function extends Value{
 
     // 为了解决 loop 的问题
     private Function(){
-        super("@LOOP_TMP", null, null);
+        super("@LOOP_TMP", new VoidType(), null);
         isBuiltIn = true;
         returnType = null;
+//        blocks.add(new BasicBlock());
     }
 
     public boolean getIsBuiltIn(){

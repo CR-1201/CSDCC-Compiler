@@ -119,7 +119,7 @@ public class MulExp extends Node{
                     dataType = new FloatType();
                 }
 
-                if( multer.getValueType().isFloat() && multer.getValueType().isFloat() ){
+                if( multer.getValueType().isFloat() && mul.getValueType().isFloat() ){
                     dataType = new FloatType();
                 }
 

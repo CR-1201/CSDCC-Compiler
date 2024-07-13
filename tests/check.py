@@ -60,6 +60,11 @@ def ensure_newline_at_end_of_file(file_path):
                 file.write('\n')
         file.seek(0, os.SEEK_END)
 
+def append_return(file_path, return_val):
+    ensure_newline_at_end_of_file(file_path)
+    with open(f'{TEST_DIR}/{file_path}', 'a+') as file:
+        file.write(f'{return_val}\n')
+
 def check(stop_event, test_file, input_file, ans_file=''):
     filename = os.path.splitext(test_file)[0]
     ir_file = f'ir/{filename}.ll'
@@ -99,12 +104,10 @@ def check(stop_event, test_file, input_file, ans_file=''):
         cmd = f'./{ir_runnable} < {input_file} > {output_file}'
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
-        ensure_newline_at_end_of_file(output_file)
-        subprocess.check_output(f'echo 0 >> {output_file}', cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+        append_return(output_file, 0)
     except subprocess.CalledProcessError as e:
         if EXPECTED_PATTERN.search(e.output.decode()):
-            ensure_newline_at_end_of_file(output_file)
-            subprocess.check_output(f'echo {e.returncode} >> {output_file}', cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+            append_return(output_file, e.returncode)
         else:
             print(f'[ERROR FILE] {test_file}')
             print(f'Error running {ir_runnable}:{e.output.decode()}')
@@ -124,8 +127,8 @@ def check(stop_event, test_file, input_file, ans_file=''):
 
     ensure_newline_at_end_of_file(output_file)
     ensure_newline_at_end_of_file(ans_file)
-    r = subprocess.run(f'diff {output_file} {ans_file}', cwd=TEST_DIR, shell=True, capture_output=True, text=True, check=False)
-    if r.returncode != 0:
+    r = subprocess.run(f"diff <(tr -d '\r' < {output_file}) {ans_file}", cwd=TEST_DIR, shell=True, capture_output=True, text=True, check=False)
+    if r.stdout:
         print(f'[ERROR FILE] {test_file}')
         print(f'{test_file} WA')
         print(r.stdout)

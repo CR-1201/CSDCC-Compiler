@@ -70,6 +70,7 @@ public class InitVal extends Node{
             for (int dim : dims) {
                 sum_dims *= dim;
             }
+//            System.out.println("sum_dims: " + sum_dims);
 
             if (dims.size() == 1) {  // 一维数组
                 for (InitVal initVal : initVals) {

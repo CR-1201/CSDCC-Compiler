@@ -89,6 +89,7 @@ public class VarDef extends Node{
         // 解析维数 exp,然后存到 dim 中
         for (ConstExp constExp : constExps) {
             constExp.buildIrTree();
+//            System.out.println(valueUp);
             // 维度一定是 int
             dims.add(((ConstInt) valueUp).getValue());
         }
@@ -103,6 +104,7 @@ public class VarDef extends Node{
         // 全局数组 "全局变量声明中指定的初值表达式必须是常量表达式"
         if (irSymbolTable.isGlobalLayer()) {
             if (initVal != null) { // 全局有初始值的数组
+//                System.out.println(dims);
                 initVal.setDims(new ArrayList<>(dims));
 
                 if(initVal.getInitVals().isEmpty()){
@@ -190,7 +192,7 @@ public class VarDef extends Node{
             // 递归创建下一级维度
             ArrayList<Constant> nextLevel = new ArrayList<>();
             for (int i = 0; i < dims.get(currentDim); i++) {
-                ArrayList<Constant>  subList = new ArrayList<>();
+                ArrayList<Constant> subList = new ArrayList<>();
                 ConstArray subArray = setInitArray(subList,currentDim + 1,flattenArray );
                 nextLevel.add(subArray);
             }

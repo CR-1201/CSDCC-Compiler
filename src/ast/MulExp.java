@@ -72,10 +72,12 @@ public class MulExp extends Node{
                     f_sum = f_unary % f_mul;
                     i_sum = i_unary % i_mul;
                 }
+
+                if( float_flag ){
+                    valueUp = new ConstFloat(f_sum);
+                } else valueUp = new ConstInt(i_sum);
             }
-            if( float_flag ){
-                valueUp = new ConstFloat(f_sum);
-            } else valueUp = new ConstInt(i_sum);
+
 
         } else { // 是不可直接计算的,要用表达式
             DataType dataType = new IntType(32);

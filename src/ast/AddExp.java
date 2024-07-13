@@ -71,6 +71,7 @@ public class AddExp extends Node{
                     f_add = ((ConstFloat)add).getValue();
                     i_add = (int)(((ConstFloat)add).getValue());
                 }
+
                 if( op.getType() == Token.TokenType.PLUS ){
                     f_sum = f_mul + f_add;
                     i_sum = i_mul + i_add;
@@ -78,11 +79,13 @@ public class AddExp extends Node{
                     f_sum = f_mul - f_add;
                     i_sum = i_mul - i_add;
                 }
+
+                if( float_flag ){
+                    valueUp = new ConstFloat(f_sum);
+                } else valueUp = new ConstInt(i_sum);
             }
 
-            if( float_flag ){
-                valueUp = new ConstFloat(f_sum);
-            } else valueUp = new ConstInt(i_sum);
+
 
         } else {
             // 是不可直接计算的,要用表达式

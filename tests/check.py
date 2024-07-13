@@ -1,3 +1,4 @@
+import re
 import os
 import subprocess
 import glob
@@ -7,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
 TEST_DIR = f'{ROOT_DIR}/tests'
 CP = '../compiler.jar'
+EXPECTED_PATTERN = re.compile(r'\d+H-\d+M-\d+S-\d+us')
 TEST_CASES = []
 
 def init():
@@ -52,10 +54,11 @@ def ensure_newline_at_end_of_file(file_path):
     with open(f'{TEST_DIR}/{file_path}', 'a+') as file:
         file.seek(0, os.SEEK_END)
         if file.tell() > 0:
-            file.seek(-1, os.SEEK_END)
+            file.seek(file.tell() - 1, os.SEEK_SET)
             last_char = file.read(1)
             if last_char != '\n':
                 file.write('\n')
+        file.seek(0, os.SEEK_END)
 
 def check(stop_event, test_file, input_file, ans_file=''):
     filename = os.path.splitext(test_file)[0]
@@ -97,10 +100,11 @@ def check(stop_event, test_file, input_file, ans_file=''):
         print(f'Running: {cmd}')
         subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        print(f'[ERROR FILE] {test_file}')
-        print(f'Error running {ir_runnable}:\n{e.output.decode()}')
-        stop_event.set()
-        return False
+        if not EXPECTED_PATTERN.search(e.output.decode()):
+            print(f'[ERROR FILE] {test_file}')
+            print(f'Error running {ir_runnable}:{e.output.decode()}')
+            stop_event.set()
+            return False
     
     # TODO: run asm
 

@@ -133,7 +133,14 @@ public class UnaryExp extends Node{
                             param.buildIrTree();
                             paramNotNeedLoadDown = false;
 
-                            argList.add(valueUp);
+                            // 没处理int强转指针
+                            Value arg = valueUp;
+                            if( argType instanceof IntType && valueUp.getValueType() instanceof FloatType ){
+                                arg = builder.buildConversion(curBlock,"fptosi",new IntType(32), valueUp);
+                            } else if (argType instanceof FloatType && valueUp.getValueType() instanceof IntType ){
+                                arg = builder.buildConversion(curBlock,"sitofp",new FloatType(), valueUp);
+                            }
+                            argList.add(arg);
                         }
                     }
                     valueUp = builder.buildCall(curBlock, func, argList);

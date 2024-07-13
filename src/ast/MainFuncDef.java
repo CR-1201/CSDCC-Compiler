@@ -1,6 +1,8 @@
 package ast;
 
 import ir.BasicBlock;
+import ir.Function;
+import ir.Value;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.terminatorInstructions.Br;
@@ -42,6 +44,12 @@ public class MainFuncDef extends Node{
         // 结尾没有指令或者指令不是跳转指令,null 指令被包含了
         if (!(tailInstr instanceof Ret || tailInstr instanceof Br)) {
             builder.buildRet(curBlock, ConstInt.ZERO);
+        } else {
+            // TODO 输出main函数return的值,为了评测使用
+            // 实参表
+            ArrayList<Value> argList = new ArrayList<>();
+            argList.add(tailInstr);
+            builder.buildCall(curBlock, Function.putint, argList);
         }
         irSymbolTable.popFuncLayer();
     }

@@ -1,6 +1,7 @@
 package ast;
 
 import ir.BasicBlock;
+import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.terminatorInstructions.Br;
@@ -75,10 +76,12 @@ public class FuncDef extends Node{
         Instruction tailInstr = curBlock.getTailInstruction();
         // 结尾没有指令或者指令不是跳转指令, null 指令被包含了
         if (!(tailInstr instanceof Ret || tailInstr instanceof Br)) {
-            if (curFunc.getReturnType() instanceof VoidType) {
+            if (returnType instanceof VoidType) {
                 builder.buildRet(curBlock);
-            } else {
+            } else if (returnType instanceof IntType){
                 builder.buildRet(curBlock, ConstInt.ZERO);
+            } else {
+                builder.buildRet(curBlock, ConstFloat.ZERO);
             }
         }
         irSymbolTable.popFuncLayer();

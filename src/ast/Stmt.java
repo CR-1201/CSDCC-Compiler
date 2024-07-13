@@ -187,6 +187,8 @@ public class Stmt extends Node{
                         sum = builder.buildConversion(curBlock,"fptosi",new IntType(32), valueUp);
                     }
                     builder.buildRet(curBlock, sum);
+                    // 为了在main函数最后的return前插入输出语句
+                    lastBasicBlockUp = curBlock;
                 } else {
                     builder.buildRet(curBlock);
                 }

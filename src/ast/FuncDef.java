@@ -73,7 +73,7 @@ public class FuncDef extends Node{
 
         // 在解析完了函数后,开始处理善后工作
         // 如果没有默认的 return 语句 (语义正确保证了结尾有一个 return 语句)
-        Instruction tailInstr = curBlock.getTailInstruction();
+        Instruction tailInstr = lastBasicBlockUp.getTailInstruction();
         // 结尾没有指令或者指令不是跳转指令, null 指令被包含了
         if (!(tailInstr instanceof Ret || tailInstr instanceof Br)) {
             if (returnType instanceof VoidType) {

@@ -179,13 +179,15 @@ public class Stmt extends Node{
                 if (exp != null) {
                     // 这里也有一个和 Break 类似的操作,不知道合不合理
                     exp.buildIrTree();
-                    Value sum = valueUp;
+                    Value sum;
                     if( returnType instanceof FloatType && valueUp.getValueType() instanceof IntType){
                         sum = builder.buildConversion(curBlock,"sitofp",new FloatType(), valueUp);
+                        builder.buildRet(curBlock, sum);
                     } else if( returnType instanceof IntType && valueUp.getValueType() instanceof FloatType ){
                         sum = builder.buildConversion(curBlock,"fptosi",new IntType(32), valueUp);
-                    }
-                    builder.buildRet(curBlock, sum);
+                        builder.buildRet(curBlock, sum);
+                    } else builder.buildRet(curBlock, valueUp);
+
                     // 为了在main函数最后的return前插入输出语句
                     lastBasicBlockUp = curBlock;
                 } else {

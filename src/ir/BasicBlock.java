@@ -106,6 +106,15 @@ public class BasicBlock extends Value{
         dominanceFrontier.add(domFrontier);
     }
 
+    /**
+     * 返回当前块是否是 other 的支配者
+     * @param other 另一个块
+     * @return 是则为 true
+     */
+    public boolean isDominator(BasicBlock other){
+        return other.domers.contains(this);
+    }
+
     // =================================================================
 
     public BasicBlock(int nameNum, Function parent){
@@ -173,15 +182,6 @@ public class BasicBlock extends Value{
         }else{
             return instructions.getLast();
         }
-    }
-
-    /**
-     * 返回当前块是否是 other 的支配者
-     * @param other 另一个块
-     * @return 是则为 true
-     */
-    public boolean isDominator(BasicBlock other){
-        return other.doms.contains(this);
     }
 
     // BasicBlock 的 parent 一定是 Function

@@ -41,7 +41,7 @@ public abstract class User extends Value {
     }
 
     // 获取操作数, index 操作数位置
-    public Value getValue(int index) {
+    public Value getOperator(int index) {
         return operators.get(index);
     }
 
@@ -51,8 +51,8 @@ public abstract class User extends Value {
      * @param index 索引
      * @param newValue 新 value
      */
-    public void updateValue(int index, Value newValue) {
-        Value oldValue = getValue(index);
+    public void setOperator(int index, Value newValue) {
+        Value oldValue = getOperator(index);
         if (oldValue != null)
             oldValue.removeUser(this);
         operators.set(index, newValue);

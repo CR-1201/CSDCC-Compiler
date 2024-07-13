@@ -50,6 +50,6 @@ public class Icmp extends BinaryInstruction {
     @Override
     public String toString(){
         return getName() + " = icmp " + condition.toString() + " " +
-                getValue(0).getValueType() + " " + getValue(0).getName() + ", " + getValue(1).getName();
+                getOperator(0).getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();
     }
 }

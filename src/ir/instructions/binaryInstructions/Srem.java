@@ -22,6 +22,6 @@ public class Srem extends BinaryInstruction{
 
     @Override
     public String toString(){
-        return getName() + " = srem " + getValueType() + " " + getValue(0).getName() + ", " + getValue(1).getName();
+        return getName() + " = srem " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();
     }
 }

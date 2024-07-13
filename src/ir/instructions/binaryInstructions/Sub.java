@@ -22,6 +22,6 @@ public class Sub extends BinaryInstruction{
 
     @Override
     public String toString(){
-        return getName() + " = sub " + getValueType() + " " + getValue(0).getName() + ", " + getValue(1).getName();
+        return getName() + " = sub " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();
     }
 }

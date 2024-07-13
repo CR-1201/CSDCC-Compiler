@@ -28,7 +28,7 @@ public class Ret extends TerInstruction{
     public Value getRetValue(){
         if (getValueType() instanceof VoidType){
             return null;
-        }else return getValue(0);
+        }else return getOperator(0);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class Ret extends TerInstruction{
         if (getValueType() instanceof VoidType){
             return "ret void";
         }else{
-            return "ret " + getValue(0).getValueType() + " " + getValue(0).getName();
+            return "ret " + getOperator(0).getValueType() + " " + getOperator(0).getName();
         }
     }
 }

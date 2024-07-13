@@ -27,11 +27,11 @@ public class Load extends MemoryInstruction{
     }
 
     public Value getAddr(){
-        return getValue(0);
+        return getOperator(0);
     }
 
     @Override
     public String toString(){
-        return getName() + " = load " + getValueType() + ", " + getValue(0).getValueType() + " " + getValue(0).getName();
+        return getName() + " = load " + getValueType() + ", " + getOperator(0).getValueType() + " " + getOperator(0).getName();
     }
 }

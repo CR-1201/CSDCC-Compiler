@@ -42,7 +42,7 @@ public class ConstArray extends Constant {
         // ConstArray 里面没有保存信息,只能依赖于标签信息
         int n = ((ArrayType) getValueType()).getElementNum();
         for (int i = 0; i < n; i++){
-            s.append(getValue(i).getValueType()).append(" ").append(getValue(i));
+            s.append(getOperator(i).getValueType()).append(" ").append(getOperator(i));
             if( i+1 < n )s.append(", ");
         }
         s.append("]");

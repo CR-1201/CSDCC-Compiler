@@ -138,7 +138,8 @@ public class Mem2reg implements Pass {
     private Boolean dealOnlyStore(Alloca alloca) {
         Value storeValue = onlyStore.getValue();
         ArrayList<User> users = alloca.getUsers();
-        for (User user : users) {
+        for (int i = 0; i < users.size(); i++) {
+            User user = users.get(i);
             if (user instanceof Store si) {
                 if (!si.equals(onlyStore)) {
                     throw new AssertionError("ai has store user different from onlyStore in dealOnlyStore");
@@ -166,7 +167,7 @@ public class Mem2reg implements Pass {
 
     private void dealOnlyBlock(Alloca alloca) {
         boolean encounterStore = false;
-        LinkedList<Instruction> insts = onlyBlock.getInstructions();
+        ArrayList<Instruction> insts = onlyBlock.getInstructionsArray();
         for (Instruction inst : insts) {
             // 在该 Load 指令之前，没有 Store 指令；
             if (inst instanceof Load && inst.getOperator(0) == alloca) {

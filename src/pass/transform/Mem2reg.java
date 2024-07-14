@@ -284,7 +284,7 @@ public class Mem2reg implements Pass {
 
     private void sweepBlock(BasicBlock entry, BasicBlock block) {
         HashMap<Alloca, Store> alloca2store = new HashMap<>();
-        LinkedList<Instruction> insts = block.getInstructions();
+        ArrayList<Instruction> insts = block.getInstructionsArray();
         for (Instruction inst : insts) {
             // 如果当前指令是 store 指令，而且地址是 alloca 分配的，那么就存到 alloca2store 中
             if (inst instanceof Store si && si.getAddr() instanceof Alloca ai) {
@@ -307,7 +307,7 @@ public class Mem2reg implements Pass {
         }
         // 清空对应关系
         alloca2store.clear();
-        insts = block.getInstructions();
+        insts = block.getInstructionsArray();
         for (int i = insts.size() - 1; i >= 0; i--) {
             Instruction inst = insts.get(i);
             // 如果是 store 指令

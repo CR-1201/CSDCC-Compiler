@@ -37,7 +37,6 @@ public class Dom implements Pass {
         domLevel(function.getFirstBlock(), 0);
         // 计算支配边界
         dominanceFrontier(function);
-
 //        printDOM(function);
     }
 
@@ -100,13 +99,11 @@ public class Dom implements Pass {
             BasicBlock block = rpos.get(i);
             BitSet domer = domers.get(i);
             for (int domerIndex = domer.nextSetBit(0); domerIndex >= 0;
-                 domerIndex = domer.nextSetBit(domerIndex + 1))
-            {
+                 domerIndex = domer.nextSetBit(domerIndex + 1)) {
                 BasicBlock domerBlock = rpos.get(domerIndex);
                 block.addDomer(domerBlock);
             }
         }
-
         // 查找直接支配者
         for (BasicBlock block : blocks) {
             for (BasicBlock domer : block.getDomers()) {
@@ -118,7 +115,6 @@ public class Dom implements Pass {
                 }
             }
         }
-
     }
 
     /**

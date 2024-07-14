@@ -50,6 +50,9 @@ public class LOrExp extends Node{
             lAndExp.setFalseBlock(nextBlock);
             lAndExp.buildIrTree();
             curBlock = nextBlock;
+
+            lOrExp.setTrueBlock(trueBlock);
+            lOrExp.setFalseBlock(falseBlock);
             lOrExp.buildIrTree();
         } else {
             lAndExp.setTrueBlock(trueBlock);

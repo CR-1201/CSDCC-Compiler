@@ -495,9 +495,11 @@ public class ParserAnalyze {
                 // 'break' ';' | 'continue' ';'
                 if( currentToken.getType() == Token.TokenType.CONTINUETK ){
                     Token continueTK = match(Token.TokenType.CONTINUETK);
+                    match(Token.TokenType.SEMICN);
                     return new Stmt(type,continueTK);
                 }else{
                     Token breakTK = match(Token.TokenType.BREAKTK);
+                    match(Token.TokenType.SEMICN);
                     return new Stmt(type,breakTK);
                 }
             }

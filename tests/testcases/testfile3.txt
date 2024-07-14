@@ -1,5 +1,0 @@
-int main() {
-    putint(3);
-    putint(5);
-    return 0;
-}

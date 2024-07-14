@@ -3,6 +3,7 @@ package ir.instructions.binaryInstructions;
 import ir.BasicBlock;
 import ir.Value;
 import ir.types.DataType;
+import ir.types.FloatType;
 
 /**
  @author Conroy
@@ -22,6 +23,6 @@ public class Srem extends BinaryInstruction{
 
     @Override
     public String toString(){
-        return getName() + " = srem " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();
+        return getName() + " = "+ ((getValueType() instanceof FloatType) ? "f" : "s") +  "rem " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();
     }
 }

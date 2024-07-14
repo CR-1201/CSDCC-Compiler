@@ -5,10 +5,7 @@ import ir.Value;
 import ir.constants.*;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
-import ir.types.ArrayType;
-import ir.types.DataType;
-import ir.types.FloatType;
-import ir.types.IntType;
+import ir.types.*;
 import token.Token;
 
 import java.util.ArrayList;
@@ -51,10 +48,16 @@ public class VarDef extends Node{
                 globalInitDown = false;
                 // "全局变量声明中指定的初值表达式必须是常量表达式",所以一定可以转为 ConstInt 或者 ConstFloat
                 GlobalVariable globalVariable;
-                if( valueUp instanceof ConstInt){
-                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstInt) valueUp, false);
+                Value temp = valueUp;
+                if( (bType.getToken().getType() == Token.TokenType.INTTK) && valueUp instanceof ConstFloat ){
+                    temp = new ConstInt((int)(((ConstFloat)valueUp).getValue()));
+                } else if( (bType.getToken().getType() == Token.TokenType.FLOATTK) && valueUp instanceof ConstInt ){
+                    temp = new ConstFloat((float) (((ConstInt)valueUp).getValue()));
+                }
+                if( temp instanceof ConstInt){
+                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstInt) temp, false);
                 } else {
-                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstFloat) valueUp, false);
+                    globalVariable = builder.buildGlobalVariable(identToken.getContent(), (ConstFloat) temp, false);
                 }
                 irSymbolTable.addValue(identToken.getContent(), globalVariable);
             } else { // 没有初始值的全局变量
@@ -68,16 +71,27 @@ public class VarDef extends Node{
             }
         } else { // 局部单变量
             DataType dataType;
+
+
             if( bType.getToken().getType() == Token.TokenType.INTTK ){
                 dataType = IntType.I32;
             } else dataType = new FloatType();
             Alloca alloca = builder.buildALLOCA(dataType, curBlock);
+
+//            System.out.println(identToken.getContent());
+
             // 从这里可以看出,可以从符号表这种查询到的东西是一个指针,即 int*
             irSymbolTable.addValue(identToken.getContent(), alloca);
             if (initVal != null) {
                 // "当不含有 '=' 和初始值时,其运行时实际初值未定义"
                 initVal.buildIrTree();
-                builder.buildStore(curBlock, valueUp, alloca);
+                Value source = valueUp;
+                if( ((PointerType) alloca.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
+                    source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
+                } else if( ((PointerType) alloca.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){
+                    source = builder.buildConversion(curBlock,"sitofp",new FloatType(), source);
+                }
+                builder.buildStore(curBlock, source, alloca);
             }
         }
     }
@@ -86,6 +100,7 @@ public class VarDef extends Node{
         // 解析维数 exp,然后存到 dim 中
         for (ConstExp constExp : constExps) {
             constExp.buildIrTree();
+//            System.out.println(valueUp);
             // 维度一定是 int
             dims.add(((ConstInt) valueUp).getValue());
         }
@@ -100,11 +115,19 @@ public class VarDef extends Node{
         // 全局数组 "全局变量声明中指定的初值表达式必须是常量表达式"
         if (irSymbolTable.isGlobalLayer()) {
             if (initVal != null) { // 全局有初始值的数组
+//                System.out.println(dims);
                 initVal.setDims(new ArrayList<>(dims));
-                globalInitDown = true;
-                initVal.buildIrTree();
-                globalInitDown = false;
-                genGlobalInitArray(valueArrayUp);
+
+                if(initVal.getInitVals().isEmpty()){
+                    ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
+                    GlobalVariable globalVariable = builder.buildGlobalVariable(identToken.getContent(), zeroInitializer, false);
+                    irSymbolTable.addValue(identToken.getContent(), globalVariable);
+                } else {
+                    globalInitDown = true;
+                    initVal.buildIrTree();
+                    globalInitDown = false;
+                    genGlobalInitArray(valueArrayUp);
+                }
             } else { // 全局无初始值的数组,那么就初始化为 0
                 ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
                 GlobalVariable globalVariable = builder.buildGlobalVariable(identToken.getContent(), zeroInitializer, false);
@@ -129,13 +152,17 @@ public class VarDef extends Node{
 
                 // 利用 store 往内存中存值
                 for (int i = 0; i < valueArrayUp.size(); i++){
-                    if (i == 0){
-                        builder.buildStore(curBlock,valueArrayUp.get(i), basePtr);
-                    }else{
-                        // 这里利用的是一维的 GEP,此时的返回值依然是 int*; 变长索引,依次赋值,其实可以不用 if-else
-                        GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
-                        builder.buildStore(curBlock, valueArrayUp.get(i), curPtr);
+
+                    Value source = valueArrayUp.get(i);
+                    GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
+
+                    if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
+                        source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
+                    } else if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){
+                        source = builder.buildConversion(curBlock,"sitofp",new FloatType(), source);
                     }
+
+                    builder.buildStore(curBlock, source, curPtr);
                 }
             }
 
@@ -180,7 +207,7 @@ public class VarDef extends Node{
             // 递归创建下一级维度
             ArrayList<Constant> nextLevel = new ArrayList<>();
             for (int i = 0; i < dims.get(currentDim); i++) {
-                ArrayList<Constant>  subList = new ArrayList<>();
+                ArrayList<Constant> subList = new ArrayList<>();
                 ConstArray subArray = setInitArray(subList,currentDim + 1,flattenArray );
                 nextLevel.add(subArray);
             }

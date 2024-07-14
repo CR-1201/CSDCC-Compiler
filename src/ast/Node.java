@@ -24,12 +24,10 @@ public abstract class Node {
 
      // 综合属性:各种 buildIr 的结果(单值形式)如果会被其更高的节点应用,那么需要利用这个值进行通信
      public static Value valueUp;
-     // 综合属性:返回值是一个 int ,其实本质上将其包装成 ConstInt 就可以通过 valueUp 返回,但是这样返回更加简便
-     public static int valueIntUp = 0;
+     // 综合属性:返回值是一个基本块,用来输出main函数最后的return结果
+     public static BasicBlock lastBasicBlockUp = null;
      // 综合属性:各种 buildIr 的结果(数组形式)如果会被其更高的节点应用,那么需要利用这个值进行通信
      public static ArrayList<Value> valueArrayUp = new ArrayList<>();
-     // 综合属性:初始化Const的时候,需要补全空白
-     public static ConstArray valueConstantUp = null;
      // 综合属性:函数的参数类型通过这个上传
      public static DataType argTypeUp = null;
      // 综合属性:函数的参数类型数组通过这个上传

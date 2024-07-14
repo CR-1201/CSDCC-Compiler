@@ -17,11 +17,11 @@ public class ConstFloat extends Constant{
 
     @Override
     public String toString(){
-        return String.valueOf(value);
+        return String.format("0x%x", Double.doubleToRawLongBits(value));
     }
 
     @Override
     public String getName(){
-        return toString();
+        return String.format("0x%x", Double.doubleToRawLongBits(value));
     }
 }

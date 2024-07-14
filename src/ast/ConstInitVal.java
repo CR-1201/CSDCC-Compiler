@@ -72,6 +72,7 @@ public class ConstInitVal extends Node{
                 if( dims.size()  == 1 ){
                     // 一维数组
                     for (ConstInitVal constInitVal : constInitVals){
+                        constInitVal.setConstant(constant);
                         constInitVal.buildIrTree();
                         Value temp = getTemp();
                         flattenArray.add(temp);
@@ -83,6 +84,7 @@ public class ConstInitVal extends Node{
                 } else {
                     // 多维数组
                     for (ConstInitVal constInitVal : constInitVals){
+                        constInitVal.setConstant(constant);
                         // 去掉一维,递归赋值
                         if( constInitVal.getConstExp() == null ) {
                             constInitVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
@@ -106,6 +108,7 @@ public class ConstInitVal extends Node{
                 // 一维数组
                 if( dims.size()  == 1 ){
                     for (ConstInitVal constInitVal : constInitVals){
+                        constInitVal.setConstant(constant);
                         constInitVal.buildIrTree();
                         Value temp = getTemp();
                         flattenArray.add(temp);
@@ -117,6 +120,7 @@ public class ConstInitVal extends Node{
 
                 } else { // 多维数组
                     for (ConstInitVal constInitVal : constInitVals){
+                        constInitVal.setConstant(constant);
                         if( constInitVal.getConstExp() == null ) {
                             constInitVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
                         }

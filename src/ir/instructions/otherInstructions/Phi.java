@@ -20,6 +20,23 @@ public class Phi extends Instruction {
         return precursorNum;
     }
 
+    public void addIncoming(Value value, BasicBlock block) {
+        int i = 0;
+        while (i < precursorNum && getOperator(i) != null) {
+            i++;
+        }
+        if (i < precursorNum) {
+            setOperator(i, value);
+            setOperator(i + precursorNum, block);
+        } else {
+            getOperators().add(precursorNum, value);
+            precursorNum++;
+            getOperators().add(block);
+        }
+        value.addUser(this);
+        block.addUser(this);
+    }
+
     public Value getInputVal(BasicBlock block) {
         for (int i = 0; i < precursorNum; i++) {
             if (getOperator(i + precursorNum) == block) {

@@ -11,9 +11,7 @@ import ir.instructions.otherInstructions.Phi;
 import ir.types.DataType;
 import pass.Pass;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 public class Mem2reg implements Pass {
     private final Module module = Module.getModule();
@@ -24,7 +22,7 @@ public class Mem2reg implements Pass {
             }
         }
     }
-    private ArrayList<Alloca> promotableAlloca = new ArrayList<>();
+    private ArrayList<Alloca> promotableAllocaInsts = new ArrayList<>();
     // 当前分析的 alloca 唯一一个 store 指令
     private Store onlyStore;
     // 如果 store 和 load 在同一个块
@@ -33,16 +31,17 @@ public class Mem2reg implements Pass {
     private final HashSet<BasicBlock> usingBlocks = new HashSet<>();
     // 对于特定的 alloca 指令，其 store 所在的块
     private final HashSet<BasicBlock> definingBlocks = new HashSet<>();
+    private final HashMap<Phi, Alloca> phi2Alloca = new HashMap<>();
     private void handleMem2Reg(Function function) {
         BasicBlock entry = function.getFirstBlock();
         // 在中端ir生成时，就将所有的alloca指令全部放在了entry基本块中
         for (Instruction inst : entry.getInstructions()) {
-            if (inst instanceof Alloca && ((Alloca) inst).isPromotable()) {
-                promotableAlloca.add((Alloca) inst);
+            if (inst instanceof Alloca ai && ai.isPromotable()) {
+                promotableAllocaInsts.add(ai);
             }
         }
 
-        Iterator<Alloca> iterator = promotableAlloca.iterator();
+        Iterator<Alloca> iterator = promotableAllocaInsts.iterator();
         while (iterator.hasNext()) {
             Alloca alloca = iterator.next();
             // 如果出现 alloca 指令没有使用者，将其删除
@@ -82,7 +81,21 @@ public class Mem2reg implements Pass {
             HashSet<BasicBlock> phiBlocks = computeIDF(definingBlocks);
             // 去掉不需要插入的节点
             phiBlocks.removeIf(block -> !isPhiAlive(alloca, block));
+            insertPhiNode(alloca, phiBlocks);
         }
+        if (promotableAllocaInsts.isEmpty()) {
+            return;
+        }
+        renamePhiNode(function);
+        for (Alloca ai : promotableAllocaInsts)
+        {
+            ai.removeAllOperators();
+            ai.eraseFromParent();
+        }
+
+        promotableAllocaInsts.clear();
+        phi2Alloca.clear();
+
     }
 
     private void clear() {
@@ -194,6 +207,66 @@ public class Mem2reg implements Pass {
         {
             Phi phi = IrBuilder.getIrBuilder().buildPhi((DataType) alloca.getAllocatedType(), phiBlock);
             phi2Alloca.put(phi, alloca);
+        }
+    }
+
+    private void renamePhiNode(Function function) {
+        BasicBlock entry = function.getFirstBlock();
+        HashMap<BasicBlock, Boolean> visitMap = new HashMap<>();
+        HashMap<Alloca, Value> variableVersion = new HashMap<>();
+        for (BasicBlock block : function.getBasicBlocksArray()) {
+            visitMap.put(block, false);
+        }
+        for (Alloca alloca : promotableAllocaInsts) {
+            variableVersion.put(alloca, ConstInt.ZERO);
+        }
+        Stack<BasicBlock> blockStack = new Stack<>();
+        Stack<HashMap<Alloca, Value>> mapStack = new Stack<>();
+        blockStack.push(entry);
+        mapStack.push(variableVersion);
+        while (!blockStack.isEmpty()) {
+            BasicBlock curBlock = blockStack.pop();
+            variableVersion = mapStack.pop();
+            if (visitMap.get(curBlock)) {
+                continue;
+            }
+            int i = 0;
+            ArrayList<Instruction> insts = curBlock.getInstructionsArray();
+            while (insts.get(i) instanceof Phi phi) {
+                variableVersion.put(phi2Alloca.get(phi), phi);
+                i++;
+            }
+            while (i < insts.size()) {
+                Instruction inst = insts.get(i);
+                if (inst instanceof Load li) {
+                    if (li.getAddr() instanceof Alloca ai) {
+                        inst.replaceAllUsesWith(variableVersion.get(ai));
+                        inst.removeAllOperators();
+                        inst.eraseFromParent();
+                    }
+                } else if (inst instanceof Store si) {
+                    if (si.getAddr() instanceof Alloca ai) {
+                        variableVersion.put(ai, si.getValue());
+                        inst.removeAllOperators();
+                        inst.eraseFromParent();
+                    }
+                }
+                i++;
+            }
+            for (BasicBlock successor : curBlock.getSuccessors()) {
+                insts = successor.getInstructionsArray();
+                i = 0;
+                while (insts.get(i) instanceof Phi phi) {
+                    Alloca ai = phi2Alloca.get(phi);
+                    phi.addIncoming(variableVersion.get(ai), curBlock);
+                    i++;
+                }
+                if (!visitMap.get(successor)) {
+                    blockStack.push(successor);
+                    mapStack.push(variableVersion);
+                }
+            }
+            visitMap.put(curBlock, true);
         }
     }
 }

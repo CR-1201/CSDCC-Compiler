@@ -17,15 +17,12 @@ public class ConstFloat extends Constant{
 
     @Override
     public String toString(){
-        int bits = Float.floatToIntBits(value);
-        // 将位模式转换为十六进制字符串
-        return "0x"+Integer.toHexString(bits).toUpperCase();
+        return String.format("0x%x", Double.doubleToRawLongBits(value));
     }
 
     @Override
     public String getName(){
-        int bits = Float.floatToIntBits(value);
-        // 将位模式转换为十六进制字符串
-        return "0x"+Integer.toHexString(bits).toUpperCase();
+
+        return String.format("0x%x", Double.doubleToRawLongBits(value));
     }
 }

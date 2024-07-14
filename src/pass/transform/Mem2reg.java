@@ -10,6 +10,7 @@ import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Phi;
 import ir.types.DataType;
 import pass.Pass;
+import utils.IOFunc;
 
 import java.util.*;
 
@@ -85,7 +86,6 @@ public class Mem2reg implements Pass {
             // 去掉不需要插入的节点
             phiBlocks.removeIf(block -> !isPhiAlive(alloca, block));
 //            System.out.println(phiBlocks);
-//            insertPhiNode(alloca, phiBlocks);
             // 插入 Phi 节点
             for (BasicBlock phiBlock : phiBlocks) {
                 Phi phi = IrBuilder.getIrBuilder().buildPhi((DataType) alloca.getAllocatedType(), phiBlock);
@@ -137,14 +137,21 @@ public class Mem2reg implements Pass {
      */
     private Boolean dealOnlyStore(Alloca alloca) {
         Value storeValue = onlyStore.getValue();
-        for (User user : alloca.getUsers()) {
-            if (user instanceof Load li) {
-                if (onlyStore.getParent() != li.getParent() && onlyBlock.isDominator(li.getParent())) {
-                    li.replaceAllUsesWith(storeValue);
-                    li.removeAllOperators();
-                    li.eraseFromParent();
+        ArrayList<User> users = alloca.getUsers();
+        for (User user : users) {
+            if (user instanceof Store si) {
+                if (!si.equals(onlyStore)) {
+                    throw new AssertionError("ai has store user different from onlyStore in dealOnlyStore");
+                }
+            } else {
+                Load load = (Load) user;
+                // 如果 store 所在的块是 load 的支配者，那么就将用到 load 读入值的地方换成 store
+                if (onlyStore.getParent() != load.getParent() && onlyStore.getParent().isDominator(load.getParent())) {
+                    load.replaceAllUsesWith(storeValue);
+                    load.removeAllOperators();
+                    load.eraseFromParent();
                 } else {
-                    usingBlocks.add(li.getParent());
+                    usingBlocks.add(load.getParent());
                 }
             }
         }
@@ -159,7 +166,8 @@ public class Mem2reg implements Pass {
 
     private void dealOnlyBlock(Alloca alloca) {
         boolean encounterStore = false;
-        for (Instruction inst : onlyBlock.getInstructions()) {
+        LinkedList<Instruction> insts = onlyBlock.getInstructions();
+        for (Instruction inst : insts) {
             // 在该 Load 指令之前，没有 Store 指令；
             if (inst instanceof Load && inst.getOperator(0) == alloca) {
                 inst.replaceAllUsesWith(ConstInt.ZERO);
@@ -267,7 +275,7 @@ public class Mem2reg implements Pass {
                 }
                 if (!visitMap.get(successor)) {
                     blockStack.push(successor);
-                    mapStack.push(variableVersion);
+                    mapStack.push(new HashMap<>(variableVersion));
                 }
             }
             visitMap.put(curBlock, true);
@@ -276,7 +284,7 @@ public class Mem2reg implements Pass {
 
     private void sweepBlock(BasicBlock entry, BasicBlock block) {
         HashMap<Alloca, Store> alloca2store = new HashMap<>();
-        LinkedList<Instruction> insts = new LinkedList<>(block.getInstructions());
+        LinkedList<Instruction> insts = block.getInstructions();
         for (Instruction inst : insts) {
             // 如果当前指令是 store 指令，而且地址是 alloca 分配的，那么就存到 alloca2store 中
             if (inst instanceof Store si && si.getAddr() instanceof Alloca ai) {
@@ -299,7 +307,7 @@ public class Mem2reg implements Pass {
         }
         // 清空对应关系
         alloca2store.clear();
-        insts = new LinkedList<>(block.getInstructions());
+        insts = block.getInstructions();
         for (int i = insts.size() - 1; i >= 0; i--) {
             Instruction inst = insts.get(i);
             // 如果是 store 指令

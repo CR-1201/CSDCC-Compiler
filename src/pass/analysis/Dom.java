@@ -61,6 +61,7 @@ public class Dom implements Pass {
         BasicBlock entry = function.getFirstBlock();
         ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
         ArrayList<BitSet> domers = new ArrayList<>();
+        int size = blocks.size();
         // 先建立图的逆后序
         /**
          * 为什么要使用逆后序：
@@ -68,19 +69,24 @@ public class Dom implements Pass {
          * 否则还要放到下次迭代来进行值的更新，这要会增加一次迭代过程。
          */
         rpos = computeReversePostOrder(entry);
-        for (int i = 0; i < rpos.size(); i++) {
+        for (int i = 0; i < size; i++) {
             domers.add(new BitSet());
             domers.get(i).set(0);
+//            if (i == 0) {
+//                domers.get(i).set(0);
+//            } else {
+//                domers.get(i).set(0, rpos.size());
+//            }
         }
         boolean flag = true;
         while (flag) {
             flag = false;
             for (BasicBlock rpo : rpos) {
-                if (rpo.equals(entry)) {
+                if (rpo == entry) {
                     continue;
                 }
                 BitSet temp = new BitSet();
-                temp.set(0, rpos.size());
+                temp.set(0, size);
                 for (BasicBlock prec : rpo.getPrecursors()) {
                     int precIdx = rpos.indexOf(prec);
                     temp.and(domers.get(precIdx));

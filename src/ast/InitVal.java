@@ -59,11 +59,14 @@ public class InitVal extends Node{
                 canCalValueDown = true;
                 exp.buildIrTree();
                 canCalValueDown = false;
+
             } else {
                 // 在进行局部变量初始化,没法确定初始值是否可以直接求值,所以用一个 value 代替
                 paramNotNeedLoadDown = false;
                 exp.buildIrTree();
+//                System.out.println(valueUp.getValueType() instanceof FloatType);
             }
+            valueUp = getTemp();
         } else {
             // 在进行数组初始化
             ArrayList<Value> flattenArray = new ArrayList<>();
@@ -125,9 +128,9 @@ public class InitVal extends Node{
     private Value getTemp() {
         Value temp = valueUp;
         // 用整数初始化浮点数
-        if( constant instanceof ConstFloat && valueUp.getValueType() instanceof IntType) {
+        if( constant instanceof ConstFloat && valueUp instanceof ConstInt) {
             temp = new ConstFloat((float)((ConstInt)valueUp).getValue());
-        } else if (constant instanceof ConstInt && valueUp.getValueType() instanceof FloatType) {
+        } else if (constant instanceof ConstInt && valueUp instanceof ConstFloat) {
             // 虽然说明了不会出现这种情况
             temp = new ConstInt((int)((ConstFloat)valueUp).getValue());
         }

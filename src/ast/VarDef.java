@@ -5,10 +5,7 @@ import ir.Value;
 import ir.constants.*;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
-import ir.types.ArrayType;
-import ir.types.DataType;
-import ir.types.FloatType;
-import ir.types.IntType;
+import ir.types.*;
 import token.Token;
 
 import java.util.ArrayList;
@@ -88,7 +85,13 @@ public class VarDef extends Node{
             if (initVal != null) {
                 // "当不含有 '=' 和初始值时,其运行时实际初值未定义"
                 initVal.buildIrTree();
-                builder.buildStore(curBlock, valueUp, alloca);
+                Value source = valueUp;
+                if( ((PointerType) alloca.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
+                    source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
+                } else if( ((PointerType) alloca.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){
+                    source = builder.buildConversion(curBlock,"sitofp",new FloatType(), source);
+                }
+                builder.buildStore(curBlock, source, alloca);
             }
         }
     }
@@ -149,13 +152,17 @@ public class VarDef extends Node{
 
                 // 利用 store 往内存中存值
                 for (int i = 0; i < valueArrayUp.size(); i++){
-                    if (i == 0){
-                        builder.buildStore(curBlock,valueArrayUp.get(i), basePtr);
-                    }else{
-                        // 这里利用的是一维的 GEP,此时的返回值依然是 int*; 变长索引,依次赋值,其实可以不用 if-else
-                        GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
-                        builder.buildStore(curBlock, valueArrayUp.get(i), curPtr);
+
+                    Value source = valueArrayUp.get(i);
+                    GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
+
+                    if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
+                        source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
+                    } else if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){
+                        source = builder.buildConversion(curBlock,"sitofp",new FloatType(), source);
                     }
+
+                    builder.buildStore(curBlock, source, curPtr);
                 }
             }
 

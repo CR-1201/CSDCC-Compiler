@@ -1,7 +1,11 @@
 package ir.instructions.memoryInstructions;
 
+import com.sun.jdi.IntegerType;
 import ir.BasicBlock;
 import ir.Value;
+import ir.types.FloatType;
+import ir.types.IntType;
+import ir.types.PointerType;
 import ir.types.VoidType;
 
 import java.util.ArrayList;

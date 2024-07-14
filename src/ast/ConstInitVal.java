@@ -46,9 +46,9 @@ public class ConstInitVal extends Node{
     private Value getTemp() {
         Value temp = valueUp;
         // 用整数初始化浮点数
-        if( constant instanceof ConstFloat && valueUp.getValueType() instanceof IntType) {
+        if( constant instanceof ConstFloat && valueUp instanceof ConstInt) {
             temp = new ConstFloat((float)((ConstInt)valueUp).getValue());
-        } else if (constant instanceof ConstInt && valueUp.getValueType() instanceof FloatType) {
+        } else if (constant instanceof ConstInt && valueUp instanceof ConstFloat) {
             // 虽然说明了不会出现这种情况
             temp = new ConstInt((int)((ConstFloat)valueUp).getValue());
         }
@@ -60,6 +60,7 @@ public class ConstInitVal extends Node{
         // 单变量
         if(constExp != null){
             constExp.buildIrTree();
+            valueUp = getTemp();
         } else { // 数组
             int sum_dims = 1;
             for (int dim : dims) {

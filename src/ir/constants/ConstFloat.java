@@ -22,7 +22,6 @@ public class ConstFloat extends Constant{
 
     @Override
     public String getName(){
-
         return String.format("0x%x", Double.doubleToRawLongBits(value));
     }
 }

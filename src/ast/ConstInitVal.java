@@ -5,6 +5,8 @@ import ir.constants.ConstArray;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.constants.Constant;
+import ir.types.FloatType;
+import ir.types.IntType;
 import token.Token;
 
 import java.util.ArrayList;
@@ -41,6 +43,18 @@ public class ConstInitVal extends Node{
         return constExp;
     }
 
+    private Value getTemp() {
+        Value temp = valueUp;
+        // 用整数初始化浮点数
+        if( constant instanceof ConstFloat && valueUp.getValueType() instanceof IntType) {
+            temp = new ConstFloat((float)((ConstInt)valueUp).getValue());
+        } else if (constant instanceof ConstInt && valueUp.getValueType() instanceof FloatType) {
+            // 虽然说明了不会出现这种情况
+            temp = new ConstInt((int)((ConstFloat)valueUp).getValue());
+        }
+        return temp;
+    }
+
     @Override
     public void buildIrTree() {
         // 单变量
@@ -59,7 +73,8 @@ public class ConstInitVal extends Node{
                     // 一维数组
                     for (ConstInitVal constInitVal : constInitVals){
                         constInitVal.buildIrTree();
-                        flattenArray.add(valueUp);
+                        Value temp = getTemp();
+                        flattenArray.add(temp);
                     }
                     // 不全 补0即可
                     for(int i = constInitVals.size() ; i < dims.get(0) ; i++ ){
@@ -74,7 +89,8 @@ public class ConstInitVal extends Node{
                         }
                         constInitVal.buildIrTree();
                         if( constInitVal.getConstExp() != null ){
-                            flattenArray.add(valueUp);
+                            Value temp = getTemp();
+                            flattenArray.add(temp);
                         } else {
                             flattenArray.addAll(valueArrayUp);
                         }
@@ -91,12 +107,14 @@ public class ConstInitVal extends Node{
                 if( dims.size()  == 1 ){
                     for (ConstInitVal constInitVal : constInitVals){
                         constInitVal.buildIrTree();
-                        flattenArray.add(valueUp);
+                        Value temp = getTemp();
+                        flattenArray.add(temp);
                     }
                     // 不全 补0即可
                     for(int i = constInitVals.size() ; i < dims.get(0) ; i++ ){
                         flattenArray.add(constant);
                     }
+
                 } else { // 多维数组
                     for (ConstInitVal constInitVal : constInitVals){
                         if( constInitVal.getConstExp() == null ) {
@@ -105,7 +123,8 @@ public class ConstInitVal extends Node{
                         constInitVal.buildIrTree();
 
                         if( constInitVal.getConstExp() != null ){
-                            flattenArray.add(valueUp);
+                            Value temp = getTemp();
+                            flattenArray.add(temp);
                         } else {
                             flattenArray.addAll(valueArrayUp);
                         }

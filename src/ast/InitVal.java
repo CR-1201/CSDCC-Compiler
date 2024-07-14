@@ -4,6 +4,8 @@ import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.constants.Constant;
+import ir.types.FloatType;
+import ir.types.IntType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,16 +76,17 @@ public class InitVal extends Node{
 
             if (dims.size() == 1) {  // 一维数组
                 for (InitVal initVal : initVals) {
+                    initVal.setConstant(constant);
                     // 全局变量数组初始化,这里的值一定是可以被计算出来的
                     if (globalInitDown) {
                         canCalValueDown = true;
                         initVal.buildIrTree();
                         canCalValueDown = false;
-                        flattenArray.add(valueUp);
                     } else {
                         initVal.buildIrTree();
-                        flattenArray.add(valueUp);
                     }
+                    Value temp = getTemp();
+                    flattenArray.add(temp);
                 }
                 // 不全 补0即可
                 for(int i = initVals.size() ; i < dims.get(0) ; i++ ){
@@ -93,6 +96,7 @@ public class InitVal extends Node{
             } else { // 多维数组
                 // 此时在遍历每个一维数组
                 for (InitVal initVal : initVals) {
+                    initVal.setConstant(constant);
 //                    initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
                     if( initVal.getExp() == null ){
                         // 如果当前初值包含括号,先减少一维
@@ -116,6 +120,18 @@ public class InitVal extends Node{
 
         }
 
+    }
+
+    private Value getTemp() {
+        Value temp = valueUp;
+        // 用整数初始化浮点数
+        if( constant instanceof ConstFloat && valueUp.getValueType() instanceof IntType) {
+            temp = new ConstFloat((float)((ConstInt)valueUp).getValue());
+        } else if (constant instanceof ConstInt && valueUp.getValueType() instanceof FloatType) {
+            // 虽然说明了不会出现这种情况
+            temp = new ConstInt((int)((ConstFloat)valueUp).getValue());
+        }
+        return temp;
     }
 
 

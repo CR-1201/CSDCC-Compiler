@@ -10,12 +10,12 @@ import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Phi;
 import ir.types.DataType;
 import pass.Pass;
-import utils.IOFunc;
 
 import java.util.*;
 
 public class Mem2reg implements Pass {
     private final Module module = Module.getModule();
+    // 可以提升的 alloca 指令
     private ArrayList<Alloca> promotableAllocaInsts = new ArrayList<>();
     // 当前分析的 alloca 唯一一个 store 指令
     private Store onlyStore;
@@ -25,16 +25,17 @@ public class Mem2reg implements Pass {
     private final HashSet<BasicBlock> usingBlocks = new HashSet<>();
     // 对于特定的 alloca 指令，其 store 所在的块
     private final HashSet<BasicBlock> definingBlocks = new HashSet<>();
+    // Phi 指令对应指向的 Alloca 指令
     private final HashMap<Phi, Alloca> phi2Alloca = new HashMap<>();
 
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
-                handleMem2Reg(function);
+                dealMem2Reg(function);
             }
         }
     }
-    private void handleMem2Reg(Function function) {
+    private void dealMem2Reg(Function function) {
         BasicBlock entry = function.getFirstBlock();
         // 在中端ir生成时，就将所有的alloca指令全部放在了entry基本块中
         for (Instruction inst : entry.getInstructions()) {
@@ -82,17 +83,13 @@ public class Mem2reg implements Pass {
             }
             // 所有 definingBlocks 的递归支配边界（递归边界的闭包）都是需要插入 phi 节点的
             HashSet<BasicBlock> phiBlocks = computeIDF(definingBlocks);
-//            System.out.println(phiBlocks);
             // 去掉不需要插入的节点
             phiBlocks.removeIf(block -> !isPhiAlive(alloca, block));
-//            System.out.println(phiBlocks);
             // 插入 Phi 节点
             for (BasicBlock phiBlock : phiBlocks) {
                 Phi phi = IrBuilder.getIrBuilder().buildPhi((DataType) alloca.getAllocatedType(), phiBlock);
                 phi2Alloca.put(phi, alloca);
             }
-//            System.out.println(phiBlocks);
-//            System.out.println(phi2Alloca);
         }
         if (promotableAllocaInsts.isEmpty()) {
             return;
@@ -132,7 +129,7 @@ public class Mem2reg implements Pass {
     }
 
     /**
-     * 只有一个 store 的情况
+     * 处理只有一个 store 的情况
      * @param alloca
      */
     private Boolean dealOnlyStore(Alloca alloca) {
@@ -140,19 +137,14 @@ public class Mem2reg implements Pass {
         ArrayList<User> users = alloca.getUsers();
         for (int i = 0; i < users.size(); i++) {
             User user = users.get(i);
-            if (user instanceof Store si) {
-                if (!si.equals(onlyStore)) {
-                    throw new AssertionError("ai has store user different from onlyStore in dealOnlyStore");
-                }
-            } else {
-                Load load = (Load) user;
+            if (user instanceof Load li) {
                 // 如果 store 所在的块是 load 的支配者，那么就将用到 load 读入值的地方换成 store
-                if (onlyStore.getParent() != load.getParent() && onlyStore.getParent().isDominator(load.getParent())) {
-                    load.replaceAllUsesWith(storeValue);
-                    load.removeAllOperators();
-                    load.eraseFromParent();
+                if (onlyStore.getParent() != li.getParent() && onlyStore.getParent().isDominator(li.getParent())) {
+                    li.replaceAllUsesWith(storeValue);
+                    li.removeAllOperators();
+                    li.eraseFromParent();
                 } else {
-                    usingBlocks.add(load.getParent());
+                    usingBlocks.add(li.getParent());
                 }
             }
         }
@@ -242,7 +234,6 @@ public class Mem2reg implements Pass {
             int i = 0;
             ArrayList<Instruction> insts = curBlock.getInstructionsArray();
             while (insts.get(i) instanceof Phi phi) {
-//                System.out.println(phi2Alloca.get(phi) + " xxxxx " + phi);
                 variableVersion.put(phi2Alloca.get(phi), phi);
                 i++;
             }
@@ -250,15 +241,12 @@ public class Mem2reg implements Pass {
                 Instruction inst = insts.get(i);
                 if (inst instanceof Load li) {
                     if (li.getAddr() instanceof Alloca ai) {
-//                        System.out.println(variableVersion);
                         inst.replaceAllUsesWith(variableVersion.get(ai));
-//                        System.out.println(variableVersion.get(ai));
                         inst.removeAllOperators();
                         inst.eraseFromParent();
                     }
                 } else if (inst instanceof Store si) {
                     if (si.getAddr() instanceof Alloca ai) {
-//                        System.out.println(ai + " xxxx " + si.getValue());
                         variableVersion.put(ai, si.getValue());
                         inst.removeAllOperators();
                         inst.eraseFromParent();
@@ -293,28 +281,27 @@ public class Mem2reg implements Pass {
             } else if (inst instanceof Load li && li.getAddr() instanceof Alloca ai) {
                 // 如果当前指令是 load，而且地址是 alloca
                 Store store = alloca2store.get(ai);
-                // 对应的是没有赋初值就 load 的情况，不用考虑这种特殊情况
+                // 没有赋初值就 load 的情况，直接删除
                 if (store == null && block == entry) {
                     inst.replaceAllUsesWith(ConstInt.ZERO);
                     inst.removeAllOperators();
                     inst.eraseFromParent();
                 } else if (store != null) {
-                    // 这里首先用 store 的要存入的值代替了 load 要读入的值
+                    // 用 store 的要存入的值代替 load 要读入的值
                     inst.replaceAllUsesWith(store.getValue());
                     inst.removeAllOperators();
                     inst.eraseFromParent();
                 }
             }
         }
-        // 清空对应关系
         alloca2store.clear();
         insts = block.getInstructionsArray();
         for (int i = insts.size() - 1; i >= 0; i--) {
             Instruction inst = insts.get(i);
-            // 如果是 store 指令
+            // 如果是 store 指令 并且 store 的地址是 alloca 出来的
             if (inst instanceof Store si && si.getAddr() instanceof Alloca ai) {
                 Store store = alloca2store.get(ai);
-                // 这不是最后一条对于 alloca 这个内存的写，那么就删除
+                // 不是最后一条对于 alloca 这个地址的写，那么就删除
                 if (store != null) {
                     inst.removeAllOperators();
                     inst.eraseFromParent();

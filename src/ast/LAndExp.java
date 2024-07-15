@@ -39,8 +39,14 @@ public class LAndExp extends Node{
 
     @Override
     public void buildIrTree() {
-        BasicBlock nextBlock = builder.buildBasicBlock(curFunc);
-        i32InRelUp = true;
+        if( lAndExp != null ){
+            BasicBlock nextBlock = builder.buildBasicBlock(curFunc);
+            lAndExp.setTrueBlock(nextBlock);
+            lAndExp.setFalseBlock(falseBlock);
+            lAndExp.buildIrTree();
+
+            curBlock = nextBlock;
+        }
         eqExp.buildIrTree();
         if (i32InRelUp) { // 在这里,将某个为 I32 的 eqExp 变成 I1
             i32InRelUp = false;
@@ -50,16 +56,7 @@ public class LAndExp extends Node{
 
         }
         // 错了就直接进入 falseBlock
-        builder.buildBr(curBlock, valueUp, nextBlock, falseBlock);
-        curBlock = nextBlock;
-
-        if( lAndExp == null ){
-            builder.buildBr(curBlock, trueBlock);
-        } else {
-            lAndExp.setTrueBlock(trueBlock);
-            lAndExp.setFalseBlock(falseBlock);
-            lAndExp.buildIrTree();
-        }
+        builder.buildBr(curBlock, valueUp, trueBlock, falseBlock);
     }
 
     @Override

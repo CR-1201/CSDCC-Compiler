@@ -45,20 +45,15 @@ public class LOrExp extends Node{
     @Override
     public void buildIrTree() {
         if( lOrExp != null ){
-            lAndExp.setTrueBlock(trueBlock);
-            BasicBlock nextBlock = builder.buildBasicBlock(curFunc);
-            lAndExp.setFalseBlock(nextBlock);
-            lAndExp.buildIrTree();
-            curBlock = nextBlock;
-
             lOrExp.setTrueBlock(trueBlock);
-            lOrExp.setFalseBlock(falseBlock);
+            BasicBlock nextBlock = builder.buildBasicBlock(curFunc);
+            lOrExp.setFalseBlock(nextBlock);
             lOrExp.buildIrTree();
-        } else {
-            lAndExp.setTrueBlock(trueBlock);
-            lAndExp.setFalseBlock(falseBlock);
-            lAndExp.buildIrTree();
+            curBlock = nextBlock;
         }
+        lAndExp.setTrueBlock(trueBlock);
+        lAndExp.setFalseBlock(falseBlock);
+        lAndExp.buildIrTree();
     }
 
     @Override

@@ -25,17 +25,20 @@ public class EqExp extends Node{
 
     @Override
     public void buildIrTree() {
-        relExp.buildIrTree();
-        Value result =  valueUp;
-
+        Value adder = null;Value result;
         if( eqExp != null ){
             i32InRelUp = false;
             eqExp.buildIrTree();
-            Value adder = valueUp;
-            // 如果类型不对，需要先换类型
-            if (result.getValueType().isI1()) {
-                result = builder.buildZext( curBlock, result);
-            }
+            adder = valueUp;
+        }
+        relExp.buildIrTree();
+        result =  valueUp;
+        // 如果类型不对，需要先换类型
+        if (result.getValueType().isI1()) {
+            result = builder.buildZext( curBlock, result);
+        }
+
+        if( adder != null ){
             if (adder.getValueType().isI1()) {
                 adder = builder.buildZext( curBlock, adder);
             }

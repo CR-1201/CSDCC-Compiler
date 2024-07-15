@@ -32,14 +32,15 @@ public class RelExp extends Node{
             i32InRelUp = false;
             relExp.buildIrTree();
             adder = valueUp;
-            // 如果类型不对，需要先换类型
         }
         addExp.buildIrTree();
         result = valueUp;
-        if( result.getValueType().isI1() ){
-            result = builder.buildZext(curBlock, result);
-        }
+
         if( adder != null ){
+            // 如果类型不对，需要先换类型
+            if( result.getValueType().isI1() ){
+                result = builder.buildZext(curBlock, result);
+            }
             if( adder.getValueType().isI1() ){
                 adder = builder.buildZext(curBlock, adder);
             }

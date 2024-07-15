@@ -44,7 +44,6 @@ public class LAndExp extends Node{
             lAndExp.setTrueBlock(nextBlock);
             lAndExp.setFalseBlock(falseBlock);
             lAndExp.buildIrTree();
-
             curBlock = nextBlock;
         }
         i32InRelUp = true;
@@ -54,7 +53,6 @@ public class LAndExp extends Node{
             if( valueUp.getValueType() instanceof FloatType ){
                 valueUp = builder.buildIcmp(curBlock, Icmp.Condition.NE, valueUp, ConstFloat.ZERO);
             } else valueUp = builder.buildIcmp(curBlock, Icmp.Condition.NE, valueUp, ConstInt.ZERO);
-
         }
         // 错了就直接进入 falseBlock
         builder.buildBr(curBlock, valueUp, trueBlock, falseBlock);

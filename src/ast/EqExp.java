@@ -32,13 +32,13 @@ public class EqExp extends Node{
             adder = valueUp;
         }
         relExp.buildIrTree();
-        result =  valueUp;
-        // 如果类型不对，需要先换类型
-        if (result.getValueType().isI1()) {
-            result = builder.buildZext( curBlock, result);
-        }
+        result = valueUp;
 
         if( adder != null ){
+            // 如果类型不对，需要先换类型
+            if (result.getValueType().isI1()) {
+                result = builder.buildZext( curBlock, result);
+            }
             if (adder.getValueType().isI1()) {
                 adder = builder.buildZext( curBlock, adder);
             }

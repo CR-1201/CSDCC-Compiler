@@ -94,7 +94,9 @@ public class MulExp extends Node{
                 // 如果是 boolean 无脑转int 32; 如果mul和multer当中有且仅有一个float, 那么另外一个就需要进行类型转化
                 if (multer.getValueType().isI1()){
                     multer = builder.buildZext(curBlock, multer);
-                } else if( multer.getValueType().isFloat() && !mul.getValueType().isFloat() ){
+                }
+
+                if( multer.getValueType().isFloat() && !mul.getValueType().isFloat() ){
                     mul = builder.buildConversion(curBlock,"sitofp",new FloatType(), mul);
                     dataType = new FloatType();
                 }
@@ -114,8 +116,8 @@ public class MulExp extends Node{
                     mul = builder.buildSdiv(curBlock, dataType, multer, mul);
                 } else if( op.getType() == Token.TokenType.MOD ){
                     // x % y = x - ( x / y ) * y,这是因为取模优化不太好做
-                    if( multer instanceof ConstInt ){
-                        int num = ((ConstInt) multer).getValue();
+                    if( mul instanceof ConstInt ){
+                        int num = ((ConstInt) mul).getValue();
                         if (Math.abs(num) == 1){
                             // 如果绝对值是 1,那么就翻译成 MOD,这就交给后端优化了
                             mul = builder.buildSrem(curBlock, dataType, multer, mul);
@@ -132,7 +134,6 @@ public class MulExp extends Node{
                         Mul b = builder.buildMul(curBlock, dataType, a, mul);
                         mul = builder.buildSub(curBlock,dataType, multer, b);
                     }
-
 //                    mul = builder.buildSrem(curBlock, dataType, mul, multer);
                 }
 

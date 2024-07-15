@@ -57,6 +57,7 @@ public class AddExp extends Node{
                 if( mul.getValueType().isFloat() || add.getValueType().isFloat() ){
                     float_flag = true;
                 }
+
                 if(!mul.getValueType().isFloat()){
                     f_mul = ((ConstInt)mul).getValue();
                     i_mul = ((ConstInt)mul).getValue();
@@ -64,6 +65,7 @@ public class AddExp extends Node{
                     f_mul = ((ConstFloat)mul).getValue();
                     i_mul = (int)(((ConstFloat)mul).getValue());
                 }
+
                 if(!add.getValueType().isFloat()){
                     f_add = ((ConstInt)add).getValue();
                     i_add = ((ConstInt)add).getValue();

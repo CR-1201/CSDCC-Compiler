@@ -155,9 +155,7 @@ public class VarDef extends Node{
 
                     Value source = valueArrayUp.get(i);
 
-                    if( source instanceof ConstStr){
-                        continue;
-                    }
+//                    if( source instanceof ConstStr) continue;
 
                     GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
                     if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){

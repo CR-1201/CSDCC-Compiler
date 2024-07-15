@@ -126,7 +126,7 @@ public class VarDef extends Node{
                     globalInitDown = true;
                     initVal.buildIrTree();
                     globalInitDown = false;
-                    genGlobalInitArray(valueArrayUp);
+                    genGlobalInitArray(valueArrayUp,arrayType);
                 }
             } else { // 全局无初始值的数组,那么就初始化为 0
                 ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
@@ -176,8 +176,25 @@ public class VarDef extends Node{
      * 可以根据展平的初始化数组和 dims 来生成一个合乎常理的全局变量
      * @param flattenArray 展平数组
      */
-    private void genGlobalInitArray(ArrayList<Value> flattenArray) {
+    private void genGlobalInitArray(ArrayList<Value> flattenArray,ArrayType arrayType) {
 //        System.out.println(flattenArray);
+        boolean flag = true;
+
+        for (Value value : flattenArray) {
+            if (!((value instanceof ConstInt && value.equals(new ConstInt(0))) ||
+                    (value instanceof ConstFloat && value.equals(new ConstFloat(0))))) {
+                flag = false;
+                break;
+            }
+        }
+
+        if( flag ){
+            ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
+            GlobalVariable globalVariable = builder.buildGlobalVariable(identToken.getContent(), zeroInitializer, false);
+            irSymbolTable.addValue(identToken.getContent(), globalVariable);
+            return;
+        }
+
         if (dims.size() == 1) { // 一维数组,将 flattenArray 转变后加入即可
             ArrayList<Constant> constArray = new ArrayList<>();
             for (Value value : flattenArray) {

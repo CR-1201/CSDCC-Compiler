@@ -70,17 +70,16 @@ public class InitVal extends Node{
         } else {
             // 在进行数组初始化
             ArrayList<Value> flattenArray = new ArrayList<>();
-
+            int curNum = 0;
             int sum_dims = 1;
             for (int dim : dims) {
                 sum_dims *= dim;
             }
-//            System.out.println("sum_dims: " + sum_dims);
 
-            if (dims.size() == 1) {  // 一维数组
-                for (InitVal initVal : initVals) {
-                    initVal.setConstant(constant);
-                    // 全局变量数组初始化,这里的值一定是可以被计算出来的
+            for( InitVal initVal : initVals ){
+                initVal.setConstant(constant);
+                if( initVal.getExp() != null ){
+                    curNum++;
                     if (globalInitDown) {
                         canCalValueDown = true;
                         initVal.buildIrTree();
@@ -90,49 +89,45 @@ public class InitVal extends Node{
                     }
                     Value temp = getTemp();
                     flattenArray.add(temp);
-                }
-                System.out.println(initVals.size());
-                System.out.println(dims.get(0));
-                // 不全 补0即可
-                for(int i = initVals.size() ; i < dims.get(0) ; i++ ){
-                    flattenArray.add(constant);
-                }
-
-            } else { // 多维数组
-                // 此时在遍历每个一维数组
-                for (InitVal initVal : initVals) {
-                    initVal.setConstant(constant);
-//                    initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
-                    if( initVal.getExp() == null ){
-                        // 如果当前初值包含括号,先减少一维
-                        initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
-                    }
+                } else {
+                    ArrayList<Integer> newDims = getIntegers(curNum);
+                    initVal.setDims(newDims);
                     initVal.buildIrTree();
-                    if( initVal.getExp() != null ){
-                        Value temp = getTemp();
-                        flattenArray.add(temp);
-                    } else {
-                        flattenArray.addAll(valueArrayUp);
-                    }
-
-//                    System.out.println(flattenArray);
+                    flattenArray.addAll(valueArrayUp);
+                    curNum += valueArrayUp.size();
                 }
             }
-//            System.out.println(flattenArray);
 
-            int x = flattenArray.size();
-
-//            System.out.println(sum_dims);
-
-            for( int i = x ; i < sum_dims; i++ ){
+            //  填充元素
+            for(int i = curNum; i < sum_dims; i++ ){
                 flattenArray.add(constant);
             }
 
-//            System.out.println(flattenArray);
-
+            System.out.println(flattenArray);
             valueArrayUp = flattenArray; // 返回
         }
 
+    }
+
+    private ArrayList<Integer> getIntegers(int curNum) {
+        ArrayList<Integer> newDims = new ArrayList<>();
+        int start = 0;
+        if(curNum == 0){
+            start = 1;
+        } else {
+            int tmpMul = 1;
+            for(int i = dims.size() - 1; i >= 0; i--){
+                tmpMul *= dims.get(i);
+                if(curNum % tmpMul != 0){
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        for(int i = start; i < dims.size(); i++){
+            newDims.add(dims.get(i));
+        }
+        return newDims;
     }
 
     private Value getTemp() {

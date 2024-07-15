@@ -22,11 +22,11 @@ public class GlobalVariable extends User{
 
     // 初始化 Constant
     public Constant getInitVal(){
-        return (Constant) getValue(0);
+        return (Constant) getOperator(0);
     }
 
     @Override
     public String toString(){
-        return getName() + " = dso_local " + ((isConst) ? "constant " : "global ") + ((PointerType) getValueType()).getPointeeType() + " " + getValue(0);
+        return getName() + " = dso_local " + ((isConst) ? "constant " : "global ") + ((PointerType) getValueType()).getPointeeType() + " " + getOperator(0);
     }
 }

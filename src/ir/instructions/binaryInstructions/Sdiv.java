@@ -23,6 +23,6 @@ public class Sdiv extends BinaryInstruction {
 
     @Override
     public String toString(){
-        return getName() + " = "+ ((getValueType() instanceof FloatType) ? "f" : "s") +  "div " + getValueType() + " " + getValue(0).getName() + ", " + getValue(1).getName();
+        return getName() + " = "+ ((getValueType() instanceof FloatType) ? "f" : "s") +  "div " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();
     }
 }

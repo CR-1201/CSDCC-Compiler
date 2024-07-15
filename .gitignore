@@ -5,6 +5,7 @@
 testfile.txt
 output.txt
 llvm_ir.txt
+llvm_ir_optimize.txt
 error.txt
 tests/ir
 tests/ir_std

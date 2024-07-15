@@ -61,8 +61,8 @@ public class Icmp extends BinaryInstruction {
 
     @Override
     public String toString(){
-        boolean flag = (getValue(0).getValueType() instanceof FloatType);
+        boolean flag = (getOperator(0).getValueType() instanceof FloatType);
         return getName() + " = "+ ( flag ? "f" : "i") +  "cmp " + getConditionString(flag,condition) + " " +
-                getValue(0).getValueType() + " " + getValue(0).getName() + ", " + getValue(1).getName();
+                getOperator(0).getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();
     }
 }

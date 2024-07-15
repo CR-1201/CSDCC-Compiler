@@ -13,7 +13,7 @@ import java.util.HashSet;
  * CFG: 控制流图，是每一个函数内部的，每一个函数内都有一个CFG
  */
 public class CFG implements Pass {
-    private Module module = Module.getModule();
+    private final Module module = Module.getModule();
     // 用来记录在dfs建立CFG时，标记访问过的基本块
     private HashSet<BasicBlock> visited = new HashSet<>();
     public void run() {

@@ -44,5 +44,7 @@ public class Compiler {
         // pass
         PassManager passManager = new PassManager();
         passManager.run();
+        IOFunc.clear(Config.irOptimizeOutputPath);
+        IOFunc.output(Module.getModule().toString(), Config.irOptimizeOutputPath);
     }
 }

@@ -27,15 +27,15 @@ public class Conversion extends Instruction {
     }
 
     public Value getConversionValue(){
-        return getValue(0);
+        return getOperator(0);
     }
 
     @Override
     public String toString(){
         if(this.type.equals("fptosi")){
-            return this.getName() + " = fptosi float " + getValue(0).getName() + " to i32";
+            return this.getName() + " = fptosi float " + getOperator(0).getName() + " to i32";
         } else {
-            return this.getName() + " = sitofp i32 " + getValue(0).getName() + " to float";
+            return this.getName() + " = sitofp i32 " + getOperator(0).getName() + " to float";
         }
     }
 }

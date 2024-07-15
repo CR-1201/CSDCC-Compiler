@@ -25,11 +25,11 @@ public abstract class BinaryInstruction extends Instruction {
     }
 
     public Value getOp1(){
-        return getValue(0);
+        return getOperator(0);
     }
 
     public Value getOp2(){
-        return getValue(1);
+        return getOperator(1);
     }
 
     //操作数 op1 和op2 是不是可交换的

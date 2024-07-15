@@ -37,7 +37,7 @@ public class Call extends Instruction {
 
     // 获得call指令被调用的函数
     public Function getFunction(){
-        return (Function) getValue(0);
+        return (Function) getOperator(0);
     }
 
     // 获得call指令传递给函数的参数,全部为具体的 value,不是形参
@@ -45,19 +45,19 @@ public class Call extends Instruction {
         ArrayList<Value> args = new ArrayList<>();
         int n = getFunction().getNumArgs();
         for (int i = 0; i < n; i++){
-            args.add(getValue(i + 1));
+            args.add(getOperator(i + 1));
         }
         return args;
     }
 
     @Override
     public String toString(){
-        Function function = (Function) getValue(0);
+        Function function = (Function) getOperator(0);
         boolean noReturn = getName().isEmpty();
         StringBuilder s = new StringBuilder(getName()).append(!noReturn ? " = call " : "call ").append(function.getReturnType()).append(' ').append(function.getName()).append('(');
         int num = function.getNumArgs();
         for (int i = 1; i <= num; i++) {
-            s.append(getValue(i).getValueType()).append(' ').append(getValue(i).getName()).append(", ");
+            s.append(getOperator(i).getValueType()).append(' ').append(getOperator(i).getName()).append(", ");
         }
         if (num > 0) {
             s.delete(s.length() - 2, s.length());

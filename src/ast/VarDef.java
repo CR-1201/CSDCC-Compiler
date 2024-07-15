@@ -154,8 +154,12 @@ public class VarDef extends Node{
                 for (int i = 0; i < valueArrayUp.size(); i++){
 
                     Value source = valueArrayUp.get(i);
-                    GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
 
+                    if( source instanceof ConstStr){
+                        continue;
+                    }
+
+                    GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
                     if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
                         source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
                     } else if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){

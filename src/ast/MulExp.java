@@ -63,14 +63,14 @@ public class MulExp extends Node{
                 }
 
                 if( op.getType() == Token.TokenType.MULT ){
-                    f_sum = f_unary * f_mul;
-                    i_sum = i_unary * i_mul;
+                    f_sum = f_mul * f_unary;
+                    i_sum = i_mul * i_unary;
                 } else if(op.getType() == Token.TokenType.DIV ){
-                    f_sum = f_unary / f_mul;
-                    i_sum = i_unary / i_mul;
+                    f_sum = f_mul / f_unary;
+                    i_sum = i_mul / i_unary;
                 } else if(op.getType() == Token.TokenType.MOD ){
-                    f_sum = f_unary % f_mul;
-                    i_sum = i_unary % i_mul;
+                    f_sum = f_mul % f_unary;
+                    i_sum = i_mul % i_unary;
                 }
 
                 if( float_flag ){
@@ -109,28 +109,28 @@ public class MulExp extends Node{
                 }
 
                 if ( op.getType() == Token.TokenType.MULT ){
-                    mul = builder.buildMul(curBlock, dataType, mul, multer);
+                    mul = builder.buildMul(curBlock, dataType, multer, mul);
                 } else if( op.getType() == Token.TokenType.DIV ){
-                    mul = builder.buildSdiv(curBlock, dataType, mul, multer);
+                    mul = builder.buildSdiv(curBlock, dataType, multer, mul);
                 } else if( op.getType() == Token.TokenType.MOD ){
                     // x % y = x - ( x / y ) * y,这是因为取模优化不太好做
                     if( multer instanceof ConstInt ){
                         int num = ((ConstInt) multer).getValue();
                         if (Math.abs(num) == 1){
                             // 如果绝对值是 1,那么就翻译成 MOD,这就交给后端优化了
-                            mul = builder.buildSrem(curBlock, dataType, mul, multer);
+                            mul = builder.buildSrem(curBlock, dataType, multer, mul);
                         } else if ((Math.abs(num) & (Math.abs(num) - 1)) == 0){
                             // 如果是 2 的幂次
-                            mul = builder.buildSrem(curBlock, dataType, mul, multer);
+                            mul = builder.buildSrem(curBlock, dataType, multer, mul);
                         } else {
-                            Sdiv a = builder.buildSdiv(curBlock, dataType, mul, multer);
-                            Mul b = builder.buildMul(curBlock, dataType, a, multer);
-                            mul = builder.buildSub(curBlock,dataType, mul, b);
+                            Sdiv a = builder.buildSdiv(curBlock, dataType, multer, mul);
+                            Mul b = builder.buildMul(curBlock, dataType, a, mul);
+                            mul = builder.buildSub(curBlock,dataType, multer, b);
                         }
                     } else {
-                        Sdiv a = builder.buildSdiv(curBlock, dataType, mul, multer);
-                        Mul b = builder.buildMul(curBlock, dataType, a, multer);
-                        mul = builder.buildSub(curBlock,dataType, mul, b);
+                        Sdiv a = builder.buildSdiv(curBlock, dataType, multer, mul);
+                        Mul b = builder.buildMul(curBlock, dataType, a, mul);
+                        mul = builder.buildSub(curBlock,dataType, multer, b);
                     }
 
 //                    mul = builder.buildSrem(curBlock, dataType, mul, multer);

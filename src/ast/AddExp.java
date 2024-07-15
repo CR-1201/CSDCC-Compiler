@@ -73,19 +73,17 @@ public class AddExp extends Node{
                 }
 
                 if( op.getType() == Token.TokenType.PLUS ){
-                    f_sum = f_mul + f_add;
-                    i_sum = i_mul + i_add;
+                    f_sum = f_add + f_mul;
+                    i_sum = i_add + i_mul;
                 } else if( op.getType() == Token.TokenType.MINU ){
-                    f_sum = f_mul - f_add;
-                    i_sum = i_mul - i_add;
+                    f_sum = f_add - f_mul;
+                    i_sum = i_add - i_mul;
                 }
 
                 if( float_flag ){
                     valueUp = new ConstFloat(f_sum);
                 } else valueUp = new ConstInt(i_sum);
             }
-
-
 
         } else {
             // 是不可直接计算的,要用表达式
@@ -118,9 +116,9 @@ public class AddExp extends Node{
                 }
 
                 if ( op.getType() == Token.TokenType.PLUS ){
-                    sum = builder.buildAdd(curBlock, dataType, sum, adder);
+                    sum = builder.buildAdd(curBlock, dataType, adder, sum);
                 } else if( op.getType() == Token.TokenType.MINU ){
-                    sum = builder.buildSub(curBlock, dataType, sum, adder);
+                    sum = builder.buildSub(curBlock, dataType, adder, sum);
                 }
             }
 

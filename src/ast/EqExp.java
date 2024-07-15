@@ -46,9 +46,9 @@ public class EqExp extends Node{
                 result = builder.buildConversion(curBlock,"sitofp",new FloatType(), result);
             }
             if( op.getType() == Token.TokenType.EQL ){
-                result = builder.buildIcmp( curBlock, Icmp.Condition.EQ, result, adder);
+                result = builder.buildIcmp( curBlock, Icmp.Condition.EQ, adder, result);
             } else if( op.getType() == Token.TokenType.NEQ ){
-                result = builder.buildIcmp( curBlock, Icmp.Condition.NE, result, adder);
+                result = builder.buildIcmp( curBlock, Icmp.Condition.NE, adder, result);
             }
         }
 

@@ -46,13 +46,13 @@ public class RelExp extends Node{
                 result = builder.buildConversion(curBlock,"sitofp",new FloatType(), result);
             }
             if( op.getType() == Token.TokenType.LEQ ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.LE, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.LE, adder, result);
             } else if( op.getType() == Token.TokenType.GEQ ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.GE, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.GE, adder, result);
             } else if( op.getType() == Token.TokenType.GRE ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.GT, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.GT, adder, result);
             } else if( op.getType() == Token.TokenType.LSS ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.LT, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.LT, adder, result);
             }
         }
         valueUp = result;

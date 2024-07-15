@@ -141,24 +141,26 @@ public class ParserAnalyze {
     private AddExp AddExp(){
         // AddExp → MulExp | AddExp ('+' | '−') MulExp
         MulExp mulExp = MulExp();
-        if( currentToken.getType() == Token.TokenType.PLUS || currentToken.getType() == Token.TokenType.MINU ){
-            Token addExpTK = null;
+        AddExp addExp = new AddExp(mulExp);;
+        Token addExpTK = null;
+        while( currentToken.getType() == Token.TokenType.PLUS || currentToken.getType() == Token.TokenType.MINU ){
             if( currentToken.getType() == Token.TokenType.PLUS ){
                 addExpTK = match(Token.TokenType.PLUS);
-            }else if( currentToken.getType() == Token.TokenType.MINU ){
+            } else if( currentToken.getType() == Token.TokenType.MINU ){
                 addExpTK = match(Token.TokenType.MINU);
             }
-            AddExp addExp = AddExp();
-            return new AddExp(mulExp,addExp,addExpTK);
-        } else return new AddExp(mulExp);
-
+            mulExp = MulExp();
+            addExp = new AddExp(mulExp,addExp,addExpTK);
+        }
+        return addExp;
     }
 
     private MulExp MulExp(){
         //  MulExp → UnaryExp | MulExp ('*' | '/' | '%') UnaryExp
         UnaryExp unaryExp = UnaryExp();
-        if(currentToken.getType() == Token.TokenType.MULT || currentToken.getType() == Token.TokenType.DIV || currentToken.getType() == Token.TokenType.MOD){
-            Token mulExpTK = null;
+        MulExp mulExp = new MulExp(unaryExp);
+        Token mulExpTK = null;
+        while(currentToken.getType() == Token.TokenType.MULT || currentToken.getType() == Token.TokenType.DIV || currentToken.getType() == Token.TokenType.MOD){
             if( currentToken.getType() == Token.TokenType.MULT ){
                 mulExpTK = match(Token.TokenType.MULT);
             }else if( currentToken.getType() == Token.TokenType.DIV ){
@@ -166,9 +168,10 @@ public class ParserAnalyze {
             }else if( currentToken.getType() == Token.TokenType.MOD ){
                 mulExpTK = match(Token.TokenType.MOD);
             }
-            MulExp mulExp = MulExp();
-            return new MulExp(mulExp,unaryExp,mulExpTK);
-        } else return new MulExp(unaryExp);
+            unaryExp = UnaryExp();
+            mulExp = new MulExp(mulExp,unaryExp,mulExpTK);
+        }
+        return mulExp;
     }
 
     private UnaryExp UnaryExp(){
@@ -261,44 +264,53 @@ public class ParserAnalyze {
     private LOrExp LOrExp(){
         // LOrExp → LAndExp | LOrExp '||' LAndExp
         LAndExp lAndExp = LAndExp();
-        if( currentToken.getType() == Token.TokenType.OR ){
-            Token lOrExpTK = match(Token.TokenType.OR);
-            LOrExp lOrExp = LOrExp();
-            return new LOrExp(lOrExp,lAndExp,lOrExpTK);
-        } else return new LOrExp(lAndExp);
+        LOrExp lOrExp = new LOrExp(lAndExp);
+        Token lOrExpTK;
+        while( currentToken.getType() == Token.TokenType.OR ){
+            lOrExpTK = match(Token.TokenType.OR);
+            lAndExp = LAndExp();
+            lOrExp = new LOrExp(lOrExp,lAndExp,lOrExpTK);
+        }
+        return lOrExp;
     }
 
     private LAndExp LAndExp(){
         // LAndExp → EqExp | LAndExp '&&' EqExp
         EqExp eqExp = EqExp();
-        if( currentToken.getType() == Token.TokenType.AND ){
-            Token lAndExpTK = match(Token.TokenType.AND);
-            LAndExp lAndExp = LAndExp();
-            return new LAndExp(lAndExp,eqExp,lAndExpTK);
-        } else return new LAndExp(eqExp);
+        LAndExp lAndExp = new LAndExp(eqExp);
+        Token lAndExpTK;
+        while( currentToken.getType() == Token.TokenType.AND ){
+            lAndExpTK = match(Token.TokenType.AND);
+            eqExp = EqExp();
+            lAndExp = new LAndExp(lAndExp,eqExp,lAndExpTK);
+        }
+        return lAndExp;
     }
 
     private EqExp EqExp(){
         // EqExp → RelExp | EqExp ('==' | '!=') RelExp
         RelExp relExp = RelExp();
-        if( currentToken.getType() == Token.TokenType.EQL || currentToken.getType() == Token.TokenType.NEQ ){
-            Token eqExpTK = null;
+        EqExp eqExp = new EqExp(relExp);
+        Token eqExpTK = null;
+        while( currentToken.getType() == Token.TokenType.EQL || currentToken.getType() == Token.TokenType.NEQ ){
             if( currentToken.getType() == Token.TokenType.EQL ){
                 eqExpTK = match(Token.TokenType.EQL);
             }else if( currentToken.getType() == Token.TokenType.NEQ ){
                 eqExpTK = match(Token.TokenType.NEQ);
             }
-            EqExp eqExp = EqExp();
-            return new EqExp(eqExp,relExp,eqExpTK);
-        } else return new EqExp(relExp);
+            relExp = RelExp();
+            eqExp = new EqExp(eqExp,relExp,eqExpTK);
+        }
+        return eqExp;
     }
 
     private RelExp RelExp(){
         // RelExp → AddExp | RelExp ('<' | '>' | '<=' | '>=') AddExp
         AddExp addExp = AddExp();
-        if( currentToken.getType() == Token.TokenType.LSS || currentToken.getType() == Token.TokenType.LEQ
+        RelExp relExp = new RelExp(addExp);
+        Token relExpTK = null;
+        while( currentToken.getType() == Token.TokenType.LSS || currentToken.getType() == Token.TokenType.LEQ
                 || currentToken.getType() == Token.TokenType.GRE || currentToken.getType() == Token.TokenType.GEQ ){
-            Token relExpTK = null;
             if( currentToken.getType() == Token.TokenType.LSS ){
                 relExpTK = match(Token.TokenType.LSS);
             }else if( currentToken.getType() == Token.TokenType.LEQ ){
@@ -308,9 +320,10 @@ public class ParserAnalyze {
             }else if( currentToken.getType() == Token.TokenType.GEQ ){
                 relExpTK = match(Token.TokenType.GEQ);
             }
-            RelExp relExp = RelExp();
-            return new RelExp(relExp,addExp,relExpTK);
-        } else return new RelExp(addExp);
+            addExp = AddExp();
+            relExp = new RelExp(relExp,addExp,relExpTK);
+        }
+        return relExp;
     }
 
     private PrimaryExp PrimaryExp(){

@@ -47,6 +47,7 @@ public class LAndExp extends Node{
 
             curBlock = nextBlock;
         }
+        i32InRelUp = true;
         eqExp.buildIrTree();
         if (i32InRelUp) { // 在这里,将某个为 I32 的 eqExp 变成 I1
             i32InRelUp = false;

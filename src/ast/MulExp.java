@@ -81,16 +81,22 @@ public class MulExp extends Node{
 
         } else { // 是不可直接计算的,要用表达式
             DataType dataType = new IntType(32);
+            Value mul; Value multer = null;
+
+            if( mulExp != null ){
+                mulExp.buildIrTree();
+                multer = valueUp;
+            }
+
+
             unaryExp.buildIrTree();
-            Value mul = valueUp;
+            mul = valueUp;
             if ( mul.getValueType().isI1()) {
                 // 如果类型是 boolean,需要先换类型
                 mul = builder.buildZext(curBlock, mul);
             }
 
-            if( mulExp != null ){
-                mulExp.buildIrTree();
-                Value multer = valueUp;
+            if( multer != null ){
                 // 如果是 boolean 无脑转int 32; 如果mul和multer当中有且仅有一个float, 那么另外一个就需要进行类型转化
                 if (multer.getValueType().isI1()){
                     multer = builder.buildZext(curBlock, multer);
@@ -136,9 +142,9 @@ public class MulExp extends Node{
                     }
 //                    mul = builder.buildSrem(curBlock, dataType, mul, multer);
                 }
-
-                valueUp = mul;
             }
+
+            valueUp = mul;
         }
     }
 

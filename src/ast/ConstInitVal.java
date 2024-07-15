@@ -143,7 +143,7 @@ public class ConstInitVal extends Node{
                 flattenArray.add(constant);
             }
             valueArrayUp = flattenArray;
-
+//            System.out.println(flattenArray);
             valueUp = getArrayTree(flattenArray,0);
         }
 

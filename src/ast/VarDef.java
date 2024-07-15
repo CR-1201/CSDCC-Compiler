@@ -175,6 +175,7 @@ public class VarDef extends Node{
      * @param flattenArray 展平数组
      */
     private void genGlobalInitArray(ArrayList<Value> flattenArray) {
+//        System.out.println(flattenArray);
         if (dims.size() == 1) { // 一维数组,将 flattenArray 转变后加入即可
             ArrayList<Constant> constArray = new ArrayList<>();
             for (Value value : flattenArray) {
@@ -189,30 +190,37 @@ public class VarDef extends Node{
             irSymbolTable.addValue(identToken.getContent(), globalVariable);
         } else { // 多维数组
             // 第一维的数组,其元素为 ConstArray
-            ArrayList<Constant> colArray = new ArrayList<>();
-            ConstArray initArray = setInitArray(colArray,0,flattenArray);
+
+            ConstArray initArray = getArrayTree(flattenArray,0);
             GlobalVariable globalVariable = builder.buildGlobalVariable(identToken.getContent(), initArray, false);
             irSymbolTable.addValue(identToken.getContent(), globalVariable);
         }
     }
 
-    private ConstArray setInitArray(ArrayList<Constant> initArray, int currentDim, ArrayList<Value> flattenArray) {
-        if (currentDim == dims.size() - 1) {
-            // 到达数组的最后一个维度，填充元素
-            for (int i = 0; i < dims.get(currentDim); i++) {
-                initArray.add((ConstInt)flattenArray.get(i));
+    private ConstArray getArrayTree(ArrayList<Value> flattenArray, int dim_level){
+        ArrayList<Constant> temp = new ArrayList<>();
+        if( dim_level >= dims.size()-1 ){
+            for( int i = 0 ; i < dims.get(dim_level) ; i++ ){
+                if( flattenArray.get(i) instanceof ConstInt ){
+                    temp.add((ConstInt)flattenArray.get(i));
+                } else temp.add((ConstFloat)flattenArray.get(i));
             }
-            return new ConstArray(initArray);
         } else {
-            // 递归创建下一级维度
-            ArrayList<Constant> nextLevel = new ArrayList<>();
-            for (int i = 0; i < dims.get(currentDim); i++) {
-                ArrayList<Constant> subList = new ArrayList<>();
-                ConstArray subArray = setInitArray(subList,currentDim + 1,flattenArray );
-                nextLevel.add(subArray);
+            int row_num = dims.get(dim_level);
+            int column_num = 1;
+            for( int i = dim_level+1 ; i < dims.size() ; i++ ){
+                column_num *= dims.get(i);
             }
-            return new ConstArray(nextLevel);
+            for( int i = 0 ; i < row_num ; i++ ){
+                ArrayList<Value> temp_flattenArray = new ArrayList<>();
+                for( int j = 0 ; j < column_num ; j++ ){
+                    Value temp_value = flattenArray.get(i*column_num+j);
+                    temp_flattenArray.add(temp_value);
+                }
+                temp.add(getArrayTree(temp_flattenArray,dim_level+1));
+            }
         }
+        return new ConstArray(temp);
     }
 
     @Override

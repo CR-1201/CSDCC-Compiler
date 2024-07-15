@@ -91,6 +91,8 @@ public class InitVal extends Node{
                     Value temp = getTemp();
                     flattenArray.add(temp);
                 }
+                System.out.println(initVals.size());
+                System.out.println(dims.get(0));
                 // 不全 补0即可
                 for(int i = initVals.size() ; i < dims.get(0) ; i++ ){
                     flattenArray.add(constant);
@@ -107,20 +109,28 @@ public class InitVal extends Node{
                     }
                     initVal.buildIrTree();
                     if( initVal.getExp() != null ){
-                        flattenArray.add(valueUp);
+                        Value temp = getTemp();
+                        flattenArray.add(temp);
                     } else {
                         flattenArray.addAll(valueArrayUp);
                     }
+
+//                    System.out.println(flattenArray);
                 }
             }
+//            System.out.println(flattenArray);
 
             int x = flattenArray.size();
+
+//            System.out.println(sum_dims);
+
             for( int i = x ; i < sum_dims; i++ ){
                 flattenArray.add(constant);
             }
 
-            valueArrayUp = flattenArray; // 返回
+//            System.out.println(flattenArray);
 
+            valueArrayUp = flattenArray; // 返回
         }
 
     }

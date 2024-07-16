@@ -1,0 +1,25 @@
+
+declare dso_local i32 @getint()
+declare dso_local i32 @getch()
+declare dso_local float @getfloat()
+declare dso_local i32 @getarray(i32* %a0)
+declare dso_local i32 @getfarray(float* %a0)
+declare dso_local void @putint(i32 %a0)
+declare dso_local void @putch(i32 %a0)
+declare dso_local void @putfloat(float %a0)
+declare dso_local void @putarray(i32 %a0, i32* %a1)
+declare dso_local void @putfarray(i32 %a0, float* %a1)
+declare dso_local void @_sysy_starttime()
+declare dso_local void @_sysy_stoptime()
+define dso_local i32 @main() {
+b0:
+	br label %b9
+b9:
+	br label %b11
+b10:
+	br label %b11
+b11:
+	ret i32 4
+b20:
+	ret i32 0
+}

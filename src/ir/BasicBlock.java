@@ -159,17 +159,32 @@ public class BasicBlock extends Value{
         successors.add(successor);
     }
 
+    public void removeSuccessor(BasicBlock successor){
+        successors.remove(successor);
+    }
+
+    public void removePrecursor(BasicBlock precursor){
+        precursors.remove(precursor);
+    }
+
+
+
     /**
      * precursor - successor 是一对双向关系
      * @param oldBlock 原有 block
      * @param newBlock 现有 block
      */
     public void replaceSuccessor(BasicBlock oldBlock, BasicBlock newBlock){
-        successors.remove(oldBlock);
-        oldBlock.precursors.remove(this);
-        successors.add(newBlock);
+        removeSuccessor(oldBlock);
+        oldBlock.removePrecursor(this);
+        addSuccessor(newBlock);
+        newBlock.addPrecursor(this);
+
+//        successors.remove(oldBlock);
+//        oldBlock.precursors.remove(this);
+//        successors.add(newBlock);
         // 个人觉得要加这句话,后续有bug注意一下
-        newBlock.precursors.add(this);
+//        newBlock.precursors.add(this);
     }
 
     /**

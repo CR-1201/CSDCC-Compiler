@@ -30,6 +30,10 @@ public class Conversion extends Instruction {
         return getOperator(0);
     }
 
+    public String getType(){
+        return type;
+    }
+
     @Override
     public String toString(){
         if(this.type.equals("fptosi")){

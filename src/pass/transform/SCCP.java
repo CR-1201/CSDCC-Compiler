@@ -123,9 +123,10 @@ public class SCCP implements Pass {
         curInstruction = instruction;
         curBasicBlock = instruction.getParent();
         prevStatus = valueMap.get(instruction);
-        if( prevStatus != null ){
-            curStatus = new ValueStatus(prevStatus.getStatus(),instruction);
-        } else curStatus = new ValueStatus(ValueStatus.Status.Top,instruction);
+        if( prevStatus == null ){
+            prevStatus = new ValueStatus(ValueStatus.Status.Top,instruction);
+        }
+        curStatus = new ValueStatus(prevStatus.getStatus(),instruction);
 
 
         if( instruction instanceof Phi phi){

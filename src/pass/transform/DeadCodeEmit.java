@@ -1,4 +1,4 @@
-package pass.refactor;
+package pass.transform;
 
 import ir.BasicBlock;
 import ir.Function;

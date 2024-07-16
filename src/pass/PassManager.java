@@ -4,6 +4,7 @@ import ir.Module;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
 import pass.transform.Mem2reg;
+import pass.transform.UselessReturnEmit;
 
 import java.util.ArrayList;
 
@@ -15,6 +16,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new Mem2reg());
+        passes.add(new UselessReturnEmit());
         for (Pass pass : passes) {
             pass.run();
         }

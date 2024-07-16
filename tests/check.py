@@ -5,11 +5,14 @@ import glob
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+TIMEOUT = 300
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
 TEST_DIR = f'{ROOT_DIR}/tests'
 CP = '../compiler.jar'
 EXPECTED_PATTERN = re.compile(r'\d+H-\d+M-\d+S-\d+us')
 TEST_CASES = []
+pass_cnt = 0
+pass_cnt_lock = threading.Lock()
 
 def init():
     subprocess.run('make build', cwd=ROOT_DIR, shell=True)
@@ -139,6 +142,9 @@ def check(stop_event, test_file, input_file='', ans_file=''):
         stop_event.set()
         return False
     print(f'{test_file} AC')
+    with pass_cnt_lock:
+        global pass_cnt
+        pass_cnt += 1
     return True
 
 if __name__ == '__main__':
@@ -148,19 +154,30 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(max_workers=16) as executor:
         tasks = {executor.submit(check, stop_event=stop_event, **case): case for case in TEST_CASES}
         
-        for task in as_completed(tasks):
-            if stop_event.is_set():
-                for t in tasks:
-                    if not t.done():
-                        t.cancel()
-                exit(1)
-            try:
-                if not task.result():
-                    case = tasks[task]
-                    print(f'Stopping due to error in processing {case}')
+        try:
+            for task in as_completed(tasks, timeout=TIMEOUT):
+                if stop_event.is_set():
+                    for t in tasks:
+                        if not t.done():
+                            t.cancel()
+                    exit(1)
+                try:
+                    res = task.result()
+                    if not res:
+                        case = tasks[task]
+                        print(f'Stopping due to error in processing {case}')
+                        stop_event.set()
+                        exit(1)
+                except Exception as e:
+                    print(f'Exception: {e}')
                     stop_event.set()
                     exit(1)
-            except Exception as e:
-                print(f'Exception: {e}')
-                stop_event.set()
-                exit(1)
+        except TimeoutError as e:
+            stop_event.set()
+            for future, task in tasks.items():
+                if not future.done():
+                    print(f'{task["test_file"]}: TLE')
+                    future.cancel()
+            exit(1)
+
+    print(f'test_num: {len(TEST_CASES)}, pass_num: {pass_cnt}')

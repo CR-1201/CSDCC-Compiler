@@ -39,12 +39,12 @@ public class Compiler {
         // ir build
         CompUnit syntaxTreeRoot = ParserAnalyze.getParser().getCompUnit();
         IrBuilder.getIrBuilder().buildModule(syntaxTreeRoot);
-        IOFunc.output(Module.getModule().toString(),Config.irOutputPath);
+        IOFunc.output(Module.getModule().toString(),Config.irRawOutputPath);
 
         // pass
         PassManager passManager = new PassManager();
         passManager.run();
-        IOFunc.clear(Config.irOptimizeOutputPath);
-        IOFunc.output(Module.getModule().toString(), Config.irOptimizeOutputPath);
+        IOFunc.clear(Config.irOutputPath);
+        IOFunc.output(Module.getModule().toString(), Config.irOutputPath);
     }
 }

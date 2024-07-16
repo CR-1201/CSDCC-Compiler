@@ -15,9 +15,6 @@ public class LoopAnalysis implements Pass {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
                 analyzeLoopInfo(function);
-                for (Loop loop : allLoops) {
-                    System.out.println(loop.toString());
-                }
             }
         }
     }

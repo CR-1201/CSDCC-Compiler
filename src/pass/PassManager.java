@@ -19,7 +19,7 @@ public class PassManager {
         passes.add(new Dom());
 //        passes.add(new LoopAnalysis());
         passes.add(new Mem2reg());
-//        passes.add(new SCCP());
+        passes.add(new SCCP());
 //        passes.add(new UselessReturnEmit());
         for (Pass pass : passes) {
             pass.run();

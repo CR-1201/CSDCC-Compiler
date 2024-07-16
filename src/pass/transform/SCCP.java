@@ -55,7 +55,7 @@ public class SCCP implements Pass {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
-                int count = 20;
+                int count = 10;
                 while( needPass && count > 0 ){
                     count--;
                     needPass = false;

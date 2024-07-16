@@ -15,7 +15,7 @@ public class PassManager {
     public void run() {
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new Mem2reg());
+//        passes.add(new Mem2reg());
 
 //        passes.add(new SCCP());
 

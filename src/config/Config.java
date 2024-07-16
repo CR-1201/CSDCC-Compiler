@@ -12,7 +12,7 @@ public class Config {
     public static String irOptimizeOutputPath = "llvm_ir_optimize.txt";
     public static void init(String in,String llvm, String arm) throws IOException {
         fileInputPath = in;
-        irOutputPath = llvm;
+        irOptimizeOutputPath = llvm;
         fileOutputPath = arm;
         IOFunc.clear(ERROR_FILE);
         IOFunc.clear(irOutputPath);

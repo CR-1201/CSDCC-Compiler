@@ -203,6 +203,18 @@ public class BasicBlock extends Value{
         return (Function) super.getParent();
     }
 
+    public void removeSelf() {
+        for (BasicBlock successor : this.getSuccessors()) {
+            successor.getPrecursors().remove(this);
+        }
+        for (Instruction inst : instructions) {
+            inst.removeAllOperators();
+            // 这里 parent 等下要被删掉了，没必要再erase，反而会报错。
+//            inst.eraseFromParent();
+        }
+        getParent().removeBlock(this);
+    }
+
     @Override
     public String toString(){
         // 将 % 去掉,因为只有在跳转指令里需要加上这个

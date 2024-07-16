@@ -16,7 +16,7 @@ public class PassManager {
     public void run() {
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new LoopAnalysis());
+//        passes.add(new LoopAnalysis());
         passes.add(new Mem2reg());
 //        passes.add(new UselessReturnEmit());
         for (Pass pass : passes) {

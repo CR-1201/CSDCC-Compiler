@@ -5,10 +5,7 @@ import ir.Function;
 import ir.Module;
 import pass.Pass;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 
 public class Dom implements Pass {
     private final Module module = Module.getModule();
@@ -71,12 +68,11 @@ public class Dom implements Pass {
         rpos = computeReversePostOrder(entry);
         for (int i = 0; i < size; i++) {
             domers.add(new BitSet());
-            domers.get(i).set(0);
-//            if (i == 0) {
-//                domers.get(i).set(0);
-//            } else {
-//                domers.get(i).set(0, rpos.size());
-//            }
+            if (i == 0) {
+                domers.get(i).set(0);
+            } else {
+                domers.get(i).set(0, rpos.size());
+            }
         }
         boolean flag = true;
         while (flag) {
@@ -189,6 +185,38 @@ public class Dom implements Pass {
                 }
             }
         }
+    }
+
+    /**
+     * 获得支配树的后序遍历结果
+     * @param function 待求解的函数
+     * @return 支配树的后序遍历结果
+     */
+    public static ArrayList<BasicBlock> getDomTreePostOrder(Function function) {
+        ArrayList<BasicBlock> postOrder = new ArrayList<>();
+        // 如果后继全部加进去了，那么就是 true，只有这样，才可以开始访问当前节点
+        HashSet<BasicBlock> canVisit = new HashSet<>();
+        Stack<BasicBlock> stack = new Stack<>();
+        // 这是因为头块一定也是支配树的根节点
+        stack.add(function.getFirstBlock());
+        // 栈式 dfs
+        while (!stack.isEmpty()) {
+            BasicBlock parent = stack.peek();
+            // 子节点被遍历完成
+            if (canVisit.contains(parent)) {
+                // 那么就加入结果
+                postOrder.add(parent);
+                stack.pop();
+                continue;
+            }
+            // 如果没有遍历完成，就遍历 idomee
+            for (BasicBlock idomee : parent.getIdoms()) {
+                stack.push(idomee);
+            }
+            // 子节点已经全部入栈，表示已经遍历完成了
+            canVisit.add(parent);
+        }
+        return postOrder;
     }
 
     private void printDOM(Function curFunction)

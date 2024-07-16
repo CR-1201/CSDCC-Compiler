@@ -12,11 +12,11 @@ public class Config {
     public static String irRawOutputPath = "llvm_ir_raw.txt";
     public static void init(String in,String llvm, String arm) throws IOException {
         fileInputPath = in;
-        irOptimizeOutputPath = llvm;
+        irOutputPath = llvm;
         fileOutputPath = arm;
         IOFunc.clear(ERROR_FILE);
         IOFunc.clear(irOutputPath);
-        IOFunc.clear(irOptimizeOutputPath);
+        IOFunc.clear(irRawOutputPath);
         IOFunc.clear(fileOutputPath);
     }
 }

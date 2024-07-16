@@ -193,7 +193,9 @@ public class SCCP implements Pass {
             if( marked.contains(new Pair<>(prevBlock,curBasicBlock)) ){
                 Value op = phi.getOperator(i);
                 ValueStatus opStatus = valueMap.get(op);
-                curStatus.xor(opStatus);
+                if( opStatus != null ){
+                    curStatus.xor(opStatus);
+                }
             }
         }
     }

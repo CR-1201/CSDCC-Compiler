@@ -2,6 +2,7 @@ package pass.transform;
 
 import ir.*;
 import ir.Module;
+import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Alloca;
@@ -9,6 +10,8 @@ import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Phi;
 import ir.types.DataType;
+import ir.types.FloatType;
+import ir.types.IntType;
 import pass.Pass;
 
 import java.util.*;
@@ -62,7 +65,11 @@ public class Mem2reg implements Pass {
                 ArrayList<User> loadClone = new ArrayList<>(alloca.getUsers());
                 for (User user : loadClone) {
                     Load load = (Load) user;
-                    load.replaceAllUsesWith(ConstInt.ZERO);
+                    if (load.getValueType() instanceof IntType) {
+                        load.replaceAllUsesWith(ConstInt.ZERO);
+                    } else if (load.getValueType() instanceof FloatType) {
+                        load.replaceAllUsesWith(ConstFloat.ZERO);
+                    }
                     load.removeAllOperators();
                     load.eraseFromParent();
                 }
@@ -163,7 +170,11 @@ public class Mem2reg implements Pass {
         for (Instruction inst : insts) {
             // 在该 Load 指令之前，没有 Store 指令；
             if (inst instanceof Load && inst.getOperator(0) == alloca) {
-                inst.replaceAllUsesWith(ConstInt.ZERO);
+                if (inst.getValueType() instanceof IntType) {
+                    inst.replaceAllUsesWith(ConstInt.ZERO);
+                } else if (inst.getValueType() instanceof FloatType) {
+                    inst.replaceAllUsesWith(ConstFloat.ZERO);
+                }
                 inst.removeAllOperators();
                 inst.eraseFromParent();
             } else if (inst instanceof Store && inst.getOperator(1) == alloca) {
@@ -219,7 +230,11 @@ public class Mem2reg implements Pass {
             visitMap.put(block, false);
         }
         for (Alloca alloca : promotableAllocaInsts) {
-            variableVersion.put(alloca, ConstInt.ZERO);
+            if (alloca.getAllocatedType() instanceof IntType) {
+                variableVersion.put(alloca, ConstInt.ZERO);
+            } else if (alloca.getAllocatedType() instanceof FloatType) {
+                variableVersion.put(alloca, ConstFloat.ZERO);
+            }
         }
         Stack<BasicBlock> blockStack = new Stack<>();
         Stack<HashMap<Alloca, Value>> mapStack = new Stack<>();
@@ -283,7 +298,11 @@ public class Mem2reg implements Pass {
                 Store store = alloca2store.get(ai);
                 // 没有赋初值就 load 的情况，直接删除
                 if (store == null && block == entry) {
-                    inst.replaceAllUsesWith(ConstInt.ZERO);
+                    if (li.getValueType() instanceof IntType) {
+                        inst.replaceAllUsesWith(ConstInt.ZERO);
+                    } else if (li.getValueType() instanceof FloatType) {
+                        inst.replaceAllUsesWith(ConstFloat.ZERO);
+                    }
                     inst.removeAllOperators();
                     inst.eraseFromParent();
                 } else if (store != null) {

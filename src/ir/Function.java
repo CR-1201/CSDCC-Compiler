@@ -142,6 +142,11 @@ public class Function extends Value{
         blocks.remove(block);
     }
 
+    // 获取sideEffect
+    public boolean getSideEffect() {
+        return this.sideEffect;
+    }
+
     /**
      * 编译器可以假设标记为 dso_local 的函数或变量将解析为同一链接单元中的符号
      * 即使定义不在这个编译单元内,也会生成直接访问

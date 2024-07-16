@@ -64,12 +64,16 @@ public abstract class User extends Value {
         return operators.size();
     }
 
+    public void addOperator(Value operator) {
+        operators.add(operator);
+    }
+
     // 解除当前 user 的所有 user <-> used_value 双向关系
     public void removeAllOperators() {
         for (Value op : operators) {
             op.removeUser(this);
         }
-//        this.operators.clear();
+        this.operators.clear();
     }
 
 }

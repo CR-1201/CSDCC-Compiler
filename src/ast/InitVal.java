@@ -3,9 +3,11 @@ package ast;
 import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
+import ir.constants.ConstStr;
 import ir.constants.Constant;
 import ir.types.FloatType;
 import ir.types.IntType;
+import ir.types.VoidType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,9 @@ public class InitVal extends Node{
      */
     @Override
     public void buildIrTree() {
+
+//        if( !globalInitDown )this.constant = new ConstStr("skip");
+
         // 初始值是一个表达式(单变量)
         if(exp != null) {
             // 在进行全局单变量初始化
@@ -103,7 +108,7 @@ public class InitVal extends Node{
                 flattenArray.add(constant);
             }
 
-            System.out.println(flattenArray);
+//            System.out.println(flattenArray);
             valueArrayUp = flattenArray; // 返回
         }
 

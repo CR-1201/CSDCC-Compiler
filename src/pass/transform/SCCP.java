@@ -120,6 +120,10 @@ public class SCCP implements Pass {
         if( curStatus.notEqual(prevStatus) ){
             // 更新指令状态
             valueMap.put(instruction,curStatus);
+
+            System.out.println(instruction);
+            System.out.println(SSAWorkList);
+
             for( User use : instruction.getUsers() ){
                 if( use instanceof Instruction ){
                     SSAWorkList.add((Instruction)use);

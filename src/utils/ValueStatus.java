@@ -78,8 +78,7 @@ public class ValueStatus {
     }
 
     public boolean notEqual(ValueStatus other){
-        System.out.println(this);
-        System.out.println(other);
+
         if( status != other.status ){
             return true;
         }
@@ -97,8 +96,4 @@ public class ValueStatus {
         }
     }
 
-    @Override
-    public String toString(){
-        return "value: " + value.toString() + ", status: " + status.toString();
-    }
 }

@@ -43,8 +43,10 @@ public class DeadCodeEmit implements Pass {
 
         for (BasicBlock bs : func.getBasicBlocksArray()) {
             for (Instruction instr : bs.getInstructionsArray()) {
-                instr.removeAllOperators();
-                instr.eraseFromParent();
+                if (!usefulInstructions.contains(instr)) {
+                    instr.removeAllOperators();
+                    instr.eraseFromParent();
+                }
             }
         }
     }

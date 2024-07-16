@@ -1,6 +1,7 @@
 package pass.transform;
 
 import ast.Cond;
+import ast.Number;
 import com.sun.jdi.ArrayReference;
 import ir.*;
 import ir.Module;
@@ -48,11 +49,16 @@ public class SCCP implements Pass {
     BasicBlock curBasicBlock;
     Instruction curInstruction;
 
+    private boolean needPass = true;
+
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
+                while( needPass ){
+                    needPass = false;
                     visitFunc(function);
+                }
             }
         }
     }
@@ -87,7 +93,12 @@ public class SCCP implements Pass {
             while(j < SSAWorkList.size()){
                 Instruction instruction = SSAWorkList.get(j++);
                 BasicBlock block = instruction.getParent();
+                System.out.println(SSAWorkList);
+                System.out.println(instruction);
                 // 只有指令可达,才需要遍历;否则可能引发不必要的状态更新
+                if( block.getPrecursors().isEmpty() ){
+                    visitInstruction(instruction);
+                }
                 for( BasicBlock preBlock : block.getPrecursors() ){
                     if( marked.contains(new Pair<>(preBlock,block)) ){
                         visitInstruction(instruction);
@@ -99,6 +110,13 @@ public class SCCP implements Pass {
         // 并且对于条件为常量的条件跳转指令,改写为无条件跳转
         // 这一改写主要是方便后续其他优化
         replaceConstant(function);
+
+        for( Value value : valueMap.keySet() ){
+            if( valueMap.get(value).getStatus() == ValueStatus.Status.Top ){
+//                needPass = true;
+                break;
+            }
+        }
     }
 
     private void visitInstruction(Instruction instruction) {
@@ -123,12 +141,14 @@ public class SCCP implements Pass {
         if( curStatus.notEqual(prevStatus) ){
             // 更新指令状态
             valueMap.put(instruction,curStatus);
-//            System.out.println(instruction);
+
             for( User use : instruction.getUsers() ){
                 if( use instanceof Instruction ){
+//                    System.out.println(use);
                     SSAWorkList.add((Instruction)use);
                 }
             }
+
         }
     }
 
@@ -147,6 +167,7 @@ public class SCCP implements Pass {
 
         for( Instruction instruction : deleteList ){
             instruction.eraseFromParent();
+            needPass = true;
         }
 
         BasicBlocks = function.getBasicBlocksArray();
@@ -176,6 +197,7 @@ public class SCCP implements Pass {
     }
 
     private void condBrToJump(Br br, BasicBlock jumpBlock, BasicBlock invalidBlock) {
+        needPass = true;
         BasicBlock block = br.getParent();
         br.removeAllOperators();
         br.setHasCondition(false);

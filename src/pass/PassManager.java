@@ -16,7 +16,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new Mem2reg());
-        passes.add(new UselessReturnEmit());
+//        passes.add(new UselessReturnEmit());
         for (Pass pass : passes) {
             pass.run();
         }

@@ -10,6 +10,8 @@ TEST_DIR = f'{ROOT_DIR}/tests'
 CP = '../compiler.jar'
 EXPECTED_PATTERN = re.compile(r'\d+H-\d+M-\d+S-\d+us')
 TEST_CASES = []
+pass_cnt = 0
+pass_cnt_lock = threading.Lock()
 
 def init():
     subprocess.run('make build', cwd=ROOT_DIR, shell=True)
@@ -139,6 +141,9 @@ def check(stop_event, test_file, input_file='', ans_file=''):
         stop_event.set()
         return False
     print(f'{test_file} AC')
+    with pass_cnt_lock:
+        global pass_cnt
+        pass_cnt += 1
     return True
 
 if __name__ == '__main__':
@@ -164,3 +169,4 @@ if __name__ == '__main__':
                 print(f'Exception: {e}')
                 stop_event.set()
                 exit(1)
+    print(f'test_num: {len(TEST_CASES)}, pass_num: {pass_cnt}')

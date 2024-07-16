@@ -78,6 +78,7 @@ public class ValueStatus {
     }
 
     public boolean notEqual(ValueStatus other){
+        if( other == null ) return true;
 
         if( status != other.status ){
             return true;

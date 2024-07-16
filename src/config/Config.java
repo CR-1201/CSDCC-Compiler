@@ -16,6 +16,7 @@ public class Config {
         fileOutputPath = arm;
         IOFunc.clear(ERROR_FILE);
         IOFunc.clear(irOutputPath);
+        IOFunc.clear(irOptimizeOutputPath);
         IOFunc.clear(fileOutputPath);
     }
 }

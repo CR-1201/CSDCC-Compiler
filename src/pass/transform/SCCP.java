@@ -55,7 +55,9 @@ public class SCCP implements Pass {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
-                while( needPass ){
+                int count = 10;
+                while( needPass && count > 0 ){
+                    count--;
                     needPass = false;
                     visitFunc(function);
                 }
@@ -93,8 +95,8 @@ public class SCCP implements Pass {
             while(j < SSAWorkList.size()){
                 Instruction instruction = SSAWorkList.get(j++);
                 BasicBlock block = instruction.getParent();
-                System.out.println(SSAWorkList);
-                System.out.println(instruction);
+//                System.out.println(SSAWorkList);
+//                System.out.println(instruction);
                 // 只有指令可达,才需要遍历;否则可能引发不必要的状态更新
                 if( block.getPrecursors().isEmpty() ){
                     visitInstruction(instruction);

@@ -14,19 +14,19 @@ public class Compiler {
         // 设置默认值
         String fileInputPath = "testfile.txt";
         String fileOutputPath = "output.txt";
-        String irOutputPath = "llvm_ir_optimize.txt";
+        String irOptimizeOutputPath = "llvm_ir_optimize.txt";
         // 解析命令行参数
         for (int i = 0; i < args.length; i++) {
             if ("-f".equals(args[i]) && i + 1 < args.length) {
                 fileInputPath = args[i + 1];
             } else if ("-ll".equals(args[i]) && i + 1 < args.length) {
-                irOutputPath = args[i + 1];
+                irOptimizeOutputPath = args[i + 1];
             } else if ("-o".equals(args[i]) && i + 1 < args.length) {
                 fileOutputPath = args[i + 1];
             }
         }
         // 初始化
-        Config.init(fileInputPath,irOutputPath,fileOutputPath);
+        Config.init(fileInputPath,irOptimizeOutputPath,fileOutputPath);
 
         // 词法分析
         LexicalAnalyze.getLexical().analyze(IOFunc.input(Config.fileInputPath));

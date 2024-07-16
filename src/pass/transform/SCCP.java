@@ -55,7 +55,7 @@ public class SCCP implements Pass {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
-                int count = 10;
+                int count = 20;
                 while( needPass && count > 0 ){
                     count--;
                     needPass = false;
@@ -98,7 +98,7 @@ public class SCCP implements Pass {
 //                System.out.println(SSAWorkList);
 //                System.out.println(instruction);
                 // 只有指令可达,才需要遍历;否则可能引发不必要的状态更新
-                if( block.getPrecursors().isEmpty() ){
+                if( block.getPrecursors().isEmpty() && block.equals(function.getFirstBlock()) ){
                     visitInstruction(instruction);
                 }
                 for( BasicBlock preBlock : block.getPrecursors() ){
@@ -112,13 +112,6 @@ public class SCCP implements Pass {
         // 并且对于条件为常量的条件跳转指令,改写为无条件跳转
         // 这一改写主要是方便后续其他优化
         replaceConstant(function);
-
-        for( Value value : valueMap.keySet() ){
-            if( valueMap.get(value).getStatus() == ValueStatus.Status.Top ){
-//                needPass = true;
-                break;
-            }
-        }
     }
 
     private void visitInstruction(Instruction instruction) {

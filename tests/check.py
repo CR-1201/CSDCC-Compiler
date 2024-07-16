@@ -173,10 +173,11 @@ if __name__ == '__main__':
                     stop_event.set()
                     exit(1)
         except TimeoutError as e:
+            print('TLE!!!')
             stop_event.set()
             for future, task in tasks.items():
                 if not future.done():
-                    print(f'{task["test_file"]}: TLE')
+                    print(f'[ERROR FILE] {task["test_file"]}: TLE')
                     future.cancel()
             exit(1)
 

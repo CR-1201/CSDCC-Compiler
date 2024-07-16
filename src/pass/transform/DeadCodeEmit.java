@@ -54,6 +54,7 @@ public class DeadCodeEmit implements Pass {
     private void findClosure(Instruction instr) {
         if (!usefulInstructions.contains(instr)) {
             usefulInstructions.add(instr);
+            
             for (Value operand : instr.getOperators()) {
                 if (operand instanceof Instruction) {
                     findClosure((Instruction) operand);

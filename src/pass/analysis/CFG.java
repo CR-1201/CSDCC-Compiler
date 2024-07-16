@@ -27,7 +27,7 @@ public class CFG implements Pass {
         }
     }
 
-    private void buildCFG(Function function) {
+    public void buildCFG(Function function) {
         deleteCFG(function);
         BasicBlock entry = function.getFirstBlock();
         if (entry != null) {
@@ -72,7 +72,7 @@ public class CFG implements Pass {
         }
     }
 
-    private void deleteUnreachableBlock(Function function) {
+    public void deleteUnreachableBlock(Function function) {
         BasicBlock entry = function.getFirstBlock();
         boolean flag = true;
         while(flag) {

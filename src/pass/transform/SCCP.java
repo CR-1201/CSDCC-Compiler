@@ -18,6 +18,7 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;
+import pass.analysis.CFG;
 import utils.Pair;
 import utils.ValueStatus;
 
@@ -53,15 +54,20 @@ public class SCCP implements Pass {
 
     public void run() {
         for (Function function : module.getFunctionsArray()) {
+            CFG cfg = new CFG();
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
-                int count = 10;
+                int count = 1;
                 while( needPass && count > 0 ){
                     count--;
                     needPass = false;
                     visitFunc(function);
+                    cfg.buildCFG(function);
+                    cfg.deleteUnreachableBlock(function);
                 }
             }
+
+
         }
     }
 
@@ -95,10 +101,8 @@ public class SCCP implements Pass {
             while(j < SSAWorkList.size()){
                 Instruction instruction = SSAWorkList.get(j++);
                 BasicBlock block = instruction.getParent();
-//                System.out.println(SSAWorkList);
-//                System.out.println(instruction);
                 // 只有指令可达,才需要遍历;否则可能引发不必要的状态更新
-                if( block.getPrecursors().isEmpty() && block.equals(function.getFirstBlock()) ){
+                if( block.getPrecursors().isEmpty() ){
                     visitInstruction(instruction);
                 }
                 for( BasicBlock preBlock : block.getPrecursors() ){
@@ -125,6 +129,7 @@ public class SCCP implements Pass {
 
 
         if( instruction instanceof Phi phi){
+//            System.out.println(phi);
             visitPHI(phi);
         } else if( instruction instanceof Br br){
             visitBr(br);
@@ -137,36 +142,23 @@ public class SCCP implements Pass {
         if( curStatus.notEqual(prevStatus) ){
             // 更新指令状态
             valueMap.put(instruction,curStatus);
-
             for( User use : instruction.getUsers() ){
                 if( use instanceof Instruction ){
 //                    System.out.println(use);
                     SSAWorkList.add((Instruction)use);
                 }
             }
+            if( curStatus.getStatus() == ValueStatus.Status.CONST ){
+                instruction.replaceAllUsesWith(curStatus.getValue());
+                instruction.eraseFromParent();
+                needPass = true;
+            }
 
         }
     }
 
     private void replaceConstant(Function function) {
-        ArrayList<Instruction> deleteList = new ArrayList<>();
         ArrayList<BasicBlock> BasicBlocks = function.getBasicBlocksArray();
-        for( BasicBlock basicBlock : BasicBlocks ){
-            ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
-            for( Instruction instruction : instructions ){
-                if( valueMap.containsKey(instruction) && valueMap.get(instruction).getValue() instanceof Constant constant){
-                    instruction.replaceAllUsesWith(constant);
-                    deleteList.add(instruction);
-                }
-            }
-        }
-
-        for( Instruction instruction : deleteList ){
-            instruction.eraseFromParent();
-            needPass = true;
-        }
-
-        BasicBlocks = function.getBasicBlocksArray();
         // cond_br with const cond
         for( BasicBlock basicBlock : BasicBlocks ){
             Instruction tailInstr = basicBlock.getTailInstruction();
@@ -187,7 +179,6 @@ public class SCCP implements Pass {
                         } else condBrToJump(br,falseBlock,trueBlock);
                     }
                 }
-
             }
         }
     }
@@ -198,6 +189,10 @@ public class SCCP implements Pass {
         br.removeAllOperators();
         br.setHasCondition(false);
         br.addOperator(jumpBlock);
+        valueMap.put(br,curStatus);
+
+//        System.out.println(br);
+
         if( !jumpBlock.equals(invalidBlock) ){
             block.removeSuccessor(invalidBlock);
             invalidBlock.removePrecursor(block);
@@ -226,11 +221,17 @@ public class SCCP implements Pass {
         } else {
             BasicBlock trueBlock = (BasicBlock)(br.getOperator(1));
             BasicBlock falseBlock = (BasicBlock)(br.getOperator(2));
-            Value cond = valueMap.get(br.getOperator(0)).getValue();
-            if( cond instanceof ConstInt){
-                CFGWorkList.add(new Pair<>(curBasicBlock, ((ConstInt) cond).getValue() != 0 ? trueBlock : falseBlock));
-            } else if( cond instanceof ConstFloat ){
-                CFGWorkList.add(new Pair<>(curBasicBlock, ((ConstFloat) cond).getValue() != 0 ? trueBlock : falseBlock));
+
+            if( valueMap.get(br.getOperator(0)) != null ){
+                Value cond = valueMap.get(br.getOperator(0)).getValue();
+                if( cond instanceof ConstInt){
+                    CFGWorkList.add(new Pair<>(curBasicBlock, ((ConstInt) cond).getValue() != 0 ? trueBlock : falseBlock));
+                } else if( cond instanceof ConstFloat ){
+                    CFGWorkList.add(new Pair<>(curBasicBlock, ((ConstFloat) cond).getValue() != 0 ? trueBlock : falseBlock));
+                } else {
+                    CFGWorkList.add(new Pair<>(curBasicBlock, trueBlock));
+                    CFGWorkList.add(new Pair<>(curBasicBlock, falseBlock));
+                }
             } else {
                 CFGWorkList.add(new Pair<>(curBasicBlock, trueBlock));
                 CFGWorkList.add(new Pair<>(curBasicBlock, falseBlock));
@@ -244,7 +245,7 @@ public class SCCP implements Pass {
             curStatus.setStatus(ValueStatus.Status.CONST);
             curStatus.setValue(floded);
         } else {
-            curStatus.setStatus(ValueStatus.Status.Top);
+//            curStatus.setStatus(ValueStatus.Status.Top);
             for( Value op : instruction.getOperators() ){
                 if( valueMap.containsKey(op) && valueMap.get(op).isBot() ){
                     curStatus.setStatus(ValueStatus.Status.BOT);

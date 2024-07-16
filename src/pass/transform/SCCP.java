@@ -62,8 +62,6 @@ public class SCCP implements Pass {
                     count--;
                     needPass = false;
                     visitFunc(function);
-                    cfg.buildCFG(function);
-                    cfg.deleteUnreachableBlock(function);
                 }
             }
 
@@ -190,9 +188,7 @@ public class SCCP implements Pass {
         br.setHasCondition(false);
         br.addOperator(jumpBlock);
         valueMap.put(br,curStatus);
-
 //        System.out.println(br);
-
         if( !jumpBlock.equals(invalidBlock) ){
             block.removeSuccessor(invalidBlock);
             invalidBlock.removePrecursor(block);

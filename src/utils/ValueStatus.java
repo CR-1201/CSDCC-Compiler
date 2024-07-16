@@ -89,11 +89,12 @@ public class ValueStatus {
             int x = ((ConstInt)value).getValue();
             int y = ((ConstInt)other.value).getValue();
             return x != y;
-        } else {
+        } else if( value instanceof ConstFloat ){
             float x = ((ConstFloat)value).getValue();
             float y = ((ConstFloat)other.value).getValue();
             return x != y;
         }
+        return false;
     }
 
 }

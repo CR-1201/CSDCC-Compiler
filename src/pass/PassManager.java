@@ -22,7 +22,7 @@ public class PassManager {
         passes.add(new Mem2reg());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
-        passes.add(new UselessReturnEmit());
+//        passes.add(new UselessReturnEmit());
         for (Pass pass : passes) {
             pass.run();
         }

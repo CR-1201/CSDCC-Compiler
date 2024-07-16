@@ -19,12 +19,14 @@ public class BasicBlock extends Value{
     // 前驱与后继基本块,不讲求顺序,因此不用链表
     private final HashSet<BasicBlock> precursors = new HashSet<>();
     private final HashSet<BasicBlock> successors = new HashSet<>();
-    // 当前基本块的必经基本块
-    private final ArrayList<BasicBlock> dominators = new ArrayList<>();
+    // 当前基本块支配的基本块
+    private ArrayList<BasicBlock> doms = new ArrayList<>();
+    // 当前基本块的必经基本块，即当前基本块的支配者
+    private ArrayList<BasicBlock> domers = new ArrayList<>();
     // 当前基本块直接支配的基本块
-    private final ArrayList<BasicBlock> i_dominators = new ArrayList<>();
+    private ArrayList<BasicBlock> idoms = new ArrayList<>();
     // 直接支配当前基本块的基本块
-    private BasicBlock directDom;
+    private BasicBlock idomer;
     // 在支配树中的深度
     private int domLevel;
     // 支配边际,即刚好不被当前基本块支配的基本块
@@ -34,24 +36,62 @@ public class BasicBlock extends Value{
         return instructions;
     }
 
+    public ArrayList<Instruction> getInstructionsArray(){
+        return new ArrayList<>(instructions);
+    }
+
     public HashSet<BasicBlock> getPrecursors(){
         return precursors;
     }
 
-    public void setIDirectDom(BasicBlock directDom){
-        this.directDom = directDom;
+    public HashSet<BasicBlock> getSuccessors(){
+        return successors;
     }
+
+    // ========================== Dom Info ==========================
 
     public void setDomLevel(int domLevel) {
         this.domLevel = domLevel;
     }
 
-    public ArrayList<BasicBlock> getI_Dominators(){
-        return i_dominators;
+    public ArrayList<BasicBlock> getDoms(){
+        return doms;
     }
 
-    public ArrayList<BasicBlock> getDominators(){
-        return dominators;
+    public void setDoms(ArrayList<BasicBlock> doms){
+        this.doms = doms;
+    }
+
+    public ArrayList<BasicBlock> getDomers() {
+        return domers;
+    }
+
+    public void setDomers(ArrayList<BasicBlock> domers) {
+        this.domers = domers;
+    }
+
+    public void addDomer(BasicBlock domer){
+        domers.add(domer);
+    }
+
+    public ArrayList<BasicBlock> getIdoms(){
+        return idoms;
+    }
+
+    public void setIdoms(ArrayList<BasicBlock> idoms){
+        this.idoms = idoms;
+    }
+
+    public void addIdom(BasicBlock idom){
+        idoms.add(idom);
+    }
+
+    public BasicBlock getIDomer(){
+        return idomer;
+    }
+
+    public void setIdomer(BasicBlock idomer){
+        this.idomer = idomer;
     }
 
     public int getDomLevel() {
@@ -62,17 +102,20 @@ public class BasicBlock extends Value{
         return dominanceFrontier;
     }
 
-    public HashSet<BasicBlock> getSuccessors(){
-        return successors;
+    public void addDominanceFrontier(BasicBlock domFrontier){
+        dominanceFrontier.add(domFrontier);
     }
 
-    public BasicBlock getDirectDom(){
-        return directDom;
+    /**
+     * 返回当前块是否是 other 的支配者
+     * @param other 另一个块
+     * @return 是则为 true
+     */
+    public boolean isDominator(BasicBlock other){
+        return other.domers.contains(this);
     }
 
-    public ArrayList<Instruction> getInstructionsArray(){
-        return new ArrayList<>(instructions);
-    }
+    // =================================================================
 
     public BasicBlock(int nameNum, Function parent){
         super("%b" + nameNum, new LabelType(), parent);
@@ -139,15 +182,6 @@ public class BasicBlock extends Value{
         }else{
             return instructions.getLast();
         }
-    }
-
-    /**
-     * 返回当前块是否是 other 的支配者
-     * @param other 另一个块
-     * @return 是则为 true
-     */
-    public boolean isDominator(BasicBlock other){
-        return other.dominators.contains(this);
     }
 
     // BasicBlock 的 parent 一定是 Function

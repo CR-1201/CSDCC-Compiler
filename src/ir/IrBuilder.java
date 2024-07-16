@@ -134,6 +134,12 @@ public class IrBuilder {
         return conversion;
     }
 
+    public Conversion buildConversionBeforeInstr(BasicBlock parent, String type, DataType dataType, Value value, Instruction before){
+        Conversion conversion = new Conversion(nameNumCounter++,type, dataType, parent, value);
+        parent.insertBefore(conversion, before);
+        return conversion;
+    }
+
     /**
      * 为了方便 mem2reg 优化,约定所有的 Alloca 放到每个函数的入口块处
      * @param allocatedType alloca 空间的类型
@@ -141,6 +147,7 @@ public class IrBuilder {
      * @return Alloca 指令
      */
     public Alloca buildALLOCA(ValueType allocatedType, BasicBlock parent){
+//        System.out.println(parent.getParent());
         BasicBlock realParent = parent.getParent().getFirstBlock();
         Alloca alloca = new Alloca(nameNumCounter++, allocatedType, realParent);
         realParent.insertHead(alloca);
@@ -224,6 +231,18 @@ public class IrBuilder {
             parent.insertTail(call);
         }
         return call;
+    }
+
+    public void buildCallBeforeInstr(BasicBlock parent, Function function, ArrayList<Value> args, Instruction before){
+        Call call;
+        if (function.getReturnType() instanceof VoidType) {
+            // 没有返回值
+            call = new Call(parent, function, args);
+            parent.insertBefore(call, before);
+        }else{
+            call = new Call(nameNumCounter++, parent, function, args);
+            parent.insertBefore(call, before);
+        }
     }
 
     public void buildBr(BasicBlock parent, BasicBlock target){

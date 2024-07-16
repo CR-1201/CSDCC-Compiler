@@ -63,7 +63,7 @@ public class GEP extends MemoryInstruction{
     }
 
     public Value getBase(){
-        return getValue(0);
+        return getOperator(0);
     }
 
     public ValueType getBaseType(){
@@ -76,7 +76,7 @@ public class GEP extends MemoryInstruction{
     public ArrayList<Value> getIndex(){
         ArrayList<Value> result = new ArrayList<>();
         for (int i = 1; i < getNumOfOps(); i++){
-            result.add(getValue(i));
+            result.add(getOperator(i));
         }
         return result;
     }
@@ -86,7 +86,7 @@ public class GEP extends MemoryInstruction{
         StringBuilder s = new StringBuilder(getName() + " = getelementptr inbounds " + baseType + ", ");
         int n = getNumOfOps();
         for (int i = 0; i < n; i++){
-            s.append(getValue(i).getValueType()).append(" ").append(getValue(i).getName());
+            s.append(getOperator(i).getValueType()).append(" ").append(getOperator(i).getName());
             if( i+1 < n )s.append(", ");
         }
 //        s.delete(s.length() - 2, s.length());

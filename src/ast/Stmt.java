@@ -99,6 +99,7 @@ public class Stmt extends Node{
             }
             case 3 ->{
                 // Block
+                block.setReturnType(returnType);
                 block.buildIrTree();
             }
             case 4 -> {
@@ -108,27 +109,28 @@ public class Stmt extends Node{
                  * 所以在条件表达式中,会被拆成多个 BasicBlock,设置他们的目的是为了保证一开始和最后的块的正确性
                  */
                 BasicBlock trueBlock = builder.buildBasicBlock(curFunc);
-                BasicBlock nextBlock = builder.buildBasicBlock(curFunc);
-                BasicBlock falseBlock = (stmt2 == null) ? nextBlock : builder.buildBasicBlock(curFunc);
+                BasicBlock falseBlock = builder.buildBasicBlock(curFunc);
+                BasicBlock nextBlock = (stmt2 == null) ? falseBlock : builder.buildBasicBlock(curFunc);
 
-                cond.setFalseBlock(falseBlock);
                 cond.setTrueBlock(trueBlock);
+                cond.setFalseBlock(falseBlock);
+
 
                 cond.buildIrTree();
                 curBlock = trueBlock;
                 // 遍历 if 块
+                stmt1.setReturnType(returnType);
                 stmt1.buildIrTree();
 
                 // 直接跳转到 nextBlock,这是不言而喻的,因为 trueBlock 执行完就是 nextBlock
                 builder.buildBr(curBlock, nextBlock);
-
                 // 对应有 else 的情况
                 if (stmt2 != null) {
                     curBlock = falseBlock;
+                    stmt2.setReturnType(returnType);
                     stmt2.buildIrTree();
                     builder.buildBr(curBlock, nextBlock);
                 }
-
                 // 最终到了 nextBlock
                 curBlock = nextBlock;
             }
@@ -154,6 +156,7 @@ public class Stmt extends Node{
                 cond.buildIrTree();
 
                 curBlock = bodyBlock;
+                stmt.setReturnType(returnType);
                 stmt.buildIrTree();
                 builder.buildBr(curBlock, condBlock);
 
@@ -180,17 +183,21 @@ public class Stmt extends Node{
                 if (exp != null) {
                     // 这里也有一个和 Break 类似的操作,不知道合不合理
                     exp.buildIrTree();
-                    Value sum = valueUp;
+                    Value sum;
                     if( returnType instanceof FloatType && valueUp.getValueType() instanceof IntType){
                         sum = builder.buildConversion(curBlock,"sitofp",new FloatType(), valueUp);
+                        builder.buildRet(curBlock, sum);
                     } else if( returnType instanceof IntType && valueUp.getValueType() instanceof FloatType ){
                         sum = builder.buildConversion(curBlock,"fptosi",new IntType(32), valueUp);
-                    }
-                    builder.buildRet(curBlock, sum);
+                        builder.buildRet(curBlock, sum);
+                    } else builder.buildRet(curBlock, valueUp);
+
+                    // 为了在main函数最后的return前插入输出语句
+                    lastBasicBlockUp = curBlock;
                 } else {
                     builder.buildRet(curBlock);
                 }
-                curBlock = new BasicBlock();
+                curBlock = builder.buildBasicBlock(curFunc);
             }
         }
 

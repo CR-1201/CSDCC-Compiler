@@ -20,10 +20,27 @@ public class Phi extends Instruction {
         return precursorNum;
     }
 
+    public void addIncoming(Value value, BasicBlock block) {
+        int i = 0;
+        while (i < precursorNum && getOperator(i) != null) {
+            i++;
+        }
+        if (i < precursorNum) {
+            setOperator(i, value);
+            setOperator(i + precursorNum, block);
+        } else {
+            getOperators().add(precursorNum, value);
+            precursorNum++;
+            getOperators().add(block);
+        }
+        value.addUser(this);
+        block.addUser(this);
+    }
+
     public Value getInputVal(BasicBlock block) {
         for (int i = 0; i < precursorNum; i++) {
-            if (getValue(i + precursorNum) == block) {
-                return getValue(i);
+            if (getOperator(i + precursorNum) == block) {
+                return getOperator(i);
             }
         }
         throw new AssertionError("block not found for phi!");
@@ -33,9 +50,9 @@ public class Phi extends Instruction {
     public String toString(){
         StringBuilder s = new StringBuilder(getName() + " = phi ").append(getValueType());
         for (int i = 0; i < precursorNum; i++){
-            if (getValue(i) == null) break;
-            s.append(" [ ").append(getValue(i).getName()).append(", ")
-                    .append(getValue(i + precursorNum).getName()).append(" ]");
+            if (getOperator(i) == null) break;
+            s.append(" [ ").append(getOperator(i).getName()).append(", ")
+                    .append(getOperator(i + precursorNum).getName()).append(" ]");
             if( i+1 < precursorNum )s.append(", ");
         }
         return s.toString();

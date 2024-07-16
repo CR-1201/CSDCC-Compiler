@@ -2,6 +2,7 @@ package ast;
 
 import ir.Value;
 import ir.instructions.binaryInstructions.Icmp;
+import ir.types.FloatType;
 import token.Token;
 
 // TODO
@@ -25,12 +26,17 @@ public class RelExp extends Node{
 
     @Override
     public void buildIrTree() {
-        addExp.buildIrTree();
-        Value result = valueUp;
+        Value adder = null;
+        Value result;
         if( relExp != null ){
             i32InRelUp = false;
             relExp.buildIrTree();
-            Value adder = valueUp;
+            adder = valueUp;
+        }
+        addExp.buildIrTree();
+        result = valueUp;
+
+        if( adder != null ){
             // 如果类型不对，需要先换类型
             if( result.getValueType().isI1() ){
                 result = builder.buildZext(curBlock, result);
@@ -38,16 +44,23 @@ public class RelExp extends Node{
             if( adder.getValueType().isI1() ){
                 adder = builder.buildZext(curBlock, adder);
             }
+            if( (result.getValueType() instanceof FloatType) && !(adder.getValueType() instanceof FloatType) ){
+                adder = builder.buildConversion(curBlock,"sitofp",new FloatType(), adder);
+            }
+            if( !(result.getValueType() instanceof FloatType) && (adder.getValueType() instanceof FloatType) ){
+                result = builder.buildConversion(curBlock,"sitofp",new FloatType(), result);
+            }
             if( op.getType() == Token.TokenType.LEQ ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.LE, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.LE, adder, result);
             } else if( op.getType() == Token.TokenType.GEQ ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.GE, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.GE, adder, result);
             } else if( op.getType() == Token.TokenType.GRE ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.GT, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.GT, adder, result);
             } else if( op.getType() == Token.TokenType.LSS ){
-                result = builder.buildIcmp(curBlock, Icmp.Condition.LT, result, adder);
+                result = builder.buildIcmp(curBlock, Icmp.Condition.LT, adder, result);
             }
         }
+
         valueUp = result;
     }
 

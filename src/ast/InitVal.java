@@ -3,7 +3,11 @@ package ast;
 import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
+import ir.constants.ConstStr;
 import ir.constants.Constant;
+import ir.types.FloatType;
+import ir.types.IntType;
+import ir.types.VoidType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +43,10 @@ public class InitVal extends Node{
         return exp;
     }
 
+    public List<InitVal> getInitVals() {
+        return initVals;
+    }
+
     /*
      * 对于单变量初始值,通过 valueUp 返回
      * 对于数组初始值,通过 valueArrayUp 返回
@@ -46,6 +54,9 @@ public class InitVal extends Node{
      */
     @Override
     public void buildIrTree() {
+
+//        if( !globalInitDown )this.constant = new ConstStr("skip");
+
         // 初始值是一个表达式(单变量)
         if(exp != null) {
             // 在进行全局单变量初始化
@@ -53,65 +64,87 @@ public class InitVal extends Node{
                 canCalValueDown = true;
                 exp.buildIrTree();
                 canCalValueDown = false;
+
             } else {
                 // 在进行局部变量初始化,没法确定初始值是否可以直接求值,所以用一个 value 代替
                 paramNotNeedLoadDown = false;
                 exp.buildIrTree();
-                paramNotNeedLoadDown = true;
+//                System.out.println(valueUp.getValueType() instanceof FloatType);
             }
+            valueUp = getTemp();
         } else {
             // 在进行数组初始化
             ArrayList<Value> flattenArray = new ArrayList<>();
-
+            int curNum = 0;
             int sum_dims = 1;
             for (int dim : dims) {
                 sum_dims *= dim;
             }
 
-            if (dims.size() == 1) {  // 一维数组
-                for (InitVal initVal : initVals) {
-                    // 全局变量数组初始化,这里的值一定是可以被计算出来的
+            for( InitVal initVal : initVals ){
+                initVal.setConstant(constant);
+                if( initVal.getExp() != null ){
+                    curNum++;
                     if (globalInitDown) {
                         canCalValueDown = true;
                         initVal.buildIrTree();
                         canCalValueDown = false;
-                        flattenArray.add(valueUp);
                     } else {
                         initVal.buildIrTree();
-                        flattenArray.add(valueUp);
                     }
-                }
-                // 不全 补0即可
-                for(int i = initVals.size() ; i < dims.get(0) ; i++ ){
-                    flattenArray.add(constant);
-                }
-
-            } else { // 多维数组
-                // 此时在遍历每个一维数组
-                for (InitVal initVal : initVals) {
-//                    initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
-                    if( initVal.getExp() == null ){
-                        // 如果当前初值包含括号,先减少一维
-                        initVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
-                    }
+                    Value temp = getTemp();
+                    flattenArray.add(temp);
+                } else {
+                    ArrayList<Integer> newDims = getIntegers(curNum);
+                    initVal.setDims(newDims);
                     initVal.buildIrTree();
-                    if( initVal.getExp() != null ){
-                        flattenArray.add(valueUp);
-                    } else {
-                        flattenArray.addAll(valueArrayUp);
-                    }
+                    flattenArray.addAll(valueArrayUp);
+                    curNum += valueArrayUp.size();
                 }
             }
 
-            int x = flattenArray.size();
-            for( int i = x ; i < sum_dims; i++ ){
+            //  填充元素
+            for(int i = curNum; i < sum_dims; i++ ){
                 flattenArray.add(constant);
             }
 
+//            System.out.println(flattenArray);
             valueArrayUp = flattenArray; // 返回
-
         }
 
+    }
+
+    private ArrayList<Integer> getIntegers(int curNum) {
+        ArrayList<Integer> newDims = new ArrayList<>();
+        int start = 0;
+        if(curNum == 0){
+            start = 1;
+        } else {
+            int tmpMul = 1;
+            for(int i = dims.size() - 1; i >= 0; i--){
+                tmpMul *= dims.get(i);
+                if(curNum % tmpMul != 0){
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        for(int i = start; i < dims.size(); i++){
+            newDims.add(dims.get(i));
+        }
+        return newDims;
+    }
+
+    private Value getTemp() {
+        Value temp = valueUp;
+        // 用整数初始化浮点数
+        if( constant instanceof ConstFloat && valueUp instanceof ConstInt) {
+            temp = new ConstFloat((float)((ConstInt)valueUp).getValue());
+        } else if (constant instanceof ConstInt && valueUp instanceof ConstFloat) {
+            // 虽然说明了不会出现这种情况
+            temp = new ConstInt((int)((ConstFloat)valueUp).getValue());
+        }
+        return temp;
     }
 
 

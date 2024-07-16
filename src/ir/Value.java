@@ -75,12 +75,12 @@ public abstract class Value {
      * 调用者作为一个被使用者,告诉它的 users,它要被替换成 replacement
      * @param replacement 替代品
      */
-    public void selfReplace(Value replacement){
+    public void replaceAllUsesWith(Value replacement){
         ArrayList<User> usersClone = new ArrayList<>(users);
         for (User user : usersClone){
             for (int i = 0; i < user.getNumOfOps(); i++){
-                if (user.getValue(i) == this){
-                    user.updateValue(i, replacement);
+                if (user.getOperator(i) == this){
+                    user.setOperator(i, replacement);
                 }
             }
         }

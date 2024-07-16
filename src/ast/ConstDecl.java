@@ -33,6 +33,7 @@ public class ConstDecl extends Node{
     @Override
     public void buildIrTree() {
         for (ConstDef constDef : constDefs) {
+            constDef.setBType(bType);
             if( bType.getToken().getType() == Token.TokenType.INTTK ){
                 constDef.setConstant(ConstInt.ZERO);
             } else constDef.setConstant(ConstFloat.ZERO);

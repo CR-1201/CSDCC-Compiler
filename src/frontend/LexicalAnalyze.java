@@ -22,8 +22,9 @@ public class LexicalAnalyze {
         return tokens;
     }
 
+    private boolean passMain = false;
+
     private final Map<String, Token.TokenType> keywords = new HashMap<>() {{
-        put("main", Token.TokenType.MAINTK);
         put("const", Token.TokenType.CONSTTK);
         put("int", Token.TokenType.INTTK);
         put("break", Token.TokenType.BREAKTK);
@@ -70,6 +71,10 @@ public class LexicalAnalyze {
                 }
                 Token.TokenType type;//检查是否是关键词
                 type = keywords.getOrDefault(idenfr, Token.TokenType.IDENFR);
+                if( !passMain && idenfr.equals("main") ){
+                    type = Token.TokenType.MAINTK;
+                    passMain = true;
+                }
                 tokens.add(new Token(type, lineNum, idenfr));
             } else if (s == '/') {//单行注释 多行注释 除号
                 if (next == '/') {

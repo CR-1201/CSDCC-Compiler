@@ -64,7 +64,7 @@ public class Br extends TerInstruction{
         ArrayList<Value> result = new ArrayList<>();
         int n = hasCondition ? 2 : 0;
         for( int i = 0 ; i <= n ; i++ ){
-            result.add(getValue(i));
+            result.add(getOperator(i));
         }
         return result;
     }
@@ -75,25 +75,25 @@ public class Br extends TerInstruction{
      * @param newValue 新 Value
      */
     @Override
-    public void updateValue(int index, Value newValue){
+    public void setOperator(int index, Value newValue){
         if (!hasCondition) {
-            BasicBlock oldBlock = (BasicBlock) getValue(index);
+            BasicBlock oldBlock = (BasicBlock) getOperator(index);
             getParent().replaceSuccessor(oldBlock, (BasicBlock) newValue);
         }else {
             if (index > 0){
-                BasicBlock oldBlock = (BasicBlock) getValue(index);
+                BasicBlock oldBlock = (BasicBlock) getOperator(index);
                 getParent().replaceSuccessor(oldBlock, (BasicBlock) newValue);
             }
         }
-        super.updateValue(index, newValue);
+        super.setOperator(index, newValue);
     }
 
     @Override
     public String toString(){
-        StringBuilder result = new StringBuilder("br " + getValue(0).getValueType() + " " + getValue(0).getName());
+        StringBuilder result = new StringBuilder("br " + getOperator(0).getValueType() + " " + getOperator(0).getName());
         int n = hasCondition ? 2 : 0;
         for( int i = 1 ; i <= n ; i++ ){
-            result.append(", ").append(getValue(i).getValueType()).append(" ").append(getValue(i).getName());
+            result.append(", ").append(getOperator(i).getValueType()).append(" ").append(getOperator(i).getName());
         }
         return result.toString();
     }

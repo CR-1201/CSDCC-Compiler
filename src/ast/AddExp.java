@@ -3,6 +3,7 @@ package ast;
 import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
+import ir.constants.Constant;
 import ir.types.DataType;
 import ir.types.FloatType;
 import ir.types.IntType;
@@ -45,70 +46,71 @@ public class AddExp extends Node{
         // 如果是可计算的，那么就要算出来
         if ( canCalValueDown ) {
             mulExp.buildIrTree();
-            float f_sum = 0;
-            int i_sum = 0;
+            Value mul = valueUp;
+            int i_sum = 0;float f_sum = 0;
+            int i_mul;float f_mul;
+            int i_add;float f_add;
             boolean float_flag = false;
-            if( valueUp instanceof  ConstInt ){
-                i_sum = ((ConstInt)valueUp).getValue();
-            } else {
-                f_sum = ((ConstFloat)valueUp).getValue();
-                float_flag = true;
-            }
             if( addExp != null ){
                 addExp.buildIrTree();
-                if( op.getType() == Token.TokenType.PLUS ){
-                    if( valueUp instanceof  ConstInt ){
-                        if( !float_flag ){
-                            i_sum += ((ConstInt)valueUp).getValue();
-                        } else {
-                            f_sum += ((ConstInt)valueUp).getValue();
-                        }
-                    } else if( valueUp instanceof ConstFloat ){
-                        if( !float_flag ){
-                            f_sum = ((ConstFloat)valueUp).getValue() + i_sum;
-                            float_flag = true;
-                        } else {
-                            f_sum += ((ConstFloat)valueUp).getValue();
-                        }
-                    }
-                } else if( op.getType() == Token.TokenType.MINU ){
-                    if( valueUp instanceof  ConstInt ){
-                        if( !float_flag ){
-                            i_sum -= ((ConstInt)valueUp).getValue();
-                        } else {
-                            f_sum -= ((ConstInt)valueUp).getValue();
-                        }
-                    } else if( valueUp instanceof ConstFloat ){
-                        if( !float_flag ){
-                            f_sum = i_sum - ((ConstFloat)valueUp).getValue() ;
-                            float_flag = true;
-                        } else {
-                            f_sum -= ((ConstFloat)valueUp).getValue();
-                        }
-                    }
+                Value add = valueUp;
+                if( mul.getValueType().isFloat() || add.getValueType().isFloat() ){
+                    float_flag = true;
                 }
+
+                if(!mul.getValueType().isFloat()){
+                    f_mul = ((ConstInt)mul).getValue();
+                    i_mul = ((ConstInt)mul).getValue();
+                } else {
+                    f_mul = ((ConstFloat)mul).getValue();
+                    i_mul = (int)(((ConstFloat)mul).getValue());
+                }
+
+                if(!add.getValueType().isFloat()){
+                    f_add = ((ConstInt)add).getValue();
+                    i_add = ((ConstInt)add).getValue();
+                } else {
+                    f_add = ((ConstFloat)add).getValue();
+                    i_add = (int)(((ConstFloat)add).getValue());
+                }
+
+                if( op.getType() == Token.TokenType.PLUS ){
+                    f_sum = f_add + f_mul;
+                    i_sum = i_add + i_mul;
+                } else if( op.getType() == Token.TokenType.MINU ){
+                    f_sum = f_add - f_mul;
+                    i_sum = i_add - i_mul;
+                }
+
+                if( float_flag ){
+                    valueUp = new ConstFloat(f_sum);
+                } else valueUp = new ConstInt(i_sum);
             }
 
-            if( float_flag ){
-                valueUp = new ConstFloat(f_sum);
-            } else valueUp = new ConstInt(i_sum);
         } else {
             // 是不可直接计算的,要用表达式
             DataType dataType = new IntType(32);
+
+            Value adder = null;Value sum;
+            if( addExp != null ){
+                addExp.buildIrTree();
+                adder = valueUp;
+            }
+
             mulExp.buildIrTree();
-            Value sum = valueUp;
+            sum = valueUp;
             if ( sum.getValueType().isI1()) {
                 // 如果类型是 boolean,需要先换类型
                 sum = builder.buildZext(curBlock, sum);
             }
 
-            if( addExp != null ){
-                addExp.buildIrTree();
-                Value adder = valueUp;
+            if( adder != null ){
                 // 如果是 boolean 无脑转int 32; 如果adder和sum当中有且仅有一个float, 那么另外一个就需要进行类型转化
                 if (adder.getValueType().isI1()) {
                     adder = builder.buildZext(curBlock, adder);
-                } else if( adder.getValueType().isFloat() && !sum.getValueType().isFloat() ){
+                }
+
+                if( adder.getValueType().isFloat() && !sum.getValueType().isFloat() ){
                     sum = builder.buildConversion(curBlock,"sitofp",new FloatType(), sum);
                     dataType = new FloatType();
                 }
@@ -123,10 +125,11 @@ public class AddExp extends Node{
                 }
 
                 if ( op.getType() == Token.TokenType.PLUS ){
-                    sum = builder.buildAdd(curBlock, dataType, sum, adder);
+                    sum = builder.buildAdd(curBlock, dataType, adder, sum);
                 } else if( op.getType() == Token.TokenType.MINU ){
-                    sum = builder.buildSub(curBlock, dataType, sum, adder);
+                    sum = builder.buildSub(curBlock, dataType, adder, sum);
                 }
+
             }
 
             valueUp = sum;

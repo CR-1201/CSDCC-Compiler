@@ -78,7 +78,10 @@ public class UnaryExp extends Node{
                     unaryValue = builder.buildZext(curBlock,unaryValue);
                 }
                 if ( unaryOp.getToken().getType() == Token.TokenType.NOT ) {
-                    valueUp = builder.buildIcmp(curBlock, Icmp.Condition.EQ, unaryValue, ConstInt.ZERO);
+                    if( dataType instanceof IntType ){
+                        valueUp = builder.buildIcmp(curBlock, Icmp.Condition.EQ, unaryValue, ConstInt.ZERO);
+                    } else valueUp = builder.buildIcmp(curBlock, Icmp.Condition.EQ, unaryValue, ConstFloat.ZERO);
+
                 } else if ( unaryOp.getToken().getType() == Token.TokenType.MINU ) {
                     if( dataType instanceof IntType ){
                         valueUp = builder.buildSub(curBlock, dataType, ConstInt.ZERO, unaryValue);
@@ -107,7 +110,14 @@ public class UnaryExp extends Node{
                             param.buildIrTree();
                             paramNotNeedLoadDown = false;
 
-                            argList.add(valueUp);
+                            // 没处理int强转指针
+                            Value arg = valueUp;
+                            if( argType instanceof IntType && valueUp.getValueType() instanceof FloatType ){
+                                arg = builder.buildConversion(curBlock,"fptosi",new IntType(32), valueUp);
+                            } else if (argType instanceof FloatType && valueUp.getValueType() instanceof IntType ){
+                                arg = builder.buildConversion(curBlock,"sitofp",new FloatType(), valueUp);
+                            }
+                            argList.add(arg);
                         }
                     }
                     //内建函数
@@ -130,7 +140,14 @@ public class UnaryExp extends Node{
                             param.buildIrTree();
                             paramNotNeedLoadDown = false;
 
-                            argList.add(valueUp);
+                            // 没处理int强转指针
+                            Value arg = valueUp;
+                            if( argType instanceof IntType && valueUp.getValueType() instanceof FloatType ){
+                                arg = builder.buildConversion(curBlock,"fptosi",new IntType(32), valueUp);
+                            } else if (argType instanceof FloatType && valueUp.getValueType() instanceof IntType ){
+                                arg = builder.buildConversion(curBlock,"sitofp",new FloatType(), valueUp);
+                            }
+                            argList.add(arg);
                         }
                     }
                     valueUp = builder.buildCall(curBlock, func, argList);
@@ -151,7 +168,6 @@ public class UnaryExp extends Node{
             case "putfloat" -> Function.putfloat;
             case "getfarray" -> Function.getfarray;
             case "putfarray" -> Function.putfarray;
-            case "putstr"    -> Function.putstr;
             case "starttime" -> Function.starttime;
             case "stoptime" -> Function.stoptime;
             default -> null;

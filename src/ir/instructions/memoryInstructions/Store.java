@@ -1,7 +1,11 @@
 package ir.instructions.memoryInstructions;
 
+import com.sun.jdi.IntegerType;
 import ir.BasicBlock;
 import ir.Value;
+import ir.types.FloatType;
+import ir.types.IntType;
+import ir.types.PointerType;
 import ir.types.VoidType;
 
 import java.util.ArrayList;
@@ -23,16 +27,16 @@ public class Store extends MemoryInstruction{
     }
 
     public Value getValue(){
-        return getValue(0);
+        return getOperator(0);
     }
 
     public Value getAddr(){
-        return getValue(1);
+        return getOperator(1);
     }
 
     @Override
     public String toString(){
-        return "store " + getValue(0).getValueType() + " " + getValue(0).getName() + ", " +
-                getValue(1).getValueType() + " " + getValue(1).getName();
+        return "store " + getOperator(0).getValueType() + " " + getOperator(0).getName() + ", " +
+                getOperator(1).getValueType() + " " + getOperator(1).getName();
     }
 }

@@ -48,11 +48,10 @@ public class Alloca extends MemoryInstruction{
     }
 
     /**
-     * 可以被提升,本质是只要是没有使用 gep 的,都可以被提升
-     * 直观理解,就是和数组不挂钩的,都可以在 mem2reg 中被提升
+     * 是否可以被提升,本质是只要是没有使用 gep 的,都可以被提升
      * @return 可提升,则为 true
      */
-    public boolean Promotable(){
+    public boolean isPromotable(){
         if (getUsers().isEmpty()){ // 没有使用
             return true;
         }
@@ -60,7 +59,7 @@ public class Alloca extends MemoryInstruction{
         for (User user : getUsers()){
             if (user instanceof GEP gep){
                 // promotable alloca must be a single data
-                if (gep.getValue(0) == this){
+                if (gep.getOperator(0) == this){
                     return false;
                 }
             }

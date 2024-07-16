@@ -75,6 +75,8 @@ public class LVal extends Node{
                 // 这里存着实际的指针
                 Value ptr = builder.buildLoad(curBlock, lVal);
 
+//                System.out.println(ptr.toString());
+
                 // FIXME 这里估计有bug
                 if (exps.isEmpty()) {
                     // 没有索引, 因为 Sysy 中没有指针运算, 只能被用当成子函数的实参

@@ -24,11 +24,11 @@ public class Zext extends Instruction {
     }
 
     public Value getConversionValue(){
-        return getValue(0);
+        return getOperator(0);
     }
 
     @Override
     public String toString(){
-        return this.getName() + " = zext i1 " + getValue(0).getName() + " to i32";
+        return this.getName() + " = zext i1 " + getOperator(0).getName() + " to i32";
     }
 }

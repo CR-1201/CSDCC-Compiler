@@ -9,7 +9,7 @@ import ir.constants.ConstInt;
 import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
-import ir.instructions.memoryInstructions.Alloca;
+
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.otherInstructions.Zext;
@@ -52,7 +52,7 @@ public class SCCP implements Pass {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
-                visitFunc(function);
+                    visitFunc(function);
             }
         }
     }

@@ -2,6 +2,7 @@ package ir;
 
 import ir.instructions.Instruction;
 import ir.types.LabelType;
+import pass.analysis.Loop;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,6 +30,9 @@ public class BasicBlock extends Value{
     private BasicBlock idomer;
     // 在支配树中的深度
     private int domLevel;
+    // ========================== Loop Info ==========================
+    // 当前 Basicblock 所在的循环，如果 loop 为 null，说明此BasicBlock不在任何循环中
+    private Loop loop;
     // 支配边际,即刚好不被当前基本块支配的基本块
     private final HashSet<BasicBlock> dominanceFrontier = new HashSet<>();
 
@@ -116,6 +120,15 @@ public class BasicBlock extends Value{
     }
 
     // =================================================================
+    // ========================== Loop Info ==========================
+
+    public Loop getLoop() {
+        return loop;
+    }
+
+    public void setLoop(Loop loop) {
+        this.loop = loop;
+    }
 
     public BasicBlock(int nameNum, Function parent){
         super("%b" + nameNum, new LabelType(), parent);
@@ -203,6 +216,18 @@ public class BasicBlock extends Value{
     @Override
     public Function getParent(){
         return (Function) super.getParent();
+    }
+
+    public void removeSelf() {
+        for (BasicBlock successor : this.getSuccessors()) {
+            successor.getPrecursors().remove(this);
+        }
+        for (Instruction inst : instructions) {
+            inst.removeAllOperators();
+            // 这里 parent 等下要被删掉了，没必要再erase，反而会报错。
+//            inst.eraseFromParent();
+        }
+        getParent().removeBlock(this);
     }
 
     @Override

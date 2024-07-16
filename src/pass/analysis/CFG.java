@@ -7,6 +7,7 @@ import ir.instructions.Instruction;
 import ir.instructions.terminatorInstructions.Br;
 import pass.Pass;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -21,6 +22,7 @@ public class CFG implements Pass {
             if (!function.getIsBuiltIn()) {
                 // 针对每一个函数去新建CFG
                 buildCFG(function);
+                deleteUnreachableBlock(function);
             }
         }
     }
@@ -65,6 +67,21 @@ public class CFG implements Pass {
                 falseBlock.addPrecursor(entry);
                 if (!visited.contains(falseBlock)) {
                     setCFG(falseBlock);
+                }
+            }
+        }
+    }
+
+    private void deleteUnreachableBlock(Function function) {
+        BasicBlock entry = function.getFirstBlock();
+        boolean flag = true;
+        while(flag) {
+            flag = false;
+            ArrayList<BasicBlock> blocks = new ArrayList<>(function.getBasicBlocksArray());
+            for (BasicBlock block : blocks) {
+                if (block.getPrecursors().isEmpty() && block != entry) {
+                    block.removeSelf();
+                    flag = true;
                 }
             }
         }

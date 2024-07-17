@@ -5,13 +5,12 @@ import ir.Module;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.BinaryInstruction;
 import ir.instructions.memoryInstructions.GEP;
-import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Phi;
 import pass.Pass;
-import pass.analysis.Dom;
-import utils.ValueStatus;
 
 import java.util.*;
+
+import static pass.analysis.Dom.getDomTreePostOrder;
 
 /**
  @author Conroy
@@ -54,32 +53,29 @@ public class GVN implements Pass {
         valueNumber.clear();
 
         // 这里做的是一个压栈，类似与手动 dfs
-//        Stack<BasicBlock> stack = new Stack<>();
-//        // pre oder
-//        ArrayList<BasicBlock> preOder = new ArrayList<>();
-//        // 后续 visited
-//        HashSet<BasicBlock> visited = new HashSet<>();
-//        // 入口块入栈
-//        stack.push(function.getFirstBlock());
-//        visited.add(function.getFirstBlock());
-//        while (!stack.isEmpty())
-//        {
-//            BasicBlock curBlock = stack.pop();
-//            preOder.add(curBlock);
-//            for (BasicBlock child : curBlock.getSuccessors())
-//            {
-//                if (!visited.contains(child))
-//                {
-//                    stack.push(child);
-//                    visited.add(child);
-//                }
-//            }
-//        }
-        reversePostOrder(function.getFirstBlock());
+        Stack<BasicBlock> stack = new Stack<>();
+        // pre oder
+        ArrayList<BasicBlock> preOder = new ArrayList<>();
+        // 后续 visited
+        HashSet<BasicBlock> visited = new HashSet<>();
+        // 入口块入栈
+        stack.push(function.getFirstBlock());
+        visited.add(function.getFirstBlock());
+        while (!stack.isEmpty()) {
+            BasicBlock curBlock = stack.pop();
+            preOder.add(curBlock);
+            for (BasicBlock child : curBlock.getSuccessors()) {
+                if (!visited.contains(child)) {
+                    stack.push(child);
+                    visited.add(child);
+                }
+            }
+        }
+//        reversePostOrder(function.getFirstBlock());
 
-        Collections.reverse(reversePostOrder);
+//        Collections.reverse(reversePostOrder);
         // 逆后序遍历
-        for(BasicBlock block : reversePostOrder){
+        for(BasicBlock block : preOder){
             basicBlockGVN(block);
         }
     }

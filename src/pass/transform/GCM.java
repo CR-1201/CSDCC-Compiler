@@ -67,6 +67,13 @@ public class GCM implements Pass {
         ArrayList<BasicBlock> reversePostOrder = getDomTreePostOrder(function);
         Collections.reverse(reversePostOrder);
 
+//        System.out.println(function.getName()+": ");
+//
+//        for( BasicBlock b : reversePostOrder ){
+//            System.out.println(b);
+//        }
+//        System.out.println("==========================");
+
         ArrayList<Instruction> instructions = new ArrayList<>();
         // GCM 中只考虑 value dependency,不考虑基本块
         for( BasicBlock basicBlock : reversePostOrder){
@@ -132,7 +139,7 @@ public class GCM implements Pass {
                         Value value = userInstPhi.getOperator(j);
                         if( value instanceof Instruction && value.equals(inst)){
                             useBasicblock = (BasicBlock) userInst.getOperator(j + ((Phi) userInst).getPrecursorNum());
-                            // useBasicblock = userInst.getParent().getPrecursors().get(j);
+//                             useBasicblock = userInst.getParent().getPrecursors().get(j);
                             LCABasicBlock = findLCA(LCABasicBlock, useBasicblock);
                         }
                     }

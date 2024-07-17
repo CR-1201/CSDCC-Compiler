@@ -81,7 +81,7 @@ public class UselessReturnEmit implements Pass {
             for (BasicBlock bb : func.getBasicBlocksArray()) {
                 for (Instruction inst : bb.getInstructionsArray())
                 {
-                    if (inst instanceof Ret)
+                    if (inst instanceof Ret && !((Ret) inst).getOperators().isEmpty())
                     {
                         inst.setOperator(0, ConstInt.ZERO);
                     }

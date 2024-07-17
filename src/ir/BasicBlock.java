@@ -1,6 +1,8 @@
 package ir;
 
 import ir.instructions.Instruction;
+import ir.instructions.otherInstructions.Phi;
+import ir.instructions.terminatorInstructions.Br;
 import ir.types.LabelType;
 import pass.analysis.Loop;
 
@@ -228,6 +230,23 @@ public class BasicBlock extends Value{
 //            inst.eraseFromParent();
         }
         getParent().removeBlock(this);
+    }
+
+    public ArrayList<Phi> getPhiUsers() {
+        ArrayList<Phi> phis = new ArrayList<>();
+        for (User user : getUsers()) {
+            if (user instanceof Phi phi) {
+                phis.add(phi);
+            }
+        }
+        return phis;
+    }
+
+    public Br getUselessBr() {
+        if (getInstructions().size() == 1 && getTailInstruction() instanceof Br br)
+            return br;
+        else
+            return null;
     }
 
     @Override

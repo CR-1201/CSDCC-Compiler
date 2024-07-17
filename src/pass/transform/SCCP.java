@@ -55,17 +55,15 @@ public class SCCP implements Pass {
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             CFG cfg = new CFG();
-            if (!function.getIsBuiltIn())  {
+            if (!function.getIsBuiltIn()) {
                 // 遍历所有非库函数
                 int count = 1;
-                while( needPass && count > 0 ){
+                while (needPass && count > 0) {
                     count--;
                     needPass = false;
                     visitFunc(function);
                 }
             }
-
-
         }
     }
 
@@ -187,6 +185,7 @@ public class SCCP implements Pass {
         br.removeAllOperators();
         br.setHasCondition(false);
         br.addOperator(jumpBlock);
+        jumpBlock.addUser(br);
         valueMap.put(br,curStatus);
 //        System.out.println(br);
         if( !jumpBlock.equals(invalidBlock) ){

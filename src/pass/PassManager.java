@@ -5,6 +5,7 @@ import pass.analysis.CFG;
 import pass.analysis.Dom;
 import pass.analysis.LoopAnalysis;
 import pass.transform.Mem2reg;
+import pass.transform.MergeRedundantBr;
 import pass.transform.UselessReturnEmit;
 import pass.transform.SCCP;
 
@@ -20,6 +21,7 @@ public class PassManager {
 //        passes.add(new LoopAnalysis());
         passes.add(new Mem2reg());
         passes.add(new SCCP());
+        passes.add(new MergeRedundantBr());
 //        passes.add(new UselessReturnEmit());
         for (Pass pass : passes) {
             pass.run();

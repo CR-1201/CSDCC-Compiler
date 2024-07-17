@@ -23,8 +23,11 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
         passes.add(new DeadCodeEmit());
-//        passes.add(new GVN());
-//        passes.add(new GCM());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new LoopAnalysis());
+        passes.add(new GVN());
+        passes.add(new GCM());
         for (Pass pass : passes) {
             pass.run();
         }

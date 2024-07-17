@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
+import static pass.analysis.Dom.getDomTreePostOrder;
+
 /**
  @author Conroy
  一个指令的位置是由它使用的指令和使用它的指令决定的
@@ -62,8 +64,9 @@ public class GCM implements Pass {
     private void functionGCM(Function function) {
         visited.clear();
         // 逆后续遍历
-        Dom dom = new Dom();
-        ArrayList<BasicBlock> reversePostOrder = dom.computeReversePostOrder(function.getFirstBlock());
+        ArrayList<BasicBlock> reversePostOrder = getDomTreePostOrder(function);
+        Collections.reverse(reversePostOrder);
+
         ArrayList<Instruction> instructions = new ArrayList<>();
         // GCM 中只考虑 value dependency,不考虑基本块
         for( BasicBlock basicBlock : reversePostOrder){

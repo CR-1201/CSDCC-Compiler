@@ -30,7 +30,7 @@ public class IrBuilder {
     // module 实例
     public final Module module = Module.getModule();
     // 一个起名计数器,对于 instruction 或者 BasicBlock 没有名字,需要用计数器取一个独一无二的名字
-    private static int nameNumCounter = 0;
+    public static int nameNumCounter = 0;
     private static int strNumCounter = 0;
     // 用于给 phi 一个名字,可以从 0 开始编号,因为 phi 一定是 %p1 之类的
     public static int phiNameNum = 0;

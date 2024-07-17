@@ -60,6 +60,14 @@ public class Module extends Value{
         return result;
     }
 
+    public ArrayList<GlobalVariable> getGlobalVariablesArray(){
+        ArrayList<GlobalVariable> result = new ArrayList<>();
+        for (Value globalVariableNode : globalVariables){
+            result.add((GlobalVariable) globalVariableNode); // 强制转化不会出问题
+        }
+        return result;
+    }
+
     @Override
     public String toString(){
         StringBuilder s = new StringBuilder();

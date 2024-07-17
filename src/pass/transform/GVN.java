@@ -87,47 +87,47 @@ public class GVN implements Pass {
 
         // 去掉一些没有必要的phi
         int i = 0, j;
-//        while( i < block.getInstructionsArray().size() ){
-//            Instruction curInstruction = block.getInstructionsArray().get(i);
-//            // 只在 phi 节点继续,消掉一些不必要的 phi
-//            // 因为 phi 指令只存在于块的开头
-//            if( !(curInstruction instanceof Phi) ){
-//                break;
-//            }
-//
-//            j = i+1;
-//            while( j < block.getInstructionsArray().size() ){
-//                Instruction nextInstruction = block.getInstructionsArray().get(j);
-//
-//                if( !(nextInstruction instanceof Phi) ){
-//                    break;
-//                }
-//                // 针对两条phi进行讨论
-//                if( ((Phi)curInstruction).getPrecursorNum() == ((Phi)nextInstruction).getPrecursorNum() ){
-//                    // 相同则删除多余的phi
-//                    boolean reduceFlag = true;
-//                    for( int k = 0 ; k < ((Phi)curInstruction).getPrecursorNum() ; k++ ){
-//                        if ( curInstruction.getOperator(k) != nextInstruction.getOperator(k) ) {
-//                            reduceFlag = false;
-//                            break;
-//                        }
-//                    }
-//                    // 如果phi相同, 删掉即可
-//                    if( reduceFlag ){
-//                        curInstruction.replaceAllUsesWith(nextInstruction);
-//                        curInstruction.removeAllOperators();
-//                        curInstruction.eraseFromParent();
-//                        break;
-//                    }
-//                }
-//                j++;
-//            }
-//            // FIXME 这里只能加1 类似于双层循环
-//            i++;
-//        }
+        while( i < block.getInstructionsArray().size() ){
+            Instruction curInstruction = block.getInstructionsArray().get(i);
+            // 只在 phi 节点继续,消掉一些不必要的 phi
+            // 因为 phi 指令只存在于块的开头
+            if( !(curInstruction instanceof Phi) ){
+                break;
+            }
+
+            j = i+1;
+            while( j < block.getInstructionsArray().size() ){
+                Instruction nextInstruction = block.getInstructionsArray().get(j);
+
+                if( !(nextInstruction instanceof Phi) ){
+                    break;
+                }
+                // 针对两条phi进行讨论
+                if( ((Phi)curInstruction).getPrecursorNum() == ((Phi)nextInstruction).getPrecursorNum() ){
+                    // 相同则删除多余的phi
+                    boolean reduceFlag = true;
+                    for( int k = 0 ; k < ((Phi)curInstruction).getPrecursorNum() ; k++ ){
+                        if ( curInstruction.getOperator(k) != nextInstruction.getOperator(k) ) {
+                            reduceFlag = false;
+                            break;
+                        }
+                    }
+                    // 如果phi相同, 删掉即可
+                    if( reduceFlag ){
+                        curInstruction.replaceAllUsesWith(nextInstruction);
+                        curInstruction.removeAllOperators();
+                        curInstruction.eraseFromParent();
+                        break;
+                    }
+                }
+                j++;
+            }
+            // FIXME 这里只能加1 类似于双层循环
+            i++;
+        }
 
         // 重新遍历,进行 instructionGVN
-//        i = 0;
+        i = 0;
         while(i < block.getInstructionsArray().size()){
             Instruction curInstruction = block.getHeadInstruction();
             instructionGVN(curInstruction);

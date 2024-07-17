@@ -53,6 +53,28 @@ public class GVN implements Pass {
     private void functionGVN(Function function) {
         valueNumber.clear();
 
+        // 这里做的是一个压栈，类似与手动 dfs
+//        Stack<BasicBlock> stack = new Stack<>();
+//        // pre oder
+//        ArrayList<BasicBlock> preOder = new ArrayList<>();
+//        // 后续 visited
+//        HashSet<BasicBlock> visited = new HashSet<>();
+//        // 入口块入栈
+//        stack.push(function.getFirstBlock());
+//        visited.add(function.getFirstBlock());
+//        while (!stack.isEmpty())
+//        {
+//            BasicBlock curBlock = stack.pop();
+//            preOder.add(curBlock);
+//            for (BasicBlock child : curBlock.getSuccessors())
+//            {
+//                if (!visited.contains(child))
+//                {
+//                    stack.push(child);
+//                    visited.add(child);
+//                }
+//            }
+//        }
         reversePostOrder(function.getFirstBlock());
 
         Collections.reverse(reversePostOrder);

@@ -16,8 +16,11 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
-        passes.add(new Mem2reg());
-        passes.add(new SCCP());
+//        passes.add(new Mem2reg());
+//        passes.add(new SCCP());
+//        passes.add(new CFG());
+//        passes.add(new Dom());
+//        passes.add(new LoopAnalysis());
         passes.add(new GVN());
         passes.add(new GCM());
 //        passes.add(new UselessReturnEmit());

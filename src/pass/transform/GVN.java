@@ -32,8 +32,6 @@ public class GVN implements Pass {
     public void run(){
         for(Function function : module.getFunctionsArray() ){
             if (!function.getIsBuiltIn())  {
-                Dom dom = new Dom();
-                dom.buildDom(function);
                 functionGVN(function);
             }
         }

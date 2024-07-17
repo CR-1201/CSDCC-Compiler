@@ -12,12 +12,13 @@ import pass.Pass;
 import ir.Module;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class DeadCodeEmit implements Pass {
 
     private final Module irModule = Module.getModule();
 
-    private final ArrayList<Instruction> usefulInstructions = new ArrayList<>();
+    private final HashSet<Instruction> usefulInstructions = new HashSet<>();
 
     @Override
     public void run() {
@@ -54,9 +55,9 @@ public class DeadCodeEmit implements Pass {
     private void findClosure(Instruction instr) {
         if (!usefulInstructions.contains(instr)) {
             usefulInstructions.add(instr);
-            
+
             for (Value operand : instr.getOperators()) {
-                if (operand instanceof Instruction) {
+                if (operand instanceof Instruction && !usefulInstructions.contains(operand)) {
                     findClosure((Instruction) operand);
                 }
             }

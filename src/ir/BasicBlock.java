@@ -126,6 +126,12 @@ public class BasicBlock extends Value{
         return loop;
     }
 
+    public int getLoopDepth() {
+        if (loop == null) {
+            return 0;
+        } else return loop.getDepth();
+    }
+
     public void setLoop(Loop loop) {
         this.loop = loop;
     }
@@ -209,6 +215,18 @@ public class BasicBlock extends Value{
             return null;
         }else{
             return instructions.getLast();
+        }
+    }
+
+    /**
+     * 获得首指令,如果开头没有指令,那么返回 null
+     * @return 首指令
+     */
+    public Instruction getHeadInstruction(){
+        if (instructions.isEmpty()){
+            return null;
+        }else{
+            return instructions.getFirst();
         }
     }
 

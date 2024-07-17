@@ -18,7 +18,6 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;
-import pass.analysis.CFG;
 import utils.Pair;
 import utils.ValueStatus;
 
@@ -54,7 +53,6 @@ public class SCCP implements Pass {
 
     public void run() {
         for (Function function : module.getFunctionsArray()) {
-            CFG cfg = new CFG();
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
                 int count = 1;
@@ -64,8 +62,6 @@ public class SCCP implements Pass {
                     visitFunc(function);
                 }
             }
-
-
         }
     }
 
@@ -187,6 +183,7 @@ public class SCCP implements Pass {
         br.removeAllOperators();
         br.setHasCondition(false);
         br.addOperator(jumpBlock);
+        jumpBlock.addUser(br);
         valueMap.put(br,curStatus);
 //        System.out.println(br);
         if( !jumpBlock.equals(invalidBlock) ){

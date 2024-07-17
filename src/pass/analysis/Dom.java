@@ -124,7 +124,7 @@ public class Dom implements Pass {
      * @param entry 入口基本块
      * @return 逆后序
      */
-    private ArrayList<BasicBlock> computeReversePostOrder(BasicBlock entry) {
+    public ArrayList<BasicBlock> computeReversePostOrder(BasicBlock entry) {
         visited.clear();
         orders.clear();
         dfsWalk(entry);

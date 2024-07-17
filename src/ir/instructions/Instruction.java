@@ -25,7 +25,7 @@ public class Instruction extends User {
     public Instruction(String name, DataType dataType, BasicBlock parent, ArrayList<Value> ops) {
         super(name, dataType, parent, ops);
         if (!name.isEmpty()) {
-        parent.getParent().addFunctionSymbol(this);
+            parent.getParent().addFunctionSymbol(this);
         }
     }
 

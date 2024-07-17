@@ -5,8 +5,10 @@ import ir.Module;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.BinaryInstruction;
 import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Phi;
 import pass.Pass;
+import pass.analysis.Dom;
 import utils.ValueStatus;
 
 import java.util.*;
@@ -30,6 +32,8 @@ public class GVN implements Pass {
     public void run(){
         for(Function function : module.getFunctionsArray() ){
             if (!function.getIsBuiltIn())  {
+                Dom dom = new Dom();
+                dom.buildDom(function);
                 functionGVN(function);
             }
         }
@@ -53,9 +57,10 @@ public class GVN implements Pass {
 
         reversePostOrder(function.getFirstBlock());
 
+        Collections.reverse(reversePostOrder);
         // 逆后序遍历
-        for( int i = reversePostOrder.size()-1 ; i >= 0 ; i-- ){
-            basicBlockGVN(reversePostOrder.get(i));
+        for(BasicBlock block : reversePostOrder){
+            basicBlockGVN(block);
         }
     }
 

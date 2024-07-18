@@ -23,11 +23,11 @@ public class BasicBlock extends Value{
     private final HashSet<BasicBlock> precursors = new HashSet<>();
     private final HashSet<BasicBlock> successors = new HashSet<>();
     // 当前基本块支配的基本块
-    private ArrayList<BasicBlock> doms = new ArrayList<>();
+    private HashSet<BasicBlock> doms = new HashSet<>();
     // 当前基本块的必经基本块，即当前基本块的支配者
-    private ArrayList<BasicBlock> domers = new ArrayList<>();
+    private HashSet<BasicBlock> domers = new HashSet<>();
     // 当前基本块直接支配的基本块
-    private ArrayList<BasicBlock> idoms = new ArrayList<>();
+    private HashSet<BasicBlock> idoms = new HashSet<>();
     // 直接支配当前基本块的基本块
     private BasicBlock idomer;
     // 在支配树中的深度
@@ -60,19 +60,19 @@ public class BasicBlock extends Value{
         this.domLevel = domLevel;
     }
 
-    public ArrayList<BasicBlock> getDoms(){
+    public HashSet<BasicBlock> getDoms(){
         return doms;
     }
 
-    public void setDoms(ArrayList<BasicBlock> doms){
+    public void setDoms(HashSet<BasicBlock> doms){
         this.doms = doms;
     }
 
-    public ArrayList<BasicBlock> getDomers() {
+    public HashSet<BasicBlock> getDomers() {
         return domers;
     }
 
-    public void setDomers(ArrayList<BasicBlock> domers) {
+    public void setDomers(HashSet<BasicBlock> domers) {
         this.domers = domers;
     }
 
@@ -80,11 +80,11 @@ public class BasicBlock extends Value{
         domers.add(domer);
     }
 
-    public ArrayList<BasicBlock> getIdoms(){
+    public HashSet<BasicBlock> getIdoms(){
         return idoms;
     }
 
-    public void setIdoms(ArrayList<BasicBlock> idoms){
+    public void setIdoms(HashSet<BasicBlock> idoms){
         this.idoms = idoms;
     }
 

@@ -18,6 +18,7 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;
+import utils.IOFunc;
 import utils.Pair;
 import utils.ValueStatus;
 
@@ -64,6 +65,8 @@ public class SCCP implements Pass {
                 }
             }
         }
+        IOFunc.clear("checkir/ir_after_mem2reg");
+        IOFunc.output(Module.getModule().toString(),"checkir/ir_after_mem2reg");
     }
 
     private void visitFunc(Function function) {

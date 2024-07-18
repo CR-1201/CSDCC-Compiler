@@ -1,5 +1,7 @@
 package pass.transform;
 
+import ir.BasicBlock;
+import ir.Function;
 import ir.Module;
 import ir.Value;
 import ir.constants.ConstFloat;
@@ -9,6 +11,9 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Zext;
+import pass.Pass;
+
+import java.util.ArrayList;
 
 /**
  @author Conroy
@@ -17,32 +22,46 @@ import ir.instructions.otherInstructions.Zext;
  (1) a + 0 = a
  (2) ( b + const1 ) - const2 = b + ( const1 - const2 )
  */
-public class SimplifyInst {
+public class SimplifyInst implements Pass {
+    private final Module module = Module.getModule();
+    public void run() {
+        for (Function function : module.getFunctionsArray()) {
+            if (!function.getIsBuiltIn()) {
+                ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+                for (BasicBlock basicBlock : blocks) {
+                    ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
+                    for (Instruction instruction : instructions) {
+                        Value value = simplify(instruction);
+                        if (!value.equals(instruction)) {
+                            instruction.replaceAllUsesWith(value);
+                            instruction.removeAllOperators();
+                            instruction.eraseFromParent();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     private static ConstInt constInt;
     private static ConstFloat constFloat;
 
-    public static Value simplify(Instruction inst){
-        if( inst instanceof Add add){
-            return simplifyAddInst(add);
-        } else if( inst instanceof Sub sub){
-            return simplifySubInst(sub);
-        } else if( inst instanceof Mul mul){
-            return simplifyMulInst(mul);
-        } else if( inst instanceof Sdiv sdiv){
-            return simplifyDivInst(sdiv);
-        } else if( inst instanceof Srem srem){
-            return simplifySremInst(srem);
-        } else if( inst instanceof Icmp icmp){
-            return simplifyIcmpInst(icmp);
-        } else if( inst instanceof Zext zext){
-            return simplifyZextInst(zext);
-        } else if( inst instanceof Conversion conversion){
-            return simplifyConversionInst(conversion);
-        } else return inst;
+    private Value simplify(Instruction inst){
+        return switch (inst) {
+            case Add add -> simplifyAddInst(add);
+            case Sub sub -> simplifySubInst(sub);
+            case Mul mul -> simplifyMulInst(mul);
+            case Sdiv sdiv -> simplifyDivInst(sdiv);
+            case Srem srem -> simplifySremInst(srem);
+            case Icmp icmp -> simplifyIcmpInst(icmp);
+            case Zext zext -> simplifyZextInst(zext);
+            case Conversion conversion -> simplifyConversionInst(conversion);
+            case null, default -> inst;
+        };
     }
 
-    public static Value simplifyAddInst(Add inst){
+    public Value simplifyAddInst(Add inst){
         Value v1 = inst.getOperator(0), v2 = inst.getOperator(1);
 
         Value v3 = flodConstant(inst,v1,v2);
@@ -97,7 +116,7 @@ public class SimplifyInst {
         return inst;
     }
 
-    private static boolean checkAdd(Value v1, Value v2) {
+    private boolean checkAdd(Value v1, Value v2) {
         if (v2 instanceof Instruction && v1 instanceof Sub) {
             Value op1 = ((Sub) v1).getOperator(0);
             Value op2 = ((Sub) v1).getOperator(1);
@@ -112,7 +131,7 @@ public class SimplifyInst {
         return false;
     }
 
-    public static Value simplifySubInst(Sub inst){
+    public Value simplifySubInst(Sub inst){
         Value v1 = inst.getOperator(0), v2 = inst.getOperator(1);
 
         Value v3 = flodConstant(inst,v1,v2);
@@ -136,7 +155,7 @@ public class SimplifyInst {
         return inst;
     }
 
-    public static Value simplifyMulInst(Mul inst){
+    public Value simplifyMulInst(Mul inst){
         Value v1 = inst.getOperator(0), v2 = inst.getOperator(1);
 
         Value v3 = flodConstant(inst,v1,v2);
@@ -168,7 +187,7 @@ public class SimplifyInst {
         return inst;
     }
 
-    public static Value simplifyDivInst(Sdiv inst){
+    public Value simplifyDivInst(Sdiv inst){
         Value v1 = inst.getOperator(0), v2 = inst.getOperator(1);
 
         Value v3 = flodConstant(inst,v1,v2);
@@ -220,7 +239,7 @@ public class SimplifyInst {
         return inst;
     }
 
-    public static Value simplifySremInst(Srem inst){
+    public Value simplifySremInst(Srem inst){
         Value v1 = inst.getOperator(0), v2 = inst.getOperator(1);
 
         Value v3 = flodConstant(inst,v1,v2);
@@ -250,7 +269,7 @@ public class SimplifyInst {
         return inst;
     }
 
-    public static Value simplifyIcmpInst(Icmp inst){
+    public Value simplifyIcmpInst(Icmp inst){
         Value v1 = inst.getOperator(0), v2 = inst.getOperator(1);
 
         Value v3 = flodConstant(inst,v1,v2);
@@ -267,7 +286,7 @@ public class SimplifyInst {
         return inst;
     }
 
-    public static Value simplifyZextInst(Zext inst){
+    public Value simplifyZextInst(Zext inst){
         Value src = inst.getConversionValue();
         if( src instanceof ConstInt value){
             return new ConstInt(value.getValue());
@@ -276,7 +295,7 @@ public class SimplifyInst {
     }
 
 
-    public static Value simplifyConversionInst(Conversion inst){
+    public Value simplifyConversionInst(Conversion inst){
         Value value = inst.getConversionValue();
         if( value instanceof ConstFloat temp_float){ // fptosi
             return new ConstInt((int)(temp_float.getValue()));
@@ -286,7 +305,7 @@ public class SimplifyInst {
         return inst;
     }
 
-    private static Value flodConstant(Instruction inst, Value v1, Value v2){
+    private Value flodConstant(Instruction inst, Value v1, Value v2){
         if( v1 instanceof ConstInt const1 && v2 instanceof ConstInt const2){
             int n1 = const1.getValue(), n2 = const2.getValue();
             int result, bit;

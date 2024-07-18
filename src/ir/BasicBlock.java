@@ -1,5 +1,6 @@
 package ir;
 
+import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;

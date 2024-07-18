@@ -65,8 +65,6 @@ public class SCCP implements Pass {
                 }
             }
         }
-        IOFunc.clear("checkir/ir_after_mem2reg");
-        IOFunc.output(Module.getModule().toString(),"checkir/ir_after_mem2reg");
     }
 
     private void visitFunc(Function function) {

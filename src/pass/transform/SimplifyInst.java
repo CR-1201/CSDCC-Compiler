@@ -48,17 +48,23 @@ public class SimplifyInst implements Pass {
     private static ConstFloat constFloat;
 
     private Value simplify(Instruction inst){
-        return switch (inst) {
-            case Add add -> simplifyAddInst(add);
-            case Sub sub -> simplifySubInst(sub);
-            case Mul mul -> simplifyMulInst(mul);
-            case Sdiv sdiv -> simplifyDivInst(sdiv);
-            case Srem srem -> simplifySremInst(srem);
-            case Icmp icmp -> simplifyIcmpInst(icmp);
-            case Zext zext -> simplifyZextInst(zext);
-            case Conversion conversion -> simplifyConversionInst(conversion);
-            case null, default -> inst;
-        };
+        if( inst instanceof Add add){
+            return simplifyAddInst(add);
+        } else if( inst instanceof Sub sub){
+            return simplifySubInst(sub);
+        } else if( inst instanceof Mul mul){
+            return simplifyMulInst(mul);
+        } else if( inst instanceof Sdiv sdiv){
+            return simplifyDivInst(sdiv);
+        } else if( inst instanceof Srem srem){
+            return simplifySremInst(srem);
+        } else if( inst instanceof Icmp icmp){
+            return simplifyIcmpInst(icmp);
+        } else if( inst instanceof Zext zext){
+            return simplifyZextInst(zext);
+        } else if( inst instanceof Conversion conversion){
+            return simplifyConversionInst(conversion);
+        } else return inst;
     }
 
     public Value simplifyAddInst(Add inst){

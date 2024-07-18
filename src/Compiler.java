@@ -1,4 +1,6 @@
 import ast.CompUnit;
+import backend.ObjBuilder;
+import backend.module.ObjModule;
 import config.Config;
 import frontend.LexicalAnalyze;
 import frontend.ParserAnalyze;
@@ -46,5 +48,10 @@ public class Compiler {
         passManager.run();
         IOFunc.clear(Config.irOptimizeOutputPath);
         IOFunc.output(Module.getModule().toString(), Config.irOptimizeOutputPath);
+
+        // 生成目标代码
+        ObjBuilder.getObjBuilder().build();
+        System.out.println(ObjModule.getModule());
+
     }
 }

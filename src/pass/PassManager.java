@@ -12,9 +12,9 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new Mem2reg());
+//        passes.add(new CFG());
+//        passes.add(new Dom());
+//        passes.add(new Mem2reg());
         for (Pass pass : passes) {
             pass.run();
         }

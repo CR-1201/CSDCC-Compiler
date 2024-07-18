@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class Br extends TerInstruction{
     // 有条件跳转还是无条件跳转
-    private final boolean hasCondition;
+    private boolean hasCondition;
 
     /**
      * 无条件跳转
@@ -57,6 +57,10 @@ public class Br extends TerInstruction{
 
     public boolean getHasCondition(){
         return hasCondition;
+    }
+
+    public void setHasCondition(boolean hasCondition){
+        this.hasCondition = hasCondition;
     }
 
     // 指令的全部操作数,使用前需要用hasCondition()判定是否为有条件跳转

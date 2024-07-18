@@ -1,6 +1,7 @@
 package ir.instructions.otherInstructions;
 
 import ir.BasicBlock;
+import ir.User;
 import ir.Value;
 import ir.instructions.Instruction;
 import ir.types.DataType;
@@ -32,9 +33,19 @@ public class Phi extends Instruction {
             getOperators().add(precursorNum, value);
             precursorNum++;
             getOperators().add(block);
+            value.addUser(this);
+            block.addUser(this);
         }
-        value.addUser(this);
-        block.addUser(this);
+    }
+
+    public void removeUsedBlock(BasicBlock block) {
+        int idx = getOperators().indexOf(block);
+        Value value = getOperator(idx - precursorNum);
+        block.removeUser(this);
+        value.removeUser(this);
+        removeOperator(idx);
+        removeOperator(idx - precursorNum);
+        precursorNum --;
     }
 
     public Value getInputVal(BasicBlock block) {

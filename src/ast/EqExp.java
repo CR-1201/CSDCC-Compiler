@@ -25,13 +25,16 @@ public class EqExp extends Node{
 
     @Override
     public void buildIrTree() {
-        relExp.buildIrTree();
-        Value result =  valueUp;
-
+        Value adder = null;Value result;
         if( eqExp != null ){
             i32InRelUp = false;
             eqExp.buildIrTree();
-            Value adder = valueUp;
+            adder = valueUp;
+        }
+        relExp.buildIrTree();
+        result = valueUp;
+
+        if( adder != null ){
             // 如果类型不对，需要先换类型
             if (result.getValueType().isI1()) {
                 result = builder.buildZext( curBlock, result);
@@ -45,6 +48,7 @@ public class EqExp extends Node{
             if( !(result.getValueType() instanceof FloatType) && (adder.getValueType() instanceof FloatType) ){
                 result = builder.buildConversion(curBlock,"sitofp",new FloatType(), result);
             }
+
             if( op.getType() == Token.TokenType.EQL ){
                 result = builder.buildIcmp( curBlock, Icmp.Condition.EQ, adder, result);
             } else if( op.getType() == Token.TokenType.NEQ ){

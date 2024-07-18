@@ -142,6 +142,31 @@ public class Function extends Value{
         blocks.remove(block);
     }
 
+    // 获取sideEffect
+    public boolean getSideEffect() {
+        return this.sideEffect;
+    }
+
+    // 设置sideEffect
+    public void setSideEffect(boolean sideEffect) {
+        this.sideEffect = sideEffect;
+    }
+
+    // 清除调用函数
+    public void clearCallers() {
+        this.callers.clear();
+    }
+
+    // 增加调用函数
+    public void addCaller(Function func) {
+        this.callers.add(func);
+    }
+
+    // 获取调用函数列表
+    public ArrayList<Function> getCallersArray() {
+        return new ArrayList<>(this.callers);
+    }
+
     /**
      * 编译器可以假设标记为 dso_local 的函数或变量将解析为同一链接单元中的符号
      * 即使定义不在这个编译单元内,也会生成直接访问

@@ -26,12 +26,17 @@ public class RelExp extends Node{
 
     @Override
     public void buildIrTree() {
-        addExp.buildIrTree();
-        Value result = valueUp;
+        Value adder = null;
+        Value result;
         if( relExp != null ){
             i32InRelUp = false;
             relExp.buildIrTree();
-            Value adder = valueUp;
+            adder = valueUp;
+        }
+        addExp.buildIrTree();
+        result = valueUp;
+
+        if( adder != null ){
             // 如果类型不对，需要先换类型
             if( result.getValueType().isI1() ){
                 result = builder.buildZext(curBlock, result);
@@ -55,6 +60,7 @@ public class RelExp extends Node{
                 result = builder.buildIcmp(curBlock, Icmp.Condition.LT, adder, result);
             }
         }
+
         valueUp = result;
     }
 

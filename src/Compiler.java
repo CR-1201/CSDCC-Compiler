@@ -41,17 +41,21 @@ public class Compiler {
         // ir build
         CompUnit syntaxTreeRoot = ParserAnalyze.getParser().getCompUnit();
         IrBuilder.getIrBuilder().buildModule(syntaxTreeRoot);
-        IOFunc.output(Module.getModule().toString(),Config.irOutputPath);
+        IOFunc.clear(Config.irRawOutputPath);
+        IOFunc.output(Module.getModule().toString(),Config.irRawOutputPath);
 
         // pass
         PassManager passManager = new PassManager();
         passManager.run();
+
         IOFunc.clear(Config.irOptimizeOutputPath);
         IOFunc.output(Module.getModule().toString(), Config.irOptimizeOutputPath);
 
         // 生成目标代码
         ObjBuilder.getObjBuilder().build();
         System.out.println(ObjModule.getModule());
+
+        IOFunc.output(Module.getModule().toString(), Config.irOutputPath);
 
     }
 }

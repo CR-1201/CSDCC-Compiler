@@ -66,87 +66,56 @@ public class ConstInitVal extends Node{
             for (int dim : dims) {
                 sum_dims *= dim;
             }
+            int curNum = 0;
             ArrayList<Value> flattenArray = new ArrayList<>();
-            // 全局常量数组
-            if( irSymbolTable.isGlobalLayer() ){
 
-                if( dims.size()  == 1 ){
-                    // 一维数组
-                    for (ConstInitVal constInitVal : constInitVals){
-                        constInitVal.setConstant(constant);
-                        constInitVal.buildIrTree();
-                        Value temp = getTemp();
-                        flattenArray.add(temp);
-                    }
-                    // 不全 补0即可
-                    for(int i = constInitVals.size() ; i < dims.get(0) ; i++ ){
-                        flattenArray.add(constant);
-                    }
+            for( ConstInitVal constInitVal : constInitVals ){
+                constInitVal.setConstant(constant);
+                if( constInitVal.getConstExp() != null ){
+                    curNum++;
+                    constInitVal.buildIrTree();
+                    Value temp = getTemp();
+                    flattenArray.add(temp);
                 } else {
-                    // 多维数组
-                    for (ConstInitVal constInitVal : constInitVals){
-                        constInitVal.setConstant(constant);
-                        // 去掉一维,递归赋值
-                        if( constInitVal.getConstExp() == null ) {
-                            constInitVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
-                        }
-                        constInitVal.buildIrTree();
-                        if( constInitVal.getConstExp() != null ){
-                            Value temp = getTemp();
-                            flattenArray.add(temp);
-                        } else {
-                            flattenArray.addAll(valueArrayUp);
-                        }
-
-                    }
+                    ArrayList<Integer> newDims = getIntegers(curNum);
+                    constInitVal.setDims(newDims);
+                    constInitVal.buildIrTree();
+                    flattenArray.addAll(valueArrayUp);
+                    curNum += valueArrayUp.size();
                 }
-
-            } else {
-                // 局部常量数组,和变量数组的初始化类似,因为局部常量数组本质上也是个局部变量数组,所以方法都一样
-                // 之所以采用 flatten 的形式,是因为在 gep 的时候, flatten 的逻辑更容易处理
-                // 但是考虑到局部常量数组需要存初始值常量, 所以同时也以 valueUp 的形式返回
-                // FIXME 常量数组存取浪费时间 可以优化？
-                // 一维数组
-                if( dims.size()  == 1 ){
-                    for (ConstInitVal constInitVal : constInitVals){
-                        constInitVal.setConstant(constant);
-                        constInitVal.buildIrTree();
-                        Value temp = getTemp();
-                        flattenArray.add(temp);
-                    }
-                    // 不全 补0即可
-                    for(int i = constInitVals.size() ; i < dims.get(0) ; i++ ){
-                        flattenArray.add(constant);
-                    }
-
-                } else { // 多维数组
-                    for (ConstInitVal constInitVal : constInitVals){
-                        constInitVal.setConstant(constant);
-                        if( constInitVal.getConstExp() == null ) {
-                            constInitVal.setDims(new ArrayList<>(dims.subList(1, dims.size())));
-                        }
-                        constInitVal.buildIrTree();
-
-                        if( constInitVal.getConstExp() != null ){
-                            Value temp = getTemp();
-                            flattenArray.add(temp);
-                        } else {
-                            flattenArray.addAll(valueArrayUp);
-                        }
-                    }
-                }
-
             }
-            // 返回
-            int x = flattenArray.size();
-            for( int i = x ; i < sum_dims; i++ ){
+            //  填充元素
+            for(int i = curNum; i < sum_dims; i++ ){
                 flattenArray.add(constant);
             }
-            valueArrayUp = flattenArray;
+
+            valueArrayUp = flattenArray; // 返回
+
 //            System.out.println(flattenArray);
             valueUp = getArrayTree(flattenArray,0);
         }
 
+    }
+
+    private ArrayList<Integer> getIntegers(int curNum) {
+        ArrayList<Integer> newDims = new ArrayList<>();
+        int start = 0;
+        if(curNum == 0){
+            start = 1;
+        } else {
+            int tmpMul = 1;
+            for(int i = dims.size() - 1; i >= 0; i--){
+                tmpMul *= dims.get(i);
+                if(curNum % tmpMul != 0){
+                    start = i + 1;
+                    break;
+                }
+            }
+        }
+        for(int i = start; i < dims.size(); i++){
+            newDims.add(dims.get(i));
+        }
+        return newDims;
     }
 
     private ConstArray getArrayTree(ArrayList<Value> flattenArray, int dim_level){

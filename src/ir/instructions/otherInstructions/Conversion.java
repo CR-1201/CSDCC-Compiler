@@ -32,6 +32,7 @@ public class Conversion extends Instruction {
 
     public String getType() { return type; }
 
+
     @Override
     public String toString(){
         if(this.type.equals("fptosi")){

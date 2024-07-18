@@ -90,20 +90,27 @@ public class AddExp extends Node{
         } else {
             // 是不可直接计算的,要用表达式
             DataType dataType = new IntType(32);
+
+            Value adder = null;Value sum;
+            if( addExp != null ){
+                addExp.buildIrTree();
+                adder = valueUp;
+            }
+
             mulExp.buildIrTree();
-            Value sum = valueUp;
+            sum = valueUp;
             if ( sum.getValueType().isI1()) {
                 // 如果类型是 boolean,需要先换类型
                 sum = builder.buildZext(curBlock, sum);
             }
 
-            if( addExp != null ){
-                addExp.buildIrTree();
-                Value adder = valueUp;
+            if( adder != null ){
                 // 如果是 boolean 无脑转int 32; 如果adder和sum当中有且仅有一个float, 那么另外一个就需要进行类型转化
                 if (adder.getValueType().isI1()) {
                     adder = builder.buildZext(curBlock, adder);
-                } else if( adder.getValueType().isFloat() && !sum.getValueType().isFloat() ){
+                }
+
+                if( adder.getValueType().isFloat() && !sum.getValueType().isFloat() ){
                     sum = builder.buildConversion(curBlock,"sitofp",new FloatType(), sum);
                     dataType = new FloatType();
                 }
@@ -122,6 +129,7 @@ public class AddExp extends Node{
                 } else if( op.getType() == Token.TokenType.MINU ){
                     sum = builder.buildSub(curBlock, dataType, adder, sum);
                 }
+
             }
 
             valueUp = sum;

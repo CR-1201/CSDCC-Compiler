@@ -3,10 +3,13 @@ package pass.analysis;
 import ir.BasicBlock;
 import ir.Function;
 import ir.Module;
+import ir.User;
 import ir.instructions.Instruction;
+import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import pass.Pass;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -21,11 +24,12 @@ public class CFG implements Pass {
             if (!function.getIsBuiltIn()) {
                 // 针对每一个函数去新建CFG
                 buildCFG(function);
+                deleteUnreachableBlock(function);
             }
         }
     }
 
-    private void buildCFG(Function function) {
+    public void buildCFG(Function function) {
         deleteCFG(function);
         BasicBlock entry = function.getFirstBlock();
         if (entry != null) {
@@ -47,24 +51,43 @@ public class CFG implements Pass {
         Instruction tail = entry.getTailInstruction();
         if (tail instanceof Br br) {
             if (!br.getHasCondition()) {
-                BasicBlock target = (BasicBlock) br.getOps().get(0);
+                BasicBlock target = (BasicBlock) br.getOperator(0);
                 entry.addSuccessor(target);
                 target.addPrecursor(entry);
                 if (!visited.contains(target)) {
                     setCFG(target);
                 }
             } else {
-                BasicBlock trueBlock = (BasicBlock) br.getOps().get(1);
+                BasicBlock trueBlock = (BasicBlock) br.getOperator(1);
                 entry.addSuccessor(trueBlock);
                 trueBlock.addPrecursor(entry);
                 if (!visited.contains(trueBlock)) {
                     setCFG(trueBlock);
                 }
-                BasicBlock falseBlock = (BasicBlock) br.getOps().get(2);
+                BasicBlock falseBlock = (BasicBlock) br.getOperator(2);
                 entry.addSuccessor(falseBlock);
                 falseBlock.addPrecursor(entry);
                 if (!visited.contains(falseBlock)) {
                     setCFG(falseBlock);
+                }
+            }
+        }
+    }
+
+    public static void deleteUnreachableBlock(Function function) {
+        BasicBlock entry = function.getFirstBlock();
+        boolean flag = true;
+        while(flag) {
+            flag = false;
+            ArrayList<BasicBlock> blocks = new ArrayList<>(function.getBasicBlocksArray());
+            for (BasicBlock block : blocks) {
+                if (block.getPrecursors().isEmpty() && block != entry) {
+                    ArrayList<Phi> phis = block.getPhiUsers();
+                    for (Phi phi : phis) {
+                        phi.removeUsedBlock(block);
+                    }
+                    block.removeSelf();
+                    flag = true;
                 }
             }
         }

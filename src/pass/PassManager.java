@@ -27,7 +27,7 @@ public class PassManager {
         passes.add(new runSimplifyInst());
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
-        passes.add(new DeadCodeEmit());
+//        passes.add(new DeadCodeEmit());
 
         GVNGCMPass();
         for (Pass pass : passes) {

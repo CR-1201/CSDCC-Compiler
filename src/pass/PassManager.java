@@ -41,6 +41,7 @@ public class PassManager {
      * GVN 和 GCM 之前一定要先进行副作用判断，来确定某一个函数是否可以被处理
      */
     private void GVNGCMPass() {
+        passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());

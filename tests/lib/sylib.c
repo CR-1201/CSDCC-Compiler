@@ -3,7 +3,7 @@
 #include<sys/time.h>
 #include"sylib.h"
 /* Input & output functions */
-void memset(void * s,int c,int count){
+void memset(int * s,int c,int count){
 	char *xs = (char *) s;
 	while (count--)
 		*xs++ = c;

@@ -86,7 +86,7 @@ public class CompUnit extends Node{
 
             /*================================ memset ================================*/
             ArrayList<DataType> memsetArgs = new ArrayList<>();
-            memsetArgs.add(new PointerType(new VoidType()));
+            memsetArgs.add(new PointerType(new IntType(32)));
             memsetArgs.add(new IntType(32));
             memsetArgs.add(new IntType(32));
             Function.memset = builder.buildFunction("memset", new FunctionType(memsetArgs, new VoidType()), true);

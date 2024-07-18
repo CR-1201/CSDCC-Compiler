@@ -10,10 +10,7 @@ import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
-import ir.instructions.otherInstructions.Call;
-import ir.instructions.otherInstructions.Conversion;
-import ir.instructions.otherInstructions.Phi;
-import ir.instructions.otherInstructions.Zext;
+import ir.instructions.otherInstructions.*;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.DataType;
@@ -139,6 +136,12 @@ public class IrBuilder {
         Conversion conversion = new Conversion(nameNumCounter++,type, dataType, parent, value);
         parent.insertBefore(conversion, before);
         return conversion;
+    }
+
+    public BitCast buildBitCast(BasicBlock parent, DataType dataType, Value value){
+        BitCast bitCast = new BitCast(nameNumCounter++, dataType, parent, value);
+        parent.insertTail(bitCast);
+        return bitCast;
     }
 
     /**

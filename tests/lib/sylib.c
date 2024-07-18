@@ -3,6 +3,11 @@
 #include<sys/time.h>
 #include"sylib.h"
 /* Input & output functions */
+void memset(void * s,int c,int count){
+	char *xs = (char *) s;
+	while (count--)
+		*xs++ = c;
+}
 int getint(){int t; scanf("%d",&t); return t; }
 int getch(){char c; scanf("%c",&c); return (int)c; }
 float getfloat(){

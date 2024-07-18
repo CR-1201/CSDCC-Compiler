@@ -84,6 +84,13 @@ public class CompUnit extends Node{
             putfarrayArgs.add(new PointerType(new FloatType()));
             Function.putfarray = builder.buildFunction("putfarray", new FunctionType(putfarrayArgs, new VoidType()), true);
 
+            /*================================ memset ================================*/
+            ArrayList<DataType> memsetArgs = new ArrayList<>();
+            memsetArgs.add(new PointerType(new VoidType()));
+            memsetArgs.add(new IntType(32));
+            memsetArgs.add(new IntType(32));
+            Function.memset = builder.buildFunction("memset", new FunctionType(memsetArgs, new VoidType()), true);
+
             /*================================ putstr ================================*/
 //            ArrayList<DataType> printfArgs = new ArrayList<>();
 //            printfArgs.add(new PointerType(new IntType(8)));

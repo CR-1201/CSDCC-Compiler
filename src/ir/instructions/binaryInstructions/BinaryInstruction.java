@@ -34,7 +34,9 @@ public abstract class BinaryInstruction extends Instruction {
 
     //操作数 op1 和op2 是不是可交换的
     public abstract boolean isCommutative();
-
+    public String getOpString() {
+        return "binary";
+    }
     /**
      * 两个指令是否是相同的运算符
      * @param instr1 指令 1

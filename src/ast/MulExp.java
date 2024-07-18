@@ -122,25 +122,25 @@ public class MulExp extends Node{
                     mul = builder.buildSdiv(curBlock, dataType, multer, mul);
                 } else if( op.getType() == Token.TokenType.MOD ){
                     // x % y = x - ( x / y ) * y,这是因为取模优化不太好做
-                    if( mul instanceof ConstInt ){
-                        int num = ((ConstInt) mul).getValue();
-                        if (Math.abs(num) == 1){
-                            // 如果绝对值是 1,那么就翻译成 MOD,这就交给后端优化了
-                            mul = builder.buildSrem(curBlock, dataType, multer, mul);
-                        } else if ((Math.abs(num) & (Math.abs(num) - 1)) == 0){
-                            // 如果是 2 的幂次
-                            mul = builder.buildSrem(curBlock, dataType, multer, mul);
-                        } else {
-                            Sdiv a = builder.buildSdiv(curBlock, dataType, multer, mul);
-                            Mul b = builder.buildMul(curBlock, dataType, a, mul);
-                            mul = builder.buildSub(curBlock,dataType, multer, b);
-                        }
-                    } else {
-                        Sdiv a = builder.buildSdiv(curBlock, dataType, multer, mul);
-                        Mul b = builder.buildMul(curBlock, dataType, a, mul);
-                        mul = builder.buildSub(curBlock,dataType, multer, b);
-                    }
-//                    mul = builder.buildSrem(curBlock, dataType, mul, multer);
+//                    if( mul instanceof ConstInt ){
+//                        int num = ((ConstInt) mul).getValue();
+//                        if (Math.abs(num) == 1){
+//                            // 如果绝对值是 1,那么就翻译成 MOD,这就交给后端优化了
+//                            mul = builder.buildSrem(curBlock, dataType, multer, mul);
+//                        } else if ((Math.abs(num) & (Math.abs(num) - 1)) == 0){
+//                            // 如果是 2 的幂次
+//                            mul = builder.buildSrem(curBlock, dataType, multer, mul);
+//                        } else {
+//                            Sdiv a = builder.buildSdiv(curBlock, dataType, multer, mul);
+//                            Mul b = builder.buildMul(curBlock, dataType, a, mul);
+//                            mul = builder.buildSub(curBlock,dataType, multer, b);
+//                        }
+//                    } else {
+//                        Sdiv a = builder.buildSdiv(curBlock, dataType, multer, mul);
+//                        Mul b = builder.buildMul(curBlock, dataType, a, mul);
+//                        mul = builder.buildSub(curBlock,dataType, multer, b);
+//                    }
+                    mul = builder.buildSrem(curBlock, dataType, multer, mul);
                 }
             }
 

@@ -1,5 +1,4 @@
-package pass.transform;
-
+package pass.transform.gcmgvn;
 
 import ir.*;
 import ir.Module;
@@ -7,38 +6,18 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.BinaryInstruction;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
-import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.otherInstructions.Zext;
-import ir.instructions.terminatorInstructions.Br;
-import ir.instructions.terminatorInstructions.Ret;
 import ir.types.PointerType;
-import pass.Pass;
 import pass.analysis.Dom;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 
-import static pass.analysis.Dom.getDomTreePostOrder;
-
-/**
- @author Conroy
- 一个指令的位置是由它使用的指令和使用它的指令决定的
- GCM 找到的是一个区间,这个区间上指令可以自由的移动
- 挑选尽可能靠近支配树根节点和尽可能循环深度比较深的点
-
- 算法的基本流程:
- 1）计算CFG的支配树,并在基本块上标记其支配树上的深度;
- 2）寻找循环,并对每个基本块计算嵌套深度;
- 3）对所有指令进行early调度,移动至第一个被该指令的输入所支配的基本块,这会导致大量的投机代码;
- 4）对所有指令进行late调度,找到最后一个可以支配该指令所有use的基本块;
- 5）将指令移动至early和late之间的基本块中,使得循环嵌套尽可能浅、控制依赖尽可能多;
- */
-public class GCM implements Pass {
-
+public class GCM {
     private final Module module = Module.getModule();
 
     private final HashSet<Instruction> visited = new HashSet<>();
@@ -51,11 +30,11 @@ public class GCM implements Pass {
                 !(instruction instanceof GEP) &&
                 !(instruction instanceof Call && isPure((Call) instruction));
     }
-    @Override
+
     public void run(){
         ArrayList<Function> functions = module.getFunctionsArray();
         for(Function function : functions ){
-            if ( !function.getIsBuiltIn() && function.getBasicBlocksArray().size() > 1 )  {
+            if (!function.getIsBuiltIn() && function.getBasicBlocksArray().size() > 1 )  {
                 functionGCM(function);
             }
         }
@@ -64,7 +43,7 @@ public class GCM implements Pass {
     private void functionGCM(Function function) {
         visited.clear();
         // 逆后续遍历
-        ArrayList<BasicBlock> reversePostOrder = getDomTreePostOrder(function);
+        ArrayList<BasicBlock> reversePostOrder = Dom.getDomTreePostOrder(function);
         Collections.reverse(reversePostOrder);
 
         ArrayList<Instruction> instructions = new ArrayList<>();

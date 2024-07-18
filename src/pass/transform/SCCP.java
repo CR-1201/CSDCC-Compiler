@@ -51,6 +51,7 @@ public class SCCP implements Pass {
 
     private boolean needPass = true;
 
+    @Override
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {

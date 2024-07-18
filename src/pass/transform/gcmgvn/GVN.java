@@ -10,6 +10,7 @@ import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.otherInstructions.Conversion;
 import pass.analysis.Dom;
+import pass.transform.SimplifyInst;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +40,9 @@ public class GVN {
         ArrayList<Instruction> insts = new ArrayList<>(entry.getInstructions());
         for (int i = 0; i < insts.size() && insts.get(i) != null; i++) {
             Instruction curInst = insts.get(i);
+
             if (canGVN(curInst)) {
+                // 首先进行常数化简
                 boolean isNumbered = checkAndSetGVN(curInst);
                 if (isNumbered) {
                     numberedInsts.add(curInst);

@@ -23,6 +23,7 @@ public class PassManager {
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
         passes.add(new SCCP());
+        passes.add(new runSimplifyInst());
         passes.add(new MergeRedundantBr());
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
@@ -43,6 +44,7 @@ public class PassManager {
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
+        passes.add(new runSimplifyInst());
         passes.add(new GCMGVN());
     }
 }

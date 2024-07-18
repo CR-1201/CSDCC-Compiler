@@ -15,7 +15,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import static ir.IrBuilder.nameNumCounter;
-
+/**
+ @author Conroy
+ 全局变量局部化
+ 如果全局变量仅在 main 函数中出现,那么这个变量只定义在 main 函数中,从而可以被 Mem2Reg 提升为虚拟寄存器
+ */
 public class GlobalValueLocalize implements Pass {
     private final Module module = Module.getModule();
 

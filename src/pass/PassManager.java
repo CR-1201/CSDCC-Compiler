@@ -25,7 +25,7 @@ public class PassManager {
 //        passes.add(new SCCP());
 //
 //        passes.add(new MergeRedundantBr());
-//        passes.add(new SideEffect());
+        passes.add(new SideEffect());
 //        passes.add(new UselessReturnEmit());
 //        passes.add(new DeadCodeEmit());
 //

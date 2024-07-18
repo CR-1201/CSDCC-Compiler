@@ -152,13 +152,15 @@ public class BasicBlock extends Value{
         instructions.add(instruction);
     }
 
-    // 将 instruction 插入到 before 指令的前面
-    // TODO 可能有bug 注意一下
-    public void insertBefore(Instruction instruction, Instruction before){
-        for( Instruction instructionNode : instructions ){
-            if( instructionNode.equals(before) ){
-                int index = instructions.indexOf(instructionNode);
-                instructions.add(index,instruction);
+    // 将 instruction 插入到 target 指令的前面
+    public void insertBefore(Instruction inst, Instruction target){
+        for (Instruction oldInst : instructions) {
+            if (oldInst.equals(target)){
+                int index = instructions.indexOf(oldInst);
+                instructions.add(index, inst);
+                if (inst.getParent() != this) {
+                    inst.setParent(this);
+                }
                 return;
             }
         }

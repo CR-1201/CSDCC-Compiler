@@ -1,5 +1,6 @@
 package pass;
 
+import config.Config;
 import ir.Module;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
@@ -7,6 +8,7 @@ import pass.analysis.LoopAnalysis;
 import pass.analysis.SideEffect;
 import pass.transform.*;
 import pass.transform.gcmgvn.GCMGVN;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 
@@ -30,7 +32,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
-//        passes.add(new GCMGVN());
+        passes.add(new GCMGVN());
 
         for (Pass pass : passes) {
             pass.run();

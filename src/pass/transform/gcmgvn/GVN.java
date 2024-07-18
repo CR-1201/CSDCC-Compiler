@@ -61,6 +61,16 @@ public class GVN {
         GVNCnt.clear();
     }
 
+    private boolean canGVN(Instruction inst){
+        if(inst instanceof Call ci){
+            Function function = ci.getFunction();
+            return !function.getIsBuiltIn() && !function.getSideEffect();
+        } else if (inst instanceof BinaryInstruction || inst instanceof GEP || inst instanceof Conversion) {
+            return true;
+        }
+        return false;
+    }
+
     private void removeInstFromGVN(Instruction inst){
         String hash = setHashValue(inst);
         GVNMap.remove(hash);
@@ -71,16 +81,16 @@ public class GVN {
     }
 
     private boolean runGVNOnInst(Instruction inst) {
-        if (inst instanceof BinaryInstruction binaryInst) {
-            String hash_1 = setHashValue(binaryInst);
+        if (inst instanceof BinaryInstruction bi) {
+            String hash_1 = setHashValue(bi);
             if (GVNMap.containsKey(hash_1)) {
                 inst.replaceAllUsesWith(GVNMap.get(hash_1));
                 inst.removeAllOperators();
                 inst.eraseFromParent();
                 return false;
             }
-            if (isSwapBinary(binaryInst)) {
-                String hash_2 = setSwapBinaryHashValue(binaryInst);
+            if (isSwapBinary(bi)) {
+                String hash_2 = setSwapBinaryHashValue(bi);
                 if (GVNMap.containsKey(hash_2)) {
                     inst.replaceAllUsesWith(GVNMap.get(hash_2));
                     inst.removeAllOperators();
@@ -89,14 +99,11 @@ public class GVN {
                 }
                 GVNMap.put(hash_1, inst);
                 GVNMap.put(hash_2, inst);
-            }
-            else {
+            } else {
                 GVNMap.put(hash_1, inst);
             }
             return true;
-        }
-        else if (inst instanceof Call || inst instanceof GEP
-                || inst instanceof Conversion) {
+        } else if (inst instanceof Call || inst instanceof GEP || inst instanceof Conversion) {
             String hash = setHashValue(inst);
             if (GVNMap.containsKey(hash)) {
                 inst.replaceAllUsesWith(GVNMap.get(hash));
@@ -115,9 +122,9 @@ public class GVN {
             String leftName = binaryInst.getOp1().getName();
             String op = binaryInst.getOpString();
             String rightName = binaryInst.getOp2().getName();
+//            System.out.println(leftName + op + rightName);
             return leftName + op + rightName;
-        }
-        else if(inst instanceof Call callInst){
+        } else if(inst instanceof Call callInst){
             StringBuilder hashBuilder = new StringBuilder(callInst.getFunction().getName() + "(");
             ArrayList<Value> params = callInst.getArgs();
             for (int i = 0; i < params.size(); i++) {
@@ -127,28 +134,21 @@ public class GVN {
                 }
             }
             hashBuilder.append(")");
+//            System.out.println(hashBuilder);
             return hashBuilder.toString();
-        }
-        else if(inst instanceof GEP gepInst){
+        } else if(inst instanceof GEP gepInst){
             StringBuilder hashBuilder = new StringBuilder(gepInst.getBase().getName());
             ArrayList<Value> indexs = gepInst.getIndex();
             for (Value index : indexs) {
                 hashBuilder.append("[").append(index.getName()).append("]");
             }
+//            System.out.println(hashBuilder);
             return hashBuilder.toString();
-        }
-        else if(inst instanceof Conversion conversionInst) {
+        } else if(inst instanceof Conversion conversionInst) {
+//            System.out.println(conversionInst);
             return conversionInst.toString();
         }
         return null;
-    }
-
-    private boolean canGVN(Instruction inst){
-        if(inst instanceof Call ci){
-            Function function = ci.getFunction();
-            return !function.getIsBuiltIn() && !function.getSideEffect();
-        }
-        return inst instanceof BinaryInstruction || inst instanceof GEP || inst instanceof Conversion;
     }
 
     private boolean isSwapBinary(Instruction inst){

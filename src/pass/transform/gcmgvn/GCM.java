@@ -3,6 +3,7 @@ package pass.transform.gcmgvn;
 import ir.*;
 import ir.Module;
 import ir.instructions.Instruction;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
@@ -26,7 +27,7 @@ public class GCM {
     private boolean isPinnedInst(Instruction inst) {
         return inst instanceof Br || inst instanceof Phi
                 || inst instanceof Ret || inst instanceof Store
-                || inst instanceof Load || inst instanceof Call;
+                || inst instanceof Load || inst instanceof Call || inst instanceof Alloca;
     }
 
     public void run(){

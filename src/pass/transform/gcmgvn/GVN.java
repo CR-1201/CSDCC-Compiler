@@ -40,7 +40,7 @@ public class GVN {
         for (int i = 0; i < insts.size() && insts.get(i) != null; i++) {
             Instruction curInst = insts.get(i);
             if (canGVN(curInst)) {
-                boolean isNumbered = runGVNOnInst(curInst);
+                boolean isNumbered = checkAndSetGVN(curInst);
                 if (isNumbered) {
                     numberedInsts.add(curInst);
                 }
@@ -52,7 +52,7 @@ public class GVN {
         }
 
         for(Instruction inst : numberedInsts){
-            removeInstFromGVN(inst);
+            removeGvnMap(inst);
         }
     }
 
@@ -71,36 +71,36 @@ public class GVN {
         return false;
     }
 
-    private void removeInstFromGVN(Instruction inst){
+    private void removeGvnMap(Instruction inst){
         String hash = setHashValue(inst);
         GVNMap.remove(hash);
-        if(inst instanceof BinaryInstruction binaryInst && isSwapBinary(binaryInst)){
-            String hash_2 = setSwapBinaryHashValue(binaryInst);
-            GVNMap.remove(hash_2);
+        if (inst instanceof BinaryInstruction binaryInst && isSwapBinary(binaryInst)){
+            String swapHash = setSwapBinaryHashValue(binaryInst);
+            GVNMap.remove(swapHash);
         }
     }
 
-    private boolean runGVNOnInst(Instruction inst) {
+    private boolean checkAndSetGVN(Instruction inst) {
         if (inst instanceof BinaryInstruction bi) {
-            String hash_1 = setHashValue(bi);
-            if (GVNMap.containsKey(hash_1)) {
-                inst.replaceAllUsesWith(GVNMap.get(hash_1));
+            String hash = setHashValue(bi);
+            if (GVNMap.containsKey(hash)) {
+                inst.replaceAllUsesWith(GVNMap.get(hash));
                 inst.removeAllOperators();
                 inst.eraseFromParent();
                 return false;
             }
             if (isSwapBinary(bi)) {
-                String hash_2 = setSwapBinaryHashValue(bi);
-                if (GVNMap.containsKey(hash_2)) {
-                    inst.replaceAllUsesWith(GVNMap.get(hash_2));
+                String swapHash = setSwapBinaryHashValue(bi);
+                if (GVNMap.containsKey(swapHash)) {
+                    inst.replaceAllUsesWith(GVNMap.get(swapHash));
                     inst.removeAllOperators();
                     inst.eraseFromParent();
                     return false;
                 }
-                GVNMap.put(hash_1, inst);
-                GVNMap.put(hash_2, inst);
+                GVNMap.put(hash, inst);
+                GVNMap.put(swapHash, inst);
             } else {
-                GVNMap.put(hash_1, inst);
+                GVNMap.put(hash, inst);
             }
             return true;
         } else if (inst instanceof Call || inst instanceof GEP || inst instanceof Conversion) {

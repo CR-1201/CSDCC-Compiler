@@ -21,6 +21,10 @@ public class Sub extends BinaryInstruction{
         return false;
     }
 
+    public String getOpString() {
+        return ((getValueType() instanceof FloatType) ? "f" : "") +  "sub";
+    }
+
     @Override
     public String toString(){
         return getName() + " = "+ ((getValueType() instanceof FloatType) ? "f" : "") +  "sub " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();

@@ -75,7 +75,9 @@ public class Module extends Value{
             GlobalVariable globalVariable = (GlobalVariable) globalVariableNode;
             s.append(globalVariable).append('\n');
         }
-        s.append("\n");
+        if (!globalVariables.isEmpty()) {
+            s.append('\n');
+        }
         for (Value functionNode : functions){
             Function function = (Function)functionNode;
             s.append(function).append('\n');

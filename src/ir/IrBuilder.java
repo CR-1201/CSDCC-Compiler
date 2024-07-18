@@ -32,8 +32,9 @@ public class IrBuilder {
     // 一个起名计数器,对于 instruction 或者 BasicBlock 没有名字,需要用计数器取一个独一无二的名字
     public static int nameNumCounter = 0;
     private static int strNumCounter = 0;
+    private static int blockNumCounter = 0;
     // 用于给 phi 一个名字,可以从 0 开始编号,因为 phi 一定是 %p1 之类的
-    public static int phiNameNum = 0;
+    private static int phiNumCounter = 0;
     // 全局变量查询表
     private static final HashMap<String, GlobalVariable> globalStrings = new HashMap<>();
 
@@ -81,7 +82,7 @@ public class IrBuilder {
     }
 
     public BasicBlock buildBasicBlock(Function function){
-        BasicBlock block = new BasicBlock(nameNumCounter++, function);
+        BasicBlock block = new BasicBlock(blockNumCounter++, function);
         function.insertTail(block);
         return block;
     }
@@ -258,7 +259,7 @@ public class IrBuilder {
     }
 
     public Phi buildPhi(DataType type, BasicBlock parent){
-        Phi phi = new Phi(phiNameNum++, type, parent, parent.getPrecursors().size());
+        Phi phi = new Phi(phiNumCounter++, type, parent, parent.getPrecursors().size());
         parent.insertHead(phi);
         return phi;
     }

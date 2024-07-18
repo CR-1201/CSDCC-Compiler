@@ -38,8 +38,8 @@ public class Mem2reg implements Pass {
                 dealMem2Reg(function);
             }
         }
-        IOFunc.clear("checkir/ir_after_mem2reg");
-        IOFunc.output(Module.getModule().toString(),"checkir/ir_after_mem2reg");
+//        IOFunc.clear("checkir/ir_after_mem2reg");
+//        IOFunc.output(Module.getModule().toString(),"checkir/ir_after_mem2reg");
     }
     private void dealMem2Reg(Function function) {
         BasicBlock entry = function.getFirstBlock();

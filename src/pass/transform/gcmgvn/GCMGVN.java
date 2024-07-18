@@ -8,8 +8,8 @@ import utils.IOFunc;
 
 public class GCMGVN implements Pass {
     public void run() {
-        IOFunc.clear("checkir/ir_before_gvn");
-        IOFunc.output(Module.getModule().toString(),"checkir/ir_before_gvn");
+//        IOFunc.clear("checkir/ir_before_gvn");
+//        IOFunc.output(Module.getModule().toString(),"checkir/ir_before_gvn");
 //        for (Function function : Module.getModule().getFunctionsArray()) {
 //            if (!function.getIsBuiltIn()) {
 //                for (BasicBlock block : function.getBasicBlocksArray()) {

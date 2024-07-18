@@ -161,6 +161,7 @@ def check_wrapper(stop_event, case):
     if thread.is_alive():
         print(f'{case["test_file"]}: TLE')
         raise TimeoutError(f'{case} TLE')
+    return True
 
 if __name__ == '__main__':
     stop_event = threading.Event()

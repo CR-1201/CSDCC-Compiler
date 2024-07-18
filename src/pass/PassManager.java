@@ -30,7 +30,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
-        passes.add(new GCMGVN());
+//        passes.add(new GCMGVN());
 
         for (Pass pass : passes) {
             pass.run();

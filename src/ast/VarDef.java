@@ -72,7 +72,6 @@ public class VarDef extends Node{
         } else { // 局部单变量
             DataType dataType;
 
-
             if( bType.getToken().getType() == Token.TokenType.INTTK ){
                 dataType = IntType.I32;
             } else dataType = new FloatType();
@@ -155,7 +154,7 @@ public class VarDef extends Node{
 
                     Value source = valueArrayUp.get(i);
 
-//                    if( source instanceof ConstStr) continue;
+                    if( source instanceof ConstStr) continue;
 
                     GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
                     if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){

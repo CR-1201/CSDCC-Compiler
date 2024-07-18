@@ -55,7 +55,7 @@ public class InitVal extends Node{
     @Override
     public void buildIrTree() {
 
-//        if( !globalInitDown )this.constant = new ConstStr("skip");
+        if( !globalInitDown )this.constant = new ConstStr("skip");
 
         // 初始值是一个表达式(单变量)
         if(exp != null) {

@@ -18,6 +18,7 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;
+import utils.IOFunc;
 import utils.Pair;
 import utils.ValueStatus;
 

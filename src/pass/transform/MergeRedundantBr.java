@@ -2,7 +2,10 @@ package pass.transform;
 
 import ir.BasicBlock;
 import ir.Function;
+import ir.IrBuilder;
 import ir.Module;
+import ir.constants.ConstInt;
+import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import pass.Pass;
@@ -14,11 +17,29 @@ public class MergeRedundantBr implements Pass {
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
+                cond2br(function);
                 process(function);
             }
         }
     }
-
+    private void cond2br(Function function) {
+        for (BasicBlock block : function.getBasicBlocksArray()) {
+            Instruction tail = block.getTailInstruction();
+            if (tail instanceof Br br && br.getHasCondition()) {
+                if (br.getOperator(0) instanceof ConstInt cond) {
+                    // br i1 1 b1, b2
+                    BasicBlock target = null;
+                    if (cond.getValue() == 1) {
+                        target = (BasicBlock) br.getOperator(1);
+                    } else {
+                        target = (BasicBlock) br.getOperator(2);
+                    }
+                    br.removeSelf();
+                    IrBuilder.getIrBuilder().buildBr(block, target);
+                }
+            }
+        }
+    }
     private void process(Function function) {
         CFG.deleteUnreachableBlock(function);
         BasicBlock entry = function.getFirstBlock();

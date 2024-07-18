@@ -22,20 +22,28 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
-//        passes.add(new SCCP());
+        passes.add(new SCCP());
 //
-//        passes.add(new MergeRedundantBr());
-        passes.add(new SideEffect());
+        passes.add(new MergeRedundantBr());
+//        passes.add(new SideEffect());
 //        passes.add(new UselessReturnEmit());
 //        passes.add(new DeadCodeEmit());
 //
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new LoopAnalysis());
-        passes.add(new GCMGVN());
 
+        GVNGCMPass();
         for (Pass pass : passes) {
             pass.run();
         }
+    }
+
+    /**
+     * 这个是专门用来处理 GVN 和 GCM 的 Pass
+     * GVN 和 GCM 之前一定要先进行副作用判断，来确定某一个函数是否可以被处理
+     */
+    private void GVNGCMPass() {
+        passes.add(new Dom());
+        passes.add(new LoopAnalysis());
+        passes.add(new SideEffect());
+        passes.add(new GCMGVN());
     }
 }

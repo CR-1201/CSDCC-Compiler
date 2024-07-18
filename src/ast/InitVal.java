@@ -55,8 +55,6 @@ public class InitVal extends Node{
     @Override
     public void buildIrTree() {
 
-        if( !globalInitDown )this.constant = new ConstStr("skip");
-
         // 初始值是一个表达式(单变量)
         if(exp != null) {
             // 在进行全局单变量初始化
@@ -73,6 +71,7 @@ public class InitVal extends Node{
             }
             valueUp = getTemp();
         } else {
+
             // 在进行数组初始化
             ArrayList<Value> flattenArray = new ArrayList<>();
             int curNum = 0;
@@ -105,7 +104,10 @@ public class InitVal extends Node{
 
             //  填充元素
             for(int i = curNum; i < sum_dims; i++ ){
-                flattenArray.add(constant);
+                if( !globalInitDown ) {
+                    flattenArray.add(new ConstStr("skip"));
+                }
+                else flattenArray.add(constant);
             }
 
 //            System.out.println(flattenArray);

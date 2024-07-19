@@ -27,6 +27,7 @@ public class PassManager {
         passes.add(new MergeRedundantBr());
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
+        passes.add(new GAVN());
 //        passes.add(new DeadCodeEmit());
 
         GVNGCMPass();

@@ -2,6 +2,7 @@ package backend.RegisterAlloc;
 
 import backend.LivenessAnalyze.LivenessAnalyzer;
 import backend.LivenessAnalyze.LivenessInfo;
+import backend.ObjBuilder;
 import backend.instruction.ObjInstruction;
 import backend.instruction.ObjLoad;
 import backend.instruction.ObjMove;
@@ -153,17 +154,19 @@ public class RegisterAllocer {
             HashSet<ObjRegister> live = new HashSet<>(livenessMap.get(b).getOut());
             for (int i = b.getInstructions().size() - 1; i >= 0; i--) {
                 ObjInstruction I = b.getInstructions().get(i);
-                if (I instanceof ObjMove && !((ObjMove) I).isHasImm()
-                        && ((ObjMove) I).getRhs() instanceof Vir && ((ObjMove) I).getDst() instanceof Vir
-                        && ((ObjMove) I).getRhs().getClass() ==  ((ObjMove) I).getDst().getClass()) {
-                    ObjRegister rs = (ObjRegister) ((ObjMove) I).getRhs();
-                    ObjRegister rd = (ObjRegister) ((ObjMove) I).getDst();
-                    live.remove(rs);
-                    moveList.putIfAbsent(rs, new HashSet<>());
-                    moveList.putIfAbsent(rd, new HashSet<>());
-                    moveList.get(rs).add(I);
-                    moveList.get(rd).add(I);
-                    worklistMoves.add(I);
+                if (I instanceof ObjMove move && !((ObjMove) I).isHasImm() && !((ObjMove) I).hasLabel()) {
+                    ObjRegister dst = (ObjRegister) move.getDst();
+                    ObjRegister rhs = (ObjRegister) move.getRhs();
+                    if ((!type && dst.isFloat() && rhs.isFloat()) || (type && !dst.isFloat() && !rhs.isFloat())) {
+                        ObjRegister rs = (ObjRegister) ((ObjMove) I).getRhs();
+                        ObjRegister rd = (ObjRegister) ((ObjMove) I).getDst();
+                        live.remove(rs);
+                        moveList.putIfAbsent(rs, new HashSet<>());
+                        moveList.putIfAbsent(rd, new HashSet<>());
+                        moveList.get(rs).add(I);
+                        moveList.get(rd).add(I);
+                        worklistMoves.add(I);
+                    }
                 }
                 for (ObjRegister d : I.getDef()) {
                     for (ObjRegister l : live) {
@@ -179,7 +182,7 @@ public class RegisterAllocer {
     }
 
     private void AddEdge(ObjRegister u, ObjRegister v) {
-        if (u.getClass() != v.getClass())
+        if (u.isFloat() != v.isFloat())
             return;
         Edge e = new Edge(u, v);
         if (!adjSet.contains(e) && !u.equals(v)) {
@@ -414,7 +417,7 @@ public class RegisterAllocer {
             for (ObjBlock block : objFunction.getBlocks()) {
                 LinkedList<ObjInstruction> temp = new LinkedList<>(block.getInstructions());
                 for (ObjInstruction instr : temp) {
-                    ObjVirRegister vReg = null;
+                    ObjRegister vReg = null;
                     ObjInstruction firstUse = null;
                     ObjInstruction lastDef = null;
                     HashSet<ObjRegister> defs = new HashSet<>(instr.getDef());
@@ -424,7 +427,7 @@ public class RegisterAllocer {
                             if (firstUse == null && lastDef == null)
                                 firstUse = instr;
                             if (vReg == null) {
-                                vReg = new ObjVirRegister();
+                                vReg = use.isFloat() ? new ObjFloatVirReg() : new ObjVirRegister();
                                 newTemp.add(vReg);
                             }
                             instr.updateReg(use, vReg, true);
@@ -434,18 +437,18 @@ public class RegisterAllocer {
                         if (def.equals(n)) {
                             lastDef = instr;
                             if (vReg == null) {
-                                vReg = new ObjVirRegister();
+                                vReg = def.isFloat() ? new ObjFloatVirReg() : new ObjVirRegister();
                                 newTemp.add(vReg);
                             }
                             instr.updateReg(def, vReg, false);
                         }
                     }
                     if (lastDef != null) {
-                        ObjStore store = new ObjStore(ObjPhyRegister.getRegister("sp"), vReg, new ObjImmediate(objFunction.getAllocSize()), false);
+                        ObjStore store = new ObjStore(ObjPhyRegister.getRegister("sp"), vReg, ObjBuilder.solveOffsetImm(new ObjImmediate(objFunction.getAllocSize()), block, false), vReg.isFloat());
                         block.addInstructionAfter(lastDef, store);
                     }
                     if (firstUse != null) {
-                        ObjLoad load = new ObjLoad(vReg, ObjPhyRegister.getRegister("sp"), new ObjImmediate(objFunction.getAllocSize()), false);
+                        ObjLoad load = new ObjLoad(vReg, ObjPhyRegister.getRegister("sp"), ObjBuilder.solveOffsetImm(new ObjImmediate(objFunction.getAllocSize()), block, false), vReg.isFloat());
                         block.addInstructionBefore(firstUse, load);
                     }
                 }
@@ -492,6 +495,7 @@ public class RegisterAllocer {
             return ObjFloatPhyReg.needSave(name);
         }
     }
+
     private HashSet<Integer> getCanIndexAllocRegister(boolean type) {
         if (type) {
             return ObjPhyRegister.getCanIndexAllocRegister();

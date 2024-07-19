@@ -1,5 +1,6 @@
 package backend.instruction;
 
+import backend.operand.ObjImmediate;
 import backend.operand.ObjLabel;
 import backend.operand.ObjOperand;
 import backend.operand.ObjRegister;
@@ -8,9 +9,10 @@ public class ObjLoad extends ObjInstruction implements hasVFP {
     private ObjOperand dst;
     private ObjOperand add;
 
-    private ObjLabel label;
     private ObjOperand off;
     boolean isV = false;
+
+    private ObjMove immMove;
 
     public ObjLoad(ObjOperand dst, ObjOperand add, ObjOperand off, boolean isV) {
         this.dst = dst;
@@ -22,11 +24,28 @@ public class ObjLoad extends ObjInstruction implements hasVFP {
         tryAddUseOrDefReg(off, true);
     }
 
-    public ObjLoad(ObjOperand dst, ObjLabel label, boolean isV) {    // label
+    public ObjLoad(ObjOperand dst, ObjOperand add, ObjOperand off, boolean isV, ObjMove immMove) {
         this.dst = dst;
-        this.label = label;
+        this.add = add;
+        this.off = off;
         this.isV = isV;
+        tryAddUseOrDefReg(dst, false);
+        tryAddUseOrDefReg(add, true);
+        tryAddUseOrDefReg(off, true);
+        this.immMove = immMove;
     }
+
+    public ObjLoad(ObjOperand dst, ObjOperand add, boolean isV) {    // label
+        this.dst = dst;
+        this.add = add;
+        this.isV = isV;
+        tryAddUseOrDefReg(dst, false);
+    }
+
+    public ObjMove getImmMove() {
+        return immMove;
+    }
+
     @Override
     public void updateReg(ObjOperand oldOp, ObjOperand newOp, boolean isUse) {
         super.updateReg(oldOp, newOp, isUse);
@@ -34,6 +53,7 @@ public class ObjLoad extends ObjInstruction implements hasVFP {
         if (oldOp.equals(add)) add = newOp;
         if (oldOp.equals(off)) off = newOp;
     }
+
     public ObjOperand getDst() {
         return dst;
     }
@@ -60,10 +80,7 @@ public class ObjLoad extends ObjInstruction implements hasVFP {
 
     @Override
     public String toString() {
-        if (label != null) {
-            return "\t" + (isV ? "v" : "") + "ldr" + getCond() + "\t" +
-                    dst + ",\t" + label + "\n";
-        } else if (off == null) {
+        if (off == null) {
             return "\t" + (isV ? "v" : "") + "ldr" + getCond() + "\t" +
                     dst + ",\t[" + add + "]\n";
         } else {

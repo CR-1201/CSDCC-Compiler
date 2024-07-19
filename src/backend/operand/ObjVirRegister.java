@@ -11,4 +11,9 @@ public class ObjVirRegister extends ObjRegister implements Vir{
     public boolean isAllocated() {
         return false;
     }
+
+    @Override
+    public boolean isFloat() {
+        return false;
+    }
 }

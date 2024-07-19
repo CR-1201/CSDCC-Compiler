@@ -1,19 +1,23 @@
 package backend.module;
 
+import backend.Utils.ImmediateUtils;
 import backend.instruction.ObjInstruction;
 import backend.instruction.ObjLoad;
+import backend.instruction.ObjMove;
 import backend.operand.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class ObjFunction {
     private String name;
     private ArrayList<ObjBlock> blocks = new ArrayList<>();
     private int allocSize;
-    private HashSet<String> savedRegisters = new HashSet<>();
-    private HashSet<String> savedFloatRegisters = new HashSet<>();
+    private Set<Integer> savedRegisters = new TreeSet<>();
+    private HashSet<Integer> savedFloatRegisters = new HashSet<>();
     private ArrayList<ObjInstruction> argLoadInstructions = new ArrayList<>();
 
     public ObjFunction(String name) {
@@ -56,47 +60,63 @@ public class ObjFunction {
 
     public void addToSavedRegisters(String name, boolean type) {
         if (type) {
-            savedRegisters.add(name);
+            savedRegisters.add(ObjPhyRegister.nameToNum(name));
         } else {
-            savedFloatRegisters.add(name);
+            savedFloatRegisters.add(ObjFloatPhyReg.nameToNum(name));
         }
     }
-    public void addToSavedFRegisters(String name) {
-        savedFloatRegisters.add(name);
-    }
-    public int getSavedRegistersSize() { return savedRegisters.size() + savedFloatRegisters.size(); }
+
     public void refreshArgOff() {
         int stack = allocSize;
-        for (ObjInstruction argload: argLoadInstructions){
-            int oldsa = ((ObjImmediate)((ObjLoad)argload).getOff()).getImmediate();
-            ((ObjLoad)argload).setOff(new ObjImmediate(stack + oldsa));
+        for (ObjInstruction argload : argLoadInstructions) {
+            if ((((ObjLoad) argload).getOff() instanceof ObjImmediate)) {
+                int oldsa = ((ObjImmediate) ((ObjLoad) argload).getOff()).getImmediate();
+                ((ObjLoad) argload).setOff(new ObjImmediate(stack + oldsa));
+            } else {
+                ObjMove freshMove = ((ObjLoad) argload).getImmMove();
+                int oldsa = ((ObjImmediate) freshMove.getRhs()).getImmediate();
+                freshMove.setRhs(new ObjImmediate(stack + oldsa));
+            }
         }
     }
+
     public String refresh() {
         StringBuilder sb = new StringBuilder();
         int stack = allocSize;
         if (stack != 0) {
-            sb.append("\tadd\tsp,\tsp,\t").append("#").append(stack).append("\n");
+            if (ImmediateUtils.checkEncodeImm(stack))
+                sb.append("\tadd\tsp,\tsp,\t").append("#").append(stack).append("\n");
+            else {
+                sb.append(new ObjMove(ObjPhyRegister.getRegister(5), new ObjImmediate(stack), false, true));
+                sb.append("\tadd\tsp,\tsp,\t").append("r5").append("\n");
+            }
         }
         if (!name.equals("main")) {
-            if (!savedRegisters.isEmpty()) {
-                sb.append("\tpop\t{");
-                int i = 0;
-                for (String savedRegIndex : savedRegisters) {
-                    if (i != 0)
-                        sb.append(",");
-                    sb.append(savedRegIndex);
-                    i++;
-                }
-                sb.append("}\n");
-            }
             if (!savedFloatRegisters.isEmpty()) {
                 sb.append("\tvpop\t{");
                 int i = 0;
-                for (String savedRegIndex : savedFloatRegisters) {
+                for (int savedRegIndex : savedFloatRegisters) {
                     if (i != 0)
                         sb.append(",");
-                    sb.append(savedRegIndex);
+                    sb.append("s").append(savedRegIndex);
+                    i++;
+                    if (i == 16 && i < savedFloatRegisters.size()) {
+                        sb.append("}\n").append("\tvpop\t{");
+                        i = 0;
+                    }
+                }
+                sb.append("}\n");
+            }
+            if (!savedRegisters.isEmpty()) {
+                sb.append("\tpop\t{");
+                int i = 0;
+                for (int savedRegIndex : savedRegisters) {
+                    if (i != 0)
+                        sb.append(",");
+                    if (14 == savedRegIndex)
+                        sb.append("pc");
+                    else
+                        sb.append("r").append(savedRegIndex);
                     i++;
                 }
                 sb.append("}\n");
@@ -112,31 +132,43 @@ public class ObjFunction {
         int stack = allocSize;
         if (!name.equals("main")) {
             int stackOffset = -4;
-            if (!savedFloatRegisters.isEmpty()) {
-                sb.append("\tvpush\t{");
+            if (!savedRegisters.isEmpty()) {
+                sb.append("\tpush\t{");
                 int i = 0;
-                for (String savedRegIndex : savedFloatRegisters) {
+                for (int savedRegIndex : savedRegisters) {
                     if (i != 0)
                         sb.append(",");
-                    sb.append(savedRegIndex);
+                    if (14 == savedRegIndex)
+                        sb.append("lr");
+                    else
+                        sb.append("r").append(savedRegIndex);
                     i++;
                 }
                 sb.append("}\n");
             }
-            if (!savedRegisters.isEmpty()) {
-                sb.append("\tpush\t{");
+            if (!savedFloatRegisters.isEmpty()) {
+                sb.append("\tvpush\t{");
                 int i = 0;
-                for (String savedRegIndex : savedRegisters) {
+                for (int savedRegIndex : savedFloatRegisters) {
                     if (i != 0)
                         sb.append(",");
-                    sb.append(savedRegIndex);
+                    sb.append("s").append(savedRegIndex);
                     i++;
+                    if (i == 16 && i < savedFloatRegisters.size()) {
+                        sb.append("}\n").append("\tvpush\t{");
+                        i = 0;
+                    }
                 }
                 sb.append("}\n");
             }
         }
         if (stack != 0) {
-            sb.append("\tsub\tsp,\tsp,\t#").append(stack).append("\n");
+            if (ImmediateUtils.checkEncodeImm(stack))
+                sb.append("\tsub\tsp,\tsp,\t").append("#").append(stack).append("\n");
+            else {
+                sb.append(new ObjMove(ObjPhyRegister.getRegister(5), new ObjImmediate(stack), false, true));
+                sb.append("\tsub\tsp,\tsp,\t").append("r5").append("\n");
+            }
         }
         blocks.forEach(objBlock -> sb.append(objBlock.toString()));
         return sb.toString();
@@ -147,9 +179,9 @@ public class ObjFunction {
         blocks.forEach(b -> b.getInstructions().forEach(i -> regs.addAll(i.getRegs())));
         HashSet<ObjRegister> regss;
         if (type)
-            regss = (HashSet<ObjRegister>) regs.stream().filter(r->(r instanceof ObjVirRegister)).collect(Collectors.toSet());
+            regss = (HashSet<ObjRegister>) regs.stream().filter(r -> (r instanceof ObjVirRegister)).collect(Collectors.toSet());
         else
-            regss = (HashSet<ObjRegister>) regs.stream().filter(r->(r instanceof ObjFloatVirReg)).collect(Collectors.toSet());
+            regss = (HashSet<ObjRegister>) regs.stream().filter(r -> (r instanceof ObjFloatVirReg)).collect(Collectors.toSet());
         return regss;
     }
 }

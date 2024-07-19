@@ -19,16 +19,22 @@ public class Compiler {
         String irOutputPath = "llvm_ir.txt";
         // 解析命令行参数
         for (int i = 0; i < args.length; i++) {
-            if ("-f".equals(args[i]) && i + 1 < args.length) {
-                fileInputPath = args[i + 1];
-            } else if ("-ll".equals(args[i]) && i + 1 < args.length) {
-                irOutputPath = args[i + 1];
-            } else if ("-o".equals(args[i]) && i + 1 < args.length) {
-                fileOutputPath = args[i + 1];
-            }
+//            if ("-f".equals(args[i]) && i + 1 < args.length) {
+//                fileInputPath = args[i + 1];
+//            } else if ("-ll".equals(args[i]) && i + 1 < args.length) {
+//                irOutputPath = args[i + 1];
+//            } else if ("-o".equals(args[i]) && i + 1 < args.length) {
+//                fileOutputPath = args[i + 1];
+//            }
+            if (i == 1 && args[1] != null)
+                fileInputPath = args[i];
+            else if (i == 2 && args[2] != null)
+                fileOutputPath = args[i];
         }
+//        fileInputPath = args[0];
+//        fileOutputPath = args[1];
         // 初始化
-        Config.init(fileInputPath,irOutputPath,fileOutputPath);
+        Config.init(fileInputPath, irOutputPath, fileOutputPath);
 
         // 词法分析
         LexicalAnalyze.getLexical().analyze(IOFunc.input(Config.fileInputPath));
@@ -42,7 +48,7 @@ public class Compiler {
         CompUnit syntaxTreeRoot = ParserAnalyze.getParser().getCompUnit();
         IrBuilder.getIrBuilder().buildModule(syntaxTreeRoot);
         IOFunc.clear(Config.irRawOutputPath);
-        IOFunc.output(Module.getModule().toString(),Config.irRawOutputPath);
+        IOFunc.output(Module.getModule().toString(), Config.irRawOutputPath);
 
         // pass
         PassManager passManager = new PassManager();

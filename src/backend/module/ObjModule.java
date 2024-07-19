@@ -29,7 +29,7 @@ public class ObjModule {
         // main函数判断
         if (pbjf.getName().equals("main")) {
             mainFunction = pbjf;
-            System.out.println("main function found");
+//            System.out.println("main function found");
         }
         functions.add(pbjf);
     }

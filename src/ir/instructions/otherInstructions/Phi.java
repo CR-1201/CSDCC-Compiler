@@ -6,8 +6,10 @@ import ir.Value;
 import ir.instructions.Instruction;
 import ir.types.DataType;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 public class Phi extends Instruction {
     private int precursorNum;
@@ -55,6 +57,15 @@ public class Phi extends Instruction {
             }
         }
         throw new AssertionError("block not found for phi!");
+    }
+
+    public ArrayList<Map.Entry<Value, BasicBlock>> getEntry() {
+        ArrayList<Map.Entry<Value, BasicBlock>> entryPairs = new ArrayList<>();
+        for (int i = 0; i < precursorNum; i++) {
+            if (getOperator(i) == null) break;
+            entryPairs.add(new AbstractMap.SimpleEntry<>(getOperator(i), (BasicBlock) getOperator(i + precursorNum)));
+        }
+        return entryPairs;
     }
 
     @Override

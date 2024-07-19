@@ -16,9 +16,9 @@ public class Config {
         fileInputPath = in;
         irOutputPath = llvm;
         fileOutputPath = arm;
-        IOFunc.clear(ERROR_FILE);
-        IOFunc.clear(irOutputPath);
-        IOFunc.clear(irRawOutputPath);
+//        IOFunc.clear(ERROR_FILE);
+//        IOFunc.clear(irOutputPath);
+//        IOFunc.clear(irRawOutputPath);
         IOFunc.clear(fileOutputPath);
     }
 }

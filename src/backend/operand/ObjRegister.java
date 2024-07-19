@@ -63,4 +63,6 @@ public abstract class ObjRegister extends ObjOperand {
     public int hashCode() {
         return Objects.hash(name);
     }
+
+    public abstract boolean isFloat();
 }

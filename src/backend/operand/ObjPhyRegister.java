@@ -99,6 +99,9 @@ public class ObjPhyRegister extends ObjRegister{
         registerNum = num;
         super.isAlloc = false;
     }
+    public static int nameToNum(String name) {
+        return nameToNumMap.get(name);
+    }
     public static ObjPhyRegister getRegister(int num) {
         return registerMap.get(num);
     }
@@ -114,7 +117,10 @@ public class ObjPhyRegister extends ObjRegister{
         return registerNum;
     }
 
-
+    @Override
+    public boolean isFloat() {
+        return false;
+    }
 
     @Override
     public boolean isAllocated() {

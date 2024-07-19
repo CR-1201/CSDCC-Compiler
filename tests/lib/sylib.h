@@ -15,6 +15,7 @@ void putfarray(int n, float a[]);
 
 void putf(char a[], ...);
 
+void memset(int * s,int c,int count);
 /* Timing function implementation */
 struct timeval _sysy_start,_sysy_end;
 #define starttime() _sysy_starttime(__LINE__)

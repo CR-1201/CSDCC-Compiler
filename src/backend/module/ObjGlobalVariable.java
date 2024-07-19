@@ -73,8 +73,11 @@ public class ObjGlobalVariable {
                         sb.append("\t.word\t").append(elements.get(i) + "\n");
                     else break;
                 } else {
-                    if ((float)elements.get(i) != 0.0)
-                        sb.append("\t.word\t").append(Float.floatToIntBits((float)elements.get(i)) + "\n");
+                    if ((float)elements.get(i) != 0.0) {
+                        int bits = Float.floatToIntBits((float)elements.get(i));
+                        String hex = "0x" + Integer.toHexString(bits).toUpperCase();
+                        sb.append("\t.word\t").append(hex).append("\n");
+                    }
                     else break;
                 }
             }
@@ -83,6 +86,7 @@ public class ObjGlobalVariable {
         } else {
             sb.append("\t.zero\t").append(size);
         }
+         sb.append("\n");
         return sb.toString();
     }
 }

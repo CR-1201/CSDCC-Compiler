@@ -14,4 +14,9 @@ public abstract class ValueType {
     public boolean isFloat() {
         return false;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj.getClass() == getClass();
+    }
 }

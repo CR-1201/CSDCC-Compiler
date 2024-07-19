@@ -21,6 +21,9 @@ public class Mul extends BinaryInstruction {
         return true;
     }
 
+    public String getOpString() {
+        return ((getValueType() instanceof FloatType) ? "f" : "") +  "mul";
+    }
     @Override
     public String toString() {
         return getName() + " = "+ ((getValueType() instanceof FloatType) ? "f" : "") +  "mul " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();

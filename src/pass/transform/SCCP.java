@@ -18,7 +18,7 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;
-import pass.analysis.CFG;
+import utils.IOFunc;
 import utils.Pair;
 import utils.ValueStatus;
 
@@ -52,13 +52,13 @@ public class SCCP implements Pass {
 
     private boolean needPass = true;
 
+    @Override
     public void run() {
         for (Function function : module.getFunctionsArray()) {
-            CFG cfg = new CFG();
-            if (!function.getIsBuiltIn()) {
+            if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
                 int count = 1;
-                while (needPass && count > 0) {
+                while( needPass && count > 0 ){
                     count--;
                     needPass = false;
                     visitFunc(function);

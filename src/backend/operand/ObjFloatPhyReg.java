@@ -68,6 +68,16 @@ public class ObjFloatPhyReg extends ObjRegister {
         return needeeSaveRegister.contains(registerMap.get(nameToNumMap.get(name)));
     }
 
+    public static Integer nameToNum(String name) {
+        return nameToNumMap.get(name);
+    }
+
+    @Override
+    public boolean isFloat() {
+        return true;
+    }
+
+
     @Override
     public boolean isAllocated() {
         return super.isAlloc;

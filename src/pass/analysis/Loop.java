@@ -51,9 +51,15 @@ public class Loop {
             children.add(child);
         }
     }
+
     public void setDepth(int depth) {
         this.depth = depth;
     }
+
+    public int getDepth() {
+        return depth;
+    }
+
     public void addBlock(BasicBlock block) {
         if (!allBlocks.contains(block)) {
             allBlocks.add(block);

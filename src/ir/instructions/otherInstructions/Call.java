@@ -1,5 +1,6 @@
 package ir.instructions.otherInstructions;
 
+import ir.Argument;
 import ir.BasicBlock;
 import ir.Function;
 import ir.Value;
@@ -66,4 +67,16 @@ public class Call extends Instruction {
         return s.toString();
     }
 
+    public int[] getArgNum() {
+        int[] ret = new int[2];
+        ArrayList<Value> arguments = getArgs();
+        for (Value argument : arguments) {
+            if (argument.getValueType().isFloat()) {
+                ret[1]++;
+            } else {
+                ret[0]++;
+            }
+        }
+        return ret;
+    }
 }

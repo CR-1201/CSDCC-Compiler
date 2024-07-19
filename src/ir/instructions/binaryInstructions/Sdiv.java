@@ -21,6 +21,9 @@ public class Sdiv extends BinaryInstruction {
         return false;
     }
 
+    public String getOpString() {
+        return ((getValueType() instanceof FloatType) ? "f" : "s") +  "div";
+    }
     @Override
     public String toString(){
         return getName() + " = "+ ((getValueType() instanceof FloatType) ? "f" : "s") +  "div " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();

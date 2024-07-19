@@ -31,7 +31,7 @@ public class Icmp extends BinaryInstruction {
         return condition;
     }
 
-    private String getConditionString(boolean flag,Condition condition){
+    public String getConditionString(boolean flag,Condition condition){
         if( flag ){
             return switch (condition) {
                 case EQ -> "oeq";
@@ -57,6 +57,11 @@ public class Icmp extends BinaryInstruction {
     public boolean isCommutative(){
         // 只有等于和不等于才能交换操作数
         return condition.equals(Condition.NE) || condition.equals(Condition.EQ);
+    }
+
+    public String getOpString() {
+        boolean flag = (getOperator(0).getValueType() instanceof FloatType);
+        return getConditionString(flag, condition);
     }
 
     @Override

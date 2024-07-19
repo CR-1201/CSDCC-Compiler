@@ -63,8 +63,8 @@ public class GAVN implements Pass {
         ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
         for(Instruction instruction : instructions){
             if(instruction instanceof Load load){
-                if( GAVNMap.containsKey(load.getAddr()) ){
-                    load.replaceAllUsesWith(GAVNMap.get(load.getAddr()));
+                if( GAVNMap.containsKey(load.getAddr())){
+                    load.replaceAllUsesWith((GAVNMap.get(load.getAddr())));
                     load.eraseFromParent();
                 } else {
                     GAVNMap.put(load.getAddr(), load);
@@ -80,7 +80,7 @@ public class GAVN implements Pass {
         ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
         for( Instruction instruction : instructions){
             if( instruction instanceof Load load && GAVNMap.containsKey(load.getAddr()) ){
-                load.replaceAllUsesWith(GAVNMap.get(load.getAddr()));
+                load.replaceAllUsesWith((GAVNMap.get(load.getAddr())));
                 load.eraseFromParent();
             } else if( instruction instanceof Store store ){
                 Value key = store.getAddr();
@@ -147,9 +147,12 @@ public class GAVN implements Pass {
     }
 
     private boolean loadGAVN(Load load) {
+
         if( GAVNMap.containsKey(load.getAddr()) ){
-            load.replaceAllUsesWith(GAVNMap.get(load.getAddr()));
+            Value addr = GAVNMap.get(load.getAddr());
+            load.replaceAllUsesWith(addr);
             load.eraseFromParent();
+            System.out.println(addr);
             return false;
         }
 

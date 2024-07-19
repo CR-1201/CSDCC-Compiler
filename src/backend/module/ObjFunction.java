@@ -54,8 +54,12 @@ public class ObjFunction {
         allocSize += size;
     }
 
-    public void addToSavedRegisters(String name) {
-        savedRegisters.add(name);
+    public void addToSavedRegisters(String name, boolean type) {
+        if (type) {
+            savedRegisters.add(name);
+        } else {
+            savedFloatRegisters.add(name);
+        }
     }
     public void addToSavedFRegisters(String name) {
         savedFloatRegisters.add(name);

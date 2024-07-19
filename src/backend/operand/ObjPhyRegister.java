@@ -75,6 +75,7 @@ public class ObjPhyRegister extends ObjRegister{
         for (int i = 4; i < 13; i++) {
             add(registerMap.get(i));
         }
+        add(registerMap.get(14));
     }};
 
     public static HashSet<ObjRegister> getCanAllocRegister() {

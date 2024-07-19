@@ -1,6 +1,6 @@
 package backend.operand;
 
-public class ObjVirRegister extends ObjRegister{
+public class ObjVirRegister extends ObjRegister implements Vir{
     protected static int rname = 0;
 
     public ObjVirRegister() {

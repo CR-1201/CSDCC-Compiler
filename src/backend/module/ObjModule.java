@@ -53,6 +53,7 @@ public class ObjModule {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append(".arch armv7ve\n\n").append(".text\n");
         globalVariables.forEach(gv -> sb.append(gv.toString()));
         functions.forEach(f -> sb.append(f.toString()));
         return sb.toString();

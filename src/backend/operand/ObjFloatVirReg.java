@@ -1,6 +1,6 @@
 package backend.operand;
 
-public class ObjFloatVirReg extends ObjRegister {
+public class ObjFloatVirReg extends ObjRegister implements Vir{
     private static int fname = 0;
     public ObjFloatVirReg() {
         super("vf" + fname++);

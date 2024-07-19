@@ -32,7 +32,7 @@ public class Compiler {
 
         // 词法分析
         LexicalAnalyze.getLexical().analyze(IOFunc.input(Config.fileInputPath));
-        LexicalAnalyze.getLexical().printTokens();
+//        LexicalAnalyze.getLexical().printTokens();
 
         // 语法分析
         ParserAnalyze.getParser().setTokens(LexicalAnalyze.getLexical().getTokens());
@@ -53,9 +53,7 @@ public class Compiler {
 
         // 生成目标代码
         ObjBuilder.getObjBuilder().build();
-        System.out.println(ObjModule.getModule());
-
-        IOFunc.output(Module.getModule().toString(), Config.irOutputPath);
+        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
 
     }
 }

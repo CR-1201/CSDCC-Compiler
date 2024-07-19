@@ -34,7 +34,7 @@ public class ObjJump extends ObjInstruction{
         if (target != null)
             return "\tb" + getCond() + "\t" + target.getName() +  "\n";
         else {
-            return func.refresh() + "\tbl\tlr\n";
+            return func.refresh() + "\tbx\tlr\n";
         }
     }
 }

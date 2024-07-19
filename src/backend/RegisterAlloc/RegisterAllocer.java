@@ -100,7 +100,7 @@ public class RegisterAllocer {
                 for (ObjRegister reg : instr.getDef()) {
                     String rname = reg.getName();
                     if (needSave(rname, type)) {
-                        objFunction.addToSavedRegisters(rname);
+                        objFunction.addToSavedRegisters(rname, type);
                     }
                 }
             }
@@ -153,7 +153,9 @@ public class RegisterAllocer {
             HashSet<ObjRegister> live = new HashSet<>(livenessMap.get(b).getOut());
             for (int i = b.getInstructions().size() - 1; i >= 0; i--) {
                 ObjInstruction I = b.getInstructions().get(i);
-                if (I instanceof ObjMove && !((ObjMove) I).isHasImm()) {
+                if (I instanceof ObjMove && !((ObjMove) I).isHasImm()
+                        && ((ObjMove) I).getRhs() instanceof Vir && ((ObjMove) I).getDst() instanceof Vir
+                        && ((ObjMove) I).getRhs().getClass() ==  ((ObjMove) I).getDst().getClass()) {
                     ObjRegister rs = (ObjRegister) ((ObjMove) I).getRhs();
                     ObjRegister rd = (ObjRegister) ((ObjMove) I).getDst();
                     live.remove(rs);
@@ -177,6 +179,8 @@ public class RegisterAllocer {
     }
 
     private void AddEdge(ObjRegister u, ObjRegister v) {
+        if (u.getClass() != v.getClass())
+            return;
         Edge e = new Edge(u, v);
         if (!adjSet.contains(e) && !u.equals(v)) {
             adjSet.add(e);
@@ -437,7 +441,7 @@ public class RegisterAllocer {
                         }
                     }
                     if (lastDef != null) {
-                        ObjStore store = new ObjStore(vReg, ObjPhyRegister.getRegister("sp"), new ObjImmediate(objFunction.getAllocSize()), false);
+                        ObjStore store = new ObjStore(ObjPhyRegister.getRegister("sp"), vReg, new ObjImmediate(objFunction.getAllocSize()), false);
                         block.addInstructionAfter(lastDef, store);
                     }
                     if (firstUse != null) {

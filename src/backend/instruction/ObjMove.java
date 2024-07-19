@@ -49,7 +49,7 @@ public class ObjMove extends ObjInstruction implements hasVFP {
         if (isV)
             return "\tvmov" + getCond() + (hasImm ? ".f32" : "") + "\t" + dst + ",\t" + rhs + "\n";
         else
-            return "\tmov" + (hasImm ? "32" : "") + getCond()  + "\t" + dst + ",\t" + rhs + "\n";
+            return "\tmov"  + getCond()  + "\t" + dst + ",\t" + rhs + "\n";
 
     }
 

@@ -220,9 +220,7 @@ public class ObjBuilder {
     }
 
     private ObjInstruction buildBinary(BinaryInstruction binary, ObjBlock objBlock, ObjFunction objFunction) {
-        if (binary instanceof Srem) {
-            return null;
-        }
+
         Value l = binary.getOp1(), r = binary.getOp2();
         ObjOperand rl = v2mMap.containsKey(l) ? v2mMap.get(l) : putNewVGtoMap(l, objFunction, objBlock),
                 rr = v2mMap.containsKey(r) ? v2mMap.get(r) : putNewVGtoMap(r, objFunction, objBlock);
@@ -236,6 +234,11 @@ public class ObjBuilder {
             objBlock.addInstruction(new ObjMove(rr, new ObjImmediate(((ConstInt) r).getValue()), false, true));
         } else if (r instanceof ConstFloat) {
             objBlock.addInstruction(new ObjMove(rr, new ObjFloatImmediate(((ConstFloat) r).getValue()), true, true));
+        }
+        if (binary instanceof Srem) {
+            objBlock.addInstruction(new Binary(rd, rl, rr, Binary.BinaryType.sdiv));
+            objBlock.addInstruction(new Binary(rd, rd, rr, Binary.BinaryType.mul));
+            return new Binary(rd, rl, rd, Binary.BinaryType.sub);
         }
         if (binary instanceof Icmp)
             return new ObjCompare(rl, rr, l.getValueType().isFloat() || r.getValueType().isFloat());
@@ -287,14 +290,13 @@ public class ObjBuilder {
         } else if (value instanceof ConstFloat) {
             objBlock.addInstruction(new ObjMove(rs, new ObjFloatImmediate(((ConstFloat) value).getValue()), true, true));
         }
+        ObjOperand rd = createVirRegister(conversion);
         if ("fptosi".equals(conversion.getType())) {
-            ObjOperand rd = new ObjVirRegister();
-            v2mMap.put(conversion, rd);
-            return new VConvert(VConvert.vcvtType.f, VConvert.vcvtType.s, rs, rd);
+            objBlock.addInstruction(new VConvert(VConvert.vcvtType.f, VConvert.vcvtType.s, rs, rs));
+            return new ObjMove(rd, rs, true, false);
         } else {
-            ObjOperand rd = new ObjFloatVirReg();
-            v2mMap.put(conversion, rd);
-            return new VConvert(VConvert.vcvtType.s, VConvert.vcvtType.f, rs, rd);
+            objBlock.addInstruction(new ObjMove(rd, rs, true, false));
+            return new VConvert(VConvert.vcvtType.s, VConvert.vcvtType.f, rd, rd);
         }
 
     }
@@ -310,6 +312,9 @@ public class ObjBuilder {
     // TODO : use def添加
     private ObjInstruction buildCall(Call call, ObjBlock objBlock, ObjFunction objFunction) {
         Function func = call.getFunction();
+        if ("@memset".equals(func.getName())) {
+            return null;
+        }
         ObjCall objCall = new ObjCall(new ObjFunction(func.getName()));
         int argnum = call.getArgs().size();
         for (int i = 0; i < argnum; i++) {

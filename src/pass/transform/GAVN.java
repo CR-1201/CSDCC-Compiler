@@ -26,9 +26,6 @@ public class GAVN implements Pass {
     public void run() {
         ArrayList<Function> functions = module.getFunctionsArray();
         for(Function function :  functions){
-            Dom dom = new Dom();
-            dom.buildDom(function);
-
             // 针对指针没有store的情况
             simpleGVN(function);
 
@@ -40,7 +37,9 @@ public class GAVN implements Pass {
         GAVNMap.clear();
         canGAVN.clear();
         initCanGAVN(function);
-        RPOSearch(function.getFirstBlock());
+        if( !function.getBasicBlocksArray().isEmpty() ){
+            RPOSearch(function.getFirstBlock());
+        }
     }
 
     private void arrayGVN(Function function) {

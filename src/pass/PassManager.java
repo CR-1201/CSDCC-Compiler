@@ -27,10 +27,14 @@ public class PassManager {
         passes.add(new MergeRedundantBr());
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
-        passes.add(new GAVN());
 //        passes.add(new DeadCodeEmit());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new LoopAnalysis());
+        passes.add(new GAVN());
 
         GVNGCMPass();
+
         for (Pass pass : passes) {
             pass.run();
         }

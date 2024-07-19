@@ -91,7 +91,7 @@ public class GEP extends MemoryInstruction{
             s.append(getOperator(i).getValueType()).append(" ").append(getOperator(i).getName());
             if( i+1 < n )s.append(", ");
         }
-        s.delete(s.length() - 2, s.length());
+//        s.delete(s.length() - 2, s.length());
         return s.toString();
     }
 }

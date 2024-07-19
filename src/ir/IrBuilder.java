@@ -280,7 +280,7 @@ public class IrBuilder {
     }
 
     public Phi buildPhi(DataType type, BasicBlock parent, int cnt){
-        Phi phi = new Phi(phiNameNum++, type, parent, cnt);
+        Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
         parent.insertHead(phi);
         return phi;
     }

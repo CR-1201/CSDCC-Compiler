@@ -8,6 +8,7 @@ import pass.analysis.LoopAnalysis;
 import pass.analysis.SideEffect;
 import pass.transform.*;
 import pass.transform.emituseless.UselessPhiEmit;
+import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import utils.IOFunc;
 
@@ -29,6 +30,8 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
         passes.add(new UselessPhiEmit());
+        // UselessStoreEmit 前面，一定要进行函数副作用的分析
+        passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
 
         GVNGCMPass();

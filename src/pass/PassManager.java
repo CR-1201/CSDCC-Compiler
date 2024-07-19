@@ -30,9 +30,9 @@ public class PassManager {
         // UselessStoreEmit 前面，一定要进行函数副作用的分析
         passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
-        passes.add(new CFG());
+//        passes.add(new CFG());
         passes.add(new Dom());
-//        passes.add(new GAVN());
+        passes.add(new GAVN());
         GVNGCMPass();
 
         for (Pass pass : passes) {

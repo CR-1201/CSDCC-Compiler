@@ -25,13 +25,18 @@ public class Instruction extends User {
     public Instruction(String name, DataType dataType, BasicBlock parent, ArrayList<Value> ops) {
         super(name, dataType, parent, ops);
         if (!name.isEmpty()) {
-        parent.getParent().addFunctionSymbol(this);
+            parent.getParent().addFunctionSymbol(this);
         }
     }
 
     // 在 parent block 中删除自己
     public void eraseFromParent(){
         getParent().removeInstruction(this);
+    }
+
+    public void removeSelf() {
+        removeAllOperators();
+        eraseFromParent();
     }
 
     @Override

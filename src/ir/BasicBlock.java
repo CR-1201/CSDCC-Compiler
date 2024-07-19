@@ -1,5 +1,6 @@
 package ir;
 
+import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
@@ -23,11 +24,11 @@ public class BasicBlock extends Value{
     private final HashSet<BasicBlock> precursors = new HashSet<>();
     private final HashSet<BasicBlock> successors = new HashSet<>();
     // 当前基本块支配的基本块
-    private ArrayList<BasicBlock> doms = new ArrayList<>();
+    private HashSet<BasicBlock> doms = new HashSet<>();
     // 当前基本块的必经基本块，即当前基本块的支配者
-    private ArrayList<BasicBlock> domers = new ArrayList<>();
+    private HashSet<BasicBlock> domers = new HashSet<>();
     // 当前基本块直接支配的基本块
-    private ArrayList<BasicBlock> idoms = new ArrayList<>();
+    private HashSet<BasicBlock> idoms = new HashSet<>();
     // 直接支配当前基本块的基本块
     private BasicBlock idomer;
     // 在支配树中的深度
@@ -60,19 +61,19 @@ public class BasicBlock extends Value{
         this.domLevel = domLevel;
     }
 
-    public ArrayList<BasicBlock> getDoms(){
+    public HashSet<BasicBlock> getDoms(){
         return doms;
     }
 
-    public void setDoms(ArrayList<BasicBlock> doms){
+    public void setDoms(HashSet<BasicBlock> doms){
         this.doms = doms;
     }
 
-    public ArrayList<BasicBlock> getDomers() {
+    public HashSet<BasicBlock> getDomers() {
         return domers;
     }
 
-    public void setDomers(ArrayList<BasicBlock> domers) {
+    public void setDomers(HashSet<BasicBlock> domers) {
         this.domers = domers;
     }
 
@@ -80,11 +81,11 @@ public class BasicBlock extends Value{
         domers.add(domer);
     }
 
-    public ArrayList<BasicBlock> getIdoms(){
+    public HashSet<BasicBlock> getIdoms(){
         return idoms;
     }
 
-    public void setIdoms(ArrayList<BasicBlock> idoms){
+    public void setIdoms(HashSet<BasicBlock> idoms){
         this.idoms = idoms;
     }
 
@@ -128,6 +129,12 @@ public class BasicBlock extends Value{
         return loop;
     }
 
+    public int getLoopDepth() {
+        if (loop == null) {
+            return 0;
+        } else return loop.getDepth();
+    }
+
     public void setLoop(Loop loop) {
         this.loop = loop;
     }
@@ -146,13 +153,15 @@ public class BasicBlock extends Value{
         instructions.add(instruction);
     }
 
-    // 将 instruction 插入到 before 指令的前面
-    // TODO 可能有bug 注意一下
-    public void insertBefore(Instruction instruction, Instruction before){
-        for( Instruction instructionNode : instructions ){
-            if( instructionNode.equals(before) ){
-                int index = instructions.indexOf(instructionNode);
-                instructions.add(index,instruction);
+    // 将 instruction 插入到 target 指令的前面
+    public void insertBefore(Instruction inst, Instruction target){
+        for (Instruction oldInst : instructions) {
+            if (oldInst.equals(target)){
+                int index = instructions.indexOf(oldInst);
+                instructions.add(index, inst);
+                if (inst.getParent() != this) {
+                    inst.setParent(this);
+                }
                 return;
             }
         }
@@ -211,6 +220,18 @@ public class BasicBlock extends Value{
             return null;
         }else{
             return instructions.getLast();
+        }
+    }
+
+    /**
+     * 获得首指令,如果开头没有指令,那么返回 null
+     * @return 首指令
+     */
+    public Instruction getHeadInstruction(){
+        if (instructions.isEmpty()){
+            return null;
+        }else{
+            return instructions.getFirst();
         }
     }
 

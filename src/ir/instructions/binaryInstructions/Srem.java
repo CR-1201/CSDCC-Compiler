@@ -21,6 +21,9 @@ public class Srem extends BinaryInstruction{
         return false;
     }
 
+    public String getOpString() {
+        return ((getValueType() instanceof FloatType) ? "f" : "s") +  "rem";
+    }
     @Override
     public String toString(){
         return getName() + " = "+ ((getValueType() instanceof FloatType) ? "f" : "s") +  "rem " + getValueType() + " " + getOperator(0).getName() + ", " + getOperator(1).getName();

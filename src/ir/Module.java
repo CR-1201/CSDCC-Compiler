@@ -60,6 +60,14 @@ public class Module extends Value{
         return result;
     }
 
+    public ArrayList<GlobalVariable> getGlobalVariablesArray(){
+        ArrayList<GlobalVariable> result = new ArrayList<>();
+        for (Value globalVariableNode : globalVariables){
+            result.add((GlobalVariable) globalVariableNode); // 强制转化不会出问题
+        }
+        return result;
+    }
+
     @Override
     public String toString(){
         StringBuilder s = new StringBuilder();
@@ -67,7 +75,9 @@ public class Module extends Value{
             GlobalVariable globalVariable = (GlobalVariable) globalVariableNode;
             s.append(globalVariable).append('\n');
         }
-        s.append("\n");
+        if (!globalVariables.isEmpty()) {
+            s.append('\n');
+        }
         for (Value functionNode : functions){
             Function function = (Function)functionNode;
             s.append(function).append('\n');

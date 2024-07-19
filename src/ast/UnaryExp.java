@@ -170,6 +170,7 @@ public class UnaryExp extends Node{
             case "putfarray" -> Function.putfarray;
             case "starttime" -> Function.starttime;
             case "stoptime" -> Function.stoptime;
+            case "memset" -> Function.memset;
             default -> null;
         };
     }

@@ -10,10 +10,7 @@ import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
-import ir.instructions.otherInstructions.Call;
-import ir.instructions.otherInstructions.Conversion;
-import ir.instructions.otherInstructions.Phi;
-import ir.instructions.otherInstructions.Zext;
+import ir.instructions.otherInstructions.*;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.DataType;
@@ -30,10 +27,11 @@ public class IrBuilder {
     // module 实例
     public final Module module = Module.getModule();
     // 一个起名计数器,对于 instruction 或者 BasicBlock 没有名字,需要用计数器取一个独一无二的名字
-    private static int nameNumCounter = 0;
+    public static int nameNumCounter = 0;
     private static int strNumCounter = 0;
+    private static int blockNumCounter = 0;
     // 用于给 phi 一个名字,可以从 0 开始编号,因为 phi 一定是 %p1 之类的
-    public static int phiNameNum = 0;
+    private static int phiNumCounter = 0;
     // 全局变量查询表
     private static final HashMap<String, GlobalVariable> globalStrings = new HashMap<>();
 
@@ -81,7 +79,7 @@ public class IrBuilder {
     }
 
     public BasicBlock buildBasicBlock(Function function){
-        BasicBlock block = new BasicBlock(nameNumCounter++, function);
+        BasicBlock block = new BasicBlock(blockNumCounter++, function);
         function.insertTail(block);
         return block;
     }
@@ -144,6 +142,12 @@ public class IrBuilder {
         Conversion conversion = new Conversion(nameNumCounter++,type, dataType, parent, value);
         parent.insertBefore(conversion, before);
         return conversion;
+    }
+
+    public BitCast buildBitCast(BasicBlock parent, DataType dataType, Value value){
+        BitCast bitCast = new BitCast(nameNumCounter++, dataType, parent, value);
+        parent.insertTail(bitCast);
+        return bitCast;
     }
 
     /**
@@ -270,7 +274,7 @@ public class IrBuilder {
     }
 
     public Phi buildPhi(DataType type, BasicBlock parent){
-        Phi phi = new Phi(phiNameNum++, type, parent, parent.getPrecursors().size());
+        Phi phi = new Phi(phiNumCounter++, type, parent, parent.getPrecursors().size());
         parent.insertHead(phi);
         return phi;
     }

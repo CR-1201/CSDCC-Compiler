@@ -1,6 +1,7 @@
 .idea
 /out
 /llvmgen
+/checkir
 *.iml
 testfile.txt
 output.txt

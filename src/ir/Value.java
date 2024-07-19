@@ -69,9 +69,7 @@ public abstract class Value {
 //        if( !users.contains(user) )
 //            throw new AssertionError("value-" + getId() + " try to remove nonexistent user: " + user + " " + user.getId());
 //        users.remove(user);
-        if (users.contains(user)) {
-            users.remove(user);
-        }
+        users.remove(user);
     }
 
     /**

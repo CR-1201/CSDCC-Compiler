@@ -1,10 +1,12 @@
 package ast;
 
+import ir.Function;
 import ir.GlobalVariable;
 import ir.Value;
 import ir.constants.*;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.otherInstructions.BitCast;
 import ir.types.*;
 import token.Token;
 
@@ -71,7 +73,6 @@ public class VarDef extends Node{
             }
         } else { // 局部单变量
             DataType dataType;
-
 
             if( bType.getToken().getType() == Token.TokenType.INTTK ){
                 dataType = IntType.I32;
@@ -145,17 +146,32 @@ public class VarDef extends Node{
                 GEP basePtr = builder.buildGEP(curBlock, allocArray, ConstInt.ZERO, ConstInt.ZERO);
 
                 for( int i = 1; i < dims.size(); i++ ){
-                    // 如果是一个多维数组,继续 GEP,basePtr会变成一个指向具体的 int 的指针,即 int*
+                    // 如果是一个多维数组,继续 GEP, basePtr会变成一个指向具体的 int 的指针,即 int*
                     // basePtr 是指向 allocArray 基地址的
                     basePtr = builder.buildGEP(curBlock, basePtr, ConstInt.ZERO, ConstInt.ZERO);
                 }
+
+                ArrayList<Value> argList = new ArrayList<>();
+
+                if( ((PointerType)(basePtr.getValueType())).getPointeeType() instanceof IntType ) {
+                    argList.add(basePtr);
+                } else {
+                    BitCast bitCast = builder.buildBitCast(curBlock,new PointerType(new IntType(32)),basePtr);
+                    argList.add(bitCast);
+                }
+
+                argList.add(new ConstInt(0));
+                argList.add(new ConstInt(valueArrayUp.size()*4));
+
+
+                builder.buildCall(curBlock, Function.memset, argList);
 
                 // 利用 store 往内存中存值
                 for (int i = 0; i < valueArrayUp.size(); i++){
 
                     Value source = valueArrayUp.get(i);
 
-//                    if( source instanceof ConstStr) continue;
+                    if( source instanceof ConstStr) continue;
 
                     GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
                     if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
@@ -167,8 +183,6 @@ public class VarDef extends Node{
                     builder.buildStore(curBlock, source, curPtr);
                 }
             }
-
-
         }
     }
 

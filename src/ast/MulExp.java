@@ -140,7 +140,7 @@ public class MulExp extends Node{
                         Mul b = builder.buildMul(curBlock, dataType, a, mul);
                         mul = builder.buildSub(curBlock,dataType, multer, b);
                     }
-//                    mul = builder.buildSrem(curBlock, dataType, mul, multer);
+//                    mul = builder.buildSrem(curBlock, dataType, multer, mul);
                 }
             }
 

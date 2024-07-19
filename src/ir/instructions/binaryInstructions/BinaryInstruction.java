@@ -34,4 +34,25 @@ public abstract class BinaryInstruction extends Instruction {
 
     //操作数 op1 和op2 是不是可交换的
     public abstract boolean isCommutative();
+    public String getOpString() {
+        return "binary";
+    }
+    /**
+     * 两个指令是否是相同的运算符
+     * @param instr1 指令 1
+     * @param instr2 指令 2
+     * @return 是则为 true
+     */
+    public static boolean isSameOp(BinaryInstruction instr1, BinaryInstruction instr2){
+        boolean isSame = false;
+        if (instr1 instanceof Add && instr2 instanceof Add) isSame = true;
+        else if (instr1 instanceof Sub && instr2 instanceof Sub) isSame = true;
+        else if (instr1 instanceof Mul && instr2 instanceof Mul) isSame = true;
+        else if (instr1 instanceof Sdiv && instr2 instanceof Sdiv) isSame = true;
+        else if (instr1 instanceof Srem && instr2 instanceof Srem) isSame = true;
+        else if (instr1 instanceof Icmp cmp_1 && instr2 instanceof Icmp cmp_2){
+            isSame =  cmp_1.getCondition().equals(cmp_2.getCondition());
+        }
+        return isSame;
+    }
 }

@@ -92,6 +92,22 @@ public class Br extends TerInstruction{
         super.setOperator(index, newValue);
     }
 
+    public void removeSelf() {
+        ArrayList<BasicBlock> succs = new ArrayList<>();
+        if (hasCondition) {
+            succs.add((BasicBlock) getOperator(1));
+            succs.add((BasicBlock) getOperator(2));
+        } else {
+            succs.add((BasicBlock) getOperator(0));
+        }
+        for (BasicBlock succ : succs) {
+            getParent().removeSuccessor(succ);
+            succ.removePrecursor(getParent());
+        }
+        removeAllOperators();
+        eraseFromParent();
+    }
+
     @Override
     public String toString(){
         StringBuilder result = new StringBuilder("br " + getOperator(0).getValueType() + " " + getOperator(0).getName());

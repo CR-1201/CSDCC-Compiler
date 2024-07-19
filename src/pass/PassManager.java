@@ -7,6 +7,7 @@ import pass.analysis.Dom;
 import pass.analysis.LoopAnalysis;
 import pass.analysis.SideEffect;
 import pass.transform.*;
+import pass.transform.gcmgvn.GCM;
 import pass.transform.gcmgvn.GCMGVN;
 import utils.IOFunc;
 
@@ -28,9 +29,9 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
 //        passes.add(new DeadCodeEmit());
-
+        passes.add(new CFG());
+        passes.add(new Dom());
 //        passes.add(new GAVN());
-
         GVNGCMPass();
 
         for (Pass pass : passes) {

@@ -7,7 +7,6 @@ import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import pass.Pass;
-import pass.analysis.Dom;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,10 +25,12 @@ public class GAVN implements Pass {
     public void run() {
         ArrayList<Function> functions = module.getFunctionsArray();
         for(Function function :  functions){
-            // 针对指针没有store的情况
-            simpleGVN(function);
+            if( !function.getIsBuiltIn() ){
+                // 针对指针没有store的情况
+                simpleGVN(function);
 
-            arrayGVN(function);
+                arrayGVN(function);
+            }
         }
     }
 
@@ -37,9 +38,11 @@ public class GAVN implements Pass {
         GAVNMap.clear();
         canGAVN.clear();
         initCanGAVN(function);
-        if( !function.getBasicBlocksArray().isEmpty() ){
-            RPOSearch(function.getFirstBlock());
-        }
+
+//        System.out.println(function);
+//        System.out.println("============================");
+
+        RPOSearch(function.getFirstBlock());
     }
 
     private void arrayGVN(Function function) {
@@ -48,13 +51,9 @@ public class GAVN implements Pass {
             GAVNMap.clear();
             addLoad(basicBlock);
             for( BasicBlock son : basicBlock.getIdoms()){
-                if( basicBlock.getSuccessors().contains(son)){
+                // TODO 只考虑这种弱的情况 后面可以增强
+                if( basicBlock.getSuccessors().contains(son) && son.getPrecursors().size() == 1){
                     replaceLoad(son);
-                    for( BasicBlock sonSon : son.getIdoms()){
-                        if( son.getSuccessors().contains(sonSon)){
-                            replaceLoad(sonSon);
-                        }
-                    }
                 }
             }
         }
@@ -66,6 +65,7 @@ public class GAVN implements Pass {
             if(instruction instanceof Load load){
                 if( GAVNMap.containsKey(load.getAddr()) ){
                     load.replaceAllUsesWith(GAVNMap.get(load.getAddr()));
+                    load.eraseFromParent();
                 } else {
                     GAVNMap.put(load.getAddr(), load);
                 }
@@ -113,12 +113,12 @@ public class GAVN implements Pass {
         for( GEP gep : geps ){
             boolean storeFlag = false;
             for( User user : gep.getUsers() ){
-                if( user instanceof Store store){
+                if( user instanceof Store ){
                     storeFlag = true;
                     break;
                 }
             }
-            if( storeFlag ){
+            if( !storeFlag ){
                 canGAVN.add(gep);
             }
         }

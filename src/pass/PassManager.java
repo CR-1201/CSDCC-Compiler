@@ -14,15 +14,16 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
-        passes.add(new CFG());
-        passes.add(new Dom());
+//        passes.add(new CFG());
+//        passes.add(new Dom());
 //        passes.add(new LoopAnalysis());
-        passes.add(new Mem2reg());
-        passes.add(new SCCP());
-        passes.add(new MergeRedundantBr());
-        passes.add(new SideEffect());
-        passes.add(new UselessReturnEmit());
-        passes.add(new DeadCodeEmit());
+//        passes.add(new Mem2reg());
+//        passes.add(new SCCP());
+//        passes.add(new MergeRedundantBr());
+//        passes.add(new SideEffect());
+//        passes.add(new UselessReturnEmit());
+//        passes.add(new DeadCodeEmit());
+        passes.add(new InlineFunction());
         for (Pass pass : passes) {
             pass.run();
         }

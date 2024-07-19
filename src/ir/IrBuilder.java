@@ -267,4 +267,9 @@ public class IrBuilder {
         return phi;
     }
 
+    public Phi buildPhi(BasicBlock parent) {
+        Phi phi = new Phi(phiNumCounter++, null, parent, parent.getPrecursors().size());
+        parent.insertHead(phi);
+        return phi;
+    }
 }

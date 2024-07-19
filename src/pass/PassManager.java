@@ -10,6 +10,7 @@ import pass.transform.*;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
+import pass.transform.loop.LCSSA;
 import utils.IOFunc;
 
 import java.util.ArrayList;
@@ -30,10 +31,13 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
         passes.add(new UselessPhiEmit());
-        // UselessStoreEmit 前面，一定要进行函数副作用的分析
+//        // UselessStoreEmit 前面，一定要进行函数副作用的分析
         passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
-
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new LoopAnalysis());
+        passes.add(new LCSSA());
         GVNGCMPass();
         for (Pass pass : passes) {
             pass.run();

@@ -22,6 +22,9 @@ public class Phi extends Instruction {
     }
 
     public void addIncoming(Value value, BasicBlock block) {
+        if (getValueType() == null) {
+            setValueType(value.getValueType());
+        }
         int i = 0;
         while (i < precursorNum && getOperator(i) != null) {
             i++;

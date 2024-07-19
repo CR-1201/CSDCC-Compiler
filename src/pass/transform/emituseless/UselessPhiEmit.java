@@ -61,7 +61,6 @@ public class UselessPhiEmit implements Pass {
                                 flag = true;
                                 phi.replaceAllUsesWith(nph);
                                 phi.removeSelf();
-                                continue;
                             }
                         }
                     }

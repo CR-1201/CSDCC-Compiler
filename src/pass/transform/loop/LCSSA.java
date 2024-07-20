@@ -17,8 +17,6 @@ public class LCSSA implements Pass {
 
     @Override
     public void run() {
-        IOFunc.clear("checkir/lcssa.txt");
-        IOFunc.output(Module.getModule().toString(), "checkir/lcssa.txt");
         for (Function func : Module.getModule().getFunctionsArray()) {
             if (!func.getIsBuiltIn()) {
                 runLCSSA(func);

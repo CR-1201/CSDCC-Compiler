@@ -190,7 +190,6 @@ public class SCCP implements Pass {
 //        System.out.println(br);
         if( !jumpBlock.equals(invalidBlock) ){
             block.removeSuccessor(invalidBlock);
-            invalidBlock.removePrecursor(block);
         }
     }
 

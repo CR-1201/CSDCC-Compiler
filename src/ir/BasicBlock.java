@@ -1,6 +1,5 @@
 package ir;
 
-import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
@@ -10,6 +9,7 @@ import pass.analysis.Loop;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  @author Conroy
@@ -175,6 +175,11 @@ public class BasicBlock extends Value{
         instructions.remove(instruction);
     }
 
+    public void removeLastInst(){
+        Instruction lastInst = getTailInstruction();
+        lastInst.removeSelf();
+    }
+
     public void addPrecursor(BasicBlock precursor){
         precursors.add(precursor);
     }
@@ -185,13 +190,34 @@ public class BasicBlock extends Value{
 
     public void removeSuccessor(BasicBlock successor){
         successors.remove(successor);
+        successor.getPrecursors().remove(this);
     }
 
     public void removePrecursor(BasicBlock precursor){
         precursors.remove(precursor);
+        precursor.getSuccessors().remove(this);
     }
 
-
+    public ArrayList<BasicBlock> computeDfsSuccBlocks() {
+        HashSet<BasicBlock> visited = new HashSet<>();
+        Stack<BasicBlock> stack = new Stack<>();
+        ArrayList<BasicBlock> dfs = new ArrayList<>();
+        stack.add(this);
+        visited.add(this);
+        while (!stack.isEmpty()) {
+            BasicBlock top = stack.pop();
+            dfs.add(top);
+            if (!top.getSuccessors().isEmpty()) {
+                for (BasicBlock succ : top.getSuccessors()) {
+                    if (!visited.contains(succ)) {
+                        visited.add(succ);
+                        stack.push(succ);
+                    }
+                }
+            }
+        }
+        return dfs;
+    }
 
     /**
      * precursor - successor 是一对双向关系

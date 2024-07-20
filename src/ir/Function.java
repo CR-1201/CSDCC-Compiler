@@ -196,6 +196,10 @@ public class Function extends Value{
     public ArrayList<Loop> getTopLoops() {
         return topLoops;
     }
+
+    public void removeTopLoop(Loop loop) {
+        this.topLoops.remove(loop);
+    }
     // ============================== Loop End ================================
 
     /**

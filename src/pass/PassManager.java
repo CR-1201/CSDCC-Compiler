@@ -11,6 +11,7 @@ import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.LCSSA;
+import pass.transform.loop.LoopUnroll;
 import utils.IOFunc;
 
 import java.util.ArrayList;
@@ -23,21 +24,22 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
-        passes.add(new GlobalValueLocalize());
-        passes.add(new Mem2reg());
-        passes.add(new SCCP());
-        passes.add(new SimplifyInst());
-        passes.add(new MergeRedundantBr());
-        passes.add(new SideEffect());
-        passes.add(new UselessReturnEmit());
-        passes.add(new UselessPhiEmit());
-//        // UselessStoreEmit 前面，一定要进行函数副作用的分析
-        passes.add(new UselessStoreEmit());
-//        passes.add(new DeadCodeEmit());
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new LoopAnalysis());
+//        passes.add(new GlobalValueLocalize());
+//        passes.add(new Mem2reg());
+//        passes.add(new SCCP());
+//        passes.add(new SimplifyInst());
+//        passes.add(new MergeRedundantBr());
+//        passes.add(new SideEffect());
+//        passes.add(new UselessReturnEmit());
+//        passes.add(new UselessPhiEmit());
+////        // UselessStoreEmit 前面，一定要进行函数副作用的分析
+//        passes.add(new UselessStoreEmit());
+////        passes.add(new DeadCodeEmit());
+//        passes.add(new CFG());
+//        passes.add(new Dom());
+//        passes.add(new LoopAnalysis());
         passes.add(new LCSSA());
+        passes.add(new LoopUnroll());
         GVNGCMPass();
         for (Pass pass : passes) {
             pass.run();

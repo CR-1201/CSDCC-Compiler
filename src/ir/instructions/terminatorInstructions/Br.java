@@ -55,6 +55,12 @@ public class Br extends TerInstruction{
         }
     }
 
+    public Value getCond() {
+        if (hasCondition) {
+            return getOperator(0);
+        }
+        return null;
+    }
     public boolean getHasCondition(){
         return hasCondition;
     }
@@ -102,10 +108,15 @@ public class Br extends TerInstruction{
         }
         for (BasicBlock succ : succs) {
             getParent().removeSuccessor(succ);
-            succ.removePrecursor(getParent());
         }
         removeAllOperators();
         eraseFromParent();
+    }
+
+    public void cond2jump(BasicBlock target) {
+        hasCondition = false;
+        removeAllOperators();
+        addOperator(target);
     }
 
     @Override

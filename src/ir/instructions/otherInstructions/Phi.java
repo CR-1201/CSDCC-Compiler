@@ -51,6 +51,16 @@ public class Phi extends Instruction {
         precursorNum --;
     }
 
+    public void removeUsedValue(Value value) {
+        int idx = getOperators().indexOf(value);
+        BasicBlock block = (BasicBlock) getOperator(idx + precursorNum);
+        block.removeUser(this);
+        value.removeUser(this);
+        removeOperator(idx + precursorNum);
+        removeOperator(idx);
+        precursorNum --;
+    }
+
     public Value getInputVal(BasicBlock block) {
         for (int i = 0; i < precursorNum; i++) {
             if (getOperator(i + precursorNum) == block) {

@@ -152,7 +152,6 @@ public class GAVN implements Pass {
             Value addr = GAVNMap.get(load.getAddr());
             load.replaceAllUsesWith(addr);
             load.eraseFromParent();
-            System.out.println(addr);
             return false;
         }
 

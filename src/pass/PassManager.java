@@ -38,6 +38,8 @@ public class PassManager {
         // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
         passes.add(new GAVN());
 
+        passes.add(new MathOptimize());
+
         for (Pass pass : passes) {
             pass.run();
         }

@@ -40,6 +40,7 @@ public class PassManager {
 
         passes.add(new MathOptimize());
 
+        passes.add(new InstructionCleanUp());
         for (Pass pass : passes) {
             pass.run();
         }

@@ -37,7 +37,7 @@ public class PassManager {
         GVNGCMPass();
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
-        passes.add(new MergeRedundantBr());
+//        passes.add(new MergeRedundantBr());
 //        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 //        passes.add(new CFG());
 //        passes.add(new Dom());

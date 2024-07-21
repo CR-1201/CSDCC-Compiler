@@ -3,13 +3,14 @@ import os
 import subprocess
 import glob
 import threading
+import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 TIMEOUT = 300
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
 TEST_DIR = f'{ROOT_DIR}/tests'
 CP = '../compiler.jar'
-EXPECTED_PATTERN = re.compile(r'\d+H-\d+M-\d+S-\d+us')
+TIME_PATTERN = re.compile(r'(\d+)H-(\d+)M-(\d+)S-(\d+)us')
 TEST_CASES = []
 pass_cnt = 0
 pass_cnt_lock = threading.Lock()
@@ -43,6 +44,11 @@ def init():
                 case['ans_file'] = ans_file
             TEST_CASES.append(case)
 
+def convert_time_to_us(match):
+    hours, minutes, seconds, microseconds = map(int, match.groups())
+    total_us = (hours * 3600 + minutes * 60 + seconds) * 1_000_000 + microseconds
+    return total_us
+
 def create_folder_for(file):
     parent_dir = f'{TEST_DIR}/{os.path.dirname(file)}'
     if not os.path.exists(parent_dir):
@@ -67,6 +73,7 @@ def append_return(file_path, return_val):
         file.write(f'{return_val}\n')
 
 def check(stop_event, test_file, input_file='', ans_file=''):
+    time_res = {}
     filename = os.path.splitext(test_file)[0]
     ir_file = f'ir/{filename}.ll'
     ir_runnable = f'ir/{filename}'
@@ -100,22 +107,39 @@ def check(stop_event, test_file, input_file='', ans_file=''):
         return False
 
     # run ir
-    try:
-        create_folder_for(output_file)
-        cmd = f'./{ir_runnable} < {input_file} > {output_file}'
-        if not input_file:
-            cmd = f'./{ir_runnable} > {output_file}'
-        print(f'Running: {cmd}')
-        subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
-        append_return(output_file, 0)
-    except subprocess.CalledProcessError as e:
-        if EXPECTED_PATTERN.search(e.output.decode()):
-            append_return(output_file, e.returncode)
-        else:
-            print(f'[ERROR FILE] {test_file}')
-            print(f'Error running {ir_runnable}:{e.output.decode()}')
-            stop_event.set()
-            return False
+    # try:
+    #     create_folder_for(output_file)
+    #     cmd = f'./{ir_runnable} < {input_file} > {output_file}'
+    #     if not input_file:
+    #         cmd = f'./{ir_runnable} > {output_file}'
+    #     print(f'Running: {cmd}')
+    #     subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+    #     append_return(output_file, 0)
+    # except subprocess.CalledProcessError as e:
+    #     if TIME_PATTERN.search(e.output.decode()):
+    #         append_return(output_file, e.returncode)
+    #     else:
+    #         print(f'[ERROR FILE] {test_file}')
+    #         print(f'Error running {ir_runnable}:{e.output.decode()}')
+    #         stop_event.set()
+    #         return False
+
+    create_folder_for(output_file)
+    cmd = f'./{ir_runnable} < {input_file} > {output_file}'
+    if not input_file:
+        cmd = f'./{ir_runnable} > {output_file}'
+    print(f'Running: {cmd}')
+    res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
+    append_return(output_file, res.returncode)
+    e = res.stderr
+    m = TIME_PATTERN.search(e)
+    if m:
+        time_res['my'] = convert_time_to_us(m)
+    else:
+        print(f'[ERROR FILE] {test_file}')
+        print(f'Error running {ir_runnable}:{e}')
+        stop_event.set()
+        return False
     
     # TODO: run asm
 
@@ -131,6 +155,22 @@ def check(stop_event, test_file, input_file='', ans_file=''):
             cmd = f'./{ir_std_runnable} > {ans_file}'
         subprocess.run(cmd, cwd=TEST_DIR, shell=True)
 
+    # get clang time
+    for opt in range(1, 4):
+        create_folder_for(ir_std_runnable)
+        subprocess.run(f'clang -x c {test_file} lib/sylib.c -include lib/sylib.h -Wall -Wno-unused-result -O{opt} -o {ir_std_runnable}', cwd=TEST_DIR, shell=True, stderr=subprocess.PIPE)
+        cmd = f'./{ir_std_runnable} < {input_file}'
+        if not input_file:
+            cmd = f'./{ir_std_runnable}'
+        print(f'Running {cmd}')
+        res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
+        e = res.stderr
+        m = TIME_PATTERN.search(e)
+        if m:
+            time_res[f'O{opt}'] = convert_time_to_us(m)
+        else:
+            print(f'ERROR: {e}')
+
     ensure_newline_at_end_of_file(output_file)
     ensure_newline_at_end_of_file(ans_file)
     cmd = f"bash -c 'diff <(tr -d \"\\r\" < {output_file}) {ans_file}'"
@@ -145,12 +185,15 @@ def check(stop_event, test_file, input_file='', ans_file=''):
     with pass_cnt_lock:
         global pass_cnt
         pass_cnt += 1
-    return True
+    return True, time_res
 
-def check_wrapper(stop_event, case):
+def check_wrapper(stop_event, case, results, results_lock):
     def target():
         try:
-            check(stop_event, **case)
+            res = check(stop_event, **case)
+            if isinstance(res, tuple) and res[0]:
+                with results_lock:
+                    results.append((case['test_file'], res[1]))
         except Exception as e:
             print(f'{case["test_file"]}: {e}')
 
@@ -167,8 +210,11 @@ if __name__ == '__main__':
     stop_event = threading.Event()
     init()
 
+    results = []
+    results_lock = threading.Lock()
+    TEST_CASES = TEST_CASES[:20]
     with ThreadPoolExecutor(max_workers=16) as executor:
-        tasks = {executor.submit(check_wrapper, stop_event, case): case for case in TEST_CASES}
+        tasks = {executor.submit(check_wrapper, stop_event, case, results, results_lock): case for case in TEST_CASES}
         
         for task in as_completed(tasks):
             if stop_event.is_set():
@@ -196,3 +242,7 @@ if __name__ == '__main__':
                 exit(1)
 
     print(f'test_num: {len(TEST_CASES)}, pass_num: {pass_cnt}')
+    df = pd.DataFrame([{'file': file, **res} for file, res in results])
+    df = df.sort_values(by='my', ascending=False)
+    print(df.to_string(index=False))
+

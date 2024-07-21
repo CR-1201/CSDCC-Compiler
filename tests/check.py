@@ -212,7 +212,6 @@ if __name__ == '__main__':
 
     results = []
     results_lock = threading.Lock()
-    TEST_CASES = TEST_CASES[:20]
     with ThreadPoolExecutor(max_workers=16) as executor:
         tasks = {executor.submit(check_wrapper, stop_event, case, results, results_lock): case for case in TEST_CASES}
         

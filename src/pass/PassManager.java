@@ -16,25 +16,29 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
-//        passes.add(new CFG());
-//        passes.add(new Dom());
-//        passes.add(new LoopAnalysis());
-//        passes.add(new GlobalValueLocalize());
-//        passes.add(new Mem2reg());
-//        passes.add(new SCCP());
-//        passes.add(new SimplifyInst());
-//        passes.add(new MergeRedundantBr());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new LoopAnalysis());
+        passes.add(new GlobalValueLocalize());
+        passes.add(new Mem2reg());
+        passes.add(new SCCP());
+        passes.add(new SimplifyInst());
+        passes.add(new MergeRedundantBr());
         passes.add(new SideEffect());
-//        passes.add(new UselessPhiEmit());
-        // UselessStoreEmit 前面，一定要进行函数副作用的分析
-//        passes.add(new UselessStoreEmit());
-//        passes.add(new CFG());
-//        passes.add(new Dom());
-        passes.add(new DeadCodeEmit());
         passes.add(new UselessReturnEmit());
-        passes.add(new InlineFunction());
-//        passes.add(new GAVN());
+        passes.add(new UselessPhiEmit());
+        // UselessStoreEmit 前面，一定要进行函数副作用的分析
+        passes.add(new UselessStoreEmit());
+//        passes.add(new DeadCodeEmit());
+
         GVNGCMPass();
+
+        passes.add(new CFG());
+        passes.add(new Dom());
+        // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+        passes.add(new GAVN());
+
+        passes.add(new MathOptimize());
 
         for (Pass pass : passes) {
             pass.run();

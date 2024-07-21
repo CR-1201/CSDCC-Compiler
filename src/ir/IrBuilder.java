@@ -108,6 +108,12 @@ public class IrBuilder {
         return mul;
     }
 
+    public Mul buildMulBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before) {
+        Mul mul = new Mul(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBefore(mul,before);
+        return mul;
+    }
+
     public Sdiv buildSdiv(BasicBlock parent, DataType dataType, Value src1, Value src2) {
         Sdiv sdiv = new Sdiv(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertTail(sdiv);

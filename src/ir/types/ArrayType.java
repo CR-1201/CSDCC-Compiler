@@ -55,6 +55,15 @@ public class ArrayType extends ValueType{
         return elementType;
     }
 
+    public ArrayList<Integer> getNumList(){
+        ArrayList<Integer> numList = new ArrayList<>();
+        numList.add(elementNum);
+        if(elementType instanceof ArrayType){
+            numList.addAll(((ArrayType) elementType).getNumList());
+        }
+        return numList;
+    }
+
     @Override
     public int getSize(){
         return size;

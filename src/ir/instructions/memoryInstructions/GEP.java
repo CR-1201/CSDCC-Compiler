@@ -2,6 +2,8 @@ package ir.instructions.memoryInstructions;
 
 import ir.BasicBlock;
 import ir.Value;
+import ir.constants.ConstFloat;
+import ir.constants.ConstInt;
 import ir.types.ArrayType;
 import ir.types.PointerType;
 import ir.types.ValueType;

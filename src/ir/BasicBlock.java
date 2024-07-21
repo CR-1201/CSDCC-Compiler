@@ -279,6 +279,10 @@ public class BasicBlock extends Value{
         getParent().removeBlock(this);
     }
 
+    public void removeFromParent() {
+        getParent().removeBlock(this);
+    }
+
     public ArrayList<Phi> getPhiUsers() {
         ArrayList<Phi> phis = new ArrayList<>();
         for (User user : getUsers()) {

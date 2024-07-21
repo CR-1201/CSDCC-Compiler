@@ -1,20 +1,15 @@
 package pass;
 
-import config.Config;
 import ir.Module;
+import java.util.ArrayList;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
 import pass.analysis.LoopAnalysis;
 import pass.analysis.SideEffect;
 import pass.transform.*;
-import pass.transform.emituseless.UselessPhiEmit;
-import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.LCSSA;
 import pass.transform.loop.LoopUnroll;
-import utils.IOFunc;
-
-import java.util.ArrayList;
 
 public class PassManager {
     private Module module = Module.getModule();
@@ -24,6 +19,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
+//        passes.add(new LoopAnalysis());
 //        passes.add(new GlobalValueLocalize());
 //        passes.add(new Mem2reg());
 //        passes.add(new SCCP());
@@ -41,6 +37,18 @@ public class PassManager {
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
         GVNGCMPass();
+        passes.add(new SideEffect());
+        passes.add(new UselessReturnEmit());
+        passes.add(new DeadCodeEmit());
+        passes.add(new InlineFunction());
+//        passes.add(new UselessPhiEmit());
+//        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+//        GVNGCMPass();
+//        passes.add(new CFG());
+//        passes.add(new Dom());
+//        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+//        passes.add(new MathOptimize());
+
         for (Pass pass : passes) {
             pass.run();
         }

@@ -79,6 +79,24 @@ public class InlineFunction implements Pass {
                 }
             }
         }
+
+        for (Function function : irModule.getFunctionsArray()) {
+            int index = 0;
+            BasicBlock firstBasicBlock= null;
+            for (BasicBlock basicBlock : function.getBasicBlocksArray()) {
+                index ++;
+                if (index == 1) {
+                    firstBasicBlock = basicBlock;
+                    continue;
+                }
+                for (Instruction instruction : basicBlock.getInstructionsArray()) {
+                    if (instruction instanceof Alloca alloca) {
+                        irBuilder.buildALLOCA(alloca, firstBasicBlock);
+                        alloca.removeSelf();
+                    }
+                }
+            }
+        }
     }
 
     private void buildCallGraph() {

@@ -85,7 +85,7 @@ public class IrBuilder {
     }
 
     public BasicBlock buildBasicBLockAfter(Function function, BasicBlock after) {
-        BasicBlock block = new BasicBlock(nameNumCounter++, function);
+        BasicBlock block = new BasicBlock(blockNumCounter++, function);
         function.insertAfter(block, after);
         return block;
     }
@@ -166,6 +166,13 @@ public class IrBuilder {
 //        System.out.println(parent.getParent());
         BasicBlock realParent = parent.getParent().getFirstBlock();
         Alloca alloca = new Alloca(nameNumCounter++, allocatedType, realParent);
+        realParent.insertHead(alloca);
+        return alloca;
+    }
+
+    public Alloca buildALLOCA(Alloca oldAlloca, BasicBlock parent){
+        BasicBlock realParent = parent.getParent().getFirstBlock();
+        Alloca alloca = new Alloca(oldAlloca.getName(), oldAlloca.getAllocatedType(), realParent);
         realParent.insertHead(alloca);
         return alloca;
     }

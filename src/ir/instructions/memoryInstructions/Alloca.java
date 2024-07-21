@@ -38,6 +38,12 @@ public class Alloca extends MemoryInstruction{
         this.initVal = initVal;
     }
 
+    public Alloca(String name, ValueType allocatedType, BasicBlock parent){
+        // 指针 有初始化
+        super(name, new PointerType(allocatedType), parent,new ArrayList<>());
+        this.initVal = null;
+    }
+
     public ValueType getAllocatedType(){
         PointerType pointer =  (PointerType) getValueType();
         return pointer.getPointeeType();

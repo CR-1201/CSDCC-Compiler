@@ -322,6 +322,14 @@ public class BasicBlock extends Value{
             return null;
     }
 
+    public void reducePhi(boolean f) {
+        for (Instruction instruction : getInstructionsArray()) {
+            if (instruction instanceof Phi) {
+                ((Phi) instruction).removeIfRedundant(f);
+            }
+        }
+    }
+
     @Override
     public String toString(){
         // 将 % 去掉,因为只有在跳转指令里需要加上这个

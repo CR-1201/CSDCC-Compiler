@@ -57,6 +57,32 @@ public class Phi extends Instruction {
         throw new AssertionError("block not found for phi!");
     }
 
+    public void removeIfRedundant(boolean f) {
+        if (getUsers().isEmpty()) {
+            removeAllOperators();
+            eraseFromParent();
+            return;
+        }
+        if (precursorNum == 0) {
+            throw new AssertionError(this + "'s predecessorNum = 0!");
+        }
+        Value commonValue = getOperator(0);
+        for (int i = 1; i < precursorNum; i++)
+        {
+            if (commonValue != getOperator(i))
+            {
+                return;
+            }
+        }
+        if (!f && commonValue instanceof Instruction)
+        {
+            return;
+        }
+        replaceAllUsesWith(commonValue);
+        removeAllOperators();
+        eraseFromParent();
+    }
+
     @Override
     public String toString(){
         StringBuilder s = new StringBuilder(getName() + " = phi ").append(getValueType());

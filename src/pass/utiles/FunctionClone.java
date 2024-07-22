@@ -44,9 +44,9 @@ public class FunctionClone {
             Argument argument = srcFunc.getArguments().get(i);
             putValue(argument, copyFunc.getArguments().get(i));
         }
-        for (BasicBlock srcBlock : srcFunc.getBasicBlocksArray()) {
-            putValue(srcBlock, irBuilder.buildBasicBlock(copyFunc));
-        }
+
+        buildBlock(copyFunc, srcFunc.getFirstBlock());
+        visited.clear();
 
         copyBlocks(srcFunc.getFirstBlock());
 
@@ -59,6 +59,19 @@ public class FunctionClone {
         }
 
         return copyFunc;
+    }
+
+    private void buildBlock(Function copyFunc, BasicBlock block) {
+        putValue(block, irBuilder.buildBasicBlock(copyFunc));
+
+        for (BasicBlock successor : block.getSuccessors())
+        {
+            if (!visited.contains(successor))
+            {
+                visited.add(successor);
+                buildBlock(copyFunc, successor);
+            }
+        }
     }
 
     private void putValue(Value source, Value copy) {
@@ -77,6 +90,7 @@ public class FunctionClone {
     }
 
     private void copyBlocks(BasicBlock basicBlock) {
+
         for (Instruction srcInstr : basicBlock.getInstructionsArray()) {
             Instruction copyInstr = copyInstr(srcInstr);
             putValue(srcInstr, copyInstr);
@@ -128,11 +142,13 @@ public class FunctionClone {
             copyInstr = irBuilder.buildZext(copyBlock, findValue(((Zext) srcInstr).getConversionValue()));
         } else if (srcInstr instanceof Phi) {
             copyInstr = irBuilder.buildPhi((DataType) srcInstr.getValueType(), copyBlock, ((Phi) srcInstr).getPrecursorNum());
+//            copyInstr = irBuilder.buildPhi((DataType) srcInstr.getValueType(), copyBlock, 0);
             phis.add((Phi) srcInstr);
         } else if (srcInstr instanceof Load) {
             copyInstr = irBuilder.buildLoad(copyBlock, findValue(((Load) srcInstr).getAddr()));
         } else if (srcInstr instanceof Store) {
-            irBuilder.buildStore(copyBlock, findValue(((Store) srcInstr).getValue()), findValue(((Store) srcInstr).getAddr()));
+            irBuilder.buildStore(copyBlock,
+                    findValue(((Store) srcInstr).getValue()), findValue(((Store) srcInstr).getAddr()));
         } else if (srcInstr instanceof Alloca) {
             copyInstr = irBuilder.buildALLOCA(((PointerType) srcInstr.getValueType()).getPointeeType(), copyBlock);
         } else if (srcInstr instanceof GEP) {
@@ -167,7 +183,6 @@ public class FunctionClone {
                 irBuilder.buildRet(copyBlock, findValue(((Ret) srcInstr).getRetValue()));
             }
         } else if (srcInstr instanceof Conversion conversionInstr) {
-
             copyInstr = irBuilder.buildConversion(copyBlock, conversionInstr.getType(), (DataType) conversionInstr.getValueType(), findValue(conversionInstr.getConversionValue()));
         }
 

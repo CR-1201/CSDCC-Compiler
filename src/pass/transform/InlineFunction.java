@@ -68,17 +68,17 @@ public class InlineFunction implements Pass {
             }
 
             toBeInlinedFunctions.clear();
-            buildCallGraph();
-            emitUselessFunctions();
         }
+        buildCallGraph();
+        emitUselessFunctions();
 
-        for (Function f : irModule.getFunctionsArray()) {
-            for (BasicBlock b : f.getBasicBlocksArray()) {
-                if (b.getInstructionsArray().isEmpty()) {
-                    b.removeSelf();
-                }
-            }
-        }
+//        for (Function f : irModule.getFunctionsArray()) {
+//            for (BasicBlock b : f.getBasicBlocksArray()) {
+//                if (b.getInstructionsArray().isEmpty()) {
+//                    b.removeSelf();
+//                }
+//            }
+//        }
 
         for (Function function : irModule.getFunctionsArray()) {
             int index = 0;
@@ -91,8 +91,9 @@ public class InlineFunction implements Pass {
                 }
                 for (Instruction instruction : basicBlock.getInstructionsArray()) {
                     if (instruction instanceof Alloca alloca) {
-                        irBuilder.buildALLOCA(alloca, firstBasicBlock);
-                        alloca.removeSelf();
+                        Alloca newAlloca = irBuilder.buildALLOCA(alloca, firstBasicBlock);
+                        alloca.replaceAllUsesWith(newAlloca);
+                        alloca.eraseFromParent();
                     }
                 }
             }
@@ -188,24 +189,17 @@ public class InlineFunction implements Pass {
         BasicBlock nextBlock = irBuilder.buildBasicBLockAfter(curFunction, curBasicBlock);
 
         boolean backInstr = false;
-        ArrayList<Instruction> tmp = new ArrayList<>();
-        for (Instruction instr : curBasicBlock.getInstructions()) {
+        for (Instruction instr : curBasicBlock.getInstructionsArray()) {
             if (!backInstr && instr.equals(call)) {
                 backInstr = true;
                 continue;
             }
             if (backInstr) {
-//                instr.eraseFromParent();
-                tmp.add(instr);
+                instr.eraseFromParent();
                 nextBlock.insertTail(instr);
-//                instr.setParent(nextBlock);
+                instr.setParent(nextBlock);
             }
         }
-        for (Instruction instr : tmp) {
-            instr.eraseFromParent();
-            instr.setParent(nextBlock);
-        }
-//        irBuilder.buildBr(curBasicBlock, nextBlock);
 
         for (BasicBlock successor : curBasicBlock.getSuccessors()) {
             for (Instruction successorInstruction : successor.getInstructionsArray()) {
@@ -237,6 +231,8 @@ public class InlineFunction implements Pass {
         FunctionClone functionCloner = new FunctionClone();
         Function copyFunction = functionCloner.copyFunction(calleeFunction);
 
+//        System.out.println(copyFunction);
+
         for (int i = 0; i < copyFunction.getNumArgs(); i++) {
             Value curArg = copyFunction.getArguments().get(i);
             Value callArg = call.getOperator(i + 1);
@@ -265,9 +261,9 @@ public class InlineFunction implements Pass {
         }
 
         Br toFunc = irBuilder.buildBr(curBasicBlock, copyFunction.getFirstBlock());
-        toFunc.eraseFromParent();
-        curBasicBlock.insertTail(toFunc);
-        toFunc.setParent(curBasicBlock);
+//        toFunc.eraseFromParent();
+//        curBasicBlock.insertTail(toFunc);
+//        toFunc.setParent(curBasicBlock);
 
         ArrayList<Ret> retList = new ArrayList<>();
         int predecessorNum = 0;
@@ -280,12 +276,12 @@ public class InlineFunction implements Pass {
             }
         }
         if (retType instanceof IntType) {
-            Phi phi = irBuilder.buildPhi((IntType) retType, nextBlock);
+            Phi phi = irBuilder.buildPhi((IntType) retType, nextBlock, predecessorNum);
             for (Ret ret : retList) {
                 phi.addIncoming(ret.getRetValue(), ret.getParent());
 
                 ret.getParent().getSuccessors().remove(nextBlock);
-                nextBlock.getSuccessors().remove(ret.getParent());
+                nextBlock.getPrecursors().remove(ret.getParent());
 
                 irBuilder.buildBrBeforeInstr(ret.getParent(), nextBlock, ret);
 
@@ -294,12 +290,12 @@ public class InlineFunction implements Pass {
             }
             call.replaceAllUsesWith(phi);
         } else if (retType instanceof FloatType) {
-            Phi phi = irBuilder.buildPhi((FloatType) retType, nextBlock);
+            Phi phi = irBuilder.buildPhi((FloatType) retType, nextBlock, predecessorNum);
             for (Ret ret : retList) {
                 phi.addIncoming(ret.getRetValue(), ret.getParent());
 
                 ret.getParent().getSuccessors().remove(nextBlock);
-                nextBlock.getSuccessors().remove(ret.getParent());
+                nextBlock.getPrecursors().remove(ret.getParent());
 
                 irBuilder.buildBrBeforeInstr(ret.getParent(), nextBlock, ret);
 
@@ -310,7 +306,7 @@ public class InlineFunction implements Pass {
         } else if (retType instanceof VoidType) {
             for (Ret retInst : retList) {
                 retInst.getParent().getSuccessors().remove(nextBlock);
-                nextBlock.getSuccessors().remove(retInst.getParent());
+                nextBlock.getPrecursors().remove(retInst.getParent());
 
                 irBuilder.buildBrBeforeInstr(retInst.getParent(), nextBlock, retInst);
 
@@ -325,8 +321,11 @@ public class InlineFunction implements Pass {
             block.setParent(curFunction);
         }
 
+        // block(Call) -> curBlock -> .... -> nextBlock
+
         call.removeAllOperators();
         call.eraseFromParent();
+        nextBlock.reducePhi(true);
     }
 
 }

@@ -18,7 +18,6 @@ import pass.utiles.FunctionClone;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 

@@ -32,8 +32,6 @@ public class SimplifyInst implements Pass {
                     ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
                     for (Instruction instruction : instructions) {
                         Value value = simplify(instruction);
-                        System.out.println(value);
-                        System.out.println(instruction);
                         if (!value.equals(instruction)) {
                             instruction.replaceAllUsesWith(value);
                             instruction.eraseFromParent();

@@ -8,7 +8,6 @@ import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.Add;
-import ir.instructions.binaryInstructions.Mul;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;

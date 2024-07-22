@@ -72,16 +72,16 @@ b0:
   store i32 3, i32* %v17, align 4
   %v70 = getelementptr inbounds [16 x i32], [16 x i32]* %v0, i32 0, i32 3
   %v71 = load i32, i32* %v70, align 4
-  %v72 = add i32 71, %v71
+  %v72 = add i32 %v71, 71
   ret i32 %v72
 }
 
 define dso_local i32 @main() {
 b2:
   %v122 = call i32 @foo()
-  %v123 = add i32 30, %v122
+  %v123 = add i32 %v122, 30
   %v133 = call i32 @foo()
-  %v134 = add i32 41, %v133
+  %v134 = add i32 %v133, 41
   %v162 = add i32 %v123, %v134
   %v164 = add i32 %v162, 35
   call void @putint(i32 %v164)

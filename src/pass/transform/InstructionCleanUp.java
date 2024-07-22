@@ -6,7 +6,6 @@ import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.MemoryInstruction;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
-import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import pass.Pass;
@@ -89,7 +88,6 @@ public class InstructionCleanUp implements Pass {
             }
 
             // 第三阶段: 删除所有没有mark的指令
-
             for( BasicBlock basicBlock : basicBlocks ){
                 ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
                 for( Instruction instruction : instructions ){

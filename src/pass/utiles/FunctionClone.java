@@ -54,7 +54,11 @@ public class FunctionClone {
             for (int i = 0; i < phi.getOperators().size(); i++) {
                 Value v = findValue(phi.getOperator(i));
                 ((Phi) findValue(phi)).setOperator(i, v);
-                findValue(phi.getOperator(i)).addUser(((Phi) findValue(phi)));
+                if( findValue(phi.getOperator(i)) instanceof BasicBlock block ){
+                    if( !block.getUsers().contains(((Phi) findValue(phi))) ){
+                        findValue(phi.getOperator(i)).addUser(((Phi) findValue(phi)));
+                    }
+                }
             }
         }
 

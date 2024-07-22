@@ -30,11 +30,10 @@ public class LoopVarAnalysis {
         Phi idcVar = null;
         Value idcEnd = null;
         Value idcAlu = null, idcInit = null;
-        if(cond.getOperator(0) instanceof Phi phi) {
+        if (cond.getOperator(0) instanceof Phi phi) {
             idcVar = phi;
             idcEnd = cond.getOperator(1);
-        }
-        else if (cond.getOperator(1) instanceof Phi phi) {
+        } else if (cond.getOperator(1) instanceof Phi phi) {
             idcVar = phi;
             idcEnd = cond.getOperator(0);
         } else {

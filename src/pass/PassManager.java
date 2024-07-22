@@ -10,6 +10,8 @@ import pass.transform.*;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
+import pass.transform.loop.LCSSA;
+import pass.transform.loop.LoopUnroll;
 
 public class PassManager {
     private Module module = Module.getModule();
@@ -21,10 +23,14 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
+        passes.add(new LCSSA());
+        passes.add(new LoopUnroll());
+        passes.add(new Dom());
+        passes.add(new GlobalValueLocalize());
+        passes.add(new Mem2reg());
         passes.add(new InlineFunction());
         passes.add(new SCCP());
-//        passes.add(new SimplifyInst());
-        passes.add(new MergeRedundantBr());
+////        passes.add(new SimplifyInst());
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
         passes.add(new UselessPhiEmit());
@@ -33,17 +39,7 @@ public class PassManager {
         passes.add(new Dom());
         passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
         passes.add(new MathOptimize());
-        passes.add(new CFG());
-        passes.add(new Dom());
-
-        GVNGCMPass();
-
-        passes.add(new CFG());
-        passes.add(new Dom());
-        // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
-        passes.add(new GAVN());
-
-        passes.add(new MathOptimize());
+//        passes.add(new MergeRedundantBr());
 
 //        passes.add(new InstructionCleanUp());
         for (Pass pass : passes) {

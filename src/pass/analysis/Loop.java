@@ -155,6 +155,15 @@ public class Loop {
         return ans;
     }
 
+    public HashSet<BasicBlock> computeChildrenExits() {
+        HashSet<BasicBlock> ans = new HashSet<>();
+        for (Loop child : children) {
+            ans.addAll(child.computeChildrenExits());
+            ans.addAll(child.getExits());
+        }
+        return ans;
+    }
+
     public int computeLoopSize() {
         int loopSize = 0;
         for (BasicBlock block : this.getAllBlocks()) {

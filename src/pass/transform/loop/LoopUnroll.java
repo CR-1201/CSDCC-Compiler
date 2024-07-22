@@ -30,23 +30,32 @@ public class LoopUnroll implements Pass {
     private BasicBlock header;
     private BasicBlock next;
     private BasicBlock exit;
-    private BasicBlock enter;
     private BasicBlock latch;
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
-        for (Function func : Module.getModule().getFunctionsArray()) {
-            if (!func.getIsBuiltIn()) {
-                isUnrolled = false;
-                loopVarAnalysis.loopVarAnalysis(func);
-                runLoopUnroll(func);
-                if (isUnrolled) {
-                    cfg.setCFG(func.getBasicBlocksArray());
+        isUnrolled = true;
+        while (isUnrolled) {
+            isUnrolled = false;
+            for (Function func : Module.getModule().getFunctionsArray()) {
+                if (!func.getIsBuiltIn()) {
+                    clear();
+                    loopVarAnalysis.loopVarAnalysis(func);
+                    runLoopUnroll(func);
+                    if (isUnrolled) {
+                        cfg.setCFG(func.getBasicBlocksArray());
+                    }
                 }
             }
         }
     }
-
+    private void clear() {
+        isUnrolled = false;
+        header = null;
+        next = null;
+        exit = null;
+        latch = null;
+    }
     private void runLoopUnroll(Function func) {
         ArrayList<Loop> allLoops = new ArrayList<>();
         for (Loop loop : func.getTopLoops()) {
@@ -87,7 +96,7 @@ public class LoopUnroll implements Pass {
     }
 
     private Boolean initUnroll(Loop loop) {
-        HashSet<BasicBlock> allExits = new HashSet<>(loop.computeAllExits());
+        HashSet<BasicBlock> allExits = new HashSet<>(loop.computeChildrenExits());
         HashSet<BasicBlock> allBlocks = new HashSet<>(loop.getAllBlocks());
         for (BasicBlock exit : allExits) {
             if (!allBlocks.contains(exit)) {
@@ -99,12 +108,10 @@ public class LoopUnroll implements Pass {
         if ((long) loopTimes * loopSize > LOOP_MAX_LINE) {
             return false;
         }
-        BasicBlock header = loop.getHeader();
+        header = loop.getHeader();
         for (BasicBlock block : header.getPrecursors()) {
             if (loop.getLatches().contains(block)) {
                 latch = block;
-            } else {
-                enter = block;
             }
         }
         exit = loop.getExits().iterator().next();
@@ -119,17 +126,18 @@ public class LoopUnroll implements Pass {
     private void handleUnroll(Loop loop) {
         HashMap<Value, Value> phiMap = new HashMap<>();
         HashMap<Value, Value> beginToEnd = new HashMap<>();
-        HashSet<Phi> headerPhi = new HashSet<>();
+        Function headerParent = header.getParent();
+        HashSet<Phi> headerPhis = new HashSet<>();
         for (Instruction inst : header.getInstructions()) {
             if (inst instanceof Phi phi) {
-                headerPhi.add(phi);
+                headerPhis.add(phi);
             } else {
                 break;
             }
         }
 
-        // headerPhi 中有来自 latch 的 value，我们需要清除掉
-        for (Phi phi : headerPhi) {
+        // headerPhis 中有来自 latch 的 value，我们需要清除掉
+        for (Phi phi : headerPhis) {
             int latchIndex = phi.getOperators().indexOf(latch);
             Value latchValue = phi.getOperator(latchIndex - phi.getPrecursorNum());
             phi.removeUsedValue(latchValue);
@@ -159,13 +167,9 @@ public class LoopUnroll implements Pass {
                 child.setParent(parent);
             }
         } else {
-            Function headerParent = header.getParent();
+            headerParent = header.getParent();
             headerParent.removeTopLoop(loop);
         }
-
-        /**
-         * 执行 Unroll 操作
-         */
         BasicBlock oldNext = next;
         BasicBlock oldLatch = latch;
         CloneUtil cloneUtil = new CloneUtil();
@@ -226,10 +230,7 @@ public class LoopUnroll implements Pass {
             oldNext = newNext;
             oldLatch = newLatch;
         }
-        oldLatch.addSuccessor(exit);
-        exit.addPrecursor(oldLatch);
         IrBuilder.getIrBuilder().buildBr(oldLatch, exit);
-
         ArrayList<Phi> phiInExit = exit.getPhis();
         for(Phi phi : phiInExit){
             for(Value value : phi.getOperators()){

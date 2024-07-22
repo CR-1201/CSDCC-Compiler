@@ -96,6 +96,12 @@ public class Phi extends Instruction {
         eraseFromParent();
     }
 
+    public void replaceOperator(Value oldValue, Value newValue) {
+        int index = getOperators().indexOf(oldValue);
+        setOperator(index, newValue);
+        setOperator(index + precursorNum, newValue.getParent());
+    }
+
     @Override
     public String toString(){
         StringBuilder s = new StringBuilder(getName() + " = phi ").append(getValueType());

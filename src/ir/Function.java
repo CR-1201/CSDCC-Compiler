@@ -134,6 +134,17 @@ public class Function extends Value{
         }
     }
 
+    public void insertBefore(BasicBlock block, BasicBlock before) {
+        for( Value BasicBlockNode : blocks ){
+            BasicBlock _block = (BasicBlock) BasicBlockNode;
+            if( _block.equals(before) ){
+                int index = blocks.indexOf(BasicBlockNode);
+                blocks.add(index,block);
+                return;
+            }
+        }
+    }
+
     // 在 module 的符号表中删除自己
     public void eraseFromParent(){
         Module.getModule().getFunctions().remove(this);

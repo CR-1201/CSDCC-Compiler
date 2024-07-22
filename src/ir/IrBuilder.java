@@ -84,6 +84,12 @@ public class IrBuilder {
         return block;
     }
 
+    public BasicBlock buildBasicBLockAfter(Function function, BasicBlock after) {
+        BasicBlock block = new BasicBlock(blockNumCounter++, function);
+        function.insertAfter(block, after);
+        return block;
+    }
+
     public Add buildAdd(BasicBlock parent, DataType dataType, Value src1, Value src2){
         Add add = new Add(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertTail(add);
@@ -160,6 +166,13 @@ public class IrBuilder {
 //        System.out.println(parent.getParent());
         BasicBlock realParent = parent.getParent().getFirstBlock();
         Alloca alloca = new Alloca(nameNumCounter++, allocatedType, realParent);
+        realParent.insertHead(alloca);
+        return alloca;
+    }
+
+    public Alloca buildALLOCA(Alloca oldAlloca, BasicBlock parent){
+        BasicBlock realParent = parent.getParent().getFirstBlock();
+        Alloca alloca = new Alloca(oldAlloca.getName(), oldAlloca.getAllocatedType(), realParent);
         realParent.insertHead(alloca);
         return alloca;
     }
@@ -255,10 +268,16 @@ public class IrBuilder {
         }
     }
 
-    public void buildBr(BasicBlock parent, BasicBlock target){
+    public Br buildBr(BasicBlock parent, BasicBlock target){
         // 无条件跳转
         Br br = new Br(parent, target);
         parent.insertTail(br);
+        return br;
+    }
+
+    public void buildBrBeforeInstr(BasicBlock parent, BasicBlock target, Instruction instruction) {
+        Br br = new Br(parent, target);
+        parent.insertBefore(br, instruction);
     }
 
     public void buildBr(BasicBlock parent, Value condition, BasicBlock trueBlock, BasicBlock falseBlock){
@@ -269,6 +288,12 @@ public class IrBuilder {
 
     public Phi buildPhi(DataType type, BasicBlock parent){
         Phi phi = new Phi(phiNumCounter++, type, parent, parent.getPrecursors().size());
+        parent.insertHead(phi);
+        return phi;
+    }
+
+    public Phi buildPhi(DataType type, BasicBlock parent, int cnt){
+        Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
         parent.insertHead(phi);
         return phi;
     }

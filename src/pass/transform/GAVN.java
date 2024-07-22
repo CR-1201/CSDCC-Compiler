@@ -39,9 +39,6 @@ public class GAVN implements Pass {
         canGAVN.clear();
         initCanGAVN(function);
 
-//        System.out.println(function);
-//        System.out.println("============================");
-
         RPOSearch(function.getFirstBlock());
     }
 

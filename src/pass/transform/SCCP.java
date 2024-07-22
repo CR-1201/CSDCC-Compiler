@@ -1,8 +1,5 @@
 package pass.transform;
 
-import ast.Cond;
-import ast.Number;
-import com.sun.jdi.ArrayReference;
 import ir.*;
 import ir.Module;
 import ir.constants.ConstFloat;
@@ -10,21 +7,18 @@ import ir.constants.ConstInt;
 import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
-
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.otherInstructions.Zext;
 import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
-import pass.Pass;
-import utils.IOFunc;
-import utils.Pair;
-import utils.ValueStatus;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import pass.Pass;
+import utils.Pair;
+import utils.ValueStatus;
 
 /**
  @author Conroy
@@ -50,43 +44,12 @@ public class SCCP implements Pass {
     BasicBlock curBasicBlock;
     Instruction curInstruction;
 
-    private boolean needPass = true;
 
     @Override
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
-                // 遍历所有非库函数
-//                int count = 1;
-//                while( needPass && count > 0 ){
-//                    count--;
-//                    needPass = false;
-//                    visitFunc(function);
-//                }
-                for (BasicBlock block : function.getBasicBlocksArray()) {
-                    for (Instruction inst : block.getInstructionsArray()) {
-                        if (inst instanceof Phi phi && phi.getName().equals("%p12")) {
-//                            System.out.println(phi.getOperator(2));
-//                            System.out.println(phi.getOperator(3));
-//                            BasicBlock block1 = (BasicBlock) phi.getOperator(2);
-//                            BasicBlock block2 = (BasicBlock) phi.getOperator(3);
-//                            for (User user : block1.getUsers()) {
-//                                System.out.println(user);
-//                            }
-//                            System.out.println("====");
-//                            for (User user : block2.getUsers()) {
-//                                System.out.println(user);
-//                            }
-                            for (Value value : phi.getOperators()) {
-                                System.out.println(value);
-                            }
-                            System.out.println(phi.getPrecursorNum());
-//                            System.out.println(phi.getOperators());
-//                            System.out.println(block1.getUsers());
-//                            System.out.println(block2.getUsers());
-                        }
-                    }
-                }
+                visitFunc(function);
             }
         }
     }
@@ -118,16 +81,20 @@ public class SCCP implements Pass {
                     visitInstruction(instruction);
                 }
             }
+
+//            System.out.println(SSAWorkList.size());
+
             while(j < SSAWorkList.size()){
                 Instruction instruction = SSAWorkList.get(j++);
                 BasicBlock block = instruction.getParent();
                 // 只有指令可达,才需要遍历;否则可能引发不必要的状态更新
                 if( block.getPrecursors().isEmpty() ){
                     visitInstruction(instruction);
-                }
-                for( BasicBlock preBlock : block.getPrecursors() ){
-                    if( marked.contains(new Pair<>(preBlock,block)) ){
-                        visitInstruction(instruction);
+                } else {
+                    for( BasicBlock preBlock : block.getPrecursors() ){
+                        if( marked.contains(new Pair<>(preBlock,block)) ){
+                            visitInstruction(instruction);
+                        }
                     }
                 }
             }
@@ -146,7 +113,6 @@ public class SCCP implements Pass {
             prevStatus = new ValueStatus(ValueStatus.Status.Top,instruction);
         }
         curStatus = new ValueStatus(prevStatus.getStatus(),instruction);
-
 
         if( instruction instanceof Phi phi){
 //            System.out.println(phi);
@@ -171,7 +137,6 @@ public class SCCP implements Pass {
             if( curStatus.getStatus() == ValueStatus.Status.CONST ){
                 instruction.replaceAllUsesWith(curStatus.getValue());
                 instruction.eraseFromParent();
-                needPass = true;
             }
 
         }
@@ -204,7 +169,6 @@ public class SCCP implements Pass {
     }
 
     private void condBrToJump(Br br, BasicBlock jumpBlock, BasicBlock invalidBlock) {
-        needPass = true;
         BasicBlock block = br.getParent();
         br.removeAllOperators();
         br.setHasCondition(false);
@@ -214,6 +178,19 @@ public class SCCP implements Pass {
 //        System.out.println(br);
         if( !jumpBlock.equals(invalidBlock) ){
             block.removeSuccessor(invalidBlock);
+            invalidBlock.removePrecursor(block);
+            deletePhiValue(block,invalidBlock);
+        }
+    }
+
+    private void deletePhiValue(BasicBlock curBlock, BasicBlock nextBlock) {
+        ArrayList<Instruction> instructions = nextBlock.getInstructionsArray();
+        for( Instruction instruction : instructions ){
+            if( instruction instanceof Phi phi){
+                if( phi.getOperators().contains(curBlock)){
+                    phi.removeUsedBlock(curBlock);
+                }
+            }
         }
     }
 
@@ -232,6 +209,7 @@ public class SCCP implements Pass {
     }
 
     private void visitBr(Br br){
+//        System.out.println(br);
         // 无条件跳转 换成jump
         if(!br.getHasCondition()){
             BasicBlock jump_block = (BasicBlock)(br.getOperator(0));

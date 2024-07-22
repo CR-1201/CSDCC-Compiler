@@ -58,7 +58,9 @@ public abstract class Value {
      * @param selfUser 当前 value 的使用者
      */
     public void addUser(User selfUser){
-        users.add(selfUser);
+        if( !users.contains(selfUser) ){
+            users.add(selfUser);
+        }
     }
 
     /**

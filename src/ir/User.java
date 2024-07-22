@@ -65,7 +65,9 @@ public abstract class User extends Value {
     }
 
     public void addOperator(Value operator) {
-        operators.add(operator);
+        if (!operators.contains(operator)) {
+            operators.add(operator);
+        }
     }
 
     public void removeOperator(Value operator) {

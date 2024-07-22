@@ -50,19 +50,12 @@ public class SCCP implements Pass {
     BasicBlock curBasicBlock;
     Instruction curInstruction;
 
-    private boolean needPass = true;
 
     @Override
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
-                // 遍历所有非库函数
-                int count = 1;
-                while( needPass && count > 0 ){
-                    count--;
-                    needPass = false;
-                    visitFunc(function);
-                }
+                visitFunc(function);
             }
         }
     }
@@ -94,16 +87,20 @@ public class SCCP implements Pass {
                     visitInstruction(instruction);
                 }
             }
+
+//            System.out.println(SSAWorkList.size());
+
             while(j < SSAWorkList.size()){
                 Instruction instruction = SSAWorkList.get(j++);
                 BasicBlock block = instruction.getParent();
                 // 只有指令可达,才需要遍历;否则可能引发不必要的状态更新
                 if( block.getPrecursors().isEmpty() ){
                     visitInstruction(instruction);
-                }
-                for( BasicBlock preBlock : block.getPrecursors() ){
-                    if( marked.contains(new Pair<>(preBlock,block)) ){
-                        visitInstruction(instruction);
+                } else {
+                    for( BasicBlock preBlock : block.getPrecursors() ){
+                        if( marked.contains(new Pair<>(preBlock,block)) ){
+                            visitInstruction(instruction);
+                        }
                     }
                 }
             }
@@ -122,7 +119,6 @@ public class SCCP implements Pass {
             prevStatus = new ValueStatus(ValueStatus.Status.Top,instruction);
         }
         curStatus = new ValueStatus(prevStatus.getStatus(),instruction);
-
 
         if( instruction instanceof Phi phi){
 //            System.out.println(phi);
@@ -147,7 +143,6 @@ public class SCCP implements Pass {
             if( curStatus.getStatus() == ValueStatus.Status.CONST ){
                 instruction.replaceAllUsesWith(curStatus.getValue());
                 instruction.eraseFromParent();
-                needPass = true;
             }
 
         }
@@ -180,7 +175,6 @@ public class SCCP implements Pass {
     }
 
     private void condBrToJump(Br br, BasicBlock jumpBlock, BasicBlock invalidBlock) {
-        needPass = true;
         BasicBlock block = br.getParent();
         br.removeAllOperators();
         br.setHasCondition(false);
@@ -191,6 +185,18 @@ public class SCCP implements Pass {
         if( !jumpBlock.equals(invalidBlock) ){
             block.removeSuccessor(invalidBlock);
             invalidBlock.removePrecursor(block);
+            deletePhiValue(block,invalidBlock);
+        }
+    }
+
+    private void deletePhiValue(BasicBlock curBlock, BasicBlock nextBlock) {
+        ArrayList<Instruction> instructions = nextBlock.getInstructionsArray();
+        for( Instruction instruction : instructions ){
+            if( instruction instanceof Phi phi){
+                if( phi.getOperators().contains(curBlock)){
+                    phi.removeUsedBlock(curBlock);
+                }
+            }
         }
     }
 
@@ -209,6 +215,7 @@ public class SCCP implements Pass {
     }
 
     private void visitBr(Br br){
+//        System.out.println(br);
         // 无条件跳转 换成jump
         if(!br.getHasCondition()){
             BasicBlock jump_block = (BasicBlock)(br.getOperator(0));

@@ -3,6 +3,8 @@
 /out
 /llvmgen
 /checkir
+/conroy_local_test
+/llvmchecker
 *.iml
 testfile.txt
 output.txt
@@ -18,6 +20,7 @@ tests/error.txt
 compiler.jar
 tests/lib/libsysy.so
 .idea/workspace.xml
+sylib.ll
 
 ### IntelliJ IDEA ###
 out/

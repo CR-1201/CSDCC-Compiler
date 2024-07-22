@@ -22,10 +22,9 @@ public class PassManager {
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
         passes.add(new InlineFunction());
-        passes.add(new CFG());
-        passes.add(new Mem2reg());
-        passes.add(new SCCP());
-        passes.add(new SimplifyInst());
+//        passes.add(new SCCP());
+//        passes.add(new SimplifyInst());
+        passes.add(new MergeRedundantBr());
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());
         passes.add(new UselessPhiEmit());

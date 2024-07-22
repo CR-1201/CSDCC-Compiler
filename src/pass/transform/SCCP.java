@@ -57,11 +57,35 @@ public class SCCP implements Pass {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn())  {
                 // 遍历所有非库函数
-                int count = 1;
-                while( needPass && count > 0 ){
-                    count--;
-                    needPass = false;
-                    visitFunc(function);
+//                int count = 1;
+//                while( needPass && count > 0 ){
+//                    count--;
+//                    needPass = false;
+//                    visitFunc(function);
+//                }
+                for (BasicBlock block : function.getBasicBlocksArray()) {
+                    for (Instruction inst : block.getInstructionsArray()) {
+                        if (inst instanceof Phi phi && phi.getName().equals("%p12")) {
+//                            System.out.println(phi.getOperator(2));
+//                            System.out.println(phi.getOperator(3));
+//                            BasicBlock block1 = (BasicBlock) phi.getOperator(2);
+//                            BasicBlock block2 = (BasicBlock) phi.getOperator(3);
+//                            for (User user : block1.getUsers()) {
+//                                System.out.println(user);
+//                            }
+//                            System.out.println("====");
+//                            for (User user : block2.getUsers()) {
+//                                System.out.println(user);
+//                            }
+                            for (Value value : phi.getOperators()) {
+                                System.out.println(value);
+                            }
+                            System.out.println(phi.getPrecursorNum());
+//                            System.out.println(phi.getOperators());
+//                            System.out.println(block1.getUsers());
+//                            System.out.println(block2.getUsers());
+                        }
+                    }
                 }
             }
         }

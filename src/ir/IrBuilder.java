@@ -304,7 +304,7 @@ public class IrBuilder {
 
     // ======================== Using for Clone ========================
     public Alloca cloneAlloca(BasicBlock parent){
-
+        return null;
     }
 
 }

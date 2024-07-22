@@ -16,6 +16,7 @@ import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
 import pass.utility.BlockUtil;
 import pass.utility.CloneUtil;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,9 +35,11 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
-        isUnrolled = true;
-        while (isUnrolled) {
-            isUnrolled = false;
+//        isUnrolled = true;
+//        while (isUnrolled) {
+//            isUnrolled = false;
+        IOFunc.clear("checkir/loop.txt");
+        IOFunc.output(Module.getModule().toString(), "checkir/loop.txt");
             for (Function func : Module.getModule().getFunctionsArray()) {
                 if (!func.getIsBuiltIn()) {
                     clear();
@@ -47,7 +50,7 @@ public class LoopUnroll implements Pass {
                     }
                 }
             }
-        }
+//        }
     }
     private void clear() {
         isUnrolled = false;
@@ -135,7 +138,6 @@ public class LoopUnroll implements Pass {
                 break;
             }
         }
-
         // headerPhis 中有来自 latch 的 value，我们需要清除掉
         for (Phi phi : headerPhis) {
             int latchIndex = phi.getOperators().indexOf(latch);
@@ -144,7 +146,6 @@ public class LoopUnroll implements Pass {
             phiMap.put(phi, latchValue);
             beginToEnd.put(phi, latchValue);
         }
-        //  删除 header 和 latch/exit 之间的前驱后继关系
         header.removePrecursor(latch);
         header.removeSuccessor(exit);
         loop.removeBlock(header);
@@ -153,7 +154,6 @@ public class LoopUnroll implements Pass {
         br.cond2jump(next);
         latch.removeLastInst();
         ArrayList<BasicBlock> dfs = loop.computeDfsBlocksFromEntry(next);
-
         Loop parent = loop.getParent();
         if (parent != null) {
             parent.removeChild(loop);
@@ -176,7 +176,6 @@ public class LoopUnroll implements Pass {
         for (Value value : phiMap.keySet()) {
             cloneUtil.insertCloneMap(value, phiMap.get(value));
         }
-        // 最后一次 loop 需要单独处理
         for (int loopTime = 0; loopTime < loop.getLoopTimes() - 1; loopTime++) {
             for (BasicBlock block : dfs) {
                 BasicBlock clonedBlock = IrBuilder.getIrBuilder().buildBasicBlock(header.getParent());
@@ -205,10 +204,10 @@ public class LoopUnroll implements Pass {
             for (Phi phi : phis) {
                 int precursorNum = phi.getPrecursorNum();
                 for (int i = 0; i < precursorNum; i++) {
-                    BasicBlock preBB = (BasicBlock) phi.getOperator(i + precursorNum);
-                    BasicBlock nowBB = (BasicBlock) cloneUtil.findValue(preBB);
+                    BasicBlock preBlock = (BasicBlock) phi.getOperator(i + precursorNum);
+                    BasicBlock nowBlock = (BasicBlock) cloneUtil.findValue(preBlock);
                     Phi clonedPhi = (Phi) cloneUtil.findValue(phi);
-                    int index = clonedPhi.getOperators().indexOf(nowBB);
+                    int index = clonedPhi.getOperators().indexOf(nowBlock);
                     Value value = phi.getOperator(i);
                     Value clonedValue;
                     if(value instanceof ConstInt){
@@ -220,7 +219,7 @@ public class LoopUnroll implements Pass {
                     } else {
                         clonedValue = cloneUtil.findValue(value);
                     }
-                    clonedPhi.setOperator(index - precursorNum, clonedValue);
+                    clonedPhi.addIncoming(clonedValue, nowBlock);
                 }
             }
             for(Value key : beginToEnd.keySet()){

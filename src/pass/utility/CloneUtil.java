@@ -42,20 +42,24 @@ public class CloneUtil {
 //
 //            }
         } else if (oldInst instanceof Load li) {
-            clonedInst = irBuilder.buildLoad(target, li.getAddr());
+            clonedInst = irBuilder.buildLoad(target, findValue(li.getAddr()));
         } else if (oldInst instanceof Store si) {
-            Value value = cloneMap.get(si.getValue());
-            Value addr = cloneMap.get(si.getAddr());
+            Value value = findValue(si.getValue());
+            Value addr = findValue(si.getAddr());
             clonedInst = irBuilder.cloneStore(target, value, addr);
         } else if (oldInst instanceof GEP gi) {
             ArrayList<Value> values = new ArrayList<>();
             for (int i = 0; i < gi.getIndex().size(); i++) {
-                values.add(findValue(gi.getOperator(i)));
+                values.add(findValue(gi.getIndex().get(i)));
             }
-            Value base = gi.getBase();
-            clonedInst = irBuilder.buildGEP(target, base, values.get(0), values.get(1));
+            Value base = findValue(gi.getBase());
+            if (values.size() == 1) {
+                clonedInst = irBuilder.buildGEP(target, base, values.get(0));
+            } else {
+                clonedInst = irBuilder.buildGEP(target, base, values.get(0), values.get(1));
+            }
         } else if (oldInst instanceof Phi phi) {
-            clonedInst = irBuilder.buildPhi((DataType) phi.getValueType(), target, 0);
+            clonedInst = irBuilder.buildPhi((DataType) phi.getValueType(), target, phi.getPrecursorNum());
         } else if (oldInst instanceof Br br) {
             if (br.getHasCondition()) {
                 clonedInst = irBuilder.buildBr(target,
@@ -103,9 +107,9 @@ public class CloneUtil {
                     findValue(ci.getConversionValue()));
         } else if (oldInst instanceof BitCast bi) {
             clonedInst = irBuilder.buildBitCast(target, (DataType) bi.getValueType(),
-                    bi.getConversionValue());
+                    findValue(bi.getConversionValue()));
         } else if (oldInst instanceof Zext zi) {
-            clonedInst = irBuilder.buildZext(target, zi.getConversionValue());
+            clonedInst = irBuilder.buildZext(target, findValue(zi.getConversionValue()));
         }
         return clonedInst;
     }

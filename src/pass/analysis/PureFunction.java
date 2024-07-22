@@ -33,7 +33,11 @@ public class PureFunction {
 
         for(Function function : functions){
             // 忽略库函数
-            if( function.getIsBuiltIn() ) continue;
+            if( function.getIsBuiltIn() ) {
+                is_pure.put(function, false);
+                work_list.add(function);
+                continue;
+            }
             is_pure.put(function, makePureInside(function));
 
             if( !is_pure.get(function) || !(global_var_store_effects.containsKey(function) && global_var_store_effects.get(function).isEmpty()) ){

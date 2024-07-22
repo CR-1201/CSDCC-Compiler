@@ -38,8 +38,6 @@ public class LoopUnroll implements Pass {
 //        isUnrolled = true;
 //        while (isUnrolled) {
 //            isUnrolled = false;
-        IOFunc.clear("checkir/loop.txt");
-        IOFunc.output(Module.getModule().toString(), "checkir/loop.txt");
             for (Function func : Module.getModule().getFunctionsArray()) {
                 if (!func.getIsBuiltIn()) {
                     clear();

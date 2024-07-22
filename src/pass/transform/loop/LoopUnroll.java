@@ -70,6 +70,9 @@ public class LoopUnroll implements Pass {
     }
 
     private void constLoopUnroll(Loop loop) {
+        if (!loop.getIsSetInductorVar()) {
+            return;
+        }
         Value idcVar = loop.getIdcVar();
         Value idcEnd = loop.getIdcEnd();
         Value idcInit = loop.getIdcInit();
@@ -207,7 +210,6 @@ public class LoopUnroll implements Pass {
                     BasicBlock preBlock = (BasicBlock) phi.getOperator(i + precursorNum);
                     BasicBlock nowBlock = (BasicBlock) cloneUtil.findValue(preBlock);
                     Phi clonedPhi = (Phi) cloneUtil.findValue(phi);
-                    int index = clonedPhi.getOperators().indexOf(nowBlock);
                     Value value = phi.getOperator(i);
                     Value clonedValue;
                     if(value instanceof ConstInt){
@@ -234,7 +236,7 @@ public class LoopUnroll implements Pass {
         for(Phi phi : phiInExit){
             for(Value value : phi.getOperators()){
                 if(value instanceof Instruction inst && inst.getParent().equals(header)){
-                    phi.replaceOperator(value, beginToEnd.get(value));
+                    phi.replaceOperator(value, beginToEnd.get(value), oldLatch);
                 }
             }
         }

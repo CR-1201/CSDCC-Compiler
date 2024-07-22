@@ -12,6 +12,7 @@ import utils.IOFunc;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Stack;
 
 public class LCSSA implements Pass {
 

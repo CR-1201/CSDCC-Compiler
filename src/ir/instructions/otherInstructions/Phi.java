@@ -96,10 +96,10 @@ public class Phi extends Instruction {
         eraseFromParent();
     }
 
-    public void replaceOperator(Value oldValue, Value newValue) {
+    public void replaceOperator(Value oldValue, Value newValue, BasicBlock newBlock) {
         int index = getOperators().indexOf(oldValue);
         setOperator(index, newValue);
-        setOperator(index + precursorNum, newValue.getParent());
+        setOperator(index + precursorNum, newBlock);
     }
 
     @Override

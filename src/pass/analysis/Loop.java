@@ -49,6 +49,7 @@ public class Loop {
     private Value idcStep = null;
     private Icmp cond = null;
     private int loopTimes;
+    private boolean isSetInductorVar = false;
 
     public Loop (BasicBlock header, HashSet<BasicBlock> latches) {
         this.id = idCounter++;
@@ -213,6 +214,7 @@ public class Loop {
         this.idcAlu = idcAlu;
         this.idcStep = idcStep;
         this.cond = cond;
+        this.isSetInductorVar = true;
     }
 
     public Value getIdcVar() {
@@ -245,5 +247,8 @@ public class Loop {
 
     public int getLoopTimes() {
         return loopTimes;
+    }
+    public Boolean getIsSetInductorVar() {
+        return isSetInductorVar;
     }
 }

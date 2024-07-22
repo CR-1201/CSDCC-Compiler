@@ -10,7 +10,6 @@ target triple = "x86_64-pc-linux-gnu"
 %struct.timeval = type { i64, i64 }
 %struct.__va_list_tag = type { i32, i32, i8*, i8* }
 
-@a = dso_local global [10000000 x i32] zeroinitializer
 @llvm.global_ctors = appending global [1 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 65535, void ()* @before_main, i8* null }]
 @llvm.global_dtors = appending global [1 x { i32, void ()*, i8* }] [{ i32, void ()*, i8* } { i32 65535, void ()* @after_main, i8* null }]
 @.str = private unnamed_addr constant [3 x i8] c"%d\00", align 1
@@ -34,157 +33,60 @@ target triple = "x86_64-pc-linux-gnu"
 @_sysy_start = dso_local global %struct.timeval zeroinitializer, align 8
 @_sysy_end = dso_local global %struct.timeval zeroinitializer, align 8
 
-define dso_local i32 @meanless_calculation(i32 %a0, i32 %a1) {
+define dso_local i32 @foo() {
 b0:
-  br label %b1
-
-b1:                                               ; preds = %b2, %b0
-  %p1 = phi i32 [ 0, %b0 ], [ %v11, %b2 ]
-  %p0 = phi i32 [ 0, %b0 ], [ %v16, %b2 ]
-  %v6 = icmp slt i32 %p1, %a0
-  br i1 %v6, label %b4, label %b3
-
-b2:                                               ; preds = %b4
-  %v14 = add i32 %p0, %a0
-  %v11 = add i32 %p1, 1
-  %v16 = add i32 %v14, %v11
-  br label %b1
-
-b3:                                               ; preds = %b4, %b1
-  ret i32 %p0
-
-b4:                                               ; preds = %b1
-  %v9 = icmp slt i32 %p1, %a1
-  br i1 %v9, label %b2, label %b3
-}
-
-define dso_local i32 @swap(i32* %a0, i32 %a1, i32 %a2) {
-b6:
-  %v24 = getelementptr inbounds i32, i32* %a0, i32 %a1
-  %v25 = load i32, i32* %v24, align 4
-  %v31 = getelementptr inbounds i32, i32* %a0, i32 %a2
-  %v32 = load i32, i32* %v31, align 4
-  store i32 %v32, i32* %v24, align 4
-  store i32 %v25, i32* %v31, align 4
-  %v39 = call i32 @meanless_calculation(i32 %a1, i32 %a2)
-  ret i32 0
-}
-
-define dso_local i32 @median(i32* %a0, i32 %a1, i32 %a2, i32 %a3) {
-b8:
-  %v47 = getelementptr inbounds i32, i32* %a0, i32 %a1
-  %v48 = load i32, i32* %v47, align 4
-  %v53 = add i32 %a2, 1
-  br label %b9
-
-b9:                                               ; preds = %b24, %b8
-  %p11 = phi i32 [ %a1, %b8 ], [ %p10, %b24 ]
-  %p8 = phi i32 [ %v53, %b8 ], [ %p7, %b24 ]
-  %p3 = phi i32 [ 0, %b8 ], [ %p5, %b24 ]
-  br i1 true, label %b10, label %b11
-
-b10:                                              ; preds = %b9
-  br label %b12
-
-b11:                                              ; preds = %b22, %b9
-  %p12 = phi i32 [ %p11, %b9 ], [ %p10, %b22 ]
-  %p9 = phi i32 [ %p8, %b9 ], [ %p7, %b22 ]
-  %p4 = phi i32 [ %p3, %b9 ], [ %p5, %b22 ]
-  store i32 %v48, i32* %v47, align 4
-  %v96 = call i32 @swap(i32* %a0, i32 %a1, i32 %p12)
-  %v99 = icmp sgt i32 %p12, %a3
-  br i1 %v99, label %b25, label %b26
-
-b12:                                              ; preds = %b16, %b10
-  %p6 = phi i32 [ %p8, %b10 ], [ %v60, %b16 ]
-  %p2 = phi i32 [ %p3, %b10 ], [ %v68, %b16 ]
-  %v58 = icmp slt i32 %p11, %p6
-  br i1 %v58, label %b13, label %b14
-
-b13:                                              ; preds = %b12
-  %v60 = sub i32 %p6, 1
-  %v63 = getelementptr inbounds i32, i32* %a0, i32 %v60
-  %v64 = load i32, i32* %v63, align 4
-  %v66 = icmp slt i32 %v64, %v48
-  br i1 %v66, label %b15, label %b16
-
-b14:                                              ; preds = %b15, %b12
-  %p7 = phi i32 [ %p6, %b12 ], [ %v60, %b15 ]
-  br label %b17
-
-b15:                                              ; preds = %b13
-  br label %b14
-
-b16:                                              ; preds = %b13
-  %v68 = add i32 %p2, 1
-  br label %b12
-
-b17:                                              ; preds = %b21, %b14
-  %p13 = phi i32 [ %p11, %b14 ], [ %v73, %b21 ]
-  %p5 = phi i32 [ %p2, %b14 ], [ %v81, %b21 ]
-  %v71 = icmp slt i32 %p13, %p7
-  br i1 %v71, label %b18, label %b19
-
-b18:                                              ; preds = %b17
-  %v73 = add i32 %p13, 1
-  %v76 = getelementptr inbounds i32, i32* %a0, i32 %v73
-  %v77 = load i32, i32* %v76, align 4
-  %v79 = icmp sge i32 %v77, %v48
-  br i1 %v79, label %b20, label %b21
-
-b19:                                              ; preds = %b20, %b17
-  %p10 = phi i32 [ %p13, %b17 ], [ %v73, %b20 ]
-  %v84 = icmp eq i32 %p10, %p7
-  br i1 %v84, label %b22, label %b23
-
-b20:                                              ; preds = %b18
-  br label %b19
-
-b21:                                              ; preds = %b18
-  %v81 = sub i32 %p5, 1
-  br label %b17
-
-b22:                                              ; preds = %b19
-  br label %b11
-
-b23:                                              ; preds = %b19
-  %v88 = call i32 @swap(i32* %a0, i32 %p10, i32 %p7)
-  br label %b24
-
-b24:                                              ; preds = %b23
-  br label %b9
-
-b25:                                              ; preds = %b11
-  %v104 = call i32 @median(i32* %a0, i32 %a1, i32 %p12, i32 %a3)
-  ret i32 0
-
-b26:                                              ; preds = %b11
-  %v107 = icmp slt i32 %p12, %a3
-  br i1 %v107, label %b28, label %b29
-
-b28:                                              ; preds = %b26
-  %v110 = add i32 %p12, 1
-  %v113 = call i32 @median(i32* %a0, i32 %v110, i32 %a2, i32 %a3)
-  ret i32 0
-
-b29:                                              ; preds = %b26
-  ret i32 0
+  %v0 = alloca [16 x i32], align 4
+  %v1 = getelementptr inbounds [16 x i32], [16 x i32]* %v0, i32 0, i32 0
+  call void @memset(i32* %v1, i32 0, i32 64)
+  %v2 = getelementptr inbounds i32, i32* %v1, i32 0
+  store i32 0, i32* %v2, align 4
+  %v3 = getelementptr inbounds i32, i32* %v1, i32 1
+  store i32 1, i32* %v3, align 4
+  %v4 = getelementptr inbounds i32, i32* %v1, i32 2
+  store i32 2, i32* %v4, align 4
+  %v5 = getelementptr inbounds i32, i32* %v1, i32 3
+  store i32 3, i32* %v5, align 4
+  %v6 = getelementptr inbounds i32, i32* %v1, i32 4
+  store i32 0, i32* %v6, align 4
+  %v7 = getelementptr inbounds i32, i32* %v1, i32 5
+  store i32 1, i32* %v7, align 4
+  %v8 = getelementptr inbounds i32, i32* %v1, i32 6
+  store i32 2, i32* %v8, align 4
+  %v9 = getelementptr inbounds i32, i32* %v1, i32 7
+  store i32 3, i32* %v9, align 4
+  %v10 = getelementptr inbounds i32, i32* %v1, i32 8
+  store i32 0, i32* %v10, align 4
+  %v11 = getelementptr inbounds i32, i32* %v1, i32 9
+  store i32 1, i32* %v11, align 4
+  %v12 = getelementptr inbounds i32, i32* %v1, i32 10
+  store i32 2, i32* %v12, align 4
+  %v13 = getelementptr inbounds i32, i32* %v1, i32 11
+  store i32 3, i32* %v13, align 4
+  %v14 = getelementptr inbounds i32, i32* %v1, i32 12
+  store i32 0, i32* %v14, align 4
+  %v15 = getelementptr inbounds i32, i32* %v1, i32 13
+  store i32 1, i32* %v15, align 4
+  %v16 = getelementptr inbounds i32, i32* %v1, i32 14
+  store i32 2, i32* %v16, align 4
+  %v17 = getelementptr inbounds i32, i32* %v1, i32 15
+  store i32 3, i32* %v17, align 4
+  %v70 = getelementptr inbounds [16 x i32], [16 x i32]* %v0, i32 0, i32 3
+  %v71 = load i32, i32* %v70, align 4
+  %v72 = add i32 71, %v71
+  ret i32 %v72
 }
 
 define dso_local i32 @main() {
-b32:
-  %v115 = getelementptr inbounds [10000000 x i32], [10000000 x i32]* @a, i32 0, i32 0
-  %v116 = call i32 @getarray(i32* %v115)
-  call void bitcast (void (i32)* @_sysy_starttime to void ()*)()
-  %v119 = sub i32 %v116, 1
-  %v121 = sdiv i32 %v116, 2
-  %v122 = call i32 @median(i32* %v115, i32 0, i32 %v119, i32 %v121)
-  call void bitcast (void (i32)* @_sysy_stoptime to void ()*)()
-  call void @putarray(i32 %v116, i32* %v115)
-  %v127 = getelementptr inbounds [10000000 x i32], [10000000 x i32]* @a, i32 0, i32 %v121
-  %v128 = load i32, i32* %v127, align 4
-  %v129 = srem i32 %v128, 256
-  ret i32 %v129
+b2:
+  %v122 = call i32 @foo()
+  %v123 = add i32 30, %v122
+  %v133 = call i32 @foo()
+  %v134 = add i32 41, %v133
+  %v162 = add i32 %v123, %v134
+  %v164 = add i32 %v162, 35
+  call void @putint(i32 %v164)
+  call void @putch(i32 10)
+  ret i32 0
 }
 
 ; Function Attrs: noinline nounwind optnone uwtable

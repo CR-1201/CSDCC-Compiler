@@ -1,8 +1,5 @@
 package pass.transform;
 
-import ast.Cond;
-import ast.Number;
-import com.sun.jdi.ArrayReference;
 import ir.*;
 import ir.Module;
 import ir.constants.ConstFloat;
@@ -18,7 +15,6 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;
-import utils.IOFunc;
 import utils.Pair;
 import utils.ValueStatus;
 

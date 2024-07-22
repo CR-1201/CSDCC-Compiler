@@ -163,6 +163,10 @@ public class Loop {
         return loopSize;
     }
 
+    public ArrayList<BasicBlock> computeDfsBlocksFromEntry(BasicBlock entry) {
+        return entry.computeDfsSuccBlocks();
+    }
+
     /**
      * 循环结构：
      * int i;

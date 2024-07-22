@@ -1,24 +1,30 @@
 package pass.transform.loop;
 
-import ir.BasicBlock;
-import ir.Function;
+import ir.*;
 import ir.Module;
-import ir.Value;
+import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
+import ir.types.IntType;
 import pass.Pass;
+import pass.analysis.CFG;
 import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
+import pass.utility.BlockUtil;
+import pass.utility.CloneUtil;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class LoopUnroll implements Pass {
+    private CFG cfg = new CFG();
+    private BlockUtil blockUtil = new BlockUtil();
     private boolean isUnrolled = false;
     private final int LOOP_MAX_LINE = 5000;
 
@@ -135,7 +141,7 @@ public class LoopUnroll implements Pass {
         Br br = (Br) header.getTailInstruction();
         br.cond2jump(next);
         latch.removeLastInst();
-        ArrayList<BasicBlock> dfs = next.computeDfsSuccBlocks();
+        ArrayList<BasicBlock> dfs = loop.computeDfsBlocksFromEntry(next);
 
         Loop parent = loop.getParent();
         if (parent != null) {
@@ -159,6 +165,58 @@ public class LoopUnroll implements Pass {
          */
         BasicBlock oldNext = next;
         BasicBlock oldLatch = latch;
+        CloneUtil cloneUtil = new CloneUtil();
+        for (Value value : phiMap.keySet()) {
+            cloneUtil.insertCloneMap(value, phiMap.get(value));
+        }
+        // 最后一次 loop 需要单独处理
+        for (int loopTime = 0; loopTime < loop.getLoopTimes() - 1; loopTime++) {
+            for (BasicBlock block : dfs) {
+                BasicBlock clonedBlock = IrBuilder.getIrBuilder().buildBasicBlock(header.getParent());
+                cloneUtil.insertCloneMap(block, clonedBlock);
+            }
+            for (BasicBlock block : dfs) {
+                BasicBlock newBlock = (BasicBlock) cloneUtil.findValue(block);
+                cloneUtil.cloneBlock(block, newBlock);
+                newBlock.setLoop(block.getLoop());
+                block.getLoop().addBlock(newBlock);
+            }
+            ArrayList<BasicBlock> beforeDfs = new ArrayList<>(dfs);
+            dfs.clear();
+            for(BasicBlock bb : beforeDfs){
+                dfs.add((BasicBlock) cloneUtil.findValue(bb));
+            }
+
+            BasicBlock newNext = (BasicBlock) cloneUtil.findValue(oldNext);
+            BasicBlock newLatch = (BasicBlock) cloneUtil.findValue(oldLatch);
+            // TODO : setCFG Detail
+            cfg.setCFG(dfs);
+            oldLatch.addSuccessor(newNext);
+            newNext.addPrecursor(oldLatch);
+            IrBuilder.getIrBuilder().buildBr(newNext, oldLatch);
+
+            ArrayList<Phi> phis = blockUtil.getAllPhisIn(beforeDfs);
+            for (Phi phi : phis) {
+                int precursorNum = phi.getPrecursorNum();
+                for (int i = 0; i < precursorNum; i++) {
+                    BasicBlock preBB = (BasicBlock) phi.getOperator(i + precursorNum);
+                    BasicBlock nowBB = (BasicBlock) cloneUtil.findValue(preBB);
+                    Phi copyPhi = (Phi) cloneUtil.findValue(phi);
+                    int index = copyPhi.getParentbb().getPreBlocks().indexOf(nowBB);
+                    Value value = phi.getOperator(i);
+                    Value copyValue;
+                    if(value instanceof ConstInt){
+                        int val = ((ConstInt) value).getValue();
+                        copyValue = new ConstInt(val);
+                    } else if(value instanceof ConstFloat){
+                        float val = ((ConstFloat) value).getValue();
+                        copyValue = new ConstFloat(val);
+                    } else copyValue = cloneUtil.findValue(value);
+                    copyPhi.replaceOperand(index, copyValue);
+                }
+            }
+
+        }
     }
 
     private int computeLoopTimes(int init, int end, int step, Instruction alu, Icmp.Condition cmp) {

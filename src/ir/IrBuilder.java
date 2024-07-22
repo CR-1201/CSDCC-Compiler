@@ -176,7 +176,6 @@ public class IrBuilder {
         realParent.insertHead(alloca);
         return alloca;
     }
-
     /**
      * 为了方便 mem2reg 优化,约定所有的 Alloca 放到每个函数的入口块处
      * ConstAlloca 对应的是局部的常量数组的 Alloca 这种 Alloca 会多存储一个常量数组 ConstArray
@@ -301,6 +300,11 @@ public class IrBuilder {
         Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
         parent.insertHead(phi);
         return phi;
+    }
+
+    // ======================== Using for Clone ========================
+    public Alloca cloneAlloca(BasicBlock parent){
+
     }
 
 }

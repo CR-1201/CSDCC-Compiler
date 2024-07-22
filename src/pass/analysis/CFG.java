@@ -92,4 +92,8 @@ public class CFG implements Pass {
             }
         }
     }
+
+    public void setCFG(ArrayList<BasicBlock> blocks) {
+
+    }
 }

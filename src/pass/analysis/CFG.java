@@ -75,7 +75,7 @@ public class CFG implements Pass {
         }
     }
 
-    public static void deleteUnreachableBlock(Function function) {
+    public void deleteUnreachableBlock(Function function) {
         BasicBlock entry = function.getFirstBlock();
         boolean flag = true;
         while(flag) {
@@ -86,6 +86,9 @@ public class CFG implements Pass {
                     ArrayList<Phi> phis = block.getPhiUsers();
                     for (Phi phi : phis) {
                         phi.removeUsedBlock(block);
+                        if (phi.getOperators().isEmpty()) {
+                            phi.removeSelf();
+                        }
                     }
                     block.removeSelf();
                     flag = true;

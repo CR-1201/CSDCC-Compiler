@@ -133,6 +133,21 @@ public class Br extends TerInstruction{
         addOperator(target);
     }
 
+    public void move2Block(BasicBlock target) {
+        if (hasCondition) {
+            BasicBlock trueBlock = (BasicBlock) getOperator(1);
+            BasicBlock falseBlock = (BasicBlock) getOperator(2);
+            trueBlock.replacePrecursor(getParent(), target);
+            falseBlock.replacePrecursor(getParent(), target);
+        } else {
+            BasicBlock block = (BasicBlock) getOperator(0);
+            block.replacePrecursor(getParent(), target);
+        }
+        eraseFromParent();
+        target.insertTail(this);
+        this.setParent(target);
+    }
+
     @Override
     public String toString(){
         StringBuilder result = new StringBuilder("br " + getOperator(0).getValueType() + " " + getOperator(0).getName());

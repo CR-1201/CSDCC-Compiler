@@ -24,7 +24,7 @@ public class UselessPhiEmit implements Pass {
      * 不动点
      * @param func
      */
-    private void emit(Function func) {
+    public void emit(Function func) {
         boolean flag = true;
         while (flag) {
             flag = false;

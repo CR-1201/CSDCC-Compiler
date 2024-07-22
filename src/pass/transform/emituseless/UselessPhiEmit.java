@@ -7,6 +7,7 @@ import ir.Value;
 import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import pass.Pass;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 
@@ -33,6 +34,10 @@ public class UselessPhiEmit implements Pass {
                 for (int i = 0; i < insts.size(); i++) {
                     Instruction inst = insts.get(i);
                     if (inst instanceof Phi phi) {
+                        if (phi.getOperators().isEmpty()) {
+                            phi.removeSelf();
+                            continue;
+                        }
                         Value only = phi.getOperator(0);
                         boolean isOnly = true;
                         for (int j = 0; j < phi.getPrecursorNum(); j++) {

@@ -68,7 +68,7 @@ public class PureFunction {
                     }
                 }
 
-                if( is_pure.get(caller_function) ){
+                if( is_pure.get(caller_function) != null && is_pure.get(caller_function) ){
                     is_pure.put(caller_function,false);
                     influenced = true;
                 }

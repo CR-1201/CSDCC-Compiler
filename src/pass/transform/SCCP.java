@@ -176,6 +176,8 @@ public class SCCP implements Pass {
         jumpBlock.addUser(br);
         valueMap.put(br,curStatus);
 //        System.out.println(br);
+        block.addSuccessor(jumpBlock);
+        jumpBlock.addPrecursor(block);
         if( !jumpBlock.equals(invalidBlock) ){
             block.removeSuccessor(invalidBlock);
             invalidBlock.removePrecursor(block);

@@ -34,7 +34,6 @@ public class SimplifyInst implements Pass {
                         Value value = simplify(instruction);
                         if (!value.equals(instruction)) {
                             instruction.replaceAllUsesWith(value);
-                            instruction.removeAllOperators();
                             instruction.eraseFromParent();
                         }
                     }
@@ -75,6 +74,7 @@ public class SimplifyInst implements Pass {
         if( !v3.equals(inst) ){
             return v3;
         }
+
         // swap 总是希望右边是常数
         if( v1 instanceof ConstInt || v1 instanceof ConstFloat ){
             inst.setOperator(0,v2);
@@ -82,6 +82,10 @@ public class SimplifyInst implements Pass {
             v1 = inst.getOperator(0);
             v2 = inst.getOperator(1);
         }
+
+//        if( inst.getName().equals("%v72") ){
+//            System.out.println(inst);
+//        }
 
         // x + 0 = x
         if( (v2 instanceof ConstInt && ((ConstInt)v2).getValue() == 0) ||
@@ -96,6 +100,7 @@ public class SimplifyInst implements Pass {
 
         // (a - b) + (b - a) = 0
         if( v1 instanceof Sub sub1 && v2 instanceof Sub sub2){
+
             Value v1_1 = sub1.getOperator(0), v1_2 = sub1.getOperator(1);
             Value v2_1 = sub2.getOperator(0), v2_2 = sub2.getOperator(1);
             if( v1_1.equals(v2_2) && v1_2.equals(v2_1) ){
@@ -111,7 +116,9 @@ public class SimplifyInst implements Pass {
                 return v1_1;
             }
         }
+
         if( v2 instanceof Sub sub2 ){
+
             Value v2_1 = sub2.getOperator(0), v2_2 = sub2.getOperator(1);
             // x + (y - x) = y
             if( v2_2.equals(v1) ){

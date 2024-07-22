@@ -36,7 +36,6 @@ public class PassManager {
         passes.add(new MathOptimize());
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new MergeRedundantBr());
 
         for (Pass pass : passes) {
             pass.run();

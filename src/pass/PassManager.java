@@ -11,7 +11,7 @@ import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.LCSSA;
-//import pass.transform.loop.LoopUnroll;
+import pass.transform.loop.LoopUnroll;
 
 public class PassManager {
     private Module module = Module.getModule();
@@ -41,7 +41,7 @@ public class PassManager {
 //        passes.add(new Dom());
         passes.add(new LoopAnalysis());
         passes.add(new LCSSA());
-//        passes.add(new LoopUnroll());
+        passes.add(new LoopUnroll());
         GVNGCMPass();
         passes.add(new SideEffect());
         passes.add(new UselessReturnEmit());

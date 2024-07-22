@@ -21,8 +21,8 @@ public class BasicBlock extends Value{
     // 指令集合
     private final LinkedList<Instruction> instructions = new LinkedList<>();
     // 前驱与后继基本块,不讲求顺序,因此不用链表
-    private final HashSet<BasicBlock> precursors = new HashSet<>();
-    private final HashSet<BasicBlock> successors = new HashSet<>();
+    private HashSet<BasicBlock> precursors = new HashSet<>();
+    private HashSet<BasicBlock> successors = new HashSet<>();
     // 当前基本块支配的基本块
     private HashSet<BasicBlock> doms = new HashSet<>();
     // 当前基本块的必经基本块，即当前基本块的支配者
@@ -198,6 +198,16 @@ public class BasicBlock extends Value{
         precursor.getSuccessors().remove(this);
     }
 
+    public void setPrecursors(HashSet<BasicBlock> precursors){
+        this.precursors.clear();
+        this.precursors = precursors;
+    }
+
+    public void setSuccessors(HashSet<BasicBlock> successors){
+        this.successors.clear();
+        this.successors = successors;
+    }
+
     public ArrayList<BasicBlock> computeDfsSuccBlocks() {
         HashSet<BasicBlock> visited = new HashSet<>();
         Stack<BasicBlock> stack = new Stack<>();
@@ -288,6 +298,18 @@ public class BasicBlock extends Value{
         for (User user : getUsers()) {
             if (user instanceof Phi phi) {
                 phis.add(phi);
+            }
+        }
+        return phis;
+    }
+
+    public ArrayList<Phi> getPhis() {
+        ArrayList<Phi> phis = new ArrayList<>();
+        for (Instruction inst : instructions) {
+            if (inst instanceof Phi phi) {
+                phis.add(phi);
+            } else {
+                break;
             }
         }
         return phis;

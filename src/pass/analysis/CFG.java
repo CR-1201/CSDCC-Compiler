@@ -10,6 +10,7 @@ import ir.instructions.terminatorInstructions.Br;
 import pass.Pass;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -94,6 +95,31 @@ public class CFG implements Pass {
     }
 
     public void setCFG(ArrayList<BasicBlock> blocks) {
-
+        HashMap<BasicBlock, HashSet<BasicBlock>> precs = new HashMap<>();
+        HashMap<BasicBlock, HashSet<BasicBlock>> succs = new HashMap<>();
+        for (BasicBlock block : blocks) {
+            precs.put(block, new HashSet<>());
+            succs.put(block, new HashSet<>());
+        }
+        for (BasicBlock block : blocks) {
+            if (block.getTailInstruction() instanceof Br br) {
+                if (br.getHasCondition()) {
+                    BasicBlock trueBlock = (BasicBlock) br.getOperator(1);
+                    BasicBlock falseBlock = (BasicBlock) br.getOperator(2);
+                    succs.get(block).add(trueBlock);
+                    succs.get(block).add(falseBlock);
+                    precs.get(trueBlock).add(block);
+                    precs.get(falseBlock).add(block);
+                } else {
+                    BasicBlock target = (BasicBlock) br.getOperator(0);
+                    succs.get(block).add(target);
+                    precs.get(target).add(block);
+                }
+            }
+        }
+        for (BasicBlock block : blocks) {
+            block.setPrecursors(precs.get(block));
+            block.setSuccessors(succs.get(block));
+        }
     }
 }

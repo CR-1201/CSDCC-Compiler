@@ -61,6 +61,20 @@ public class Br extends TerInstruction{
         }
         return null;
     }
+
+    public BasicBlock getTrueBlock() {
+        if (hasCondition) {
+            return (BasicBlock) getOperator(1);
+        }
+        return null;
+    }
+
+    public BasicBlock getFalseBlock() {
+        if (hasCondition) {
+            return (BasicBlock) getOperator(2);
+        }
+        return null;
+    }
     public boolean getHasCondition(){
         return hasCondition;
     }

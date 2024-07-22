@@ -18,6 +18,8 @@ import ir.types.DataType;
 import ir.types.FunctionType;
 import ir.types.ValueType;
 import ir.types.VoidType;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -231,7 +233,7 @@ public class IrBuilder {
         return load;
     }
 
-    public void buildRet(BasicBlock parent, Value... retValue){
+    public Ret buildRet(BasicBlock parent, Value... retValue){
         Ret ret;
         if (retValue.length == 0) {
             // 没有返回值
@@ -240,6 +242,7 @@ public class IrBuilder {
             ret = new Ret(parent, retValue[0]);
         }
         parent.insertTail(ret);
+        return ret;
     }
 
     public Call buildCall(BasicBlock parent, Function function, ArrayList<Value> args){
@@ -279,10 +282,11 @@ public class IrBuilder {
         parent.insertBefore(br, instruction);
     }
 
-    public void buildBr(BasicBlock parent, Value condition, BasicBlock trueBlock, BasicBlock falseBlock){
+    public Br buildBr(BasicBlock parent, Value condition, BasicBlock trueBlock, BasicBlock falseBlock){
         // 有条件跳转
         Br br = new Br(parent, condition, trueBlock, falseBlock);
         parent.insertTail(br);
+        return br;
     }
 
     public Phi buildPhi(DataType type, BasicBlock parent){
@@ -303,8 +307,10 @@ public class IrBuilder {
     }
 
     // ======================== Using for Clone ========================
-    public Alloca cloneAlloca(BasicBlock parent){
-        return null;
+    // 这里 Store 之所以分开写，是因为这里的 clonedStore 会返回 store 指令，但是之前的 buildStore 不会返回
+    public Store cloneStore(BasicBlock parent, Value value, Value addr){
+        Store store = new Store(parent, value, addr);
+        parent.insertTail(store);
+        return store;
     }
-
 }

@@ -11,6 +11,7 @@ import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import pass.analysis.Dom;
+import pass.analysis.LoopAnalysis;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,8 +31,10 @@ public class GCM {
 
     public void run(){
         ArrayList<Function> functions = module.getFunctionsArray();
+        LoopAnalysis loopAnalysis = new LoopAnalysis();
         for (Function function : functions ){
             if (!function.getIsBuiltIn() && function.getBasicBlocksArray().size() > 1 )  {
+                loopAnalysis.analyzeLoopInfo(function);
                 runGCM(function);
             }
         }

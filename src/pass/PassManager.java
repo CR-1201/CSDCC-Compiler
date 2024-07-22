@@ -36,9 +36,9 @@ public class PassManager {
 //        passes.add(new UselessReturnEmit());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
         GVNGCMPass();
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+//        passes.add(new CFG());
+//        passes.add(new Dom());
+//        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
         passes.add(new MathOptimize());
 //        passes.add(new MergeRedundantBr());
 
@@ -53,9 +53,6 @@ public class PassManager {
      * GVN 和 GCM 之前一定要先进行副作用判断，来确定某一个函数是否可以被处理
      */
     private void GVNGCMPass() {
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GCMGVN());
     }

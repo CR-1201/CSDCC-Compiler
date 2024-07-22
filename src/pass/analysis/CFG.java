@@ -25,7 +25,6 @@ public class CFG implements Pass {
             if (!function.getIsBuiltIn()) {
                 // 针对每一个函数去新建CFG
                 buildCFG(function);
-                deleteUnreachableBlock(function);
             }
         }
     }
@@ -37,6 +36,7 @@ public class CFG implements Pass {
             visited.clear();
             setCFG(entry);
         }
+        deleteUnreachableBlock(function);
     }
 
     private void deleteCFG(Function function) {

@@ -14,9 +14,7 @@ public class LoopAnalysis implements Pass {
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
-                clear();
                 analyzeLoopInfo(function);
-                setLoop(function);
             }
         }
     }
@@ -30,7 +28,8 @@ public class LoopAnalysis implements Pass {
      */
     private final ArrayList<Loop> topLoops = new ArrayList<>();
 
-    private void analyzeLoopInfo(Function function) {
+    public void analyzeLoopInfo(Function function) {
+        clear();
         HashSet<BasicBlock> latches = new HashSet<>();
         ArrayList<BasicBlock> domPostOrder = Dom.getDomTreePostOrder(function);
         for (BasicBlock block : domPostOrder) {
@@ -46,6 +45,7 @@ public class LoopAnalysis implements Pass {
             }
         }
         setLoopRelation(function.getFirstBlock());
+        setLoop(function);
     }
 
     private void clear() {

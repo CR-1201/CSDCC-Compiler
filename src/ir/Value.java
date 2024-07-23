@@ -42,6 +42,8 @@ public abstract class Value {
     public Value getParent(){
         return parent;
     }
+
+
     public ArrayList<User> getUsers(){
         return users;
     }

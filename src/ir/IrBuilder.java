@@ -211,6 +211,13 @@ public class IrBuilder {
         return gep;
     }
 
+    public GEP buildGEP(BasicBlock parent, DataType dataType,Value base, ArrayList<Value> index) {
+        int nameNum = nameNumCounter++;
+        GEP gep = new GEP(nameNum, parent, dataType, base, index);
+        parent.insertTail(gep);
+        return gep;
+    }
+
     /**
      * @param parent 基本块
      * @param content 存储内容

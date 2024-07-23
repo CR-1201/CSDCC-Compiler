@@ -14,8 +14,7 @@ import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.*;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
-import ir.types.DataType;
-import ir.types.VoidType;
+import ir.types.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,10 +52,16 @@ public class CloneUtil {
                 values.add(findValue(gi.getIndex().get(i)));
             }
             Value base = findValue(gi.getBase());
+            ValueType dataType = ((PointerType) gi.getBase().getValueType()).getPointeeType();
+            while (dataType instanceof ArrayType arrayType) {
+                dataType = arrayType.getElementType();
+            }
             if (values.size() == 1) {
                 clonedInst = irBuilder.buildGEP(target, base, values.get(0));
-            } else {
+            } else if (values.size() == 2) {
                 clonedInst = irBuilder.buildGEP(target, base, values.get(0), values.get(1));
+            } else {
+                clonedInst = irBuilder.buildGEP(target, new PointerType(dataType), base, values);
             }
         } else if (oldInst instanceof Phi phi) {
             clonedInst = irBuilder.buildPhi((DataType) phi.getValueType(), target, phi.getPrecursorNum());
@@ -86,7 +91,7 @@ public class CloneUtil {
             Value left = findValue(bi.getOp1());
             Value right = findValue(bi.getOp2());
             DataType type = (DataType) bi.getValueType();
-            if (bi instanceof Add add) {
+            if (bi instanceof Add) {
                 clonedInst = irBuilder.buildAdd(target, type, left, right);
             } else if (bi instanceof Sub) {
                 clonedInst = irBuilder.buildSub(target, type, left, right);

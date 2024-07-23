@@ -92,16 +92,17 @@ public class GEP extends MemoryInstruction{
         this.setBaseType(((PointerType) target.getValueType()).getPointeeType());
     }
 
-    public void modifyIndexes(ArrayList<Value> indexs){
+    public void modifyIndexes(ArrayList<Value> indexes){
         ArrayList<Value> tmpOperands = new ArrayList<>(getOperators());
         for(int i = 1; i < tmpOperands.size(); i++){
             Value operand = tmpOperands.get(i);
             operand.removeUser(this);
             removeOperator(operand);
         }
-        for(Value idxValue : indexs){
+        for(Value idxValue : indexes){
             this.addOperator(idxValue);
         }
+
     }
 
     @Override

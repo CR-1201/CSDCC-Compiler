@@ -70,7 +70,9 @@ public class GepFuse implements Pass{
 
         indexes.add(new ConstInt(preConst + nowConst));
 
-        indexes.addAll(nowIndexes);
+        for(int i = 1; i < nowIndexes.size(); i++){
+            indexes.add(nowIndexes.get(i));
+        }
 
         gep.modifyIndexes(indexes);
 

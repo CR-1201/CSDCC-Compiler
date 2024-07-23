@@ -191,6 +191,7 @@ public class SCCP implements Pass {
             if( instruction instanceof Phi phi){
                 if( phi.getOperators().contains(curBlock)){
                     phi.removeUsedBlock(curBlock);
+                    // TODO 如果phi没有value？
                 }
             }
         }

@@ -247,6 +247,11 @@ public class BasicBlock extends Value{
 //        newBlock.precursors.add(this);
     }
 
+    public void replacePrecursor(BasicBlock oldBlock, BasicBlock newBlock){
+        removePrecursor(oldBlock);
+        addPrecursor(newBlock);
+        newBlock.addSuccessor(this);
+    }
     /**
      * 获得结尾的指令,如果结尾没有指令,那么返回 null
      * @return 结尾指令

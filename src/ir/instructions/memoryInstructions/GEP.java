@@ -37,7 +37,7 @@ import java.util.ArrayList;
  */
 
 public class GEP extends MemoryInstruction{
-    private final ValueType baseType;
+    private ValueType baseType;
     /**
      * 只有一个下标,用于 (函数传参int a[][2]),a[2]型寻址
      * @param base       第一个操作数,基址（其类型是一个指针）
@@ -72,6 +72,10 @@ public class GEP extends MemoryInstruction{
         return baseType;
     }
 
+    public void setBaseType(ValueType baseType){
+        this.baseType = baseType;
+    }
+
     /**
      * @return 下标列表,包含1个或2个下标
      */
@@ -85,6 +89,7 @@ public class GEP extends MemoryInstruction{
 
     public void modifyTarget(Value target){
         this.setOperator(0, target);
+        this.setBaseType(((PointerType) target.getValueType()).getPointeeType());
     }
 
     public void modifyIndexes(ArrayList<Value> indexs){

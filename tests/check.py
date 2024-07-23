@@ -10,7 +10,7 @@ TIMEOUT = 300
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
 TEST_DIR = f'{ROOT_DIR}/tests'
 CP = '../compiler.jar'
-TIME_PATTERN = re.compile(r'(\d+)H-(\d+)M-(\d+)S-(\d+)us')
+TIME_PATTERN = re.compile(r'TOTAL: (\d+)H-(\d+)M-(\d+)S-(\d+)us')
 TEST_CASES = []
 pass_cnt = 0
 pass_cnt_lock = threading.Lock()
@@ -107,37 +107,32 @@ def check(stop_event, test_file, input_file='', ans_file=''):
         return False
 
     # run ir
-    # try:
-    #     create_folder_for(output_file)
-    #     cmd = f'./{ir_runnable} < {input_file} > {output_file}'
-    #     if not input_file:
-    #         cmd = f'./{ir_runnable} > {output_file}'
-    #     print(f'Running: {cmd}')
-    #     subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
-    #     append_return(output_file, 0)
-    # except subprocess.CalledProcessError as e:
-    #     if TIME_PATTERN.search(e.output.decode()):
-    #         append_return(output_file, e.returncode)
-    #     else:
-    #         print(f'[ERROR FILE] {test_file}')
-    #         print(f'Error running {ir_runnable}:{e.output.decode()}')
-    #         stop_event.set()
-    #         return False
+    time_output = ''
+    try:
+        create_folder_for(output_file)
+        cmd = f'./{ir_runnable} < {input_file} > {output_file}'
+        if not input_file:
+            cmd = f'./{ir_runnable} > {output_file}'
+        print(f'Running: {cmd}')
+        r = subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+        time_output = r.decode()
+        append_return(output_file, 0)
+    except subprocess.CalledProcessError as e:
+        if TIME_PATTERN.search(e.output.decode()):
+            append_return(output_file, e.returncode)
+            time_output = e.output.decode()
+        else:
+            print(f'[ERROR FILE] {test_file}')
+            print(f'Error running {ir_runnable}:{e.output.decode()}')
+            stop_event.set()
+            return False
 
-    create_folder_for(output_file)
-    cmd = f'./{ir_runnable} < {input_file} > {output_file}'
-    if not input_file:
-        cmd = f'./{ir_runnable} > {output_file}'
-    print(f'Running: {cmd}')
-    res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
-    append_return(output_file, res.returncode)
-    e = res.stderr
-    m = TIME_PATTERN.search(e)
+    m = TIME_PATTERN.search(time_output)
     if m:
         time_res['my'] = convert_time_to_us(m)
     else:
         print(f'[ERROR FILE] {test_file}')
-        print(f'Error running {ir_runnable}:{e}')
+        print(f'Error running {ir_runnable}: no time measurement')
         stop_event.set()
         return False
     

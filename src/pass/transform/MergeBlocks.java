@@ -18,7 +18,6 @@ public class MergeBlocks implements Pass {
             if (!function.getIsBuiltIn()) {
                 cond2br(function);
                 mergeBlock(function);
-//                process(function);
             }
         }
     }
@@ -65,15 +64,17 @@ public class MergeBlocks implements Pass {
 
     private void mergeBlock(Function func) {
         cfg.buildCFG(func);
+        BasicBlock entry = func.getFirstBlock();
         boolean flag = true;
         while (flag) {
             flag = false;
             ArrayList<BasicBlock> blocks = func.getBasicBlocksArray();
             for (BasicBlock block : blocks) {
                 if (canMerge(block)) {
+                    // 线性单块
                     Br br = (Br) block.getTailInstruction();
                     BasicBlock to = (BasicBlock) br.getOperator(0);
-                    ArrayList<Phi> phis = block.getPhis();
+                    ArrayList<Phi> phis = to.getPhis();
                     for (Phi phi : phis) {
                         Value value = phi.getOperator(0);
                         phi.replaceAllUsesWith(value);
@@ -99,53 +100,5 @@ public class MergeBlocks implements Pass {
             return target.getPrecursors().size() == 1;
         }
         return false;
-    }
-
-    private void process(Function function) {
-        cfg.buildCFG(function);
-        BasicBlock entry = function.getFirstBlock();
-        boolean flag = true;
-        while (flag) {
-            flag = false;
-            ArrayList<BasicBlock> blocks = new ArrayList<>(function.getBasicBlocksArray());
-            for (BasicBlock block : blocks) {
-                if (block == entry) {
-                    continue;
-                }
-                if (block.getUselessBr() != null) {
-                    Br br = block.getUselessBr();
-                    BasicBlock target = (BasicBlock) br.getOperator(0);
-                    // 先 Check 一下有没有 Phi 用到这个块，用到的话就删掉
-                    if (!block.getPhiUsers().isEmpty()) {
-                        if (target.getUselessBr() != null) {
-                            // 保证当前块是无条件跳转块，且下一个块也是，才能删，不然有可能下一个直接就是target
-                            ArrayList<Phi> phis = block.getPhiUsers();
-                            for (Phi phi : phis) {
-                                phi.removeUsedBlock(block);
-                                if (phi.getOperators().isEmpty()) {
-                                    phi.removeSelf();
-                                }
-                            }
-                            ArrayList<BasicBlock> precs = new ArrayList<>(block.getPrecursors());
-                            for (BasicBlock prec : precs) {
-                                Br tmp = (Br) prec.getTailInstruction();
-                                tmp.setOperator(tmp.getOperators().indexOf(block), target);
-                                block.removeSelf();
-                            }
-                            flag = true;
-                        }
-                    } else {
-                        ArrayList<BasicBlock> precs = new ArrayList<>(block.getPrecursors());
-                        for (BasicBlock prec : precs) {
-                            Br tmp = (Br) prec.getTailInstruction();
-                            tmp.setOperator(tmp.getOperators().indexOf(block), target);
-                            target.removeUser(br);
-                            block.removeSelf();
-                        }
-                        flag = true;
-                    }
-                }
-            }
-        }
     }
 }

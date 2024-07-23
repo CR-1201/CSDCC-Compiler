@@ -5,10 +5,12 @@ import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.types.ArrayType;
+import ir.types.DataType;
 import ir.types.PointerType;
 import ir.types.ValueType;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  @author Conroy
@@ -60,6 +62,13 @@ public class GEP extends MemoryInstruction{
         super("%v" + nameNum, new PointerType(((ArrayType) ((PointerType) base.getValueType()).getPointeeType()).getElementType()),
                 parent, new ArrayList<>(){{
                     add(base);add(firstIndex);add(secondIndex);
+                }});
+        this.baseType = ((PointerType) base.getValueType()).getPointeeType();
+    }
+
+    public GEP(int nameNum, BasicBlock parent, DataType dataType, Value base, ArrayList<Value> indexes){
+        super("%v" + nameNum, dataType, parent, new ArrayList<>(){{
+                    add(base);addAll(indexes);
                 }});
         this.baseType = ((PointerType) base.getValueType()).getPointeeType();
     }

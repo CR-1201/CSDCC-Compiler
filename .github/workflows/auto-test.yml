@@ -24,7 +24,15 @@ jobs:
         java-version: '17'
     
     - name: install clang
-      run: sudo apt install -y clang
+      run: |
+        sudo apt update
+        sudo apt install -y clang
+        sudo apt install -y software-properties-common
+        sudo add-apt-repository "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-10 main"
+        sudo apt install -y clang-10
+        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-10 100
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-10 100
+        clang --version
 
     - name: set LD_LIBRARY_PATH
       run: echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$(pwd)/tests/lib" >> $GITHUB_ENV

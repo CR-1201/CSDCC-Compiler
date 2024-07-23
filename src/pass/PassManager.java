@@ -41,7 +41,7 @@ public class PassManager {
 
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+//        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
 
         passes.add(new MathOptimize());
 //

@@ -83,6 +83,22 @@ public class GEP extends MemoryInstruction{
         return result;
     }
 
+    public void modifyTarget(Value target){
+        this.setOperator(0, target);
+    }
+
+    public void modifyIndexes(ArrayList<Value> indexs){
+        ArrayList<Value> tmpOperands = new ArrayList<>(getOperators());
+        for(int i = 1; i < tmpOperands.size(); i++){
+            Value operand = tmpOperands.get(i);
+            operand.removeUser(this);
+            removeOperator(operand);
+        }
+        for(Value idxValue : indexs){
+            this.addOperator(idxValue);
+        }
+    }
+
     @Override
     public String toString(){
         StringBuilder s = new StringBuilder(getName() + " = getelementptr inbounds " + baseType + ", ");

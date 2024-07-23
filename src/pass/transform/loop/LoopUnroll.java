@@ -26,7 +26,7 @@ public class LoopUnroll implements Pass {
     private CFG cfg = new CFG();
     private BlockUtil blockUtil = new BlockUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 500;
+    private final int LOOP_MAX_LINE = 3000;
 
     private BasicBlock header;
     private BasicBlock next;
@@ -143,7 +143,7 @@ public class LoopUnroll implements Pass {
         for (Phi phi : headerPhis) {
             int latchIndex = phi.getOperators().indexOf(latch);
             Value latchValue = phi.getOperator(latchIndex - phi.getPrecursorNum());
-            phi.removeUsedValue(latchValue);
+            phi.removeUsedBlock(latch);
             phiMap.put(phi, latchValue);
             beginToEnd.put(phi, latchValue);
         }
@@ -168,7 +168,6 @@ public class LoopUnroll implements Pass {
                 child.setParent(parent);
             }
         } else {
-            headerParent = header.getParent();
             headerParent.removeTopLoop(loop);
         }
         BasicBlock oldNext = next;

@@ -110,6 +110,9 @@ public class GEP extends MemoryInstruction{
         }
         for(Value idxValue : indexes){
             this.addOperator(idxValue);
+            if (!idxValue.getUsers().contains(this)) {
+                idxValue.addUser(this);
+            }
         }
 
     }

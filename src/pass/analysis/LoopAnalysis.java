@@ -11,6 +11,7 @@ import java.util.Stack;
 
 public class LoopAnalysis implements Pass {
     private Module module = Module.getModule();
+    Dom dom = new Dom();
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
@@ -30,8 +31,15 @@ public class LoopAnalysis implements Pass {
 
     public void analyzeLoopInfo(Function function) {
         clear();
+        /**
+         * ATTENTION:
+         * 循环分析之前一定要清空循环的所有相关信息，不然会出现意想不到的错误
+         */
+        for (Loop topLoop : function.getTopLoops()) {
+            topLoop.removeSelf();
+        }
         HashSet<BasicBlock> latches = new HashSet<>();
-        ArrayList<BasicBlock> domPostOrder = Dom.getDomTreePostOrder(function);
+        ArrayList<BasicBlock> domPostOrder = dom.getDomTreePostOrder(function);
         for (BasicBlock block : domPostOrder) {
             for (BasicBlock prec : block.getPrecursors()) {
                 if (block.isDominator(prec)) {

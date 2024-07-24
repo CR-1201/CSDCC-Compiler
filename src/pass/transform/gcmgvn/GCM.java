@@ -11,16 +11,21 @@ import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import pass.analysis.Dom;
+import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class GCM {
     private final Module module = Module.getModule();
+    Dom dom = new Dom();
 
     private final HashSet<Instruction> visited = new HashSet<>();
+    LoopAnalysis loopAnalysis = new LoopAnalysis();
 
     // 是否是被 Pin 住的指令
     private boolean isPinnedInst(Instruction inst) {
@@ -31,29 +36,32 @@ public class GCM {
 
     public void run(){
         ArrayList<Function> functions = module.getFunctionsArray();
-        LoopAnalysis loopAnalysis = new LoopAnalysis();
         for (Function function : functions ){
-            if (!function.getIsBuiltIn() && function.getBasicBlocksArray().size() > 1 )  {
+            if (!function.getIsBuiltIn() && function.getBasicBlocksArray().size() > 1)  {
+                loopAnalysis.analyzeLoopInfo(function);
                 loopAnalysis.analyzeLoopInfo(function);
                 runGCM(function);
             }
         }
+        IOFunc.clear("checkir/gcm.txt");
+        IOFunc.output(Module.getModule().toString(), "checkir/gcm.txt");
     }
 
     private void runGCM(Function function) {
         visited.clear();
-        ArrayList<BasicBlock> reversePostOrder = Dom.getDomTreePostOrder(function);
+        ArrayList<BasicBlock> reversePostOrder = dom.getDomTreePostOrder(function);
         Collections.reverse(reversePostOrder);
-
         ArrayList<Instruction> instructions = new ArrayList<>();
         for (BasicBlock basicBlock : reversePostOrder){
             instructions.addAll(basicBlock.getInstructions());
         }
-
         for (Instruction instruction : instructions){
-            scheduleEarly(instruction, function);
+            if (isPinnedInst(instruction)){
+                visited.add(instruction);
+            } else {
+                scheduleEarly(instruction, function);
+            }
         }
-
         visited.clear();
         Collections.reverse(instructions);
         for (Instruction instruction : instructions){
@@ -100,10 +108,12 @@ public class GCM {
                         Value value = phi.getOperator(i);
                         if (value instanceof Instruction && value.equals(inst)){
                             userbb = (BasicBlock) userInst.getOperator(i + phi.getPrecursorNum());
+                            lca = findLca(lca, userbb);
                         }
                     }
+                } else {
+                    lca = findLca(lca, userbb);
                 }
-                lca = findLca(lca, userbb);
             }
         }
         if (!inst.getUsers().isEmpty()) {
@@ -118,13 +128,13 @@ public class GCM {
             inst.eraseFromParent();
             bestBB.insertBefore(inst, bestBB.getTailInstruction());
         }
-        BasicBlock bestbb = inst.getParent();
-        ArrayList<Instruction> instructions = bestbb.getInstructionsArray();
+        BasicBlock bestBB = inst.getParent();
+        ArrayList<Instruction> instructions = bestBB.getInstructionsArray();
         for (Instruction instruction : instructions){
             if (instruction != inst) {
                 if (!(instruction instanceof Phi) && instruction.getOperators().contains(inst)){
                     inst.eraseFromParent();
-                    bestbb.insertBefore(inst, instruction);
+                    bestBB.insertBefore(inst, instruction);
                     break;
                 }
             }

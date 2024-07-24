@@ -6,7 +6,6 @@ import ir.instructions.binaryInstructions.Icmp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Stack;
 
 public class Loop {
     private static int idCounter = 0;
@@ -136,6 +135,15 @@ public class Loop {
 
     public void removeBlock(BasicBlock block) {
         allBlocks.remove(block);
+    }
+
+    public void removeSelf() {
+        for (BasicBlock block : allBlocks) {
+            block.removeLoop();
+        }
+        for (Loop loop : children) {
+            loop.removeSelf();
+        }
     }
 
     public ArrayList<Loop> computeDfsLoops() {

@@ -6,7 +6,10 @@ import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.types.DataType;
 import pass.Pass;
+import pass.analysis.CFG;
+import pass.analysis.Dom;
 import pass.analysis.Loop;
+import pass.analysis.LoopAnalysis;
 import utils.IOFunc;
 
 import java.util.ArrayList;
@@ -18,8 +21,14 @@ public class LCSSA implements Pass {
 
     @Override
     public void run() {
+        CFG cfg = new CFG();
+        Dom dom = new Dom();
+        LoopAnalysis loopAnalysis = new LoopAnalysis();
         for (Function func : Module.getModule().getFunctionsArray()) {
             if (!func.getIsBuiltIn()) {
+                cfg.buildCFG(func);
+                dom.buildDom(func);
+                loopAnalysis.analyzeLoopInfo(func);
                 runLCSSA(func);
             }
         }

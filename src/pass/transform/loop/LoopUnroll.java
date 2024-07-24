@@ -35,6 +35,8 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
+        IOFunc.clear("checkir/loop.txt");
+        IOFunc.output(Module.getModule().toString(), "checkir/loop.txt");
 //        isUnrolled = true;
 //        while (isUnrolled) {
 //            isUnrolled = false;
@@ -233,6 +235,7 @@ public class LoopUnroll implements Pass {
         for(Phi phi : phiInExit){
             for(Value value : phi.getOperators()){
                 if(value instanceof Instruction inst && inst.getParent().equals(header)){
+                    System.out.println(beginToEnd.get(value));
                     phi.replaceOperator(value, beginToEnd.get(value), oldLatch);
                 }
             }

@@ -20,14 +20,13 @@ public class PassManager {
     public void run() {
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new LoopAnalysis());
+//        passes.add(new LoopAnalysis());
         passes.add(new GlobalValueLocalize());
         passes.add(new GepFuse());
         passes.add(new Mem2reg());
 //        passes.add(new InlineFunction());
         passes.add(new SCCP());
-        passes.add(new UselessPhiEmit());
-//        passes.add(new SideEffect());
+        passes.add(new SideEffect());
 //        passes.add(new UselessReturnEmit());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
         GVNGCMPass();
@@ -35,13 +34,10 @@ public class PassManager {
 //        passes.add(new Dom());
 //        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
         passes.add(new MathOptimize());
-        passes.add(new MergeBlocks());
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new LoopAnalysis());
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
         passes.add(new UselessPhiEmit());
+        passes.add(new MergeBlocks());
 //        passes.add(new InstructionCleanUp());
         for (Pass pass : passes) {
             pass.run();

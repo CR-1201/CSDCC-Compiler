@@ -14,8 +14,8 @@ import java.io.IOException;
 public class Compiler {
     public static void main(String[] args) throws IOException {
         // 设置默认值
-        String fileInputPath = "testfile.txt";
-        String fileOutputPath = "output.txt";
+        String fileInputPath = "testcase.sy";
+        String fileOutputPath = "testcase.s";
         String irOutputPath = "llvm_ir.txt";
         // 解析命令行参数
         for (int i = 0; i < args.length; i++) {
@@ -23,13 +23,14 @@ public class Compiler {
 //                fileInputPath = args[i + 1];
 //            } else if ("-ll".equals(args[i]) && i + 1 < args.length) {
 //                irOutputPath = args[i + 1];
-//            } else if ("-o".equals(args[i]) && i + 1 < args.length) {
-//                fileOutputPath = args[i + 1];
-//            }
-            if (i == 1 && args[1] != null)
-                fileInputPath = args[i];
-            else if (i == 2 && args[2] != null)
-                fileOutputPath = args[i];
+            if ("-o".equals(args[i]) && i + 2 < args.length) {
+                fileOutputPath = args[i + 1];
+                fileInputPath = args[i + 2];
+            }
+//            if (i == 1 && args[1] != null)
+//                fileInputPath = args[i];
+//            else if (i == 2 && args[2] != null)
+//                fileOutputPath = args[i];
         }
 //        fileInputPath = args[0];
 //        fileOutputPath = args[1];

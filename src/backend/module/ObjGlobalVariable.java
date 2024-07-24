@@ -57,13 +57,13 @@ public class ObjGlobalVariable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append(".global\t").append(name).append("\n");
         if (!hasInit) {
             sb.append("\n.bss\n");
         } else {
             sb.append("\n.data\n");
         }
         sb.append(".align 4\n");
-        sb.append(".global\t").append(name).append("\n");
         sb.append(name).append(":\n");
          if (hasInit) {
             int i = 0;

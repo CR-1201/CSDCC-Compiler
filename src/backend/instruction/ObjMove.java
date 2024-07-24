@@ -63,9 +63,9 @@ public class ObjMove extends ObjInstruction implements hasVFP {
             if (hasImm) {
                 int imm = ((ObjImmediate) getRhs()).getImmediate();
                 if (ImmediateUtils.checkEncodeImm(~imm)) {
-                    return "\tmvn" + getCond() + "\t" + dst + ",\t" + rhs + "\n";
+                    return "\tmvn" + getCond() + "\t" + dst + ",\t#" + (~imm) + "\n";
                 } else if (ImmediateUtils.checkEncodeImm(imm)) {
-                    return "\tmov" + getCond() + "\t" + dst + ",\t" + rhs + "\n";
+                    return "\tmov" + getCond() + "\t" + dst + ",\t#" + imm + "\n";
                 } else {
                     final var high = imm >>> 16;
                     final var low = (imm << 16) >>> 16;

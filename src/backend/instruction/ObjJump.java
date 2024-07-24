@@ -32,9 +32,9 @@ public class ObjJump extends ObjInstruction{
     @Override
     public String toString() {
         if (target != null)
-            return "\tb" + getCond() + "\t" + target.getName() +  "\n";
+            return "\tb" + getCond() + "\t" + target.getName() +  "\n" + (getCond() == ObjCond.any ? ".ltorg\n" : "");
         else {
-            return func.refresh() + "\tbx\tlr\n";
+            return func.refresh() + "\tbx\tlr\n.ltorg\n";
         }
     }
 }

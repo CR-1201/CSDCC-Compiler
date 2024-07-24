@@ -27,10 +27,7 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 public class ObjBuilder {
     private static final ObjBuilder builder = new ObjBuilder();
@@ -82,11 +79,66 @@ public class ObjBuilder {
                 ObjFunction objFunction = buildObjFunc((Function) function);
                 objModule.addFunction(objFunction);
                 buildPhi((Function) function, objFunction);
+
             }
         }
         RegisterAllocer rar = new RegisterAllocer(objModule);
         rar.alloc(true);
         rar.alloc(false);
+        for (ObjFunction function : objModule.getFunctions()) {
+            placeLiteralPool(function);
+        }
+    }
+
+    private void placeLiteralPool(ObjFunction function) {
+        boolean haveLoadFImm = false;
+        int offset = 0;
+        List<ObjBlock> blocks = new ArrayList<>(function.getBlocks());
+        for (ObjBlock block : blocks) {
+            List<ObjInstruction> insts = new LinkedList<>(block.getInstructions());
+            for (ObjInstruction inst : insts) {
+                if (inst.needLtorg()) {
+                    haveLoadFImm = true;
+                }
+                if (inst.haveLtorg()) {
+                    haveLoadFImm = false;
+                    offset = 0;
+                }
+                if (haveLoadFImm) {
+                    offset += getLtorgSize(inst);
+                }
+                if (offset > 250) {
+                    ObjInstruction pool = new LiteralPoolPlacement();
+                    block.addInstructionAfter(inst, pool);
+                    haveLoadFImm = false;
+                    offset = 0;
+                }
+            }
+        }
+    }
+
+    private int getLtorgSize(ObjInstruction inst) {
+        if (inst instanceof Binary) {
+            return 1;
+        } else if (inst instanceof ObjJump) {
+            if (((ObjJump) inst).getTarget() == null)
+                return 7;
+            return inst.getCond() == ObjInstruction.ObjCond.any ? 2 : 1;
+        } else if (inst instanceof ObjCall) {
+            return 1;
+        } else if (inst instanceof ObjCompare) {
+            return ((ObjCompare) inst).isVFP() ? 2 : 1;
+        } else if (inst instanceof VConvert) {
+            return 1;
+        } else if (inst instanceof ObjLoad) {
+            return 2;
+        } else if (inst instanceof LiteralPoolPlacement) {
+            return 3;
+        } else if (inst instanceof ObjMove) {
+            return 2;
+        } else if (inst instanceof ObjStore) {
+            return 1;
+        } else return 1;
     }
 
 
@@ -172,7 +224,7 @@ public class ObjBuilder {
         ObjOperand rd = createVirRegister(gep);
         if (base instanceof GlobalVariable) {
             objBlock.addInstruction(new ObjMove(rs, new ObjLabel(base.getName().substring(1), true), false, false));
-            objBlock.addInstruction(new ObjLoad(rs, rs, base.getValueType().isFloat()));
+//            objBlock.addInstruction(new ObjLoad(rs, rs, base.getValueType().isFloat()));
         }
         ArrayList<Value> indexes = gep.getIndex();
         if (indexes.size() == 1) {  // gep 1
@@ -186,8 +238,9 @@ public class ObjBuilder {
             } else {
                 ObjRegister off = v2mMap.containsKey(off1) ? (ObjRegister) v2mMap.get(off1) : putNewVGtoMap(off1, objFunction, objBlock);
 //                    objBlock.addMIPSInstruction(new IInstruction("mul  ", off, rd, new MIPSImmediate(baseType.getSize())));
-                ObjInstruction i = new Binary(rd, rs, off, Binary.BinaryType.add);
-                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
+                objBlock.addInstruction(new ObjMove(rd, new ObjImmediate(baseType.getSize()), false, true));
+                ObjInstruction i = new MLA(rd, off, rd, rs);
+//                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
                 return i;
             }
         } else {    // gep 1 2
@@ -202,9 +255,12 @@ public class ObjBuilder {
                 }
             } else {
                 ObjOperand off = v2mMap.containsKey(off1) ? v2mMap.get(off1) : putNewVGtoMap(off1, objFunction, objBlock);
-                ObjInstruction i = new Binary(rd, rs, off, Binary.BinaryType.add);
-                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
-                objBlock.addInstruction(i);
+//                objBlock.addInstruction(new Binary(off, off, solveImm(baseType.getSize(), objBlock), Binary.BinaryType.mul));
+//                ObjInstruction i = new Binary(rd, rs, off, Binary.BinaryType.add);
+////                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
+//                objBlock.addInstruction(i);
+                objBlock.addInstruction(new ObjMove(rd, new ObjImmediate(baseType.getSize()), false, true));
+                objBlock.addInstruction(new MLA(rd, off, rd, rs));
             }
             if (off2 instanceof ConstInt) {
                 if (((ConstInt) off2).getValue() != 0) {
@@ -219,9 +275,12 @@ public class ObjBuilder {
 //                MIPSRegister tmp2 = new VirtualRegister();
 //                MulOptimizer.mulOptimization(objBlock, tmp2, off, new MIPSImmediate(elementType.getSize()));
 //                    v2mMap.replace(instruction, rd);
-                ObjInstruction i = new Binary(rd, rs, off, Binary.BinaryType.add);
-                i.setShift(new Shift(Binary.BinaryType.sl, elementType.getSize() / 2));
-                return i;
+//                objBlock.addInstruction(new Binary(off, off, solveImm(elementType.getSize(), objBlock), Binary.BinaryType.mul));
+//                ObjInstruction i = new Binary(rd, rd, off, Binary.BinaryType.add);
+//                i.setShift(new Shift(Binary.BinaryType.sl, elementType.getSize() / 2));
+                ObjRegister tmp = new ObjVirRegister();
+                objBlock.addInstruction(new ObjMove(tmp, new ObjImmediate(elementType.getSize()), false, true));
+                return new MLA(rd, off, tmp, rd);
             }
         }
         return null;
@@ -287,7 +346,7 @@ public class ObjBuilder {
         }
         if (addr instanceof GlobalVariable) {
             objBlock.addInstruction(new ObjMove(rd, new ObjLabel(addr.getName().substring(1), true), false, false));
-            objBlock.addInstruction(new ObjLoad(rd, rd, false));
+//            objBlock.addInstruction(new ObjLoad(rd, rd, false));
         }
         return new ObjStore(rd, rs, ((PointerType) addr.getValueType()).getPointeeType().isFloat());
     }
@@ -343,7 +402,7 @@ public class ObjBuilder {
                         ObjOperand offset = new ObjImmediate((stacknum - num) * 4);
                         ObjOperand src = new ObjFloatVirReg();
                         objBlock.addInstruction(new ObjMove(src, new ObjFloatImmediate(((ConstFloat) argument).getValue()), true, true));
-                        objBlock.addInstruction(new ObjStore(ObjPhyRegister.getRegister("sp"), src, solveOffsetImm(offset, objBlock, false), true));
+                        objBlock.addInstruction(new ObjStore(ObjPhyRegister.getRegister("sp"), src, solveOffsetImm(offset, objBlock, true), true));
                         stacknum++;
                     }
                 } else {
@@ -355,7 +414,7 @@ public class ObjBuilder {
                     } else { // 入栈
                         ObjOperand offset = new ObjImmediate((stacknum - num) * 4);
                         ObjOperand src = v2mMap.containsKey(argument) ? v2mMap.get(argument) : putNewVGtoMap(argument, objFunction, objBlock);
-                        objBlock.addInstruction(new ObjStore(ObjPhyRegister.getRegister("sp"), src, solveOffsetImm(offset, objBlock, false), true));
+                        objBlock.addInstruction(new ObjStore(ObjPhyRegister.getRegister("sp"), src, solveOffsetImm(offset, objBlock, true), true));
                         stacknum++;
                     }
                 }
@@ -375,9 +434,10 @@ public class ObjBuilder {
                     }
                 } else {
                     if (index < 4) { // 移入寄存器
-                        ObjOperand dst = ObjPhyRegister.getRegister(index);
+                        ObjRegister dst = ObjPhyRegister.getRegister(index);
                         ObjOperand src = v2mMap.containsKey(argument) ? v2mMap.get(argument) : putNewVGtoMap(argument, objFunction, objBlock);
                         objBlock.addInstruction(new ObjMove(dst, src, false, false));
+                        objCall.addUse(dst);
                     } else { // 入栈
                         ObjOperand offset = new ObjImmediate((stacknum - num) * 4);
                         ObjOperand src = v2mMap.containsKey(argument) ? v2mMap.get(argument) : putNewVGtoMap(argument, objFunction, objBlock);
@@ -483,11 +543,14 @@ public class ObjBuilder {
             assert stackPos >= 0;
             // 这个栈位置后面要寄存器分配后可能需要refresh
             ObjInstruction loadArg = creatArgLoad(rd, stackPos, objBlock, arg.getValueType().isFloat());
-            if (objFunction.getBlocks().size() > 0)
-                objFunction.getBlocks().get(0).addInstruction(loadArg);
-            else
-                objBlock.addInstruction(loadArg);
-            objFunction.addArgInstructions(loadArg);
+            ObjBlock b = objBlock;
+//            if (objFunction.getBlocks().size() > 0) {
+//                b = objFunction.getBlocks().get(0);
+//                b.addInstructionToHead(loadArg);
+//            } else {
+            b.addInstruction(loadArg);
+//            }
+            objFunction.addArgInstructions(loadArg, b);
         }
         return rd;
     }

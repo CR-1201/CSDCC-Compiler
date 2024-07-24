@@ -32,7 +32,7 @@ public class Argument extends Value {
         for (Argument argument : arguments) {
             if (argument.getNum() == this.num)
                 break;
-            if (argument.getValueType().equals(this.getValueType()))
+            if (argument.getValueType().isFloat() == this.getValueType().isFloat())
                 rank++;
         }
         return rank;
@@ -48,8 +48,7 @@ public class Argument extends Value {
                 if (fcnt > 16) {
                     stackPos++;
                 }
-            }
-            else {
+            } else {
                 icnt++;
                 if (icnt > 4) {
                     stackPos++;

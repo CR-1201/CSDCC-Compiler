@@ -29,10 +29,10 @@ public class ImmediateUtils {
     public static boolean checkOffsetRange(int offset, boolean isFloat) {
         if (isFloat) {
             // 对 f32 的间接寻址的偏移量必须在 [-1020, 1020] 范围内
-            return offset >= -1020 && offset <= 1020;
+            return offset >= -1020 && offset <= 1020 - 48 * 4;
         } else {
             // 对 i32 的间接寻址的偏移量必须在 [-4095, 4095] 范围内
-            return offset >= -4095 && offset <= 4095;
+            return offset >= -4095 && offset <= 4095 - 48 * 4;
         }
     }
 }

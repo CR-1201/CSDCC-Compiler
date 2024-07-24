@@ -1,6 +1,7 @@
 package backend.instruction;
 
 import backend.module.ObjBlock;
+import backend.operand.ObjFloatImmediate;
 import backend.operand.ObjOperand;
 import backend.operand.ObjRegister;
 import ir.instructions.binaryInstructions.Icmp;
@@ -14,6 +15,16 @@ public class ObjInstruction {
         regs.addAll(use);
         return regs;
     }
+
+    public boolean needLtorg() {
+        return this instanceof ObjMove && ((ObjMove)this).getRhs() instanceof ObjFloatImmediate;
+    }
+
+    public boolean haveLtorg() {
+        return  (this instanceof ObjJump && getCond().equals(ObjCond.any))
+                || (this instanceof LiteralPoolPlacement);
+    }
+
 
     public enum ObjCond {
         any(""), // 无条件执行

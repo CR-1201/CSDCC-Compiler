@@ -90,7 +90,8 @@ public class RegisterAllocer {
             allocInFunc(objFunction);
             switchV2R(objFunction);
             storeReg(objFunction); // 用于记录现场，便于以后回复
-            objFunction.refreshArgOff();
+            if (!type)
+                objFunction.refreshArgOff();
         }
     }
 
@@ -388,9 +389,10 @@ public class RegisterAllocer {
     }
 
     private void AssignColors() {
+        Set<ObjRegister> used = ObjRegister.getAllAllocatableRegs().stream().filter(adjList::containsKey).collect(Collectors.toSet());
         while (!selectStack.isEmpty()) {
             ObjRegister n = selectStack.pop();
-            HashSet<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type));
+            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type)).stream().filter(oneReg ->ObjRegister.isCalleeSave(oneReg, type) || (ObjRegister.isCallerSave(oneReg, type) && !used.contains(ObjRegister.getPhysicalRegisterById(oneReg, type)))).collect(Collectors.toSet());
             for (ObjRegister w : adjList.getOrDefault(n, new HashSet<>())) {
                 ObjRegister aw = GetAlias(w);
                 if (coloredNodes.contains(aw) || precolored.contains(aw)) {

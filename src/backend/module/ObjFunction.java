@@ -6,10 +6,7 @@ import backend.instruction.ObjLoad;
 import backend.instruction.ObjMove;
 import backend.operand.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ObjFunction {
@@ -18,15 +15,15 @@ public class ObjFunction {
     private int allocSize;
     private Set<Integer> savedRegisters = new TreeSet<>();
     private HashSet<Integer> savedFloatRegisters = new HashSet<>();
-    private ArrayList<ObjInstruction> argLoadInstructions = new ArrayList<>();
+    private HashMap<ObjInstruction, ObjBlock> argLoadInstructions = new HashMap<>();
 
     public ObjFunction(String name) {
         this.name = name.substring(1);
     }
 
-    public void addArgInstructions(ObjInstruction argLoadInstruction) {
+    public void addArgInstructions(ObjInstruction argLoadInstruction, ObjBlock objBlock) {
         if (argLoadInstruction instanceof ObjLoad) {
-            argLoadInstructions.add(argLoadInstruction);
+            argLoadInstructions.put(argLoadInstruction, objBlock);
         }
     }
 
@@ -66,9 +63,15 @@ public class ObjFunction {
         }
     }
 
+    private int getSavedRegistersSize() {
+        return savedRegisters.size() + savedFloatRegisters.size();
+    }
+
     public void refreshArgOff() {
-        int stack = allocSize;
-        for (ObjInstruction argload : argLoadInstructions) {
+        int stack = getStackSize() + getSavedRegistersSize() * 4;
+        Map<ObjInstruction, ObjBlock> argLoads = new HashMap<>(argLoadInstructions);
+        for (Map.Entry<ObjInstruction, ObjBlock> entry :argLoads.entrySet()) {
+            ObjInstruction argload = entry.getKey();
             if ((((ObjLoad) argload).getOff() instanceof ObjImmediate)) {
                 int oldsa = ((ObjImmediate) ((ObjLoad) argload).getOff()).getImmediate();
                 ((ObjLoad) argload).setOff(new ObjImmediate(stack + oldsa));
@@ -80,9 +83,17 @@ public class ObjFunction {
         }
     }
 
+    private int getStackSize() {
+        int regSize = getSavedRegistersSize() * 4;
+        if ("main".equals(name)) {
+            regSize = 4;
+        }
+        return (regSize + allocSize + 4) / 8 * 8 - regSize;
+    }
+
     public String refresh() {
         StringBuilder sb = new StringBuilder();
-        int stack = allocSize;
+        int stack = getStackSize();
         if (stack != 0) {
             if (ImmediateUtils.checkEncodeImm(stack))
                 sb.append("\tadd\tsp,\tsp,\t").append("#").append(stack).append("\n");
@@ -121,6 +132,8 @@ public class ObjFunction {
                 }
                 sb.append("}\n");
             }
+        } else {
+            sb.append("\tpop\t{pc}\n");
         }
         return sb.toString();
     }
@@ -129,7 +142,7 @@ public class ObjFunction {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(".global\t").append(name).append("\n").append(name).append(":\n");
-        int stack = allocSize;
+        int stack = getStackSize();
         if (!name.equals("main")) {
             int stackOffset = -4;
             if (!savedRegisters.isEmpty()) {
@@ -161,6 +174,8 @@ public class ObjFunction {
                 }
                 sb.append("}\n");
             }
+        } else {
+            sb.append("\tpush\t{lr}\n");
         }
         if (stack != 0) {
             if (ImmediateUtils.checkEncodeImm(stack))

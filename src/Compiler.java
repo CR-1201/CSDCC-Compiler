@@ -27,10 +27,10 @@ public class Compiler {
                 fileOutputPath = args[i + 1];
                 fileInputPath = args[i + 2];
             }
-//            if (i == 1 && args[1] != null)
-//                fileInputPath = args[i];
-//            else if (i == 2 && args[2] != null)
-//                fileOutputPath = args[i];
+            if (i == 1 && args[1] != null)
+                fileInputPath = args[i];
+            else if (i == 2 && args[2] != null)
+                fileOutputPath = args[i];
         }
 //        fileInputPath = args[0];
 //        fileOutputPath = args[1];

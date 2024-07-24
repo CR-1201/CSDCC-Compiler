@@ -149,11 +149,11 @@ public class ObjBuilder {
         } else if (initVal instanceof ConstInt) {
             ArrayList<Integer> elements = new ArrayList<>();
             elements.add(((ConstInt) initVal).getValue());
-            return new ObjGlobalVariable(globalVariable.getName(), elements, ObjGlobalVariable.Type.INT);
+            return new ObjGlobalVariable(globalVariable.getName(), elements, ObjGlobalVariable.Type.INT, ((ConstInt) initVal).getValue() != 0);
         } else if (initVal instanceof ConstFloat) {
             ArrayList<Float> elements = new ArrayList<>();
             elements.add(((ConstFloat) initVal).getValue());
-            return new ObjGlobalVariable(globalVariable.getName(), elements, ObjGlobalVariable.Type.FLOAT);
+            return new ObjGlobalVariable(globalVariable.getName(), elements, ObjGlobalVariable.Type.FLOAT,  ((ConstFloat) initVal).getValue() < Float.MIN_VALUE && ((ConstFloat) initVal).getValue() > -Float.MIN_VALUE);
         } else if (initVal instanceof ConstArray) {
             ArrayList<Constant> el = ((ConstArray) initVal).getElementList();
             ObjGlobalVariable.Type type = el.get(0).getValueType().isFloat() ? ObjGlobalVariable.Type.FLOAT : ObjGlobalVariable.Type.INT;
@@ -361,8 +361,9 @@ public class ObjBuilder {
         }
         ObjOperand rd = createVirRegister(conversion);
         if ("fptosi".equals(conversion.getType())) {
-            objBlock.addInstruction(new VConvert(VConvert.vcvtType.f, VConvert.vcvtType.s, rs, rs));
-            return new ObjMove(rd, rs, true, false);
+            ObjFloatVirReg tmp = new ObjFloatVirReg();
+            objBlock.addInstruction(new VConvert(VConvert.vcvtType.f, VConvert.vcvtType.s, rs, tmp));
+            return new ObjMove(rd, tmp, true, false);
         } else {
             objBlock.addInstruction(new ObjMove(rd, rs, true, false));
             return new VConvert(VConvert.vcvtType.s, VConvert.vcvtType.f, rd, rd);
@@ -381,9 +382,6 @@ public class ObjBuilder {
     // TODO : use def添加
     private ObjInstruction buildCall(Call call, ObjBlock objBlock, ObjFunction objFunction) {
         Function func = call.getFunction();
-        if ("@memset".equals(func.getName())) {
-            return null;
-        }
         ObjCall objCall = new ObjCall(new ObjFunction(func.getName()));
         int argnum = call.getArgs().size();
         int findex = 0, index = 0;

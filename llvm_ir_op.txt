@@ -1,0 +1,155 @@
+declare dso_local i32 @getint()
+declare dso_local i32 @getch()
+declare dso_local float @getfloat()
+declare dso_local i32 @getarray(i32* %a0)
+declare dso_local i32 @getfarray(float* %a0)
+declare dso_local void @putint(i32 %a0)
+declare dso_local void @putch(i32 %a0)
+declare dso_local void @putfloat(float %a0)
+declare dso_local void @putarray(i32 %a0, i32* %a1)
+declare dso_local void @putfarray(i32 %a0, float* %a1)
+declare dso_local void @memset(i32* %a0, i32 %a1, i32 %a2)
+declare dso_local void @_sysy_starttime()
+declare dso_local void @_sysy_stoptime()
+define dso_local float @float_abs(float %a0) {
+b0:
+	%v3 = fcmp olt float %a0, 0x0
+	br i1 %v3, label %b1, label %b2
+b1:
+	%v5 = fsub float 0x0, %a0
+	ret float %v5
+b2:
+	ret float %a0
+}
+define dso_local float @circle_area(i32 %a0) {
+b5:
+	%v9 = sitofp i32 %a0 to float
+	%v10 = fmul float %v9, 0x400921fb60000000
+	%v12 = sitofp i32 %a0 to float
+	%v13 = fmul float %v10, %v12
+	%v16 = mul i32 %a0, %a0
+	%v17 = sitofp i32 %v16 to float
+	%v18 = fmul float %v17, 0x400921fb60000000
+	%v19 = fadd float %v13, %v18
+	%v21 = fdiv float %v19, 0x4000000000000000
+	ret float %v21
+}
+define dso_local i32 @float_eq(float %a0, float %a1) {
+b7:
+	%v26 = fsub float %a0, %a1
+	%v27 = call float @float_abs(float %v26)
+	%v28 = fcmp olt float %v27, 0x3eb0c6f7a0000000
+	br i1 %v28, label %b8, label %b9
+b8:
+	ret i32 1
+b9:
+	ret i32 0
+}
+define dso_local void @error() {
+b13:
+	call void @putch(i32 101)
+	call void @putch(i32 114)
+	call void @putch(i32 114)
+	call void @putch(i32 111)
+	call void @putch(i32 114)
+	call void @putch(i32 10)
+	ret void
+}
+define dso_local void @ok() {
+b14:
+	call void @putch(i32 111)
+	call void @putch(i32 107)
+	call void @putch(i32 10)
+	ret void
+}
+define dso_local void @assert(i32 %a0) {
+b15:
+	%v36 = icmp eq i32 %a0, 0
+	%v37 = zext i1 %v36 to i32
+	%v38 = icmp ne i32 %v37, 0
+	br i1 %v38, label %b16, label %b17
+b16:
+	call void @error()
+	br label %b18
+b17:
+	call void @ok()
+	br label %b18
+b18:
+	ret void
+}
+define dso_local void @assert_not(i32 %a0) {
+b19:
+	%v41 = icmp ne i32 %a0, 0
+	br i1 %v41, label %b20, label %b21
+b20:
+	call void @error()
+	br label %b22
+b21:
+	call void @ok()
+	br label %b22
+b22:
+	ret void
+}
+define dso_local i32 @main() {
+b23:
+	%v62 = alloca [10 x float]
+	%v42 = call i32 @float_eq(float 0x3fb4000000000000, float 0xc0e01d0000000000)
+	call void @assert_not(i32 %v42)
+	%v43 = call i32 @float_eq(float 0x4057c21fc0000000, float 0x4041475ce0000000)
+	call void @assert_not(i32 %v43)
+	%v44 = call i32 @float_eq(float 0x4041475ce0000000, float 0x4041475ce0000000)
+	call void @assert(i32 %v44)
+	%v46 = call float @circle_area(i32 5)
+	%v48 = call i32 @float_eq(float %v46, float %v46)
+	call void @assert(i32 %v48)
+	%v49 = call i32 @float_eq(float 0x406d200000000000, float 0x40affe0000000000)
+	call void @assert_not(i32 %v49)
+	br label %b24
+b24:
+	call void @ok()
+	br label %b26
+b26:
+	call void @ok()
+	br label %b31
+b31:
+	call void @ok()
+	br label %b32
+b32:
+	%v63 = getelementptr inbounds [10 x float], [10 x float]* %v62, i32 0, i32 0
+	%v64 = bitcast float* %v63 to i32*
+	call void @memset(i32* %v64, i32 0, i32 40)
+	%v65 = getelementptr inbounds float, float* %v63, i32 0
+	store float 0x3ff0000000000000, float* %v65
+	%v66 = getelementptr inbounds float, float* %v63, i32 1
+	store float 0x4000000000000000, float* %v66
+	%v69 = call i32 @getfarray(float* %v63)
+	br label %b34
+b34:
+	%p1 = phi i32 [ 1, %b32 ],  [ %v98, %b35 ]
+	%p0 = phi i32 [ 0, %b32 ],  [ %v100, %b35 ]
+	%v71 = icmp slt i32 %p1, 1000000000
+	br i1 %v71, label %b35, label %b36
+b35:
+	%v73 = call float @getfloat()
+	%v81 = fptosi float %v73 to i32
+	%v82 = call float @circle_area(i32 %v81)
+	%v84 = getelementptr inbounds [10 x float], [10 x float]* %v62, i32 0, i32 %p0
+	%v87 = load float, float* %v84
+	%v89 = fadd float %v87, %v73
+	store float %v89, float* %v84
+	%v76 = fmul float %v73, 0x400921fb60000000
+	%v78 = fmul float %v76, %v73
+	call void @putfloat(float %v78)
+	call void @putch(i32 32)
+	%v92 = fptosi float %v82 to i32
+	call void @putint(i32 %v92)
+	call void @putch(i32 10)
+	%v100 = add i32 %p0, 1
+	%v96 = sitofp i32 %p1 to float
+	%v97 = fmul float %v96, 0x4024000000000000
+	%v98 = fptosi float %v97 to i32
+	br label %b34
+b36:
+	call void @putfarray(i32 %v69, float* %v63)
+	ret i32 0
+}

@@ -10,6 +10,7 @@ import ir.instructions.terminatorInstructions.Br;
 import pass.Pass;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -24,7 +25,6 @@ public class CFG implements Pass {
             if (!function.getIsBuiltIn()) {
                 // 针对每一个函数去新建CFG
                 buildCFG(function);
-                deleteUnreachableBlock(function);
             }
         }
     }
@@ -36,6 +36,7 @@ public class CFG implements Pass {
             visited.clear();
             setCFG(entry);
         }
+        deleteUnreachableBlock(function);
     }
 
     private void deleteCFG(Function function) {
@@ -74,7 +75,7 @@ public class CFG implements Pass {
         }
     }
 
-    public static void deleteUnreachableBlock(Function function) {
+    public void deleteUnreachableBlock(Function function) {
         BasicBlock entry = function.getFirstBlock();
         boolean flag = true;
         while(flag) {
@@ -85,11 +86,43 @@ public class CFG implements Pass {
                     ArrayList<Phi> phis = block.getPhiUsers();
                     for (Phi phi : phis) {
                         phi.removeUsedBlock(block);
+                        if (phi.getOperators().isEmpty()) {
+                            phi.removeSelf();
+                        }
                     }
                     block.removeSelf();
                     flag = true;
                 }
             }
+        }
+    }
+
+    public void setCFG(ArrayList<BasicBlock> blocks) {
+        HashMap<BasicBlock, HashSet<BasicBlock>> precs = new HashMap<>();
+        HashMap<BasicBlock, HashSet<BasicBlock>> succs = new HashMap<>();
+        for (BasicBlock block : blocks) {
+            precs.put(block, new HashSet<>());
+            succs.put(block, new HashSet<>());
+        }
+        for (BasicBlock block : blocks) {
+            if (block.getTailInstruction() instanceof Br br) {
+                if (br.getHasCondition()) {
+                    BasicBlock trueBlock = (BasicBlock) br.getOperator(1);
+                    BasicBlock falseBlock = (BasicBlock) br.getOperator(2);
+                    succs.get(block).add(trueBlock);
+                    succs.get(block).add(falseBlock);
+                    precs.get(trueBlock).add(block);
+                    precs.get(falseBlock).add(block);
+                } else {
+                    BasicBlock target = (BasicBlock) br.getOperator(0);
+                    succs.get(block).add(target);
+                    precs.get(target).add(block);
+                }
+            }
+        }
+        for (BasicBlock block : blocks) {
+            block.setPrecursors(precs.get(block));
+            block.setSuccessors(succs.get(block));
         }
     }
 }

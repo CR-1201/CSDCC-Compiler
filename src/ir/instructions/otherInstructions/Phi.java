@@ -22,6 +22,9 @@ public class Phi extends Instruction {
     }
 
     public void addIncoming(Value value, BasicBlock block) {
+        if (getValueType() == null) {
+            setValueType(value.getValueType());
+        }
         int i = 0;
         while (i < precursorNum && getOperator(i) != null) {
             i++;
@@ -45,6 +48,16 @@ public class Phi extends Instruction {
         value.removeUser(this);
         removeOperator(idx);
         removeOperator(idx - precursorNum);
+        precursorNum --;
+    }
+
+    public void removeUsedValue(Value value) {
+        int idx = getOperators().indexOf(value);
+        BasicBlock block = (BasicBlock) getOperator(idx + precursorNum);
+        block.removeUser(this);
+        value.removeUser(this);
+        removeOperator(idx + precursorNum);
+        removeOperator(idx);
         precursorNum --;
     }
 
@@ -81,6 +94,12 @@ public class Phi extends Instruction {
         replaceAllUsesWith(commonValue);
         removeAllOperators();
         eraseFromParent();
+    }
+
+    public void replaceOperator(Value oldValue, Value newValue, BasicBlock newBlock) {
+        int index = getOperators().indexOf(oldValue);
+        setOperator(index, newValue);
+        setOperator(index + precursorNum, newBlock);
     }
 
     @Override

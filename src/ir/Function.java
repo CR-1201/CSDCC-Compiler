@@ -3,6 +3,7 @@ package ir;
 import ir.types.DataType;
 import ir.types.FunctionType;
 import ir.types.VoidType;
+import pass.analysis.Loop;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +48,13 @@ public class Function extends Value{
     private boolean sideEffect = false;
     //调用图相关
     private final HashSet<Function> callers = new HashSet<>();
+
+
+    // ============================== Loop Info ================================
+    private ArrayList<Loop> topLoops = new ArrayList<>();
+    private ArrayList<Loop> allLoops = new ArrayList<>();
+    // ============================== Loop End ================================
+
 
     public Function(String name, FunctionType functionType, boolean isBuiltIn){
         super("@" + name, functionType, Module.getModule());
@@ -179,6 +187,31 @@ public class Function extends Value{
     public ArrayList<Function> getCallersArray() {
         return new ArrayList<>(this.callers);
     }
+
+
+    // ============================== Loop Info ================================
+    public void setAllLoops(ArrayList<Loop> allLoops) {
+        this.allLoops.clear();
+        this.allLoops = allLoops;
+    }
+
+    public ArrayList<Loop> getAllLoops() {
+        return allLoops;
+    }
+
+    public void setTopLoops(ArrayList<Loop> topLoops) {
+        this.topLoops.clear();
+        this.topLoops = topLoops;
+    }
+
+    public ArrayList<Loop> getTopLoops() {
+        return topLoops;
+    }
+
+    public void removeTopLoop(Loop loop) {
+        this.topLoops.remove(loop);
+    }
+    // ============================== Loop End ================================
 
     /**
      * 编译器可以假设标记为 dso_local 的函数或变量将解析为同一链接单元中的符号

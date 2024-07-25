@@ -84,4 +84,8 @@ public abstract class User extends Value {
         this.operators.clear();
     }
 
+    public void replaceOperator(Value oldValue, Value newValue) {
+        int index = operators.indexOf(oldValue);
+        setOperator(index, newValue);
+    }
 }

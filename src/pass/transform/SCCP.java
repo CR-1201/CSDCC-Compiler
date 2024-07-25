@@ -7,20 +7,18 @@ import ir.constants.ConstInt;
 import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
-
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.otherInstructions.Zext;
 import ir.instructions.terminatorInstructions.Br;
 import ir.types.FloatType;
 import ir.types.IntType;
-import pass.Pass;
-import utils.Pair;
-import utils.ValueStatus;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import pass.Pass;
+import utils.Pair;
+import utils.ValueStatus;
 
 /**
  @author Conroy
@@ -178,6 +176,8 @@ public class SCCP implements Pass {
         jumpBlock.addUser(br);
         valueMap.put(br,curStatus);
 //        System.out.println(br);
+        block.addSuccessor(jumpBlock);
+        jumpBlock.addPrecursor(block);
         if( !jumpBlock.equals(invalidBlock) ){
             block.removeSuccessor(invalidBlock);
             invalidBlock.removePrecursor(block);

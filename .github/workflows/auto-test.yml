@@ -23,11 +23,21 @@ jobs:
         distribution: 'adopt'
         java-version: '17'
     
-    - name: install clang
-      run: sudo apt install -y clang
+    - name: install clang10
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "10.0"
 
-    - name: set LD_LIBRARY_PATH
-      run: echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$(pwd)/tests/lib" >> $GITHUB_ENV
+    - name: setup env
+      run: |
+        sudo apt install -y libtinfo5
+        echo "$(pwd)/llvm/bin" >> $GITHUB_PATH
+        echo "$(pwd)/llvm/lib" >> $LD_LIBRARY_PATH
+        echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:$(pwd)/tests/lib" >> $GITHUB_ENV
+
+    - name: check clang version
+      run: |
+        clang --version
 
     - name: test all
       run: |

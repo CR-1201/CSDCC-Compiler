@@ -15,7 +15,7 @@ public abstract class Value {
    private final int id;
    // value 的名字,用于打印 llvm ir
    protected String name;
-   private final ValueType valueType;
+   private ValueType valueType;
    // value 的拥有者,注意不是使用者 user
    private Value parent;
    // 记录使用过当前 value 的使用者,一个 value 可以有多个 user
@@ -38,6 +38,9 @@ public abstract class Value {
     }
     public ValueType getValueType(){
         return valueType;
+    }
+    public void setValueType(ValueType valueType) {
+       this.valueType = valueType;
     }
     public Value getParent(){
         return parent;

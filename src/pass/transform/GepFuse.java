@@ -47,7 +47,7 @@ public class GepFuse implements Pass{
                 if( instruction instanceof GEP gep && gep.getBase() instanceof GEP preGep ){
                     if( canFuse(preGep,gep) ){
                         fuse(preGep,gep);
-                    } else {
+                    } else if( canValueFuse(preGep,gep) ){
                         valueFuse(preGep,gep);
                     }
                 }
@@ -130,6 +130,13 @@ public class GepFuse implements Pass{
     }
 
     private boolean canFuse(GEP preGep, GEP gep){
+        Value preLastValue = preGep.getIndex().get(preGep.getIndex().size() - 1);
+        Value nowFirstValue = gep.getIndex().get(0);
+
+        return preLastValue instanceof Constant && nowFirstValue instanceof Constant;
+    }
+
+    private boolean canValueFuse(GEP preGep, GEP gep){
         Value preLastValue = preGep.getIndex().get(preGep.getIndex().size() - 1);
         Value nowFirstValue = gep.getIndex().get(0);
 

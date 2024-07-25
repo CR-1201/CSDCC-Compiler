@@ -35,20 +35,16 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
-//        isUnrolled = true;
-//        while (isUnrolled) {
-//            isUnrolled = false;
-            for (Function func : Module.getModule().getFunctionsArray()) {
-                if (!func.getIsBuiltIn()) {
-                    clear();
-                    loopVarAnalysis.loopVarAnalysis(func);
-                    runLoopUnroll(func);
-                    if (isUnrolled) {
-                        cfg.setCFG(func.getBasicBlocksArray());
-                    }
+        for (Function func : Module.getModule().getFunctionsArray()) {
+            if (!func.getIsBuiltIn()) {
+                clear();
+                loopVarAnalysis.loopVarAnalysis(func);
+                runLoopUnroll(func);
+                if (isUnrolled) {
+                    cfg.setCFG(func.getBasicBlocksArray());
                 }
             }
-//        }
+        }
     }
     private void clear() {
         isUnrolled = false;

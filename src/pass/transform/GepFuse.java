@@ -47,9 +47,42 @@ public class GepFuse implements Pass{
                 if( instruction instanceof GEP gep && gep.getBase() instanceof GEP preGep ){
                     if( canFuse(preGep,gep) ){
                         fuse(preGep,gep);
+                    } else {
+                        valueFuse(preGep,gep);
                     }
                 }
             }
+        }
+    }
+
+    private void valueFuse(GEP preGep,GEP gep){
+        gep.modifyTarget(preGep.getBase());
+
+        ArrayList<Value> preIndexes = preGep.getIndex();
+        ArrayList<Value> nowIndexes = gep.getIndex();
+
+        ArrayList<Value> indexes = new ArrayList<>();
+
+        for (int i = 0; i < preIndexes.size() - 1; i++) {
+            indexes.add(preIndexes.get(i));
+        }
+
+        Value preValue = preIndexes.get(preIndexes.size() - 1);
+        int nowConst = ((ConstInt) nowIndexes.get(0)).getValue();
+
+        // 只考虑now gep 的第一维是0的情况
+        if( nowConst == 0 ){
+            indexes.add(preValue);
+        }
+
+        for(int i = 1; i < nowIndexes.size(); i++){
+            indexes.add(nowIndexes.get(i));
+        }
+
+        gep.modifyIndexes(indexes);
+
+        if( preGep.getUsers().isEmpty() ){
+            preGep.removeSelf();
         }
     }
 

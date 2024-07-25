@@ -48,7 +48,7 @@ public class GepFuse implements Pass{
                     if( canFuse(preGep,gep) ){
                         fuse(preGep,gep);
                     } else {
-//                        valueFuse(preGep,gep);
+                        valueFuse(preGep,gep);
                     }
                 }
             }
@@ -81,8 +81,7 @@ public class GepFuse implements Pass{
             if( preConst == 0 ){
                 indexes.add(nowValue);
             }
-        }
-
+        } else return;
 
         for(int i = 1; i < nowIndexes.size(); i++){
             indexes.add(nowIndexes.get(i));
@@ -134,6 +133,6 @@ public class GepFuse implements Pass{
         Value preLastValue = preGep.getIndex().get(preGep.getIndex().size() - 1);
         Value nowFirstValue = gep.getIndex().get(0);
 
-        return preLastValue instanceof Constant && nowFirstValue instanceof Constant;
+        return preLastValue instanceof Constant || nowFirstValue instanceof Constant;
     }
 }

@@ -48,7 +48,7 @@ public class GepFuse implements Pass{
                     if( canFuse(preGep,gep) ){
                         fuse(preGep,gep);
                     } else {
-                        valueFuse(preGep,gep);
+//                        valueFuse(preGep,gep);
                     }
                 }
             }
@@ -68,12 +68,21 @@ public class GepFuse implements Pass{
         }
 
         Value preValue = preIndexes.get(preIndexes.size() - 1);
-        int nowConst = ((ConstInt) nowIndexes.get(0)).getValue();
+        Value nowValue = nowIndexes.get(0);
 
-        // 只考虑now gep 的第一维是0的情况
-        if( nowConst == 0 ){
-            indexes.add(preValue);
+        if( nowValue instanceof ConstInt ){
+            int nowConst = ((ConstInt) nowIndexes.get(0)).getValue();
+            // 只考虑now gep 的第一维是0的情况
+            if( nowConst == 0 ){
+                indexes.add(preValue);
+            }
+        } else if( preValue instanceof ConstInt ){
+            int preConst = ((ConstInt) preValue).getValue();
+            if( preConst == 0 ){
+                indexes.add(nowValue);
+            }
         }
+
 
         for(int i = 1; i < nowIndexes.size(); i++){
             indexes.add(nowIndexes.get(i));

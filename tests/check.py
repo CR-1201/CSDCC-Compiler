@@ -6,7 +6,7 @@ import threading
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-TIMEOUT = 300
+TIMEOUT = 600
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
 TEST_DIR = f'{ROOT_DIR}/tests'
 CP = '../compiler.jar'

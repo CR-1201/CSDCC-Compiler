@@ -19,10 +19,7 @@ import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
-import ir.instructions.otherInstructions.Call;
-import ir.instructions.otherInstructions.Conversion;
-import ir.instructions.otherInstructions.Phi;
-import ir.instructions.otherInstructions.Zext;
+import ir.instructions.otherInstructions.*;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
@@ -211,7 +208,19 @@ public class ObjBuilder {
         } else if (instruction instanceof GEP) {
             return buildGEP((GEP) instruction, objBlock, objFunction);
         } else if (instruction instanceof Zext) {
-            v2mMap.put(instruction, v2mMap.get(((Zext) instruction).getConversionValue()));
+            Value con = ((Zext) instruction).getConversionValue();
+            if (con instanceof Icmp) {
+                ObjRegister rd = createVirRegister(instruction);
+                ObjMove tmove = new ObjMove(rd, new ObjImmediate(1), false, true);
+                tmove.setCond(ObjInstruction.ObjCond.switchIr2Obj(((Icmp) con).getCondition()));
+                ObjMove fmove = new ObjMove(rd, new ObjImmediate(0), false, true);
+                fmove.setCond(ObjInstruction.ObjCond.switchIr2ObjOpp(((Icmp) con).getCondition()));
+                objBlock.addInstruction(tmove);
+                objBlock.addInstruction(fmove);
+            }else
+                v2mMap.put(instruction, v2mMap.get(con));
+        }else if (instruction instanceof BitCast) {
+            v2mMap.put(instruction, v2mMap.get(((BitCast) instruction).getConversionValue()));
         }
         // TODO: PHI
         return null;
@@ -307,8 +316,9 @@ public class ObjBuilder {
             objBlock.addInstruction(new Binary(rd, rd, rr, Binary.BinaryType.mul));
             return new Binary(rd, rl, rd, Binary.BinaryType.sub);
         }
-        if (binary instanceof Icmp)
-            return new ObjCompare(rl, rr, l.getValueType().isFloat() || r.getValueType().isFloat());
+        if (binary instanceof Icmp) {
+           return new ObjCompare(rl, rr, r.getValueType().isFloat() || l.getValueType().isFloat());
+        }
         if (binary.getValueType().isFloat())
             return new FloatBinary(rd, rl, rr, FloatBinary.FloatBinaryType.switchIrToObj(binary));
         return new Binary(rd, rl, rr, Binary.BinaryType.switchIrToObj(binary));

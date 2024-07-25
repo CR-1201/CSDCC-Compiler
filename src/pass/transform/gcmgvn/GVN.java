@@ -7,10 +7,14 @@ import ir.Value;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.BinaryInstruction;
 import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.memoryInstructions.Load;
+import ir.instructions.otherInstructions.BitCast;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.otherInstructions.Conversion;
+import pass.analysis.CFG;
 import pass.analysis.Dom;
 import pass.transform.SimplifyInst;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,11 +29,14 @@ public class GVN {
                 runGVN(function);
             }
         }
+//        IOFunc.output(Module.getModule().toString(), "checkir/gvn.txt");
     }
 
     private void runGVN(Function func) {
         clear();
+        CFG cfg = new CFG();
         Dom dom = new Dom();
+        cfg.buildCFG(func);
         dom.buildDom(func);
         BasicBlock entry = func.getFirstBlock();
         RPOSearch(entry);
@@ -40,9 +47,7 @@ public class GVN {
         ArrayList<Instruction> insts = new ArrayList<>(entry.getInstructions());
         for (int i = 0; i < insts.size() && insts.get(i) != null; i++) {
             Instruction curInst = insts.get(i);
-
             if (canGVN(curInst)) {
-                // 首先进行常数化简
                 boolean isNumbered = checkAndSetGVN(curInst);
                 if (isNumbered) {
                     numberedInsts.add(curInst);
@@ -68,7 +73,7 @@ public class GVN {
         if(inst instanceof Call ci){
             Function function = ci.getFunction();
             return !function.getIsBuiltIn() && !function.getSideEffect();
-        } else if (inst instanceof BinaryInstruction || inst instanceof GEP || inst instanceof Conversion) {
+        } else if (inst instanceof BinaryInstruction || inst instanceof GEP || inst instanceof Conversion || inst instanceof BitCast) {
             return true;
         }
         return false;
@@ -88,16 +93,14 @@ public class GVN {
             String hash = setHashValue(bi);
             if (GVNMap.containsKey(hash)) {
                 inst.replaceAllUsesWith(GVNMap.get(hash));
-                inst.removeAllOperators();
-                inst.eraseFromParent();
+                inst.removeSelf();
                 return false;
             }
             if (isSwapBinary(bi)) {
                 String swapHash = setSwapBinaryHashValue(bi);
                 if (GVNMap.containsKey(swapHash)) {
                     inst.replaceAllUsesWith(GVNMap.get(swapHash));
-                    inst.removeAllOperators();
-                    inst.eraseFromParent();
+                    inst.removeSelf();
                     return false;
                 }
                 GVNMap.put(hash, inst);
@@ -106,12 +109,11 @@ public class GVN {
                 GVNMap.put(hash, inst);
             }
             return true;
-        } else if (inst instanceof Call || inst instanceof GEP || inst instanceof Conversion) {
+        } else if (inst instanceof Call || inst instanceof GEP || inst instanceof Conversion || inst instanceof BitCast) {
             String hash = setHashValue(inst);
             if (GVNMap.containsKey(hash)) {
                 inst.replaceAllUsesWith(GVNMap.get(hash));
-                inst.removeAllOperators();
-                inst.eraseFromParent();
+                inst.removeSelf();
                 return false;
             }
             GVNMap.put(hash, inst);

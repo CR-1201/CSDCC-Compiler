@@ -24,6 +24,9 @@ public class Phi extends Instruction {
     }
 
     public void addIncoming(Value value, BasicBlock block) {
+        if (getValueType() == null) {
+            setValueType(value.getValueType());
+        }
         int i = 0;
         while (i < precursorNum && getOperator(i) != null) {
             i++;
@@ -50,6 +53,16 @@ public class Phi extends Instruction {
         precursorNum --;
     }
 
+    public void removeUsedValue(Value value) {
+        int idx = getOperators().indexOf(value);
+        BasicBlock block = (BasicBlock) getOperator(idx + precursorNum);
+        block.removeUser(this);
+        value.removeUser(this);
+        removeOperator(idx + precursorNum);
+        removeOperator(idx);
+        precursorNum --;
+    }
+
     public Value getInputVal(BasicBlock block) {
         for (int i = 0; i < precursorNum; i++) {
             if (getOperator(i + precursorNum) == block) {
@@ -59,6 +72,7 @@ public class Phi extends Instruction {
         throw new AssertionError("block not found for phi!");
     }
 
+
     public ArrayList<Map.Entry<Value, BasicBlock>> getEntry() {
         ArrayList<Map.Entry<Value, BasicBlock>> entryPairs = new ArrayList<>();
         for (int i = 0; i < precursorNum; i++) {
@@ -66,6 +80,37 @@ public class Phi extends Instruction {
             entryPairs.add(new AbstractMap.SimpleEntry<>(getOperator(i), (BasicBlock) getOperator(i + precursorNum)));
         }
         return entryPairs;
+    }
+    public void removeIfRedundant(boolean f) {
+        if (getUsers().isEmpty()) {
+            removeAllOperators();
+            eraseFromParent();
+            return;
+        }
+        if (precursorNum == 0) {
+            throw new AssertionError(this + "'s predecessorNum = 0!");
+        }
+        Value commonValue = getOperator(0);
+        for (int i = 1; i < precursorNum; i++)
+        {
+            if (commonValue != getOperator(i))
+            {
+                return;
+            }
+        }
+        if (!f && commonValue instanceof Instruction)
+        {
+            return;
+        }
+        replaceAllUsesWith(commonValue);
+        removeAllOperators();
+        eraseFromParent();
+    }
+
+    public void replaceOperator(Value oldValue, Value newValue, BasicBlock newBlock) {
+        int index = getOperators().indexOf(oldValue);
+        setOperator(index, newValue);
+        setOperator(index + precursorNum, newBlock);
     }
 
     @Override

@@ -42,6 +42,26 @@ public class ObjInstruction {
             this.name = name;
         }
 
+        public static ObjCond switchIr2ObjOpp(Icmp.Condition cond) {
+            switch (cond) {
+//                EQ, LE, LT, GE, GT, NE;
+                case EQ:
+                    return ObjCond.ne;
+                case NE:
+                    return ObjCond.eq;
+                case LT:
+                    return ObjCond.sge;
+                case LE:
+                    return ObjCond.sgt;
+                case GT:
+                    return ObjCond.sle;
+                case GE:
+                    return ObjCond.slt;
+                default:
+                    return ObjCond.any;
+            }
+        }
+
         public String getName() {
             return name;
         }

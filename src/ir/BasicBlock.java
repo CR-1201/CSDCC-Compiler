@@ -1,6 +1,5 @@
 package ir;
 
-import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
@@ -10,6 +9,7 @@ import pass.analysis.Loop;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  @author Conroy
@@ -21,8 +21,8 @@ public class BasicBlock extends Value{
     // 指令集合
     private final LinkedList<Instruction> instructions = new LinkedList<>();
     // 前驱与后继基本块,不讲求顺序,因此不用链表
-    private final HashSet<BasicBlock> precursors = new HashSet<>();
-    private final HashSet<BasicBlock> successors = new HashSet<>();
+    private HashSet<BasicBlock> precursors = new HashSet<>();
+    private HashSet<BasicBlock> successors = new HashSet<>();
     // 当前基本块支配的基本块
     private HashSet<BasicBlock> doms = new HashSet<>();
     // 当前基本块的必经基本块，即当前基本块的支配者
@@ -175,6 +175,11 @@ public class BasicBlock extends Value{
         instructions.remove(instruction);
     }
 
+    public void removeLastInst(){
+        Instruction lastInst = getTailInstruction();
+        lastInst.removeSelf();
+    }
+
     public void addPrecursor(BasicBlock precursor){
         precursors.add(precursor);
     }
@@ -185,13 +190,44 @@ public class BasicBlock extends Value{
 
     public void removeSuccessor(BasicBlock successor){
         successors.remove(successor);
+        successor.getPrecursors().remove(this);
     }
 
     public void removePrecursor(BasicBlock precursor){
         precursors.remove(precursor);
+        precursor.getSuccessors().remove(this);
     }
 
+    public void setPrecursors(HashSet<BasicBlock> precursors){
+        this.precursors.clear();
+        this.precursors = precursors;
+    }
 
+    public void setSuccessors(HashSet<BasicBlock> successors){
+        this.successors.clear();
+        this.successors = successors;
+    }
+
+    public ArrayList<BasicBlock> computeDfsSuccBlocks() {
+        HashSet<BasicBlock> visited = new HashSet<>();
+        Stack<BasicBlock> stack = new Stack<>();
+        ArrayList<BasicBlock> dfs = new ArrayList<>();
+        stack.add(this);
+        visited.add(this);
+        while (!stack.isEmpty()) {
+            BasicBlock top = stack.pop();
+            dfs.add(top);
+            if (!top.getSuccessors().isEmpty()) {
+                for (BasicBlock succ : top.getSuccessors()) {
+                    if (!visited.contains(succ)) {
+                        visited.add(succ);
+                        stack.push(succ);
+                    }
+                }
+            }
+        }
+        return dfs;
+    }
 
     /**
      * precursor - successor 是一对双向关系
@@ -211,6 +247,11 @@ public class BasicBlock extends Value{
 //        newBlock.precursors.add(this);
     }
 
+    public void replacePrecursor(BasicBlock oldBlock, BasicBlock newBlock){
+        removePrecursor(oldBlock);
+        addPrecursor(newBlock);
+        newBlock.addSuccessor(this);
+    }
     /**
      * 获得结尾的指令,如果结尾没有指令,那么返回 null
      * @return 结尾指令
@@ -253,6 +294,10 @@ public class BasicBlock extends Value{
         getParent().removeBlock(this);
     }
 
+    public void removeFromParent() {
+        getParent().removeBlock(this);
+    }
+
     public ArrayList<Phi> getPhiUsers() {
         ArrayList<Phi> phis = new ArrayList<>();
         for (User user : getUsers()) {
@@ -263,11 +308,31 @@ public class BasicBlock extends Value{
         return phis;
     }
 
+    public ArrayList<Phi> getPhis() {
+        ArrayList<Phi> phis = new ArrayList<>();
+        for (Instruction inst : instructions) {
+            if (inst instanceof Phi phi) {
+                phis.add(phi);
+            } else {
+                break;
+            }
+        }
+        return phis;
+    }
+
     public Br getUselessBr() {
         if (getInstructions().size() == 1 && getTailInstruction() instanceof Br br)
             return br;
         else
             return null;
+    }
+
+    public void reducePhi(boolean f) {
+        for (Instruction instruction : getInstructionsArray()) {
+            if (instruction instanceof Phi) {
+                ((Phi) instruction).removeIfRedundant(f);
+            }
+        }
     }
 
     @Override

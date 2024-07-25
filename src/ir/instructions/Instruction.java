@@ -34,6 +34,17 @@ public class Instruction extends User {
         getParent().removeInstruction(this);
     }
 
+    public void removeSelf() {
+        removeAllOperators();
+        eraseFromParent();
+    }
+
+    public void move2Block(BasicBlock target) {
+        eraseFromParent();
+        target.insertTail(this);
+        this.setParent(target);
+    }
+
     @Override
     public BasicBlock getParent(){
         return (BasicBlock) super.getParent();

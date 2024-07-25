@@ -18,14 +18,19 @@ public class LoopAnalysis implements Pass {
             }
         }
     }
-    // 函数内部的所有的Loop
+
+    /**
+     * 函数内部包括的所有循环
+     */
     private final ArrayList<Loop> allLoops = new ArrayList<>();
-    // 顶层Loop
+    /**
+     * 函数内部的顶层循环
+     */
     private final ArrayList<Loop> topLoops = new ArrayList<>();
 
-    private void analyzeLoopInfo(Function function) {
+    public void analyzeLoopInfo(Function function) {
         clear();
-        ArrayList<BasicBlock> latches = new ArrayList<>();
+        HashSet<BasicBlock> latches = new HashSet<>();
         ArrayList<BasicBlock> domPostOrder = Dom.getDomTreePostOrder(function);
         for (BasicBlock block : domPostOrder) {
             for (BasicBlock prec : block.getPrecursors()) {
@@ -40,7 +45,9 @@ public class LoopAnalysis implements Pass {
             }
         }
         setLoopRelation(function.getFirstBlock());
+        setLoop(function);
     }
+
     private void clear() {
         allLoops.clear();
         topLoops.clear();
@@ -51,7 +58,7 @@ public class LoopAnalysis implements Pass {
      * @param loop 新建的 loop
      * @param latches 该 Loop 的 End 块
      */
-    private void completeLoop(Loop loop, ArrayList<BasicBlock> latches) {
+    private void completeLoop(Loop loop, HashSet<BasicBlock> latches) {
         ArrayList<BasicBlock> loopLatches = new ArrayList<>(latches);
         while (!loopLatches.isEmpty()) {
             BasicBlock latch = loopLatches.remove(0);
@@ -120,5 +127,20 @@ public class LoopAnalysis implements Pass {
                 }
             }
         }
+    }
+
+    private void setLoop(Function function) {
+        for (Loop loop : allLoops) {
+            for (BasicBlock block : loop.getAllBlocks()) {
+                for (BasicBlock succ : block.getSuccessors()) {
+                    if (!loop.getAllBlocks().contains(succ)) {
+                        loop.addExit(succ);
+                        loop.addExiting(block);
+                    }
+                }
+            }
+        }
+        function.setTopLoops(new ArrayList<>(topLoops));
+        function.setAllLoops(new ArrayList<>(allLoops));
     }
 }

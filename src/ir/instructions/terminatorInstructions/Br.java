@@ -55,6 +55,26 @@ public class Br extends TerInstruction{
         }
     }
 
+    public Value getCond() {
+        if (hasCondition) {
+            return getOperator(0);
+        }
+        return null;
+    }
+
+    public BasicBlock getTrueBlock() {
+        if (hasCondition) {
+            return (BasicBlock) getOperator(1);
+        }
+        return null;
+    }
+
+    public BasicBlock getFalseBlock() {
+        if (hasCondition) {
+            return (BasicBlock) getOperator(2);
+        }
+        return null;
+    }
     public boolean getHasCondition(){
         return hasCondition;
     }
@@ -102,10 +122,30 @@ public class Br extends TerInstruction{
         }
         for (BasicBlock succ : succs) {
             getParent().removeSuccessor(succ);
-            succ.removePrecursor(getParent());
         }
         removeAllOperators();
         eraseFromParent();
+    }
+
+    public void cond2jump(BasicBlock target) {
+        hasCondition = false;
+        removeAllOperators();
+        addOperator(target);
+    }
+
+    public void move2Block(BasicBlock target) {
+        if (hasCondition) {
+            BasicBlock trueBlock = (BasicBlock) getOperator(1);
+            BasicBlock falseBlock = (BasicBlock) getOperator(2);
+            trueBlock.replacePrecursor(getParent(), target);
+            falseBlock.replacePrecursor(getParent(), target);
+        } else {
+            BasicBlock block = (BasicBlock) getOperator(0);
+            block.replacePrecursor(getParent(), target);
+        }
+        eraseFromParent();
+        target.insertTail(this);
+        this.setParent(target);
     }
 
     @Override

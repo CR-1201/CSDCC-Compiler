@@ -1,11 +1,12 @@
 package ir;
 
 import ast.CompUnit;
+import ir.Module;
 import ir.constants.ConstArray;
 import ir.constants.ConstStr;
 import ir.constants.Constant;
-import ir.instructions.binaryInstructions.*;
 import ir.instructions.Instruction;
+import ir.instructions.binaryInstructions.*;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
@@ -18,6 +19,7 @@ import ir.types.FunctionType;
 import ir.types.ValueType;
 import ir.types.VoidType;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -84,6 +86,12 @@ public class IrBuilder {
         return block;
     }
 
+    public BasicBlock buildBasicBLockAfter(Function function, BasicBlock after) {
+        BasicBlock block = new BasicBlock(blockNumCounter++, function);
+        function.insertAfter(block, after);
+        return block;
+    }
+
     public Add buildAdd(BasicBlock parent, DataType dataType, Value src1, Value src2){
         Add add = new Add(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertTail(add);
@@ -99,6 +107,12 @@ public class IrBuilder {
     public Mul buildMul(BasicBlock parent, DataType dataType, Value src1, Value src2) {
         Mul mul = new Mul(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertTail(mul);
+        return mul;
+    }
+
+    public Mul buildMulBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before) {
+        Mul mul = new Mul(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBefore(mul,before);
         return mul;
     }
 
@@ -158,6 +172,12 @@ public class IrBuilder {
         return alloca;
     }
 
+    public Alloca buildALLOCA(Alloca oldAlloca, BasicBlock parent){
+        BasicBlock realParent = parent.getParent().getFirstBlock();
+        Alloca alloca = new Alloca(oldAlloca.getName(), oldAlloca.getAllocatedType(), realParent);
+        realParent.insertHead(alloca);
+        return alloca;
+    }
     /**
      * 为了方便 mem2reg 优化,约定所有的 Alloca 放到每个函数的入口块处
      * ConstAlloca 对应的是局部的常量数组的 Alloca 这种 Alloca 会多存储一个常量数组 ConstArray
@@ -213,7 +233,7 @@ public class IrBuilder {
         return load;
     }
 
-    public void buildRet(BasicBlock parent, Value... retValue){
+    public Ret buildRet(BasicBlock parent, Value... retValue){
         Ret ret;
         if (retValue.length == 0) {
             // 没有返回值
@@ -222,6 +242,7 @@ public class IrBuilder {
             ret = new Ret(parent, retValue[0]);
         }
         parent.insertTail(ret);
+        return ret;
     }
 
     public Call buildCall(BasicBlock parent, Function function, ArrayList<Value> args){
@@ -249,16 +270,23 @@ public class IrBuilder {
         }
     }
 
-    public void buildBr(BasicBlock parent, BasicBlock target){
+    public Br buildBr(BasicBlock parent, BasicBlock target){
         // 无条件跳转
         Br br = new Br(parent, target);
         parent.insertTail(br);
+        return br;
     }
 
-    public void buildBr(BasicBlock parent, Value condition, BasicBlock trueBlock, BasicBlock falseBlock){
+    public void buildBrBeforeInstr(BasicBlock parent, BasicBlock target, Instruction instruction) {
+        Br br = new Br(parent, target);
+        parent.insertBefore(br, instruction);
+    }
+
+    public Br buildBr(BasicBlock parent, Value condition, BasicBlock trueBlock, BasicBlock falseBlock){
         // 有条件跳转
         Br br = new Br(parent, condition, trueBlock, falseBlock);
         parent.insertTail(br);
+        return br;
     }
 
     public Phi buildPhi(DataType type, BasicBlock parent){
@@ -267,4 +295,22 @@ public class IrBuilder {
         return phi;
     }
 
+    public Phi buildPhi(BasicBlock parent) {
+        Phi phi = new Phi(phiNumCounter++, null, parent, parent.getPrecursors().size());
+        parent.insertHead(phi);
+        return phi;
+    }
+    public Phi buildPhi(DataType type, BasicBlock parent, int cnt){
+        Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
+        parent.insertHead(phi);
+        return phi;
+    }
+
+    // ======================== Using for Clone ========================
+    // 这里 Store 之所以分开写，是因为这里的 clonedStore 会返回 store 指令，但是之前的 buildStore 不会返回
+    public Store cloneStore(BasicBlock parent, Value value, Value addr){
+        Store store = new Store(parent, value, addr);
+        parent.insertTail(store);
+        return store;
+    }
 }

@@ -3,6 +3,7 @@ package ir.instructions.memoryInstructions;
 import ir.BasicBlock;
 import ir.User;
 import ir.constants.ConstArray;
+import ir.types.ArrayType;
 import ir.types.PointerType;
 import ir.types.ValueType;
 
@@ -38,6 +39,12 @@ public class Alloca extends MemoryInstruction{
         this.initVal = initVal;
     }
 
+    public Alloca(String name, ValueType allocatedType, BasicBlock parent){
+        // 指针 有初始化
+        super(name, new PointerType(allocatedType), parent,new ArrayList<>());
+        this.initVal = null;
+    }
+
     public ValueType getAllocatedType(){
         PointerType pointer =  (PointerType) getValueType();
         return pointer.getPointeeType();
@@ -65,6 +72,10 @@ public class Alloca extends MemoryInstruction{
             }
         }
         return true;
+    }
+
+    public Boolean isArray() {
+        return getAllocatedType() instanceof ArrayType;
     }
 
     @Override

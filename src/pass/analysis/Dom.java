@@ -192,7 +192,7 @@ public class Dom implements Pass {
      * @param function 待求解的函数
      * @return 支配树的后序遍历结果
      */
-    public static ArrayList<BasicBlock> getDomTreePostOrder(Function function) {
+    public ArrayList<BasicBlock> getDomTreePostOrder(Function function) {
         ArrayList<BasicBlock> postOrder = new ArrayList<>();
         // 如果后继全部加进去了，那么就是 true，只有这样，才可以开始访问当前节点
         HashSet<BasicBlock> canVisit = new HashSet<>();

@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class LoopUnroll implements Pass {
-    private CFG cfg = new CFG();
-    private BlockUtil blockUtil = new BlockUtil();
+    private final CFG cfg = new CFG();
+    private final BlockUtil blockUtil = new BlockUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 500;
+    private final int LOOP_MAX_LINE = 1000;
 
     private BasicBlock header;
     private BasicBlock next;
@@ -35,20 +35,16 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
-//        isUnrolled = true;
-//        while (isUnrolled) {
-//            isUnrolled = false;
-            for (Function func : Module.getModule().getFunctionsArray()) {
-                if (!func.getIsBuiltIn()) {
-                    clear();
-                    loopVarAnalysis.loopVarAnalysis(func);
-                    runLoopUnroll(func);
-                    if (isUnrolled) {
-                        cfg.setCFG(func.getBasicBlocksArray());
-                    }
+        for (Function func : Module.getModule().getFunctionsArray()) {
+            if (!func.getIsBuiltIn()) {
+                clear();
+                loopVarAnalysis.loopVarAnalysis(func);
+                runLoopUnroll(func);
+                if (isUnrolled) {
+                    cfg.setCFG(func.getBasicBlocksArray());
                 }
             }
-//        }
+        }
     }
     private void clear() {
         isUnrolled = false;
@@ -112,6 +108,7 @@ public class LoopUnroll implements Pass {
         if ((long) loopTimes * loopSize > LOOP_MAX_LINE) {
             return false;
         }
+        System.out.println(loopTimes * loopSize);
         header = loop.getHeader();
         for (BasicBlock block : header.getPrecursors()) {
             if (loop.getLatches().contains(block)) {
@@ -143,7 +140,7 @@ public class LoopUnroll implements Pass {
         for (Phi phi : headerPhis) {
             int latchIndex = phi.getOperators().indexOf(latch);
             Value latchValue = phi.getOperator(latchIndex - phi.getPrecursorNum());
-            phi.removeUsedValue(latchValue);
+            phi.removeUsedBlock(latch);
             phiMap.put(phi, latchValue);
             beginToEnd.put(phi, latchValue);
         }
@@ -168,7 +165,6 @@ public class LoopUnroll implements Pass {
                 child.setParent(parent);
             }
         } else {
-            headerParent = header.getParent();
             headerParent.removeTopLoop(loop);
         }
         BasicBlock oldNext = next;
@@ -244,7 +240,7 @@ public class LoopUnroll implements Pass {
         int loopTimes = -1;
         if (alu instanceof Add) {
             if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : 0;
+                loopTimes = (init == end) ? 1 : -1;
             } else if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = ((end - init) % step == 0) ? (end - init) / step : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
@@ -254,7 +250,7 @@ public class LoopUnroll implements Pass {
             }
         } else if (alu instanceof Sub) {
             if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : 0;
+                loopTimes = (init == end) ? 1 : -1;
             } else if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = ((init - end) % step == 0) ? (init - end) / step : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
@@ -266,7 +262,7 @@ public class LoopUnroll implements Pass {
             double val = Math.log(end / init) / Math.log(step);
             boolean tag = init * Math.pow(step, val) == end;
             if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : 0;
+                loopTimes = (init == end) ? 1 : -1;
             } else if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = tag ? (int) val : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {

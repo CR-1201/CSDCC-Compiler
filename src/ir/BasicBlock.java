@@ -139,6 +139,10 @@ public class BasicBlock extends Value{
         this.loop = loop;
     }
 
+    public void removeLoop() {
+        this.loop = null;
+    }
+
     public BasicBlock(int nameNum, Function parent){
         super("%b" + nameNum, new LabelType(), parent);
         parent.addFunctionSymbol(this);

@@ -39,12 +39,9 @@ public class GCM {
         for (Function function : functions ){
             if (!function.getIsBuiltIn() && function.getBasicBlocksArray().size() > 1)  {
                 loopAnalysis.analyzeLoopInfo(function);
-                loopAnalysis.analyzeLoopInfo(function);
                 runGCM(function);
             }
         }
-        IOFunc.clear("checkir/gcm.txt");
-        IOFunc.output(Module.getModule().toString(), "checkir/gcm.txt");
     }
 
     private void runGCM(Function function) {

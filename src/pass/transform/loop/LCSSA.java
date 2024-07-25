@@ -32,6 +32,8 @@ public class LCSSA implements Pass {
                 runLCSSA(func);
             }
         }
+//        IOFunc.clear("checkir/lcssa.txt");
+//        IOFunc.output(Module.getModule().toString(), "checkir/lcssa.txt");
     }
 
     /**

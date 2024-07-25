@@ -35,7 +35,7 @@ public class LoopAnalysis implements Pass {
          * ATTENTION:
          * 循环分析之前一定要清空循环的所有相关信息，不然会出现意想不到的错误
          */
-        for (Loop topLoop : function.getTopLoops()) {
+        for (Loop topLoop : function.getAllLoops()) {
             topLoop.removeSelf();
         }
         HashSet<BasicBlock> latches = new HashSet<>();

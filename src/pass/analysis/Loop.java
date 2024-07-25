@@ -56,6 +56,9 @@ public class Loop {
         this.header = header;
         this.latches.addAll(latches);
     }
+    public int getId() {
+        return id;
+    }
 
     public Loop getParent() {
         return parent;
@@ -138,12 +141,21 @@ public class Loop {
     }
 
     public void removeSelf() {
+        clearInductorVar();
         for (BasicBlock block : allBlocks) {
             block.removeLoop();
         }
-        for (Loop loop : children) {
-            loop.removeSelf();
-        }
+    }
+
+    public void clearInductorVar() {
+        idcVar = null;
+        idcEnd = null;
+        idcInit = null;
+        idcAlu = null;
+        idcStep = null;
+        cond = null;
+        loopTimes = -1;
+        isSetInductorVar = false;
     }
 
     public ArrayList<Loop> computeDfsLoops() {

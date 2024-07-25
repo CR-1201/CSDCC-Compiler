@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class LoopUnroll implements Pass {
-    private CFG cfg = new CFG();
-    private BlockUtil blockUtil = new BlockUtil();
+    private final CFG cfg = new CFG();
+    private final BlockUtil blockUtil = new BlockUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 3000;
+    private final int LOOP_MAX_LINE = 1000;
 
     private BasicBlock header;
     private BasicBlock next;
@@ -35,8 +35,6 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
-        IOFunc.clear("checkir/loop.txt");
-        IOFunc.output(Module.getModule().toString(), "checkir/loop.txt");
 //        isUnrolled = true;
 //        while (isUnrolled) {
 //            isUnrolled = false;
@@ -114,6 +112,7 @@ public class LoopUnroll implements Pass {
         if ((long) loopTimes * loopSize > LOOP_MAX_LINE) {
             return false;
         }
+        System.out.println(loopTimes * loopSize);
         header = loop.getHeader();
         for (BasicBlock block : header.getPrecursors()) {
             if (loop.getLatches().contains(block)) {
@@ -235,7 +234,6 @@ public class LoopUnroll implements Pass {
         for(Phi phi : phiInExit){
             for(Value value : phi.getOperators()){
                 if(value instanceof Instruction inst && inst.getParent().equals(header)){
-                    System.out.println(beginToEnd.get(value));
                     phi.replaceOperator(value, beginToEnd.get(value), oldLatch);
                 }
             }
@@ -246,7 +244,7 @@ public class LoopUnroll implements Pass {
         int loopTimes = -1;
         if (alu instanceof Add) {
             if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : 0;
+                loopTimes = (init == end) ? 1 : -1;
             } else if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = ((end - init) % step == 0) ? (end - init) / step : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
@@ -256,7 +254,7 @@ public class LoopUnroll implements Pass {
             }
         } else if (alu instanceof Sub) {
             if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : 0;
+                loopTimes = (init == end) ? 1 : -1;
             } else if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = ((init - end) % step == 0) ? (init - end) / step : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
@@ -268,7 +266,7 @@ public class LoopUnroll implements Pass {
             double val = Math.log(end / init) / Math.log(step);
             boolean tag = init * Math.pow(step, val) == end;
             if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : 0;
+                loopTimes = (init == end) ? 1 : -1;
             } else if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = tag ? (int) val : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {

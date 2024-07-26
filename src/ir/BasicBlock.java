@@ -185,6 +185,20 @@ public class BasicBlock extends Value{
         }
     }
 
+    // 将 instruction 插入到 target 指令的后面
+    public void insertAfter(Instruction inst, Instruction target){
+        for (Instruction oldInst : instructions) {
+            if (oldInst.equals(target)){
+                int index = instructions.indexOf(oldInst);
+                instructions.add(index+1, inst);
+                if (inst.getParent() != this) {
+                    inst.setParent(this);
+                }
+                return;
+            }
+        }
+    }
+
     public void insertHead(Instruction instruction){
         instructions.add(0,instruction);
     }

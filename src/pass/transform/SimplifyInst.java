@@ -1,9 +1,7 @@
 package pass.transform;
 
-import ir.BasicBlock;
-import ir.Function;
+import ir.*;
 import ir.Module;
-import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.constants.Constant;

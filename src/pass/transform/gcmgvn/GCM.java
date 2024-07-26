@@ -141,13 +141,13 @@ public class GCM {
     private BasicBlock findLca(BasicBlock a, BasicBlock b) {
         if (a == null)
             return b;
-        while (a.getDomLevel() < b.getDomLevel()){
+        while (a.getDomLevel() < b.getDomLevel()) {
             b = b.getIDomer();
         }
-        while (b.getDomLevel() < a.getDomLevel()){
+        while (b.getDomLevel() < a.getDomLevel()) {
             a = a.getIDomer();
         }
-        while (!a.equals(b)){
+        while (a != b) {
             a = a.getIDomer();
             b = b.getIDomer();
         }

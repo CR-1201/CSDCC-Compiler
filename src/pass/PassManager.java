@@ -22,17 +22,19 @@ public class PassManager {
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
         passes.add(new GlobalValueLocalize());
-        passes.add(new GepFuse());
         passes.add(new Mem2reg());
-//        passes.add(new InlineFunction());
+        passes.add(new GepFuse());
+        passes.add(new InlineFunction());
         passes.add(new SCCP());
-        passes.add(new SideEffect());
-//        passes.add(new UselessReturnEmit());
+        passes.add(new SimplifyInst());
+        passes.add(new MergeBlocks());
+//        passes.add(new SideEffect());
+////        passes.add(new UselessReturnEmit());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
         GVNGCMPass();
-//        passes.add(new CFG());
-//        passes.add(new Dom());
-//        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+////        passes.add(new CFG());
+////        passes.add(new Dom());
+////        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
         passes.add(new MathOptimize());
         passes.add(new UselessPhiEmit());
         passes.add(new LCSSA());

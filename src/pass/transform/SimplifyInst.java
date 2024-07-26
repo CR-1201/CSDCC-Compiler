@@ -34,7 +34,7 @@ public class SimplifyInst implements Pass {
                         Value value = simplify(instruction);
                         if (!value.equals(instruction)) {
                             instruction.replaceAllUsesWith(value);
-                            instruction.eraseFromParent();
+                            instruction.removeSelf();
                         }
                     }
                 }

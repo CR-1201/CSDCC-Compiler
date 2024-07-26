@@ -55,6 +55,11 @@ public class BasicBlock extends Value{
         return successors;
     }
 
+    public void clearCfgInfo() {
+        precursors.clear();
+        successors.clear();
+    }
+
     // ========================== Dom Info ==========================
 
     public void setDomLevel(int domLevel) {
@@ -120,6 +125,15 @@ public class BasicBlock extends Value{
      */
     public boolean isDominator(BasicBlock other){
         return other.domers.contains(this);
+    }
+
+    public void clearDomInfo() {
+        domers.clear();
+        idomer = null;
+        doms.clear();
+        idoms.clear();
+        dominanceFrontier.clear();
+        domLevel = 0;
     }
 
     // =================================================================

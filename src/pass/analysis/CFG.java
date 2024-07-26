@@ -41,8 +41,7 @@ public class CFG implements Pass {
 
     private void deleteCFG(Function function) {
         for (BasicBlock basicBlock : function.getBasicBlocksArray()) {
-            basicBlock.getPrecursors().clear();
-            basicBlock.getSuccessors().clear();
+            basicBlock.clearCfgInfo();
         }
     }
 

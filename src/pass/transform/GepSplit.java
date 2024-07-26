@@ -20,7 +20,7 @@ public class GepSplit implements Pass {
     @Override
     public void run() {
         GepSpill();
-//        removeUselessGEP();
+        removeUselessGEP();
     }
 
     private void GepSpill() {

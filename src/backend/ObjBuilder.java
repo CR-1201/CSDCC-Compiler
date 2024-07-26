@@ -65,6 +65,7 @@ public class ObjBuilder {
     }
 
     public void build() {
+        System.out.println("backend");
         // 处理全局变量
         LinkedList<Value> globalVariables = module.getGlobalVariables();
         for (Value globalVariable : globalVariables) {

@@ -25,6 +25,7 @@ import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ObjBuilder {
     private static final ObjBuilder builder = new ObjBuilder();
@@ -150,7 +151,7 @@ public class ObjBuilder {
         } else if (initVal instanceof ConstFloat) {
             ArrayList<Float> elements = new ArrayList<>();
             elements.add(((ConstFloat) initVal).getValue());
-            return new ObjGlobalVariable(globalVariable.getName(), elements, ObjGlobalVariable.Type.FLOAT,  ((ConstFloat) initVal).getValue() < Float.MIN_VALUE && ((ConstFloat) initVal).getValue() > -Float.MIN_VALUE);
+            return new ObjGlobalVariable(globalVariable.getName(), elements, ObjGlobalVariable.Type.FLOAT, ((ConstFloat) initVal).getValue() < Float.MIN_VALUE && ((ConstFloat) initVal).getValue() > -Float.MIN_VALUE);
         } else if (initVal instanceof ConstArray) {
             ArrayList<Constant> el = ((ConstArray) initVal).getElementList();
             ObjGlobalVariable.Type type = el.get(0).getValueType().isFloat() ? ObjGlobalVariable.Type.FLOAT : ObjGlobalVariable.Type.INT;
@@ -217,9 +218,9 @@ public class ObjBuilder {
                 fmove.setCond(ObjInstruction.ObjCond.switchIr2ObjOpp(((Icmp) con).getCondition()));
                 objBlock.addInstruction(tmove);
                 objBlock.addInstruction(fmove);
-            }else
+            } else
                 v2mMap.put(instruction, v2mMap.get(con));
-        }else if (instruction instanceof BitCast) {
+        } else if (instruction instanceof BitCast) {
             v2mMap.put(instruction, v2mMap.get(((BitCast) instruction).getConversionValue()));
         }
         // TODO: PHI
@@ -317,7 +318,7 @@ public class ObjBuilder {
             return new Binary(rd, rl, rd, Binary.BinaryType.sub);
         }
         if (binary instanceof Icmp) {
-           return new ObjCompare(rl, rr, r.getValueType().isFloat() || l.getValueType().isFloat());
+            return new ObjCompare(rl, rr, r.getValueType().isFloat() || l.getValueType().isFloat());
         }
         if (binary.getValueType().isFloat())
             return new FloatBinary(rd, rl, rr, FloatBinary.FloatBinaryType.switchIrToObj(binary));
@@ -463,6 +464,8 @@ public class ObjBuilder {
         }
         for (int i = 0; i < 4; ++i) {
             objCall.addDef(ObjPhyRegister.getRegister(i));
+        }
+        for (int i = 0; i < 16; ++i) {
             objCall.addDef(ObjFloatPhyReg.getRegister(i));
         }
         objCall.addDef(ObjPhyRegister.getRegister("lr"));

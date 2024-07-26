@@ -6,7 +6,9 @@ import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
+import ir.instructions.otherInstructions.Call;
 import pass.Pass;
+import pass.analysis.PureFunction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +23,15 @@ public class GAVN implements Pass {
     // 记录指针与其loadInst的映射关系
     HashMap<Value, Value> GAVNMap = new HashMap<>();
     HashSet<GEP> canGAVN = new HashSet<>();
+    private HashMap<Function, Boolean> is_pure = new HashMap<>();
     @Override
     public void run() {
         ArrayList<Function> functions = module.getFunctionsArray();
+
+        PureFunction pureFunction = new PureFunction();
+        pureFunction.markPure();
+        this.is_pure = pureFunction.is_pure;
+
         for(Function function :  functions){
             if( !function.getIsBuiltIn() ){
                 // 针对指针没有store的情况
@@ -43,6 +51,7 @@ public class GAVN implements Pass {
     }
 
     private void arrayGVN(Function function) {
+
         ArrayList<BasicBlock> basicBlocks = function.getBasicBlocksArray();
         for(BasicBlock basicBlock : basicBlocks){
             GAVNMap.clear();
@@ -68,6 +77,9 @@ public class GAVN implements Pass {
                 }
             } else if( instruction instanceof Store store){
                 GAVNMap.remove(store.getAddr());
+            } else if( instruction instanceof Call call && !(is_pure.containsKey(call.getFunction()) && is_pure.get(call.getFunction())) ){
+                //保守起见 碰到call非纯函数就清空
+                GAVNMap.clear();
             }
         }
     }

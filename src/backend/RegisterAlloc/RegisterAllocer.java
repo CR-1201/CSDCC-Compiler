@@ -3,10 +3,8 @@ package backend.RegisterAlloc;
 import backend.LivenessAnalyze.LivenessAnalyzer;
 import backend.LivenessAnalyze.LivenessInfo;
 import backend.ObjBuilder;
-import backend.instruction.ObjInstruction;
-import backend.instruction.ObjLoad;
-import backend.instruction.ObjMove;
-import backend.instruction.ObjStore;
+import backend.Utils.ImmediateUtils;
+import backend.instruction.*;
 import backend.module.ObjBlock;
 import backend.module.ObjFunction;
 import backend.module.ObjModule;
@@ -392,7 +390,8 @@ public class RegisterAllocer {
         Set<ObjRegister> used = ObjRegister.getAllAllocatableRegs().stream().filter(adjList::containsKey).collect(Collectors.toSet());
         while (!selectStack.isEmpty()) {
             ObjRegister n = selectStack.pop();
-            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type)).stream().filter(oneReg ->ObjRegister.isCalleeSave(oneReg, type) || (ObjRegister.isCallerSave(oneReg, type) && !used.contains(ObjRegister.getPhysicalRegisterById(oneReg, type)))).collect(Collectors.toSet());
+            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type)).stream().filter(oneReg -> ObjRegister.isCalleeSave(oneReg, type) || (ObjRegister.isCallerSave(oneReg, type) && !used.contains(ObjRegister.getPhysicalRegisterById(oneReg, type)))).collect(Collectors.toSet());
+//            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type));
             for (ObjRegister w : adjList.getOrDefault(n, new HashSet<>())) {
                 ObjRegister aw = GetAlias(w);
                 if (coloredNodes.contains(aw) || precolored.contains(aw)) {
@@ -446,12 +445,59 @@ public class RegisterAllocer {
                         }
                     }
                     if (lastDef != null) {
-                        ObjStore store = new ObjStore(ObjPhyRegister.getRegister("sp"), vReg, ObjBuilder.solveOffsetImm(new ObjImmediate(objFunction.getAllocSize()), block, false), vReg.isFloat());
-                        block.addInstructionAfter(lastDef, store);
+                        if (ImmediateUtils.checkOffsetRange(objFunction.getAllocSize(), vReg.isFloat())) {
+                            ObjStore store = new ObjStore(ObjPhyRegister.getRegister("sp"), vReg, new ObjImmediate(objFunction.getAllocSize()), vReg.isFloat());
+                            block.addInstructionAfter(lastDef, store);
+                        } else if (!vReg.isFloat()) {
+                            ObjRegister tmp = ObjPhyRegister.getRegister(12);
+                            ObjMove move = new ObjMove(tmp, new ObjImmediate(objFunction.getAllocSize()), false, true);
+                            ObjStore store = new ObjStore(ObjPhyRegister.getRegister("sp"), vReg, tmp, false);
+                            block.addInstructionAfter(lastDef, store);
+                            block.addInstructionAfter(lastDef, move);
+                        } else {
+                            ObjRegister tmp = ObjPhyRegister.getRegister(12);
+                            ObjOperand imm;
+                            if (ImmediateUtils.checkEncodeImm(objFunction.getAllocSize())) {
+                                imm = new ObjImmediate(objFunction.getAllocSize());
+                            } else {
+                                imm = tmp;
+                            }
+                            Binary move = new Binary(tmp, ObjPhyRegister.getRegister("sp"), imm, Binary.BinaryType.add);
+                            ObjStore store = new ObjStore(tmp, vReg, true);
+                            block.addInstructionAfter(lastDef, store);
+                            block.addInstructionAfter(lastDef, move);
+                            if (imm == tmp) {
+                                block.addInstructionAfter(lastDef, new ObjMove(tmp, new ObjImmediate(objFunction.getAllocSize()), false, true));
+                            }
+                        }
                     }
                     if (firstUse != null) {
-                        ObjLoad load = new ObjLoad(vReg, ObjPhyRegister.getRegister("sp"), ObjBuilder.solveOffsetImm(new ObjImmediate(objFunction.getAllocSize()), block, false), vReg.isFloat());
-                        block.addInstructionBefore(firstUse, load);
+                        if (ImmediateUtils.checkOffsetRange(objFunction.getAllocSize(), vReg.isFloat())) {
+                            ObjLoad load = new ObjLoad(vReg, ObjPhyRegister.getRegister("sp"), new ObjImmediate(objFunction.getAllocSize()), vReg.isFloat());
+                            block.addInstructionBefore(firstUse, load);
+                        } else if (!vReg.isFloat()) {
+                            ObjRegister tmp = ObjPhyRegister.getRegister(12);
+                            ObjMove move = new ObjMove(tmp, new ObjImmediate(objFunction.getAllocSize()), false, true);
+                            ObjLoad load = new ObjLoad(vReg, ObjPhyRegister.getRegister("sp"), tmp, vReg.isFloat());
+                            block.addInstructionBefore(firstUse, move);
+                            block.addInstructionBefore(firstUse, load);
+                        } else {
+                            ObjRegister tmp = ObjPhyRegister.getRegister(12);
+                            ObjOperand imm;
+                            if (ImmediateUtils.checkEncodeImm(objFunction.getAllocSize())) {
+                                imm = new ObjImmediate(objFunction.getAllocSize());
+                            } else {
+                                imm = tmp;
+                            }
+                            Binary move = new Binary(tmp, ObjPhyRegister.getRegister("sp"), imm, Binary.BinaryType.add);
+                            ObjLoad load = new ObjLoad(vReg, tmp, true);
+                            if (imm == tmp) {
+                                block.addInstructionBefore(firstUse, new ObjMove(tmp, new ObjImmediate(objFunction.getAllocSize()), false, true));
+                            }
+                            block.addInstructionBefore(firstUse, move);
+                            block.addInstructionBefore(firstUse, load);
+                        }
+
                     }
                 }
             }

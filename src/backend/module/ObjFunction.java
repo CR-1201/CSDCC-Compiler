@@ -1,6 +1,7 @@
 package backend.module;
 
 import backend.Utils.ImmediateUtils;
+import backend.instruction.Binary;
 import backend.instruction.ObjInstruction;
 import backend.instruction.ObjLoad;
 import backend.instruction.ObjMove;
@@ -70,11 +71,29 @@ public class ObjFunction {
     public void refreshArgOff() {
         int stack = getStackSize() + getSavedRegistersSize() * 4;
         Map<ObjInstruction, ObjBlock> argLoads = new HashMap<>(argLoadInstructions);
-        for (Map.Entry<ObjInstruction, ObjBlock> entry :argLoads.entrySet()) {
+        for (Map.Entry<ObjInstruction, ObjBlock> entry : argLoads.entrySet()) {
             ObjInstruction argload = entry.getKey();
             if ((((ObjLoad) argload).getOff() instanceof ObjImmediate)) {
                 int oldsa = ((ObjImmediate) ((ObjLoad) argload).getOff()).getImmediate();
-                ((ObjLoad) argload).setOff(new ObjImmediate(stack + oldsa));
+                if (ImmediateUtils.checkOffsetRange(stack + oldsa, ((ObjLoad) argload).isVFP())) {
+                    ((ObjLoad) argload).setOff(new ObjImmediate(stack + oldsa));
+                } else if (!((ObjLoad) argload).isVFP()) {
+                    ObjMove move = new ObjMove(ObjPhyRegister.getRegister(12), new ObjImmediate(stack + oldsa), false, true);
+                    entry.getValue().addInstructionBefore(argload, move);
+                    ((ObjLoad) argload).setOff(ObjPhyRegister.getRegister(12));
+                } else {
+                    Binary add;
+                    if (!ImmediateUtils.checkEncodeImm(stack + oldsa)) {
+                        ObjMove move = new ObjMove(ObjPhyRegister.getRegister(12), new ObjImmediate(stack + oldsa), false, true);
+                        add = new Binary(ObjPhyRegister.getRegister(12), ObjPhyRegister.getRegister("sp"), ObjPhyRegister.getRegister(12), Binary.BinaryType.add);
+                        entry.getValue().addInstructionBefore(argload, move);
+                    } else {
+                        add = new Binary(ObjPhyRegister.getRegister(12), ObjPhyRegister.getRegister("sp"), new ObjImmediate(stack + oldsa), Binary.BinaryType.add);
+                    }
+                    entry.getValue().addInstructionBefore(argload, add);
+                    ((ObjLoad) argload).setOff(null);
+                    ((ObjLoad) argload).setAdd(ObjPhyRegister.getRegister(12));
+                }
             } else {
                 ObjMove freshMove = ((ObjLoad) argload).getImmMove();
                 int oldsa = ((ObjImmediate) freshMove.getRhs()).getImmediate();

@@ -1,6 +1,7 @@
 package pass.utiles;
 
 import ir.*;
+import ir.constants.ConstInt;
 import ir.constants.Constant;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.memoryInstructions.Alloca;
@@ -11,10 +12,8 @@ import ir.instructions.otherInstructions.Phi;
 import ir.instructions.otherInstructions.Zext;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
-import ir.types.DataType;
-import ir.types.IntType;
+import ir.types.*;
 import ir.instructions.Instruction;
-import ir.types.PointerType;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.memoryInstructions.Load;
 
@@ -161,10 +160,17 @@ public class FunctionClone {
                 copyIndices.add(findValue(index));
             }
             Value copyBase = findValue(((GEP) srcInstr).getBase());
+            Value data = ((GEP) srcInstr).getBase();
+            ValueType dataType = ((PointerType) data.getValueType()).getPointeeType();
+            while(  dataType instanceof ArrayType arrayType){
+                dataType = arrayType.getElementType();
+            }
             if (copyIndices.size() == 1) {
                 copyInstr = irBuilder.buildGEP(copyBlock, copyBase, copyIndices.get(0));
-            } else {
+            } else if (copyIndices.size() == 2) {
                 copyInstr = irBuilder.buildGEP(copyBlock, copyBase, copyIndices.get(0), copyIndices.get(1));
+            } else {
+                copyInstr = irBuilder.buildGEP(copyBlock, new PointerType(dataType), copyBase, copyIndices);
             }
         } else if (srcInstr instanceof Call) {
             ArrayList<Value> args = new ArrayList<>();
@@ -181,7 +187,7 @@ public class FunctionClone {
                 irBuilder.buildBr(copyBlock, (BasicBlock) findValue(srcInstr.getOperator(0)));
             }
         } else if (srcInstr instanceof Ret) {
-            if (srcInstr.getOperators().size() == 0) {
+            if (srcInstr.getOperators().isEmpty()) {
                 irBuilder.buildRet(copyBlock);
             } else {
                 irBuilder.buildRet(copyBlock, findValue(((Ret) srcInstr).getRetValue()));

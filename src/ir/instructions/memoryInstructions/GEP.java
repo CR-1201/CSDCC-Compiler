@@ -5,10 +5,12 @@ import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.types.ArrayType;
+import ir.types.DataType;
 import ir.types.PointerType;
 import ir.types.ValueType;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  @author Conroy
@@ -37,7 +39,7 @@ import java.util.ArrayList;
  */
 
 public class GEP extends MemoryInstruction{
-    private final ValueType baseType;
+    private ValueType baseType;
     /**
      * 只有一个下标,用于 (函数传参int a[][2]),a[2]型寻址
      * @param base       第一个操作数,基址（其类型是一个指针）
@@ -64,12 +66,23 @@ public class GEP extends MemoryInstruction{
         this.baseType = ((PointerType) base.getValueType()).getPointeeType();
     }
 
+    public GEP(int nameNum, BasicBlock parent, DataType dataType, Value base, ArrayList<Value> indexes){
+        super("%v" + nameNum, dataType, parent, new ArrayList<>(){{
+                    add(base);addAll(indexes);
+                }});
+        this.baseType = ((PointerType) base.getValueType()).getPointeeType();
+    }
+
     public Value getBase(){
         return getOperator(0);
     }
 
     public ValueType getBaseType(){
         return baseType;
+    }
+
+    public void setBaseType(ValueType baseType){
+        this.baseType = baseType;
     }
 
     /**
@@ -81,6 +94,27 @@ public class GEP extends MemoryInstruction{
             result.add(getOperator(i));
         }
         return result;
+    }
+
+    public void modifyTarget(Value target){
+        this.setOperator(0, target);
+        this.setBaseType(((PointerType) target.getValueType()).getPointeeType());
+    }
+
+    public void modifyIndexes(ArrayList<Value> indexes){
+        ArrayList<Value> tmpOperands = new ArrayList<>(getOperators());
+        for(int i = 1; i < tmpOperands.size(); i++){
+            Value operand = tmpOperands.get(i);
+            operand.removeUser(this);
+            removeOperator(operand);
+        }
+        for(Value idxValue : indexes){
+            this.addOperator(idxValue);
+            if( !idxValue.getUsers().contains(this) ){
+                idxValue.addUser(this);
+            }
+        }
+
     }
 
     @Override

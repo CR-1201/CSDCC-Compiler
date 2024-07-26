@@ -40,7 +40,7 @@ public class ObjFloatPhyReg extends ObjRegister {
     }};
 
     private static final HashSet<ObjRegister> needeeSaveRegister = new HashSet<>() {{
-        for (int i = 4; i < 32; i++) {
+        for (int i = 16; i < 32; i++) {
             add(registerMap.get(i));
         }
     }};

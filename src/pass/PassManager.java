@@ -9,6 +9,9 @@ import pass.transform.*;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
+import pass.transform.loop.LCSSA;
+import pass.transform.loop.LoopUnroll;
+
 import java.util.ArrayList;
 
 public class PassManager {
@@ -32,12 +35,17 @@ public class PassManager {
 
         passes.add(new SideEffect());
 //        passes.add(new UselessReturnEmit());
-        passes.add(new UselessPhiEmit());
         // UselessStoreEmit 前面，一定要进行函数副作用的分析
         passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
 
-//        GVNGCMPass();
+        GVNGCMPass();
+
+        passes.add(new UselessPhiEmit());
+        passes.add(new LCSSA());
+        passes.add(new LoopUnroll());
+        passes.add(new UselessPhiEmit());
+        passes.add(new MergeBlocks());
 
         passes.add(new CFG());
         passes.add(new Dom());
@@ -56,9 +64,6 @@ public class PassManager {
      * GVN 和 GCM 之前一定要先进行副作用判断，来确定某一个函数是否可以被处理
      */
     private void GVNGCMPass() {
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GCMGVN());
     }

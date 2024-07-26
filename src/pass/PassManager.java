@@ -40,7 +40,7 @@ public class PassManager {
         passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
 
-//        GVNGCMPass();
+        GVNGCMPass();
 
 
         passes.add(new LCSSA());

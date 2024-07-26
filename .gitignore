@@ -1,9 +1,9 @@
 .idea
 /conroy_local_test
 /out
+/path
 /llvmgen
 /checkir
-/conroy_local_test
 /llvmchecker
 *.iml
 testfile.txt

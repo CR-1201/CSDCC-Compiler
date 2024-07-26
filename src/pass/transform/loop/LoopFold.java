@@ -42,5 +42,6 @@ public class LoopFold implements Pass {
         if (!loop.isSimpleLoop() || !loop.getIsSetInductorVar()) {
             return false;
         }
+        return null;
     }
 }

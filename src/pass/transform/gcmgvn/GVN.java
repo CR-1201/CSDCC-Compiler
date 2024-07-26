@@ -23,21 +23,20 @@ import java.util.HashSet;
 public class GVN {
     private final HashMap<String, Value> GVNMap = new HashMap<>();
     private final HashMap<String, Integer> GVNCnt = new HashMap<>();
+    CFG cfg = new CFG();
+    Dom dom = new Dom();
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
+                cfg.buildCFG(function);
+                dom.buildDom(function);
                 runGVN(function);
             }
         }
-//        IOFunc.output(Module.getModule().toString(), "checkir/gvn.txt");
     }
 
     private void runGVN(Function func) {
         clear();
-        CFG cfg = new CFG();
-        Dom dom = new Dom();
-        cfg.buildCFG(func);
-        dom.buildDom(func);
         BasicBlock entry = func.getFirstBlock();
         RPOSearch(entry);
     }

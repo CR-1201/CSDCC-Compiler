@@ -2,15 +2,11 @@ package ir.instructions.memoryInstructions;
 
 import ir.BasicBlock;
 import ir.Value;
-import ir.constants.ConstFloat;
-import ir.constants.ConstInt;
 import ir.types.ArrayType;
 import ir.types.DataType;
 import ir.types.PointerType;
 import ir.types.ValueType;
-
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  @author Conroy
@@ -110,7 +106,7 @@ public class GEP extends MemoryInstruction{
         }
         for(Value idxValue : indexes){
             this.addOperator(idxValue);
-            if( !idxValue.getUsers().contains(this) ){
+            if (!idxValue.getUsers().contains(this)) {
                 idxValue.addUser(this);
             }
         }

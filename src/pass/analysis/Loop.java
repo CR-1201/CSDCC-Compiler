@@ -6,7 +6,6 @@ import ir.instructions.binaryInstructions.Icmp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Stack;
 
 public class Loop {
     private static int idCounter = 0;
@@ -56,6 +55,9 @@ public class Loop {
         header.setLoop(this);
         this.header = header;
         this.latches.addAll(latches);
+    }
+    public int getId() {
+        return id;
     }
 
     public Loop getParent() {
@@ -136,6 +138,24 @@ public class Loop {
 
     public void removeBlock(BasicBlock block) {
         allBlocks.remove(block);
+    }
+
+    public void removeSelf() {
+        clearInductorVar();
+        for (BasicBlock block : allBlocks) {
+            block.removeLoop();
+        }
+    }
+
+    public void clearInductorVar() {
+        idcVar = null;
+        idcEnd = null;
+        idcInit = null;
+        idcAlu = null;
+        idcStep = null;
+        cond = null;
+        loopTimes = -1;
+        isSetInductorVar = false;
     }
 
     public ArrayList<Loop> computeDfsLoops() {

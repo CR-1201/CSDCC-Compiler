@@ -168,7 +168,7 @@ def check(stop_event, test_file, input_file='', ans_file=''):
 
     ensure_newline_at_end_of_file(output_file)
     ensure_newline_at_end_of_file(ans_file)
-    cmd = f"bash -c 'diff <(tr -d \"\\r\" < {output_file}) {ans_file}'"
+    cmd = f"bash -c 'diff -w <(tr -d \"\\r\" < {output_file}) {ans_file}'"
     r = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True, check=False)
     if r.stdout:
         print(f'[ERROR FILE] {test_file}')

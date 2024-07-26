@@ -78,7 +78,7 @@ public class GlobalValueLocalize implements Pass {
                     }
 
                     useInst.replaceAllUsesWith(newValue);
-                    useInst.eraseFromParent();
+                    useInst.removeSelf();
                 }
             }
             return;

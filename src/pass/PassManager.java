@@ -29,8 +29,9 @@ public class PassManager {
 
         // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
+//        passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
-
+//
         passes.add(new MergeBlocks());
 
         passes.add(new SideEffect());
@@ -39,9 +40,9 @@ public class PassManager {
         passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
 
-        GVNGCMPass();
+//        GVNGCMPass();
 
-        passes.add(new UselessPhiEmit());
+
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
         passes.add(new UselessPhiEmit());
@@ -54,6 +55,8 @@ public class PassManager {
         passes.add(new MathOptimize());
 //
         passes.add(new InstructionCleanUp());
+
+        passes.add(new GepSplit());
         for (Pass pass : passes) {
             pass.run();
         }

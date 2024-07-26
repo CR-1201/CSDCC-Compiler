@@ -14,10 +14,7 @@ import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.*;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
-import ir.types.DataType;
-import ir.types.FunctionType;
-import ir.types.ValueType;
-import ir.types.VoidType;
+import ir.types.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -212,10 +209,32 @@ public class IrBuilder {
         return gep;
     }
 
-    public GEP buildGEP(BasicBlock parent, DataType dataType,Value base, ArrayList<Value> index) {
+    public GEP buildGEP(BasicBlock parent, DataType dataType, Value base, ArrayList<Value> index) {
         int nameNum = nameNumCounter++;
         GEP gep = new GEP(nameNum, parent, dataType, base, index);
         parent.insertTail(gep);
+        return gep;
+    }
+
+    public GEP buildGEPBeforeInst(BasicBlock parent, Value base, ArrayList<Value> index, Instruction before){
+        ValueType type = ((PointerType) base.getValueType()).getPointeeType();
+        for(int i = 0; i < index.size() - 1; i++){
+            type = ((ArrayType) type).getElementType();
+        }
+        int nameNum = nameNumCounter++;
+        GEP gep = new GEP(nameNum, parent, new PointerType(type), base, index);
+        parent.insertBefore(gep, before);
+        return gep;
+    }
+
+    public GEP buildGEPAfterInst(BasicBlock parent, Value base, ArrayList<Value> index, Instruction after){
+        ValueType type = ((PointerType) base.getValueType()).getPointeeType();
+        for(int i = 0; i < index.size() - 1; i++){
+            type = ((ArrayType) type).getElementType();
+        }
+        int nameNum = nameNumCounter++;
+        GEP gep = new GEP(nameNum, parent, new PointerType(type), base, index);
+        parent.insertAfter(gep, after);
         return gep;
     }
 

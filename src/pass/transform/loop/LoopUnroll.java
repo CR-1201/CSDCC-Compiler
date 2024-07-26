@@ -108,7 +108,7 @@ public class LoopUnroll implements Pass {
         if ((long) loopTimes * loopSize > LOOP_MAX_LINE) {
             return false;
         }
-        System.out.println(loopTimes * loopSize);
+//        System.out.println(loopTimes * loopSize);
         header = loop.getHeader();
         for (BasicBlock block : header.getPrecursors()) {
             if (loop.getLatches().contains(block)) {

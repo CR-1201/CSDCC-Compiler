@@ -24,9 +24,7 @@ public class Dom implements Pass {
      */
     public void buildDom(Function function) {
         for (BasicBlock block : function.getBasicBlocksArray()) {
-            block.getDoms().clear();
-            block.getIdoms().clear();
-            block.getDominanceFrontier().clear();
+            block.clearDomInfo();
         }
         // 计算dom信息
         domInfo(function);

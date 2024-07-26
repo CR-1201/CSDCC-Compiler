@@ -26,7 +26,7 @@ public class LoopUnroll implements Pass {
     private final CFG cfg = new CFG();
     private final BlockUtil blockUtil = new BlockUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 1000;
+    private final int LOOP_MAX_LINE = 500;
 
     private BasicBlock header;
     private BasicBlock next;
@@ -108,7 +108,6 @@ public class LoopUnroll implements Pass {
         if ((long) loopTimes * loopSize > LOOP_MAX_LINE) {
             return false;
         }
-        System.out.println(loopTimes * loopSize);
         header = loop.getHeader();
         for (BasicBlock block : header.getPrecursors()) {
             if (loop.getLatches().contains(block)) {

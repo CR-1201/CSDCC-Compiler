@@ -80,7 +80,12 @@ public class MergeBlocks implements Pass {
                         phi.replaceAllUsesWith(value);
                         phi.removeSelf();
                     }
-                    block.removeLastInst();
+                    br.removeSelf();
+                    ArrayList<BasicBlock> succs = new ArrayList<>(to.getSuccessors());
+                    for (BasicBlock succ : succs) {
+                        block.addSuccessor(succ);
+                        succ.replacePrecursor(to, block);
+                    }
                     ArrayList<Instruction> insts = to.getInstructionsArray();
                     for (Instruction inst : insts) {
                         inst.move2Block(block);
@@ -97,7 +102,7 @@ public class MergeBlocks implements Pass {
         // 无条件跳转已经说明是只有一个后继了
         if (!block.getInstructions().isEmpty() && block.getTailInstruction() instanceof Br br && !br.getHasCondition()) {
             BasicBlock target = (BasicBlock) br.getOperator(0);
-            return target.getPrecursors().size() == 1;
+            return target.getPrecursors().size() == 1 && target.getPrecursors().iterator().next() == block;
         }
         return false;
     }

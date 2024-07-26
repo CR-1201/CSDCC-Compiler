@@ -1,6 +1,7 @@
 .idea
 /conroy_local_test
 /out
+/path
 /llvmgen
 /checkir
 /llvmchecker

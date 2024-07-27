@@ -27,51 +27,49 @@ public class PassManager {
         passes.add(new GepFuse());
         // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
-        passes.add(new UselessPhiEmit());
+//        passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
 
-        passes.add(new InlineFunction());
+//        passes.add(new InlineFunction());
 
-        // SCCP后可能出现没有value的phi
+//        // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
-        passes.add(new UselessPhiEmit());
+//        passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
 //        passes.add(new DeadCodeEmit());
         passes.add(new MergeBlocks());
 
         passes.add(new SideEffect());
-        passes.add(new UselessReturnEmit());
+//        passes.add(new UselessReturnEmit());
         // UselessStoreEmit 前面，一定要进行函数副作用的分析
         passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
 
         GVNGCMPass();
-
+////
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
-        passes.add(new UselessPhiEmit());
+//        passes.add(new UselessPhiEmit());
         passes.add(new MergeBlocks());
-
-
+//
+//
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
-
+//
 //        passes.add(new CSE());
-
-
-
-        // SCCP后可能出现没有value的phi
+//
+//        // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
-        passes.add(new UselessPhiEmit());
+//        passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
-
+//
         passes.add(new MathOptimize());
 
         passes.add(new InstructionCleanUp());
-
+//
         passes.add(new GepSplit());
         for (Pass pass : passes) {
             pass.run();

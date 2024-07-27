@@ -78,9 +78,11 @@ public class SimplifyInst implements Pass {
         if( v1 instanceof ConstInt || v1 instanceof ConstFloat ){
             inst.setOperator(0,v2);
             inst.setOperator(1,v1);
+            inst.setOperator(0,v2);
             v1 = inst.getOperator(0);
             v2 = inst.getOperator(1);
         }
+
 
 //        if( inst.getName().equals("%v72") ){
 //            System.out.println(inst);
@@ -91,6 +93,7 @@ public class SimplifyInst implements Pass {
                 (v2 instanceof ConstFloat && ((ConstFloat)v2).getValue() == 0) ){
             return v1;
         }
+
 
         // x + (const - x) = const || (const - x) + x = const
         if( checkAdd(v2,v1) || checkAdd(v1,v2) ){
@@ -122,6 +125,8 @@ public class SimplifyInst implements Pass {
                 return v2_1;
             }
         }
+
+        if( !intFlag ) return inst;
 
         // (x + const1) + const2 = x + (const1 + const2)
         // (const1 + x) + const2 = x + (const1 + const2)
@@ -221,6 +226,8 @@ public class SimplifyInst implements Pass {
             return intFlag ? ConstInt.ZERO : ConstFloat.ZERO;
         }
 
+        if( !intFlag ) return inst;
+
         // (x + const1) - const2 = x - (const2 - const1)
         // (const1 + x) - const2 = x - (const2 - const1)
         if( v1 instanceof Add add ){
@@ -252,12 +259,8 @@ public class SimplifyInst implements Pass {
                 inst.replaceOperator(v1,new ConstInt(constInt1.getValue()-constInt2.getValue()));
                 inst.replaceOperator(v2,v1_2);
                 return inst;
-            } else if( v1_1.equals(v2) && intFlag){
+            } else if( v1_1.equals(v2) ){
                 inst.replaceOperator(v1,new ConstInt(0));
-                inst.replaceOperator(v2,v1_2);
-                return inst;
-            } else if( v1_1.equals(v2) && !intFlag){
-                inst.replaceOperator(v1,new ConstFloat(0));
                 inst.replaceOperator(v2,v1_2);
                 return inst;
             }
@@ -271,12 +274,8 @@ public class SimplifyInst implements Pass {
                 inst.replaceOperator(v1,new ConstInt(constInt1.getValue()-constInt2.getValue()));
                 inst.replaceOperator(v2,v2_1);
                 return inst;
-            } else if( v1.equals(v2_2) && intFlag){
+            } else if( v1.equals(v2_2) ){
                 inst.replaceOperator(v1,new ConstInt(0));
-                inst.replaceOperator(v2,v2_1);
-                return inst;
-            } else if( v1.equals(v2_2) && !intFlag){
-                inst.replaceOperator(v1,new ConstFloat(0));
                 inst.replaceOperator(v2,v2_1);
                 return inst;
             }
@@ -284,12 +283,8 @@ public class SimplifyInst implements Pass {
                 inst.replaceOperator(v1,new ConstInt(constInt1.getValue()-constInt2.getValue()));
                 inst.replaceOperator(v2,v2_2);
                 return inst;
-            } else if( v1.equals(v2_1) && intFlag ){
+            } else if( v1.equals(v2_1) ){
                 inst.replaceOperator(v1,new ConstInt(0));
-                inst.replaceOperator(v2,v2_2);
-                return inst;
-            } else if( v1.equals(v2_1) && !intFlag ){
-                inst.replaceOperator(v1,new ConstFloat(0));
                 inst.replaceOperator(v2,v2_2);
                 return inst;
             }
@@ -321,6 +316,7 @@ public class SimplifyInst implements Pass {
         if( v1 instanceof ConstInt || v1 instanceof ConstFloat ){
             inst.setOperator(0,v2);
             inst.setOperator(1,v1);
+            inst.setOperator(0,v2);
             v1 = inst.getOperator(0);
             v2 = inst.getOperator(1);
         }

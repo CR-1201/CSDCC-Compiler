@@ -200,6 +200,7 @@ public class SCCP implements Pass {
     private void visitPHI(Phi phi) {
         int phiSize = phi.getNumOfOps() / 2;
         for( int i = 0; i < phiSize; i++ ){
+//            System.out.println(phi.getOperators());
             BasicBlock prevBlock = (BasicBlock) (phi.getOperator(phiSize+i));
             if( marked.contains(new Pair<>(prevBlock,curBasicBlock)) ){
                 Value op = phi.getOperator(i);

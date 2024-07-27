@@ -101,6 +101,24 @@ public class Function extends Value{
         return result;
     }
 
+    private ArrayList<BasicBlock> domSequence;
+    private HashSet<BasicBlock> visited;
+    public ArrayList<BasicBlock> getBlocksFromDom(){
+        domSequence = new ArrayList<>();
+        visited = new HashSet<>();
+        dfsDom(getFirstBlock());
+        return domSequence;
+    }
+    private void dfsDom(BasicBlock block) {
+        visited.add(block);
+        domSequence.add(block);
+        for (BasicBlock bb : block.getIdoms()) {
+            if (!visited.contains(bb)) {
+                dfsDom(bb);
+            }
+        }
+    }
+
     // 函数开头基本块
     public BasicBlock getFirstBlock(){
         return (BasicBlock) blocks.get(0);

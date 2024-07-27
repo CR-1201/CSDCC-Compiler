@@ -1,5 +1,6 @@
 package pass;
 
+import config.Config;
 import ir.Module;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
@@ -24,7 +25,7 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
-        passes.add(new GepFuse());
+//        passes.add(new GepFuse());
         passes.add(new InlineFunction());
 
         // SCCP后可能出现没有value的phi
@@ -39,24 +40,24 @@ public class PassManager {
         // UselessStoreEmit 前面，一定要进行函数副作用的分析
         passes.add(new UselessStoreEmit());
 //        passes.add(new DeadCodeEmit());
-
-        GVNGCMPass();
-
-
-        passes.add(new LCSSA());
-        passes.add(new LoopUnroll());
         passes.add(new UselessPhiEmit());
-        passes.add(new MergeBlocks());
+        if (Config.isO1) {
+            GVNGCMPass();
+//            passes.add(new LCSSA());
+//            passes.add(new LoopUnroll());
 
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+            passes.add(new MergeBlocks());
 
+            passes.add(new CFG());
+            passes.add(new Dom());
+            passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+        }
         passes.add(new MathOptimize());
 //
         passes.add(new InstructionCleanUp());
 
-        passes.add(new GepSplit());
+//        passes.add(new GepSplit());
+        passes.add(new Dom());
         for (Pass pass : passes) {
             pass.run();
         }

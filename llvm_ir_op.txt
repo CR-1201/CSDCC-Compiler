@@ -1,4 +1,6 @@
-@_g_arr = dso_local global [6 x i32] [i32 1, i32 2, i32 33, i32 4, i32 5, i32 6]
+@_g_a = dso_local global i32 0
+@_g_sum = dso_local global i32 0
+@_g_count = dso_local global i32 0
 
 declare dso_local i32 @getint()
 declare dso_local i32 @getch()
@@ -14,29 +16,540 @@ declare dso_local void @memset(i32* %a0, i32 %a1, i32 %a2)
 declare dso_local void @_sysy_starttime()
 declare dso_local void @_sysy_stoptime()
 define dso_local i32 @main() {
-b0:
-	%v6 = getelementptr inbounds [6 x i32], [6 x i32]* @_g_arr, i32 0, i32 0
-	%v7 = load i32, i32* %v6
-	%v10 = add i32 0, 1
-	%v8 = add i32 0, %v7
-	%v12 = getelementptr inbounds [6 x i32], [6 x i32]* @_g_arr, i32 0, i32 %v10
-	%v13 = load i32, i32* %v12
-	%v14 = add i32 %v10, 1
-	%v15 = add i32 %v8, %v13
-	%v16 = getelementptr inbounds [6 x i32], [6 x i32]* @_g_arr, i32 0, i32 %v14
-	%v17 = load i32, i32* %v16
-	%v18 = add i32 %v14, 1
-	%v19 = add i32 %v15, %v17
-	%v20 = getelementptr inbounds [6 x i32], [6 x i32]* @_g_arr, i32 0, i32 %v18
-	%v21 = load i32, i32* %v20
-	%v22 = add i32 %v18, 1
-	%v23 = add i32 %v19, %v21
-	%v24 = getelementptr inbounds [6 x i32], [6 x i32]* @_g_arr, i32 0, i32 %v22
-	%v25 = load i32, i32* %v24
-	%v26 = add i32 %v22, 1
-	%v27 = add i32 %v23, %v25
-	%v28 = getelementptr inbounds [6 x i32], [6 x i32]* @_g_arr, i32 0, i32 %v26
-	%v29 = load i32, i32* %v28
-	%v31 = add i32 %v27, %v29
-	ret i32 %v31
+b7:
+	store i32 0, i32* @_g_sum
+	%v106 = load i32, i32* @_g_count
+	%v107 = add i32 %v106, 1
+	store i32 %v107, i32* @_g_count
+	%v108 = load i32, i32* @_g_count
+	store i32 %v108, i32* @_g_a
+	%v46 = load i32, i32* @_g_sum
+	%v47 = load i32, i32* @_g_a
+	%v48 = add i32 %v46, %v47
+	store i32 %v48, i32* @_g_sum
+	%v110 = add i32 %v108, 1
+	store i32 %v110, i32* @_g_count
+	%v111 = load i32, i32* @_g_count
+	%v136 = load i32, i32* @_g_sum
+	%v137 = add i32 %v136, %v111
+	store i32 %v137, i32* @_g_sum
+	%v139 = add i32 %v111, 1
+	store i32 %v139, i32* @_g_count
+	%v140 = load i32, i32* @_g_count
+	%v141 = load i32, i32* @_g_sum
+	%v142 = add i32 %v141, %v140
+	store i32 %v142, i32* @_g_sum
+	%v145 = add i32 %v140, 1
+	store i32 %v145, i32* @_g_count
+	%v146 = load i32, i32* @_g_count
+	%v147 = load i32, i32* @_g_sum
+	%v148 = add i32 %v147, %v146
+	store i32 %v148, i32* @_g_sum
+	%v149 = load i32, i32* @_g_sum
+	%v150 = add i32 %v149, %v140
+	store i32 %v150, i32* @_g_sum
+	%v151 = load i32, i32* @_g_sum
+	%v152 = add i32 %v151, %v140
+	store i32 %v152, i32* @_g_sum
+	%v306 = load i32, i32* @_g_sum
+	%v308 = add i32 %v306, %v47
+	store i32 %v308, i32* @_g_sum
+	%v310 = add i32 %v146, 1
+	store i32 %v310, i32* @_g_count
+	%v311 = load i32, i32* @_g_count
+	%v312 = load i32, i32* @_g_sum
+	%v314 = add i32 %v312, %v47
+	store i32 %v314, i32* @_g_sum
+	%v397 = add i32 %v311, 1
+	store i32 %v397, i32* @_g_count
+	%v398 = load i32, i32* @_g_count
+	%v399 = load i32, i32* @_g_sum
+	%v400 = add i32 %v399, %v398
+	store i32 %v400, i32* @_g_sum
+	%v402 = add i32 %v398, 1
+	store i32 %v402, i32* @_g_count
+	%v403 = load i32, i32* @_g_count
+	%v404 = load i32, i32* @_g_sum
+	%v405 = add i32 %v404, %v403
+	store i32 %v405, i32* @_g_sum
+	%v407 = add i32 %v403, 1
+	store i32 %v407, i32* @_g_count
+	%v408 = load i32, i32* @_g_count
+	%v409 = load i32, i32* @_g_sum
+	%v410 = add i32 %v409, %v403
+	store i32 %v410, i32* @_g_sum
+	%v153 = load i32, i32* @_g_sum
+	%v154 = add i32 %v153, %v111
+	store i32 %v154, i32* @_g_sum
+	%v156 = add i32 %v408, 1
+	store i32 %v156, i32* @_g_count
+	%v157 = load i32, i32* @_g_count
+	%v158 = load i32, i32* @_g_sum
+	%v159 = add i32 %v158, %v157
+	store i32 %v159, i32* @_g_sum
+	%v162 = add i32 %v157, 1
+	store i32 %v162, i32* @_g_count
+	%v163 = load i32, i32* @_g_count
+	%v164 = load i32, i32* @_g_sum
+	%v165 = add i32 %v164, %v163
+	store i32 %v165, i32* @_g_sum
+	%v166 = load i32, i32* @_g_sum
+	%v167 = add i32 %v166, %v157
+	store i32 %v167, i32* @_g_sum
+	%v168 = load i32, i32* @_g_sum
+	%v169 = add i32 %v168, %v157
+	store i32 %v169, i32* @_g_sum
+	%v315 = load i32, i32* @_g_sum
+	%v317 = add i32 %v315, %v47
+	store i32 %v317, i32* @_g_sum
+	%v319 = add i32 %v163, 1
+	store i32 %v319, i32* @_g_count
+	%v320 = load i32, i32* @_g_count
+	%v321 = load i32, i32* @_g_sum
+	%v323 = add i32 %v321, %v47
+	store i32 %v323, i32* @_g_sum
+	%v412 = add i32 %v320, 1
+	store i32 %v412, i32* @_g_count
+	%v413 = load i32, i32* @_g_count
+	%v414 = load i32, i32* @_g_sum
+	%v415 = add i32 %v414, %v413
+	store i32 %v415, i32* @_g_sum
+	%v417 = add i32 %v413, 1
+	store i32 %v417, i32* @_g_count
+	%v418 = load i32, i32* @_g_count
+	%v419 = load i32, i32* @_g_sum
+	%v420 = add i32 %v419, %v418
+	store i32 %v420, i32* @_g_sum
+	%v422 = add i32 %v418, 1
+	store i32 %v422, i32* @_g_count
+	%v423 = load i32, i32* @_g_count
+	%v424 = load i32, i32* @_g_sum
+	%v425 = add i32 %v424, %v418
+	store i32 %v425, i32* @_g_sum
+	%v113 = add i32 %v423, 1
+	store i32 %v113, i32* @_g_count
+	%v114 = load i32, i32* @_g_count
+	%v170 = load i32, i32* @_g_sum
+	%v171 = add i32 %v170, %v111
+	store i32 %v171, i32* @_g_sum
+	%v173 = add i32 %v114, 1
+	store i32 %v173, i32* @_g_count
+	%v174 = load i32, i32* @_g_count
+	%v175 = load i32, i32* @_g_sum
+	%v176 = add i32 %v175, %v174
+	store i32 %v176, i32* @_g_sum
+	%v179 = add i32 %v174, 1
+	store i32 %v179, i32* @_g_count
+	%v180 = load i32, i32* @_g_count
+	%v181 = load i32, i32* @_g_sum
+	%v182 = add i32 %v181, %v180
+	store i32 %v182, i32* @_g_sum
+	%v183 = load i32, i32* @_g_sum
+	%v184 = add i32 %v183, %v174
+	store i32 %v184, i32* @_g_sum
+	%v185 = load i32, i32* @_g_sum
+	%v186 = add i32 %v185, %v174
+	store i32 %v186, i32* @_g_sum
+	%v324 = load i32, i32* @_g_sum
+	%v326 = add i32 %v324, %v47
+	store i32 %v326, i32* @_g_sum
+	%v328 = add i32 %v180, 1
+	store i32 %v328, i32* @_g_count
+	%v329 = load i32, i32* @_g_count
+	%v330 = load i32, i32* @_g_sum
+	%v332 = add i32 %v330, %v47
+	store i32 %v332, i32* @_g_sum
+	%v427 = add i32 %v329, 1
+	store i32 %v427, i32* @_g_count
+	%v428 = load i32, i32* @_g_count
+	%v429 = load i32, i32* @_g_sum
+	%v430 = add i32 %v429, %v428
+	store i32 %v430, i32* @_g_sum
+	%v432 = add i32 %v428, 1
+	store i32 %v432, i32* @_g_count
+	%v433 = load i32, i32* @_g_count
+	%v434 = load i32, i32* @_g_sum
+	%v435 = add i32 %v434, %v433
+	store i32 %v435, i32* @_g_sum
+	%v437 = add i32 %v433, 1
+	store i32 %v437, i32* @_g_count
+	%v438 = load i32, i32* @_g_count
+	%v439 = load i32, i32* @_g_sum
+	%v440 = add i32 %v439, %v433
+	store i32 %v440, i32* @_g_sum
+	%v116 = add i32 %v438, 1
+	store i32 %v116, i32* @_g_count
+	%v117 = load i32, i32* @_g_count
+	%v119 = add i32 %v117, 1
+	store i32 %v119, i32* @_g_count
+	%v120 = load i32, i32* @_g_count
+	%v187 = load i32, i32* @_g_sum
+	%v188 = add i32 %v187, %v120
+	store i32 %v188, i32* @_g_sum
+	%v190 = add i32 %v120, 1
+	store i32 %v190, i32* @_g_count
+	%v191 = load i32, i32* @_g_count
+	%v192 = load i32, i32* @_g_sum
+	%v193 = add i32 %v192, %v191
+	store i32 %v193, i32* @_g_sum
+	%v196 = add i32 %v191, 1
+	store i32 %v196, i32* @_g_count
+	%v197 = load i32, i32* @_g_count
+	%v198 = load i32, i32* @_g_sum
+	%v199 = add i32 %v198, %v197
+	store i32 %v199, i32* @_g_sum
+	%v200 = load i32, i32* @_g_sum
+	%v201 = add i32 %v200, %v191
+	store i32 %v201, i32* @_g_sum
+	%v202 = load i32, i32* @_g_sum
+	%v203 = add i32 %v202, %v191
+	store i32 %v203, i32* @_g_sum
+	%v333 = load i32, i32* @_g_sum
+	%v335 = add i32 %v333, %v47
+	store i32 %v335, i32* @_g_sum
+	%v337 = add i32 %v197, 1
+	store i32 %v337, i32* @_g_count
+	%v338 = load i32, i32* @_g_count
+	%v339 = load i32, i32* @_g_sum
+	%v341 = add i32 %v339, %v47
+	store i32 %v341, i32* @_g_sum
+	%v442 = add i32 %v338, 1
+	store i32 %v442, i32* @_g_count
+	%v443 = load i32, i32* @_g_count
+	%v444 = load i32, i32* @_g_sum
+	%v445 = add i32 %v444, %v443
+	store i32 %v445, i32* @_g_sum
+	%v447 = add i32 %v443, 1
+	store i32 %v447, i32* @_g_count
+	%v448 = load i32, i32* @_g_count
+	%v449 = load i32, i32* @_g_sum
+	%v450 = add i32 %v449, %v448
+	store i32 %v450, i32* @_g_sum
+	%v452 = add i32 %v448, 1
+	store i32 %v452, i32* @_g_count
+	%v453 = load i32, i32* @_g_count
+	%v454 = load i32, i32* @_g_sum
+	%v455 = add i32 %v454, %v448
+	store i32 %v455, i32* @_g_sum
+	%v122 = add i32 %v453, 1
+	store i32 %v122, i32* @_g_count
+	%v123 = load i32, i32* @_g_count
+	%v204 = load i32, i32* @_g_sum
+	%v205 = add i32 %v204, %v123
+	store i32 %v205, i32* @_g_sum
+	%v207 = add i32 %v123, 1
+	store i32 %v207, i32* @_g_count
+	%v208 = load i32, i32* @_g_count
+	%v209 = load i32, i32* @_g_sum
+	%v210 = add i32 %v209, %v208
+	store i32 %v210, i32* @_g_sum
+	%v213 = add i32 %v208, 1
+	store i32 %v213, i32* @_g_count
+	%v214 = load i32, i32* @_g_count
+	%v215 = load i32, i32* @_g_sum
+	%v216 = add i32 %v215, %v214
+	store i32 %v216, i32* @_g_sum
+	%v217 = load i32, i32* @_g_sum
+	%v218 = add i32 %v217, %v208
+	store i32 %v218, i32* @_g_sum
+	%v219 = load i32, i32* @_g_sum
+	%v220 = add i32 %v219, %v208
+	store i32 %v220, i32* @_g_sum
+	%v342 = load i32, i32* @_g_sum
+	%v344 = add i32 %v342, %v47
+	store i32 %v344, i32* @_g_sum
+	%v346 = add i32 %v214, 1
+	store i32 %v346, i32* @_g_count
+	%v347 = load i32, i32* @_g_count
+	%v348 = load i32, i32* @_g_sum
+	%v350 = add i32 %v348, %v47
+	store i32 %v350, i32* @_g_sum
+	%v457 = add i32 %v347, 1
+	store i32 %v457, i32* @_g_count
+	%v458 = load i32, i32* @_g_count
+	%v459 = load i32, i32* @_g_sum
+	%v460 = add i32 %v459, %v458
+	store i32 %v460, i32* @_g_sum
+	%v462 = add i32 %v458, 1
+	store i32 %v462, i32* @_g_count
+	%v463 = load i32, i32* @_g_count
+	%v464 = load i32, i32* @_g_sum
+	%v465 = add i32 %v464, %v463
+	store i32 %v465, i32* @_g_sum
+	%v467 = add i32 %v463, 1
+	store i32 %v467, i32* @_g_count
+	%v468 = load i32, i32* @_g_count
+	%v469 = load i32, i32* @_g_sum
+	%v470 = add i32 %v469, %v463
+	store i32 %v470, i32* @_g_sum
+	%v125 = add i32 %v468, 1
+	store i32 %v125, i32* @_g_count
+	%v126 = load i32, i32* @_g_count
+	%v221 = load i32, i32* @_g_sum
+	%v222 = add i32 %v221, %v126
+	store i32 %v222, i32* @_g_sum
+	%v224 = add i32 %v126, 1
+	store i32 %v224, i32* @_g_count
+	%v225 = load i32, i32* @_g_count
+	%v226 = load i32, i32* @_g_sum
+	%v227 = add i32 %v226, %v225
+	store i32 %v227, i32* @_g_sum
+	%v230 = add i32 %v225, 1
+	store i32 %v230, i32* @_g_count
+	%v231 = load i32, i32* @_g_count
+	%v232 = load i32, i32* @_g_sum
+	%v233 = add i32 %v232, %v231
+	store i32 %v233, i32* @_g_sum
+	%v234 = load i32, i32* @_g_sum
+	%v235 = add i32 %v234, %v225
+	store i32 %v235, i32* @_g_sum
+	%v236 = load i32, i32* @_g_sum
+	%v237 = add i32 %v236, %v225
+	store i32 %v237, i32* @_g_sum
+	%v351 = load i32, i32* @_g_sum
+	%v353 = add i32 %v351, %v47
+	store i32 %v353, i32* @_g_sum
+	%v355 = add i32 %v231, 1
+	store i32 %v355, i32* @_g_count
+	%v356 = load i32, i32* @_g_count
+	%v357 = load i32, i32* @_g_sum
+	%v359 = add i32 %v357, %v47
+	store i32 %v359, i32* @_g_sum
+	%v472 = add i32 %v356, 1
+	store i32 %v472, i32* @_g_count
+	%v473 = load i32, i32* @_g_count
+	%v474 = load i32, i32* @_g_sum
+	%v475 = add i32 %v474, %v473
+	store i32 %v475, i32* @_g_sum
+	%v477 = add i32 %v473, 1
+	store i32 %v477, i32* @_g_count
+	%v478 = load i32, i32* @_g_count
+	%v479 = load i32, i32* @_g_sum
+	%v480 = add i32 %v479, %v478
+	store i32 %v480, i32* @_g_sum
+	%v482 = add i32 %v478, 1
+	store i32 %v482, i32* @_g_count
+	%v483 = load i32, i32* @_g_count
+	%v484 = load i32, i32* @_g_sum
+	%v485 = add i32 %v484, %v478
+	store i32 %v485, i32* @_g_sum
+	%v238 = load i32, i32* @_g_sum
+	%v239 = add i32 %v238, %v111
+	store i32 %v239, i32* @_g_sum
+	%v241 = add i32 %v483, 1
+	store i32 %v241, i32* @_g_count
+	%v242 = load i32, i32* @_g_count
+	%v243 = load i32, i32* @_g_sum
+	%v244 = add i32 %v243, %v242
+	store i32 %v244, i32* @_g_sum
+	%v247 = add i32 %v242, 1
+	store i32 %v247, i32* @_g_count
+	%v248 = load i32, i32* @_g_count
+	%v249 = load i32, i32* @_g_sum
+	%v250 = add i32 %v249, %v248
+	store i32 %v250, i32* @_g_sum
+	%v251 = load i32, i32* @_g_sum
+	%v252 = add i32 %v251, %v242
+	store i32 %v252, i32* @_g_sum
+	%v253 = load i32, i32* @_g_sum
+	%v254 = add i32 %v253, %v242
+	store i32 %v254, i32* @_g_sum
+	%v360 = load i32, i32* @_g_sum
+	%v362 = add i32 %v360, %v47
+	store i32 %v362, i32* @_g_sum
+	%v364 = add i32 %v248, 1
+	store i32 %v364, i32* @_g_count
+	%v365 = load i32, i32* @_g_count
+	%v366 = load i32, i32* @_g_sum
+	%v368 = add i32 %v366, %v47
+	store i32 %v368, i32* @_g_sum
+	%v487 = add i32 %v365, 1
+	store i32 %v487, i32* @_g_count
+	%v488 = load i32, i32* @_g_count
+	%v489 = load i32, i32* @_g_sum
+	%v490 = add i32 %v489, %v488
+	store i32 %v490, i32* @_g_sum
+	%v492 = add i32 %v488, 1
+	store i32 %v492, i32* @_g_count
+	%v493 = load i32, i32* @_g_count
+	%v494 = load i32, i32* @_g_sum
+	%v495 = add i32 %v494, %v493
+	store i32 %v495, i32* @_g_sum
+	%v497 = add i32 %v493, 1
+	store i32 %v497, i32* @_g_count
+	%v498 = load i32, i32* @_g_count
+	%v499 = load i32, i32* @_g_sum
+	%v500 = add i32 %v499, %v493
+	store i32 %v500, i32* @_g_sum
+	br label %b14
+b14:
+	%p5 = phi i32 [ %v111, %b7 ],  [ %v135, %b23 ],  [ %p5, %b22 ]
+	%p1 = phi i32 [ 0, %b7 ],  [ %v86, %b23 ],  [ %v82, %b22 ]
+	%v71 = icmp slt i32 %p1, 3
+	br i1 %v71, label %b15, label %b16
+b15:
+	%v255 = load i32, i32* @_g_sum
+	%v256 = add i32 %v255, %p5
+	store i32 %v256, i32* @_g_sum
+	%v257 = load i32, i32* @_g_count
+	%v258 = add i32 %v257, 1
+	store i32 %v258, i32* @_g_count
+	%v259 = load i32, i32* @_g_count
+	%v260 = load i32, i32* @_g_sum
+	%v261 = add i32 %v260, %v259
+	store i32 %v261, i32* @_g_sum
+	%v264 = add i32 %v259, 1
+	store i32 %v264, i32* @_g_count
+	%v265 = load i32, i32* @_g_count
+	%v266 = load i32, i32* @_g_sum
+	%v267 = add i32 %v266, %v265
+	store i32 %v267, i32* @_g_sum
+	%v268 = load i32, i32* @_g_sum
+	%v269 = add i32 %v268, %v259
+	store i32 %v269, i32* @_g_sum
+	%v270 = load i32, i32* @_g_sum
+	%v271 = add i32 %v270, %v259
+	store i32 %v271, i32* @_g_sum
+	%v369 = load i32, i32* @_g_sum
+	%v370 = load i32, i32* @_g_a
+	%v371 = add i32 %v369, %v370
+	store i32 %v371, i32* @_g_sum
+	%v373 = add i32 %v265, 1
+	store i32 %v373, i32* @_g_count
+	%v374 = load i32, i32* @_g_count
+	%v375 = load i32, i32* @_g_sum
+	%v377 = add i32 %v375, %v370
+	store i32 %v377, i32* @_g_sum
+	%v502 = add i32 %v374, 1
+	store i32 %v502, i32* @_g_count
+	%v503 = load i32, i32* @_g_count
+	%v504 = load i32, i32* @_g_sum
+	%v505 = add i32 %v504, %v503
+	store i32 %v505, i32* @_g_sum
+	%v507 = add i32 %v503, 1
+	store i32 %v507, i32* @_g_count
+	%v508 = load i32, i32* @_g_count
+	%v509 = load i32, i32* @_g_sum
+	%v510 = add i32 %v509, %v508
+	store i32 %v510, i32* @_g_sum
+	%v512 = add i32 %v508, 1
+	store i32 %v512, i32* @_g_count
+	%v513 = load i32, i32* @_g_count
+	%v514 = load i32, i32* @_g_sum
+	%v515 = add i32 %v514, %v508
+	store i32 %v515, i32* @_g_sum
+	%v77 = icmp eq i32 %p1, 1
+	br i1 %v77, label %b22, label %b23
+b16:
+	%v87 = load i32, i32* @_g_sum
+	call void @putint(i32 %v87)
+	ret i32 0
+b22:
+	%v131 = add i32 %v513, 1
+	store i32 %v131, i32* @_g_count
+	%v132 = load i32, i32* @_g_count
+	%v272 = load i32, i32* @_g_sum
+	%v273 = add i32 %v272, %v132
+	store i32 %v273, i32* @_g_sum
+	%v275 = add i32 %v132, 1
+	store i32 %v275, i32* @_g_count
+	%v276 = load i32, i32* @_g_count
+	%v277 = load i32, i32* @_g_sum
+	%v278 = add i32 %v277, %v276
+	store i32 %v278, i32* @_g_sum
+	%v281 = add i32 %v276, 1
+	store i32 %v281, i32* @_g_count
+	%v282 = load i32, i32* @_g_count
+	%v283 = load i32, i32* @_g_sum
+	%v284 = add i32 %v283, %v282
+	store i32 %v284, i32* @_g_sum
+	%v285 = load i32, i32* @_g_sum
+	%v286 = add i32 %v285, %v276
+	store i32 %v286, i32* @_g_sum
+	%v287 = load i32, i32* @_g_sum
+	%v288 = add i32 %v287, %v276
+	store i32 %v288, i32* @_g_sum
+	%v378 = load i32, i32* @_g_sum
+	%v380 = add i32 %v378, %v370
+	store i32 %v380, i32* @_g_sum
+	%v382 = add i32 %v282, 1
+	store i32 %v382, i32* @_g_count
+	%v383 = load i32, i32* @_g_count
+	%v384 = load i32, i32* @_g_sum
+	%v386 = add i32 %v384, %v370
+	store i32 %v386, i32* @_g_sum
+	%v517 = add i32 %v383, 1
+	store i32 %v517, i32* @_g_count
+	%v518 = load i32, i32* @_g_count
+	%v519 = load i32, i32* @_g_sum
+	%v520 = add i32 %v519, %v518
+	store i32 %v520, i32* @_g_sum
+	%v522 = add i32 %v518, 1
+	store i32 %v522, i32* @_g_count
+	%v523 = load i32, i32* @_g_count
+	%v524 = load i32, i32* @_g_sum
+	%v525 = add i32 %v524, %v523
+	store i32 %v525, i32* @_g_sum
+	%v527 = add i32 %v523, 1
+	store i32 %v527, i32* @_g_count
+	%v528 = load i32, i32* @_g_count
+	%v529 = load i32, i32* @_g_sum
+	%v530 = add i32 %v529, %v523
+	store i32 %v530, i32* @_g_sum
+	%v82 = add i32 %p1, 1
+	br label %b14
+b23:
+	%v289 = load i32, i32* @_g_sum
+	%v290 = add i32 %v289, %p5
+	store i32 %v290, i32* @_g_sum
+	%v292 = add i32 %v513, 1
+	store i32 %v292, i32* @_g_count
+	%v293 = load i32, i32* @_g_count
+	%v294 = load i32, i32* @_g_sum
+	%v295 = add i32 %v294, %v293
+	store i32 %v295, i32* @_g_sum
+	%v298 = add i32 %v293, 1
+	store i32 %v298, i32* @_g_count
+	%v299 = load i32, i32* @_g_count
+	%v300 = load i32, i32* @_g_sum
+	%v301 = add i32 %v300, %v299
+	store i32 %v301, i32* @_g_sum
+	%v302 = load i32, i32* @_g_sum
+	%v303 = add i32 %v302, %v293
+	store i32 %v303, i32* @_g_sum
+	%v304 = load i32, i32* @_g_sum
+	%v305 = add i32 %v304, %v293
+	store i32 %v305, i32* @_g_sum
+	%v387 = load i32, i32* @_g_sum
+	%v389 = add i32 %v387, %v370
+	store i32 %v389, i32* @_g_sum
+	%v391 = add i32 %v299, 1
+	store i32 %v391, i32* @_g_count
+	%v392 = load i32, i32* @_g_count
+	%v393 = load i32, i32* @_g_sum
+	%v395 = add i32 %v393, %v370
+	store i32 %v395, i32* @_g_sum
+	%v532 = add i32 %v392, 1
+	store i32 %v532, i32* @_g_count
+	%v533 = load i32, i32* @_g_count
+	%v534 = load i32, i32* @_g_sum
+	%v535 = add i32 %v534, %v533
+	store i32 %v535, i32* @_g_sum
+	%v537 = add i32 %v533, 1
+	store i32 %v537, i32* @_g_count
+	%v538 = load i32, i32* @_g_count
+	%v539 = load i32, i32* @_g_sum
+	%v540 = add i32 %v539, %v538
+	store i32 %v540, i32* @_g_sum
+	%v542 = add i32 %v538, 1
+	store i32 %v542, i32* @_g_count
+	%v543 = load i32, i32* @_g_count
+	%v544 = load i32, i32* @_g_sum
+	%v545 = add i32 %v544, %v538
+	store i32 %v545, i32* @_g_sum
+	%v134 = add i32 %v543, 1
+	store i32 %v134, i32* @_g_count
+	%v135 = load i32, i32* @_g_count
+	%v86 = add i32 %p1, 1
+	br label %b14
 }

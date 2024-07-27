@@ -173,7 +173,7 @@ public class ObjBuilder {
 
     public ObjFunction buildObjFunc(Function function) {
         ObjFunction objFunction = new ObjFunction(function.getName());
-        for (BasicBlock basicBlock : function.getBasicBlocksArray()) {
+        for (BasicBlock basicBlock : function.getBlocksFromDom()) {
             objFunction.addObjBlock(buildBasicBlock(objFunction, basicBlock));
         }
         return objFunction;
@@ -205,18 +205,21 @@ public class ObjBuilder {
             return buildRet((Ret) instruction, objBlock, objFunction);
         } else if (instruction instanceof Call) {
             return buildCall((Call) instruction, objBlock, objFunction);
+        } else if (instruction instanceof Icmp) {
+            return null;
         } else if (instruction instanceof BinaryInstruction) {
             return buildBinary((BinaryInstruction) instruction, objBlock, objFunction);
         } else if (instruction instanceof GEP) {
             return buildGEP((GEP) instruction, objBlock, objFunction);
         } else if (instruction instanceof Zext) {
             Value con = ((Zext) instruction).getConversionValue();
-            if (con instanceof Icmp) {
+            if (con instanceof Icmp cond) {
+                objBlock.addInstruction(buildBinary(cond, objBlock, objFunction));
                 ObjRegister rd = createVirRegister(instruction);
                 ObjMove tmove = new ObjMove(rd, new ObjImmediate(1), false, true);
-                tmove.setCond(ObjInstruction.ObjCond.switchIr2Obj(((Icmp) con).getCondition()));
+                tmove.setCond(ObjInstruction.ObjCond.switchIr2Obj(cond.getCondition()));
                 ObjMove fmove = new ObjMove(rd, new ObjImmediate(0), false, true);
-                fmove.setCond(ObjInstruction.ObjCond.switchIr2ObjOpp(((Icmp) con).getCondition()));
+                fmove.setCond(ObjInstruction.ObjCond.switchIr2ObjOpp(cond.getCondition()));
                 objBlock.addInstruction(tmove);
                 objBlock.addInstruction(fmove);
             } else
@@ -511,7 +514,7 @@ public class ObjBuilder {
             return new ObjJump(new ObjBlock(ops.get(0).getName()));
         } else {
             Icmp condition = (Icmp) ops.get(0);
-            ObjRegister rs = v2mMap.containsKey(condition) ? (ObjRegister) v2mMap.get(condition) : putNewVGtoMap(condition, objFunction, objBlock);
+            objBlock.addInstruction(buildBinary(condition, objBlock, objFunction));
             objBlock.addInstruction(new ObjJump(ObjInstruction.ObjCond.switchIr2Obj(condition.getCondition()), new ObjBlock(ops.get(1).getName())));
             succMap.get(objBlock.getName())[0] = ops.get(1).getName().substring(1);
             succMap.get(objBlock.getName())[1] = ops.get(2).getName().substring(1);

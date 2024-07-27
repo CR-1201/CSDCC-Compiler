@@ -11,6 +11,7 @@ public class Config {
     public static String irOutputPath = "llvm_ir.txt";
     public static String irRawOutputPath = "llvm_ir_raw.txt";
     public static String irOptimizeOutputPath = "llvm_ir_op.txt";
+    public static boolean isO1 = false;
 
     public static void init(String in,String llvm, String arm) throws IOException {
         fileInputPath = in;

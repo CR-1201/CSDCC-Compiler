@@ -66,4 +66,8 @@ public class ObjBlock {
             }
         }
     }
+
+    public void removeInstruction(ObjInstruction instruction) {
+        instructions.remove(instruction);
+    }
 }

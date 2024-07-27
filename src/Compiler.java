@@ -1,6 +1,7 @@
 import ast.CompUnit;
 import backend.ObjBuilder;
 import backend.module.ObjModule;
+import backend.pass.ObjPassManager;
 import config.Config;
 import frontend.LexicalAnalyze;
 import frontend.ParserAnalyze;
@@ -27,10 +28,10 @@ public class Compiler {
                 fileOutputPath = args[i + 1];
                 fileInputPath = args[i + 2];
             }
-            if (i == 1 && args[1] != null)
-                fileInputPath = args[i];
-            else if (i == 2 && args[2] != null)
-                fileOutputPath = args[i];
+
+            if ("-O1".equals(args[i])) {
+                Config.isO1 = true;
+            }
         }
 //        fileInputPath = args[0];
 //        fileOutputPath = args[1];
@@ -60,7 +61,10 @@ public class Compiler {
 
         // 生成目标代码
         ObjBuilder.getObjBuilder().build();
-        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
 
+        ObjPassManager objPassManager = new ObjPassManager();
+        objPassManager.run();
+
+        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
     }
 }

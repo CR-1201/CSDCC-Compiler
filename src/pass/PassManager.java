@@ -63,7 +63,7 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
 //
-        passes.add(new GepSplit());
+//        passes.add(new GepSplit());
 
         for (Pass pass : passes) {
             pass.run();

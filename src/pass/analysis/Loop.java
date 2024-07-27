@@ -2,7 +2,11 @@ package pass.analysis;
 
 import ir.BasicBlock;
 import ir.Value;
+import ir.instructions.Instruction;
+import ir.instructions.binaryInstructions.Add;
 import ir.instructions.binaryInstructions.Icmp;
+import ir.instructions.binaryInstructions.Mul;
+import ir.instructions.binaryInstructions.Sub;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -191,6 +195,44 @@ public class Loop {
             loopSize += block.getInstructions().size();
         }
         return loopSize;
+    }
+
+    public int computeLoopTimes(int init, int end, int step, Instruction alu, Icmp.Condition cmp) {
+        int loopTimes = -1;
+        if (alu instanceof Add) {
+            if (cmp.equals(Icmp.Condition.EQ)) {
+                loopTimes = (init == end) ? 1 : -1;
+            } else if (cmp.equals(Icmp.Condition.NE)) {
+                loopTimes = ((end - init) % step == 0) ? (end - init) / step : -1;
+            } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
+                loopTimes = (end - init) / step + 1;
+            } else if (cmp.equals(Icmp.Condition.GT) || cmp.equals(Icmp.Condition.LT)) {
+                loopTimes = ((end - init) % step == 0) ? (end - init) / step : (end - init) / step + 1;
+            }
+        } else if (alu instanceof Sub) {
+            if (cmp.equals(Icmp.Condition.EQ)) {
+                loopTimes = (init == end) ? 1 : -1;
+            } else if (cmp.equals(Icmp.Condition.NE)) {
+                loopTimes = ((init - end) % step == 0) ? (init - end) / step : -1;
+            } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
+                loopTimes = (init - end) / step + 1;
+            } else if (cmp.equals(Icmp.Condition.GT) || cmp.equals(Icmp.Condition.LT)) {
+                loopTimes = ((init - end) % step == 0) ? (init - end) / step : (init - end) / step + 1;
+            }
+        } else if (alu instanceof Mul) {
+            double val = Math.log(end / init) / Math.log(step);
+            boolean tag = init * Math.pow(step, val) == end;
+            if (cmp.equals(Icmp.Condition.EQ)) {
+                loopTimes = (init == end) ? 1 : -1;
+            } else if (cmp.equals(Icmp.Condition.NE)) {
+                loopTimes = tag ? (int) val : -1;
+            } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
+                loopTimes = (int) val + 1;
+            } else if (cmp.equals(Icmp.Condition.GT) || cmp.equals(Icmp.Condition.LT)) {
+                loopTimes = tag ? (int) val : (int) val + 1;
+            }
+        }
+        return loopTimes;
     }
 
     public ArrayList<BasicBlock> computeDfsBlocksFromEntry(BasicBlock entry) {

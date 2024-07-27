@@ -64,7 +64,6 @@ public class MergeBlocks implements Pass {
 
     private void mergeBlock(Function func) {
         cfg.buildCFG(func);
-        BasicBlock entry = func.getFirstBlock();
         boolean flag = true;
         while (flag) {
             flag = false;
@@ -99,8 +98,9 @@ public class MergeBlocks implements Pass {
     }
 
     private Boolean canMerge(BasicBlock block) {
-        // 无条件跳转已经说明是只有一个后继了
-        if (!block.getInstructions().isEmpty() && block.getTailInstruction() instanceof Br br && !br.getHasCondition()) {
+        if (block.getSuccessors().size() != 1) {
+            return false;
+        } else if (!block.getInstructions().isEmpty() && block.getTailInstruction() instanceof Br br) {
             BasicBlock target = (BasicBlock) br.getOperator(0);
             return target.getPrecursors().size() == 1 && target.getPrecursors().iterator().next() == block;
         }

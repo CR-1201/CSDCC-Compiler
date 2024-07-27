@@ -1,6 +1,7 @@
 package pass;
 
 import ir.Module;
+import java.util.ArrayList;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
 import pass.analysis.LoopAnalysis;
@@ -11,8 +12,6 @@ import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.LCSSA;
 import pass.transform.loop.LoopUnroll;
-
-import java.util.ArrayList;
 
 public class PassManager {
     private Module module = Module.getModule();
@@ -25,53 +24,24 @@ public class PassManager {
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
         passes.add(new GepFuse());
-        // SCCP后可能出现没有value的phi
-        passes.add(new SCCP());
-        passes.add(new UselessPhiEmit());
-        passes.add(new SimplifyInst());
-        passes.add(new MathOptimize());
-
-        //FIXME SCCP后要加CFG?
-        passes.add(new CFG());
         passes.add(new InlineFunction());
-
-        // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
-//        passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
-        passes.add(new MathOptimize());
-////        passes.add(new DeadCodeEmit());
         passes.add(new MergeBlocks());
-//
-        passes.add(new SideEffect());
-//        passes.add(new UselessReturnEmit());
-        // UselessStoreEmit 前面，一定要进行函数副作用的分析
-        passes.add(new UselessStoreEmit());
-//        passes.add(new DeadCodeEmit());
-
+//        passes.add(new SideEffect());
+////        passes.add(new UselessReturnEmit());
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
         GVNGCMPass();
-////
+////        passes.add(new CFG());
+////        passes.add(new Dom());
+////        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+        passes.add(new MathOptimize());
+        passes.add(new UselessPhiEmit());
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
-//        passes.add(new UselessPhiEmit());
-        passes.add(new MergeBlocks());
-
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
-//
-        passes.add(new CSE());
-
-        // SCCP后可能出现没有value的phi
-        passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
-        passes.add(new SimplifyInst());
-//
-        passes.add(new MathOptimize());
-
-        passes.add(new InstructionCleanUp());
-//
-        passes.add(new GepSplit());
+        passes.add(new MergeBlocks());
+//        passes.add(new InstructionCleanUp());
         for (Pass pass : passes) {
             pass.run();
         }

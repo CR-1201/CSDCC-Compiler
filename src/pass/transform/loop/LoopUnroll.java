@@ -25,8 +25,10 @@ import java.util.HashSet;
 public class LoopUnroll implements Pass {
     private final CFG cfg = new CFG();
     private final BlockUtil blockUtil = new BlockUtil();
+    private final CloneUtil cloneUtil = new CloneUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 1000;
+    private boolean stopUnroll = false;
+    private final int LOOP_MAX_LINE = 15000;
 
     private BasicBlock header;
     private BasicBlock next;
@@ -60,6 +62,9 @@ public class LoopUnroll implements Pass {
         }
         for (Loop loop : allLoops) {
             constLoopUnroll(loop);
+            if (stopUnroll) {
+                return;
+            }
         }
     }
 
@@ -94,7 +99,6 @@ public class LoopUnroll implements Pass {
         isUnrolled = true;
         handleUnroll(loop);
     }
-
     private Boolean initUnroll(Loop loop) {
         HashSet<BasicBlock> allExits = new HashSet<>(loop.computeChildrenExits());
         HashSet<BasicBlock> allBlocks = new HashSet<>(loop.getAllBlocks());
@@ -106,9 +110,9 @@ public class LoopUnroll implements Pass {
         int loopTimes = loop.getLoopTimes();
         int loopSize = loop.computeLoopSize();
         if ((long) loopTimes * loopSize > LOOP_MAX_LINE) {
+            stopUnroll = true;
             return false;
         }
-
         header = loop.getHeader();
         for (BasicBlock block : header.getPrecursors()) {
             if (loop.getLatches().contains(block)) {
@@ -169,11 +173,12 @@ public class LoopUnroll implements Pass {
         }
         BasicBlock oldNext = next;
         BasicBlock oldLatch = latch;
-        CloneUtil cloneUtil = new CloneUtil();
+        cloneUtil.clearCloneMap();
         for (Value value : phiMap.keySet()) {
             cloneUtil.insertCloneMap(value, phiMap.get(value));
         }
-        for (int loopTime = 0; loopTime < loop.getLoopTimes() - 1; loopTime++) {
+        int loopTime = loop.getLoopTimes();
+        for (int curLoopTime = 0; curLoopTime < loopTime - 1; curLoopTime++) {
             for (BasicBlock block : dfs) {
                 BasicBlock clonedBlock = IrBuilder.getIrBuilder().buildBasicBlock(header.getParent());
                 cloneUtil.insertCloneMap(block, clonedBlock);

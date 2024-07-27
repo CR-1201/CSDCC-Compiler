@@ -140,23 +140,16 @@ public class SimplifyInst implements Pass {
             }
         }
 
-        // (x + const1) - const2 = x + (const1 - const2)
-        // (const1 + x) - const2 = x + (const1 - const2)
+        // (x - const1) + const2 = x + (const2 - const1)
+        // TODO (const1 - x) + const2 = (const1 + const2) - x
         if( v1 instanceof Sub sub ){
             Value v1_1 = sub.getOperator(0), v1_2 = sub.getOperator(1);
             if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
                 inst.replaceOperator(v1,v1_1);
-                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                inst.replaceOperator(v2,new ConstInt(constInt2.getValue()-constInt1.getValue()));
                 return inst;
             } else if( v1_2.equals(v2) ){
                 return v1_1;
-            }
-            if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
-                inst.replaceOperator(v1,v1_2);
-                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()-constInt2.getValue()));
-                return inst;
-            } else if( v1_1.equals(v2) ){
-                return v1_2;
             }
         }
 
@@ -177,7 +170,7 @@ public class SimplifyInst implements Pass {
         }
 
         // const1 + (x - const2) = x + (const1 - const2)
-        // const1 + (const2 - x) = (const1 + const2) - x
+        //TODO const1 + (const2 - x) = (const1 + const2) - x
         if( v2 instanceof Sub sub ){
             Value v2_1 = sub.getOperator(0), v2_2 = sub.getOperator(1);
             if( v1 instanceof ConstInt constInt1 && v2_2 instanceof ConstInt constInt2){
@@ -186,11 +179,6 @@ public class SimplifyInst implements Pass {
                 return inst;
             } else if( v1.equals(v2_2) ){
                 return v2_1;
-            }
-            if( v1 instanceof ConstInt constInt1 && v2_1 instanceof ConstInt constInt2){
-                inst.replaceOperator(v1,new ConstInt(constInt1.getValue()+constInt2.getValue()));
-                inst.replaceOperator(v2,v2_2);
-                return inst;
             }
         }
 
@@ -233,18 +221,18 @@ public class SimplifyInst implements Pass {
             return intFlag ? ConstInt.ZERO : ConstFloat.ZERO;
         }
 
-        // (x + const1) - const2 = x + (const1 + const2)
-        // (const1 + x) - const2 = x + (const1 - const2)
+        // (x + const1) - const2 = x - (const2 - const1)
+        // (const1 + x) - const2 = x - (const2 - const1)
         if( v1 instanceof Add add ){
             Value v1_1 = add.getOperator(0), v1_2 = add.getOperator(1);
             if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
                 inst.replaceOperator(v1,v1_1);
-                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                inst.replaceOperator(v2,new ConstInt(constInt2.getValue()-constInt1.getValue()));
                 return inst;
             }
             if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
                 inst.replaceOperator(v1,v1_2);
-                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                inst.replaceOperator(v2,new ConstInt(constInt2.getValue()-constInt1.getValue()));
                 return inst;
             } else if( v1_1.equals(v2) ){
                 return v1_2;

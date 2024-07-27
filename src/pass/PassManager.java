@@ -25,13 +25,13 @@ public class PassManager {
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
         passes.add(new GepFuse());
-        passes.add(new InlineFunction());
+//        passes.add(new InlineFunction());
 
         // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
 //        passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
-//
+//        passes.add(new DeadCodeEmit());
         passes.add(new MergeBlocks());
 
         passes.add(new SideEffect());
@@ -42,18 +42,20 @@ public class PassManager {
 
         GVNGCMPass();
 
-
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
         passes.add(new UselessPhiEmit());
         passes.add(new MergeBlocks());
 
+
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
 
+//        passes.add(new CSE());
+
         passes.add(new MathOptimize());
-//
+
         passes.add(new InstructionCleanUp());
 
         passes.add(new GepSplit());

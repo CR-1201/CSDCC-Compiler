@@ -32,8 +32,8 @@ public class PassManager {
         passes.add(new MathOptimize());
 
         //FIXME SCCP后要加CFG?
-        passes.add(new CFG());
-        passes.add(new InlineFunction());
+//        passes.add(new CFG());
+//        passes.add(new InlineFunction());
 
 //        // SCCP后可能出现没有value的phi
         passes.add(new SCCP());

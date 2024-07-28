@@ -64,6 +64,14 @@ public class ArrayType extends ValueType{
         return numList;
     }
 
+    public ValueType getBaseType(){
+        ValueType baseType = elementType;
+        while (baseType instanceof ArrayType arrayType){
+            baseType = arrayType.getElementType();
+        }
+        return baseType;
+    }
+
     @Override
     public int getSize(){
         return size;

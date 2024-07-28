@@ -166,12 +166,13 @@ public class VarDef extends Node{
 
                 builder.buildCall(curBlock, Function.memset, argList);
 
+                allocArray.setInitValues(valueArrayUp);
                 // 利用 store 往内存中存值
                 for (int i = 0; i < valueArrayUp.size(); i++){
 
                     Value source = valueArrayUp.get(i);
 
-                    if( source instanceof ConstStr) continue;
+                    if( source instanceof ConstStr ) continue;
 
                     GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
                     if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){

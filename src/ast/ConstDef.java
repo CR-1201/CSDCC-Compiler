@@ -96,6 +96,8 @@ public class ConstDef extends Node{
                     basePtr = builder.buildGEP(curBlock, basePtr, ConstInt.ZERO, ConstInt.ZERO);
                 }
 
+                allocArray.setInitValues(valueArrayUp);
+
                 // 利用 store 往内存中存值
                 for (int i = 0; i < valueArrayUp.size(); i++){
                     // 这里利用的是一维的 GEP,此时的返回值依然是 int*; 变长索引,依次赋值

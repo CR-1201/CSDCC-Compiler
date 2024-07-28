@@ -1,5 +1,6 @@
 package ir.constants;
 
+import ir.Value;
 import ir.types.ArrayType;
 import ir.types.ValueType;
 
@@ -34,6 +35,18 @@ public class ConstArray extends Constant {
 
     public Constant getElementByIndex(int index){
         return elements.get(index);
+    }
+
+    public ArrayList<Constant> getElements(){
+        ArrayList<Constant> elements = new ArrayList<>();
+        for( Constant element : this.elements ){
+            if( element instanceof ConstInt || element instanceof ConstFloat ){
+                elements.add(element);
+            } else {
+                elements.addAll(((ConstArray)element).getElements());
+            }
+        }
+        return elements;
     }
 
     @Override

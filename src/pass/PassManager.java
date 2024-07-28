@@ -25,6 +25,7 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
+        passes.add(new LocalArrayLift());
 
         passes.add(new ConstArrayFold());
         passes.add(new SCCP());
@@ -59,12 +60,12 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
-//
+
         passes.add(new MathOptimize());
 
         passes.add(new InstructionCleanUp());
 
-//        passes.add(new GepSplit());
+        passes.add(new GepSplit());
 
         for (Pass pass : passes) {
             pass.run();

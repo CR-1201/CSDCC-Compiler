@@ -75,6 +75,10 @@ public class Function extends Value{
 //        blocks.add(new BasicBlock());
     }
 
+    public HashSet<Function> getCallers(){
+        return callers;
+    }
+
     public boolean getIsBuiltIn(){
         return isBuiltIn;
     }

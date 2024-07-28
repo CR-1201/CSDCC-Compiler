@@ -26,6 +26,7 @@ public class PassManager {
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
 
+        passes.add(new ConstArrayFold());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
@@ -39,10 +40,10 @@ public class PassManager {
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
-////        passes.add(new UselessReturnEmit());
+//        passes.add(new UselessReturnEmit());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-        GVNGCMPass();
 
+        GVNGCMPass();
 
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
@@ -62,8 +63,8 @@ public class PassManager {
         passes.add(new MathOptimize());
 
         passes.add(new InstructionCleanUp());
-//
-        passes.add(new GepSplit());
+
+//        passes.add(new GepSplit());
 
         for (Pass pass : passes) {
             pass.run();

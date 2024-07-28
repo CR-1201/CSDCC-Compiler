@@ -11,6 +11,10 @@ import pass.analysis.LoopVarAnalysis;
 
 /**
  * 把重复计算的循环给进行折叠
+ * while (i < n) {
+ *     var = var + k; (这里的变量会进行重复的计算)
+ *     i = i + 1;
+ * }
  */
 public class LoopFold implements Pass {
     private final IrBuilder irBuilder = IrBuilder.getIrBuilder();
@@ -19,7 +23,7 @@ public class LoopFold implements Pass {
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
-
+                loopFold(function);
             }
         }
     }
@@ -37,6 +41,11 @@ public class LoopFold implements Pass {
 
     }
 
+    /**
+     * 判断循环是否满足折叠的条件
+     * @param loop 循环
+     * @return true/false
+     */
     private Boolean isFoldingLoop(Loop loop) {
         BasicBlock exit = null;
         if (!loop.isSimpleLoop() || !loop.getIsSetInductorVar()) {

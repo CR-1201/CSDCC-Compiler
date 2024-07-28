@@ -90,6 +90,7 @@ public class LoopUnroll implements Pass {
         }
         int loopTimes = loop.computeLoopTimes(init, end, step, idcAlu, cond.getCondition());
         if (loopTimes <= 0) {
+            // 说明这个 loop 其实是无用的 loop，可以直接删掉
             return;
         } else {
             loop.setLoopTimes(loopTimes);

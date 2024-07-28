@@ -176,6 +176,7 @@ public class ObjBuilder {
         for (BasicBlock basicBlock : function.getBlocksFromDom()) {
             objFunction.addObjBlock(buildBasicBlock(objFunction, basicBlock));
         }
+
         return objFunction;
     }
 
@@ -205,8 +206,6 @@ public class ObjBuilder {
             return buildRet((Ret) instruction, objBlock, objFunction);
         } else if (instruction instanceof Call) {
             return buildCall((Call) instruction, objBlock, objFunction);
-        } else if (instruction instanceof Icmp) {
-            return null;
         } else if (instruction instanceof BinaryInstruction) {
             return buildBinary((BinaryInstruction) instruction, objBlock, objFunction);
         } else if (instruction instanceof GEP) {
@@ -214,7 +213,7 @@ public class ObjBuilder {
         } else if (instruction instanceof Zext) {
             Value con = ((Zext) instruction).getConversionValue();
             if (con instanceof Icmp cond) {
-                objBlock.addInstruction(buildBinary(cond, objBlock, objFunction));
+//                objBlock.addInstruction(buildBinary(cond, objBlock, objFunction));
                 ObjRegister rd = createVirRegister(instruction);
                 ObjMove tmove = new ObjMove(rd, new ObjImmediate(1), false, true);
                 tmove.setCond(ObjInstruction.ObjCond.switchIr2Obj(cond.getCondition()));
@@ -233,72 +232,109 @@ public class ObjBuilder {
 
     private ObjInstruction buildGEP(GEP gep, ObjBlock objBlock, ObjFunction objFunction) {
         Value base = gep.getBase();
-        ValueType baseType = gep.getBaseType();
+        ValueType type = gep.getBaseType();
         ObjOperand rs = v2mMap.containsKey(base) ? v2mMap.get(base) : putNewVGtoMap(base, objFunction, objBlock);
         ObjOperand rd = createVirRegister(gep);
         if (base instanceof GlobalVariable) {
             objBlock.addInstruction(new ObjMove(rs, new ObjLabel(base.getName().substring(1), true), false, false));
 //            objBlock.addInstruction(new ObjLoad(rs, rs, base.getValueType().isFloat()));
         }
-        ArrayList<Value> indexes = gep.getIndex();
-        if (indexes.size() == 1) {  // gep 1
-            Value off1 = indexes.get(0);
-            if (off1 instanceof ConstInt) {
-                if (((ConstInt) off1).getValue() != 0) {
-                    return new Binary(rd, rs, solveImm(((ConstInt) off1).getValue() * baseType.getSize(), objBlock), Binary.BinaryType.add);
-                } else {
-                    v2mMap.put(gep, rs);
-                }
+        List<Value> indexes = gep.getIndex();
+        int offset = 0;
+        boolean trans2rd = false;
+        ObjOperand tmp = new ObjVirRegister();
+        for (Value index : indexes) {
+            if (index instanceof ConstInt) {
+                offset += ((ConstInt) index).getValue() * type.getSize();
             } else {
-                ObjRegister off = v2mMap.containsKey(off1) ? (ObjRegister) v2mMap.get(off1) : putNewVGtoMap(off1, objFunction, objBlock);
-//                    objBlock.addMIPSInstruction(new IInstruction("mul  ", off, rd, new MIPSImmediate(baseType.getSize())));
-                objBlock.addInstruction(new ObjMove(rd, new ObjImmediate(baseType.getSize()), false, true));
-                ObjInstruction i = new MLA(rd, off, rd, rs);
-//                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
-                return i;
+                ObjOperand off = v2mMap.containsKey(index) ? v2mMap.get(index) : putNewVGtoMap(index, objFunction, objBlock);
+                objBlock.addInstruction(new ObjMove(tmp, new ObjImmediate(type.getSize()), false, true));
+                if (!trans2rd) {
+                    objBlock.addInstruction(new MLA(rd, off, tmp, rs));
+                } else
+                    objBlock.addInstruction(new MLA(rd, off, tmp, rd));
+                trans2rd = true;
             }
-        } else {    // gep 1 2
-            ValueType elementType = ((ArrayType) baseType).getElementType();
-            Value off1 = indexes.get(0);
-            Value off2 = indexes.get(1);
-            if (off1 instanceof ConstInt) {
-                if (((ConstInt) off1).getValue() != 0) {
-                    objBlock.addInstruction(new Binary(rd, rs, solveImm(((ConstInt) off1).getValue() * baseType.getSize(), objBlock), Binary.BinaryType.add));
-                } else {
-                    objBlock.addInstruction(new ObjMove(rd, rs, false, false));
-                }
-            } else {
-                ObjOperand off = v2mMap.containsKey(off1) ? v2mMap.get(off1) : putNewVGtoMap(off1, objFunction, objBlock);
-//                objBlock.addInstruction(new Binary(off, off, solveImm(baseType.getSize(), objBlock), Binary.BinaryType.mul));
-//                ObjInstruction i = new Binary(rd, rs, off, Binary.BinaryType.add);
-////                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
-//                objBlock.addInstruction(i);
-                objBlock.addInstruction(new ObjMove(rd, new ObjImmediate(baseType.getSize()), false, true));
-                objBlock.addInstruction(new MLA(rd, off, rd, rs));
-            }
-            if (off2 instanceof ConstInt) {
-                if (((ConstInt) off2).getValue() != 0) {
-                    objBlock.addInstruction(new Binary(rd, rd, solveImm(((ConstInt) off2).getValue() * elementType.getSize(), objBlock), Binary.BinaryType.add));
-//                        v2mMap.replace(instruction, rd);
-                } else {
-//                    objBlock.addInstruction(new ObjMove(rd, rd));
-                }
-            } else {
-                ObjOperand off = v2mMap.containsKey(off2) ? v2mMap.get(off2) : putNewVGtoMap(off2, objFunction, objBlock);
-//                    objBlock.addMIPSInstruction(new IInstruction("mul  ", off, off, new MIPSImmediate(elementType.getSize())));
-//                MIPSRegister tmp2 = new VirtualRegister();
-//                MulOptimizer.mulOptimization(objBlock, tmp2, off, new MIPSImmediate(elementType.getSize()));
-//                    v2mMap.replace(instruction, rd);
-//                objBlock.addInstruction(new Binary(off, off, solveImm(elementType.getSize(), objBlock), Binary.BinaryType.mul));
-//                ObjInstruction i = new Binary(rd, rd, off, Binary.BinaryType.add);
-//                i.setShift(new Shift(Binary.BinaryType.sl, elementType.getSize() / 2));
-                ObjRegister tmp = new ObjVirRegister();
-                objBlock.addInstruction(new ObjMove(tmp, new ObjImmediate(elementType.getSize()), false, true));
-                return new MLA(rd, off, tmp, rd);
-            }
+            if (type instanceof ArrayType)
+                type = ((ArrayType) type).getElementType();
+        }
+        if (offset != 0) {
+            objBlock.addInstruction(new ObjMove(tmp, new ObjImmediate(offset), false, true));
+            objBlock.addInstruction(new Binary(rd, (trans2rd ? rd : rs), tmp, Binary.BinaryType.add));
+        } else if (!trans2rd) {
+            v2mMap.put(gep, rs);
         }
         return null;
     }
+
+//    private ObjInstruction buildGEP(GEP gep, ObjBlock objBlock, ObjFunction objFunction) {
+//        Value base = gep.getBase();
+//        ValueType baseType = gep.getBaseType();
+//        ObjOperand rs = v2mMap.containsKey(base) ? v2mMap.get(base) : putNewVGtoMap(base, objFunction, objBlock);
+//        ObjOperand rd = createVirRegister(gep);
+//        if (base instanceof GlobalVariable) {
+//            objBlock.addInstruction(new ObjMove(rs, new ObjLabel(base.getName().substring(1), true), false, false));
+////            objBlock.addInstruction(new ObjLoad(rs, rs, base.getValueType().isFloat()));
+//        }
+//        ArrayList<Value> indexes = gep.getIndex();
+//        if (indexes.size() == 1) {  // gep 1
+//            Value off1 = indexes.get(0);
+//            if (off1 instanceof ConstInt) {
+//                if (((ConstInt) off1).getValue() != 0) {
+//                    return new Binary(rd, rs, solveImm(((ConstInt) off1).getValue() * baseType.getSize(), objBlock), Binary.BinaryType.add);
+//                } else {
+//                    v2mMap.put(gep, rs);
+//                }
+//            } else {
+//                ObjRegister off = v2mMap.containsKey(off1) ? (ObjRegister) v2mMap.get(off1) : putNewVGtoMap(off1, objFunction, objBlock);
+////                    objBlock.addMIPSInstruction(new IInstruction("mul  ", off, rd, new MIPSImmediate(baseType.getSize())));
+//                objBlock.addInstruction(new ObjMove(rd, new ObjImmediate(baseType.getSize()), false, true));
+//                ObjInstruction i = new MLA(rd, off, rd, rs);
+////                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
+//                return i;
+//            }
+//        } else {    // gep 1 2
+//            ValueType elementType = ((ArrayType) baseType).getElementType();
+//            Value off1 = indexes.get(0);
+//            Value off2 = indexes.get(1);
+//            if (off1 instanceof ConstInt) {
+//                if (((ConstInt) off1).getValue() != 0) {
+//                    objBlock.addInstruction(new Binary(rd, rs, solveImm(((ConstInt) off1).getValue() * baseType.getSize(), objBlock), Binary.BinaryType.add));
+//                } else {
+//                    objBlock.addInstruction(new ObjMove(rd, rs, false, false));
+//                }
+//            } else {
+//                ObjOperand off = v2mMap.containsKey(off1) ? v2mMap.get(off1) : putNewVGtoMap(off1, objFunction, objBlock);
+////                objBlock.addInstruction(new Binary(off, off, solveImm(baseType.getSize(), objBlock), Binary.BinaryType.mul));
+////                ObjInstruction i = new Binary(rd, rs, off, Binary.BinaryType.add);
+//////                i.setShift(new Shift(Binary.BinaryType.sl, baseType.getSize() / 2));
+////                objBlock.addInstruction(i);
+//                objBlock.addInstruction(new ObjMove(rd, new ObjImmediate(baseType.getSize()), false, true));
+//                objBlock.addInstruction(new MLA(rd, off, rd, rs));
+//            }
+//            if (off2 instanceof ConstInt) {
+//                if (((ConstInt) off2).getValue() != 0) {
+//                    objBlock.addInstruction(new Binary(rd, rd, solveImm(((ConstInt) off2).getValue() * elementType.getSize(), objBlock), Binary.BinaryType.add));
+////                        v2mMap.replace(instruction, rd);
+//                } else {
+////                    objBlock.addInstruction(new ObjMove(rd, rd));
+//                }
+//            } else {
+//                ObjOperand off = v2mMap.containsKey(off2) ? v2mMap.get(off2) : putNewVGtoMap(off2, objFunction, objBlock);
+////                    objBlock.addMIPSInstruction(new IInstruction("mul  ", off, off, new MIPSImmediate(elementType.getSize())));
+////                MIPSRegister tmp2 = new VirtualRegister();
+////                MulOptimizer.mulOptimization(objBlock, tmp2, off, new MIPSImmediate(elementType.getSize()));
+////                    v2mMap.replace(instruction, rd);
+////                objBlock.addInstruction(new Binary(off, off, solveImm(elementType.getSize(), objBlock), Binary.BinaryType.mul));
+////                ObjInstruction i = new Binary(rd, rd, off, Binary.BinaryType.add);
+////                i.setShift(new Shift(Binary.BinaryType.sl, elementType.getSize() / 2));
+//                ObjRegister tmp = new ObjVirRegister();
+//                objBlock.addInstruction(new ObjMove(tmp, new ObjImmediate(elementType.getSize()), false, true));
+//                return new MLA(rd, off, tmp, rd);
+//            }
+//        }
+//        return null;
+//    }
 
     private ObjInstruction buildBinary(BinaryInstruction binary, ObjBlock objBlock, ObjFunction objFunction) {
 
@@ -514,7 +550,7 @@ public class ObjBuilder {
             return new ObjJump(new ObjBlock(ops.get(0).getName()));
         } else {
             Icmp condition = (Icmp) ops.get(0);
-            objBlock.addInstruction(buildBinary(condition, objBlock, objFunction));
+//            objBlock.addInstruction(buildBinary(condition, objBlock, objFunction));
             objBlock.addInstruction(new ObjJump(ObjInstruction.ObjCond.switchIr2Obj(condition.getCondition()), new ObjBlock(ops.get(1).getName())));
             succMap.get(objBlock.getName())[0] = ops.get(1).getName().substring(1);
             succMap.get(objBlock.getName())[1] = ops.get(2).getName().substring(1);

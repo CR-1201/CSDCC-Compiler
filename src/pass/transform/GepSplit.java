@@ -85,9 +85,7 @@ public class GepSplit implements Pass {
         if( gep.getIndex().size() > 1 ){
             return false;
         }
-        if( gep.getIndex().isEmpty() ){
-            System.out.println(gep);
-        }
+
         Value value = gep.getIndex().get(0);
         return value instanceof ConstInt constInt && constInt.getValue() == 0 ;
     }

@@ -134,4 +134,7 @@ public class CloneUtil {
     public void insertCloneMap(Value key, Value value) {
         cloneMap.put(key, value);
     }
+    public void clearCloneMap() {
+        cloneMap.clear();
+    }
 }

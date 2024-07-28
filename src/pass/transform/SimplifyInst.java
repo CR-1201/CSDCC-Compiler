@@ -22,6 +22,7 @@ import java.util.ArrayList;
  */
 public class SimplifyInst implements Pass {
     private final Module module = Module.getModule();
+
     public void run() {
         for (Function function : module.getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
@@ -77,9 +78,11 @@ public class SimplifyInst implements Pass {
         if( v1 instanceof ConstInt || v1 instanceof ConstFloat ){
             inst.setOperator(0,v2);
             inst.setOperator(1,v1);
+            inst.setOperator(0,v2);
             v1 = inst.getOperator(0);
             v2 = inst.getOperator(1);
         }
+
 
 //        if( inst.getName().equals("%v72") ){
 //            System.out.println(inst);
@@ -91,6 +94,7 @@ public class SimplifyInst implements Pass {
             return v1;
         }
 
+
         // x + (const - x) = const || (const - x) + x = const
         if( checkAdd(v2,v1) || checkAdd(v1,v2) ){
             return intFlag ? constInt : constFloat;
@@ -98,7 +102,6 @@ public class SimplifyInst implements Pass {
 
         // (a - b) + (b - a) = 0
         if( v1 instanceof Sub sub1 && v2 instanceof Sub sub2){
-
             Value v1_1 = sub1.getOperator(0), v1_2 = sub1.getOperator(1);
             Value v2_1 = sub2.getOperator(0), v2_2 = sub2.getOperator(1);
             if( v1_1.equals(v2_2) && v1_2.equals(v2_1) ){
@@ -116,10 +119,70 @@ public class SimplifyInst implements Pass {
         }
 
         if( v2 instanceof Sub sub2 ){
-
             Value v2_1 = sub2.getOperator(0), v2_2 = sub2.getOperator(1);
             // x + (y - x) = y
             if( v2_2.equals(v1) ){
+                return v2_1;
+            }
+        }
+
+        if( !intFlag ) return inst;
+
+        // (x + const1) + const2 = x + (const1 + const2)
+        // (const1 + x) + const2 = x + (const1 + const2)
+        // TODO 暂时只考虑整数
+        if( v1 instanceof Add add ){
+            Value v1_1 = add.getOperator(0), v1_2 = add.getOperator(1);
+            if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v1_1);
+                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()+constInt2.getValue()));
+                return inst;
+            }
+            if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v1_2);
+                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()+constInt2.getValue()));
+                return inst;
+            }
+        }
+
+        // (x - const1) + const2 = x + (const2 - const1)
+        // TODO (const1 - x) + const2 = (const1 + const2) - x
+        if( v1 instanceof Sub sub ){
+            Value v1_1 = sub.getOperator(0), v1_2 = sub.getOperator(1);
+            if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v1_1);
+                inst.replaceOperator(v2,new ConstInt(constInt2.getValue()-constInt1.getValue()));
+                return inst;
+            } else if( v1_2.equals(v2) ){
+                return v1_1;
+            }
+        }
+
+        // const1 + (x + const2) = x + (const1 + const2)
+        // const1 + (const2 + x) = x + (const1 + const2)
+        if( v2 instanceof Add add ){
+            Value v2_1 = add.getOperator(0), v2_2 = add.getOperator(1);
+            if( v2_2 instanceof ConstInt constInt1 && v1 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v2_1);
+                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()+constInt2.getValue()));
+                return inst;
+            }
+            if( v2_1 instanceof ConstInt constInt1 && v1 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v2_2);
+                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()+constInt2.getValue()));
+                return inst;
+            }
+        }
+
+        // const1 + (x - const2) = x + (const1 - const2)
+        //TODO const1 + (const2 - x) = (const1 + const2) - x
+        if( v2 instanceof Sub sub ){
+            Value v2_1 = sub.getOperator(0), v2_2 = sub.getOperator(1);
+            if( v1 instanceof ConstInt constInt1 && v2_2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v2_1);
+                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                return inst;
+            } else if( v1.equals(v2_2) ){
                 return v2_1;
             }
         }
@@ -163,6 +226,80 @@ public class SimplifyInst implements Pass {
             return intFlag ? ConstInt.ZERO : ConstFloat.ZERO;
         }
 
+        if( !intFlag ) return inst;
+
+        // (x + const1) - const2 = x - (const2 - const1)
+        // (const1 + x) - const2 = x - (const2 - const1)
+        if( v1 instanceof Add add ){
+            Value v1_1 = add.getOperator(0), v1_2 = add.getOperator(1);
+            if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v1_1);
+                inst.replaceOperator(v2,new ConstInt(constInt2.getValue()-constInt1.getValue()));
+                return inst;
+            }
+            if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v1_2);
+                inst.replaceOperator(v2,new ConstInt(constInt2.getValue()-constInt1.getValue()));
+                return inst;
+            } else if( v1_1.equals(v2) ){
+                return v1_2;
+            }
+        }
+
+        // (x - const1) - const2 = x - (const1 + const2)
+        // (const1 - x) - const2 = (const1 - const2) - x
+        if( v1 instanceof Sub sub ){
+            Value v1_1 = sub.getOperator(0), v1_2 = sub.getOperator(1);
+            if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,v1_1);
+                inst.replaceOperator(v2,new ConstInt(constInt1.getValue()+constInt2.getValue()));
+                return inst;
+            }
+            if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                inst.replaceOperator(v2,v1_2);
+                return inst;
+            } else if( v1_1.equals(v2) ){
+                inst.replaceOperator(v1,new ConstInt(0));
+                inst.replaceOperator(v2,v1_2);
+                return inst;
+            }
+        }
+
+        // const1 - (x + const2) = (const1 - const2) - x
+        // const1 - (const2 + x) = (const1 - const2) - x
+        if( v2 instanceof Add add ){
+            Value v2_1 = add.getOperator(0), v2_2 = add.getOperator(1);
+            if( v1 instanceof ConstInt constInt1 && v2_2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                inst.replaceOperator(v2,v2_1);
+                return inst;
+            } else if( v1.equals(v2_2) ){
+                inst.replaceOperator(v1,new ConstInt(0));
+                inst.replaceOperator(v2,v2_1);
+                return inst;
+            }
+            if( v1 instanceof ConstInt constInt1 && v2_1 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                inst.replaceOperator(v2,v2_2);
+                return inst;
+            } else if( v1.equals(v2_1) ){
+                inst.replaceOperator(v1,new ConstInt(0));
+                inst.replaceOperator(v2,v2_2);
+                return inst;
+            }
+        }
+
+        // const1 - (x - const2) = (const1 + const2) - x
+        // TODO: const1 - (const2 - x) = (const1 - const2) + x
+        if( v2 instanceof Sub sub ){
+            Value v2_1 = sub.getOperator(0), v2_2 = sub.getOperator(1);
+            if( v1 instanceof ConstInt constInt1 && v2_2 instanceof ConstInt constInt2){
+                inst.replaceOperator(v1,new ConstInt(constInt1.getValue()+constInt2.getValue()));
+                inst.replaceOperator(v2,v2_1);
+                return inst;
+            }
+        }
         return inst;
     }
 
@@ -179,6 +316,7 @@ public class SimplifyInst implements Pass {
         if( v1 instanceof ConstInt || v1 instanceof ConstFloat ){
             inst.setOperator(0,v2);
             inst.setOperator(1,v1);
+            inst.setOperator(0,v2);
             v1 = inst.getOperator(0);
             v2 = inst.getOperator(1);
         }
@@ -193,6 +331,26 @@ public class SimplifyInst implements Pass {
         if( (v2 instanceof ConstInt && ((ConstInt)v2).getValue() == 1) ||
                 (v2 instanceof ConstFloat && ((ConstFloat)v2).getValue() == 1) ){
             return v1;
+        }
+
+
+        if( intFlag ){
+
+            // (x * const1) * const2 = x * (const1 * const2)
+            // (const1 * x) * const2 = x * (const1 * const2)
+            if( v1 instanceof Mul mul){
+                Value v1_1 = mul.getOperator(0), v1_2 = mul.getOperator(1);
+                if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                    inst.replaceOperator(v1,v1_1);
+                    inst.replaceOperator(v2,new ConstInt(constInt1.getValue()*constInt2.getValue()));
+                    return inst;
+                }
+                if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                    inst.replaceOperator(v1,v1_2);
+                    inst.replaceOperator(v2,new ConstInt(constInt1.getValue()*constInt2.getValue()));
+                    return inst;
+                }
+            }
         }
 
         return inst;
@@ -225,8 +383,9 @@ public class SimplifyInst implements Pass {
             return v1;
         }
 
-        // a = a * b / b 注意 这里不考虑浮点数 存在误差
+
         if( intFlag ){
+            // a = a * b / b 注意 这里不考虑浮点数 存在误差
              if( v1 instanceof Mul mul){
                 Value v1_1 = mul.getOperator(0), v1_2 = mul.getOperator(1);
                 // a = a * b / b
@@ -245,6 +404,17 @@ public class SimplifyInst implements Pass {
                      return v1_2;
                  }
              }
+
+            // (x / const1) / const2 = x / (const1 * const2)
+            if( v1 instanceof Sdiv sdiv){
+                Value v1_1 = sdiv.getOperator(0), v1_2 = sdiv.getOperator(1);
+                if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                    inst.replaceOperator(v1,v1_1);
+                    inst.replaceOperator(v2,new ConstInt(constInt1.getValue()*constInt2.getValue()));
+                    return inst;
+                }
+            }
+
         }
 
         return inst;

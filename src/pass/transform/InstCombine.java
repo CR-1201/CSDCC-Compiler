@@ -3,6 +3,7 @@ package pass.transform;
 import ir.BasicBlock;
 import ir.Function;
 import ir.Module;
+import ir.Value;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.BinaryInstruction;
 import pass.Pass;
@@ -27,5 +28,19 @@ public class InstCombine implements Pass {
                 }
             }
         }
+    }
+
+    /**
+     * a = b + 1;
+     * b = c + 1;
+     * => a = c + 2;
+     * @param src 原指令
+     * @param tgt 合并的目标指令
+     */
+    private void instCombineAddSub(BinaryInstruction src, BinaryInstruction tgt) {
+        Value leftSrc = src.getOp1();
+        Value leftTgt = tgt.getOp1();
+        Value rightSrc = src.getOp2();
+        Value rightTgt = tgt.getOp2();
     }
 }

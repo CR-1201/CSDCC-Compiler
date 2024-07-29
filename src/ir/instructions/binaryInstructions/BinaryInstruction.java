@@ -58,15 +58,11 @@ public abstract class BinaryInstruction extends Instruction {
     }
 
     /**
-     * Binary Instruction 的两个操作数中，只有一个操作数是常数
+     * Binary Instruction 的两个操作数中，只有一个操作数是常数，另一个是变量
      */
-    public Boolean onlyConstOperator() {
+    public Boolean with1Const() {
         boolean isLeftConst = getOp1() instanceof Constant;
         boolean isRightConst = getOp2() instanceof Constant;
-        if (isLeftConst && isRightConst){
-            return false;
-        } else {
-            return isLeftConst || isRightConst;
-        }
+        return (isLeftConst && !isRightConst) || (!isLeftConst && isRightConst);
     }
 }

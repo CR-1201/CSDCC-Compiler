@@ -5,6 +5,7 @@ import ir.Module;
 import ir.constants.*;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Alloca;
+import ir.instructions.otherInstructions.Call;
 import ir.types.ArrayType;
 import ir.types.IntType;
 import ir.types.ValueType;
@@ -79,13 +80,16 @@ public class LocalArrayLift implements Pass {
                                 continue;
                             }
                             if( originInitValues.get(j) instanceof ConstInt constInt){
-                                initValues.set(i, constInt);
+                                initValues.set(j, constInt);
                             }
                         }
 
                         ArrayList<Instruction> initInstructions = alloca.initInstructions;
                         for( Instruction inst : initInstructions ){
-                            inst.removeSelf();
+                            if( inst instanceof Call ){
+                                constFlag = false;
+                                inst.removeSelf();
+                            }
                         }
 
                         String name = "lift_" + alloca.getName().replace("%", "");

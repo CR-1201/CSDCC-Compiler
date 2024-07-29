@@ -48,6 +48,8 @@ public class Function extends Value{
     private boolean sideEffect = false;
     //调用图相关
     private final HashSet<Function> callers = new HashSet<>();
+    // 唯一出口块
+    private BasicBlock finalExitBlock;
 
 
     // ============================== Loop Info ================================
@@ -104,6 +106,14 @@ public class Function extends Value{
     // 函数开头基本块
     public BasicBlock getFirstBlock(){
         return (BasicBlock) blocks.get(0);
+    }
+
+    public BasicBlock getFinalExitBlock() {
+        return finalExitBlock;
+    }
+
+    public void setFinalExitBlock(BasicBlock finalExitBlock) {
+        this.finalExitBlock = finalExitBlock;
     }
 
     /**

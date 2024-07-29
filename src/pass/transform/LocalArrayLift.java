@@ -4,7 +4,6 @@ import ir.*;
 import ir.Module;
 import ir.constants.*;
 import ir.instructions.Instruction;
-import ir.instructions.binaryInstructions.Sub;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Store;

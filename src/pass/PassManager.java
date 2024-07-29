@@ -47,6 +47,11 @@ public class PassManager {
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
         GVNGCMPass();
+
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+
         passes.add(new GepFuse());
 
         passes.add(new LCSSA());
@@ -54,13 +59,9 @@ public class PassManager {
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
 
-
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+        passes.add(new GepSplit());
 
 //        passes.add(new CSE());
-
         // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
@@ -68,9 +69,15 @@ public class PassManager {
 
         passes.add(new MathOptimize());
 
+        GVNGCMPass();
+
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+
         passes.add(new InstructionCleanUp());
 
-        passes.add(new GepSplit());
+
         for (Pass pass : passes) {
             pass.run();
         }

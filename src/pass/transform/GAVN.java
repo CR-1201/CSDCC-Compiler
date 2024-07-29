@@ -2,6 +2,7 @@ package pass.transform;
 
 import ir.*;
 import ir.Module;
+import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
@@ -51,7 +52,6 @@ public class GAVN implements Pass {
     }
 
     private void arrayGVN(Function function) {
-
         ArrayList<BasicBlock> basicBlocks = function.getBasicBlocksArray();
         for(BasicBlock basicBlock : basicBlocks){
             GAVNMap.clear();
@@ -76,12 +76,25 @@ public class GAVN implements Pass {
                     GAVNMap.put(load.getAddr(), load);
                 }
             } else if( instruction instanceof Store store){
-                GAVNMap.remove(store.getAddr());
+                if( mysteriousStore( store.getAddr() ) ){
+                    GAVNMap.clear();
+                } else GAVNMap.remove( store.getAddr() );
             } else if( instruction instanceof Call call && !(is_pure.containsKey(call.getFunction()) && is_pure.get(call.getFunction())) ){
                 //保守起见 碰到call非纯函数就清空
                 GAVNMap.clear();
             }
         }
+    }
+
+    private boolean mysteriousStore(Value pointer) {
+        if( pointer instanceof GEP gep ){
+            for( Value value : gep.getIndex() ){
+                if( !(value instanceof ConstInt) ){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void replaceLoad(BasicBlock basicBlock) {
@@ -92,6 +105,11 @@ public class GAVN implements Pass {
                 load.replaceAllUsesWith((GAVNMap.get(load.getAddr())));
                 load.removeSelf();
             } else if( instruction instanceof Store store ){
+                if( mysteriousStore( store.getAddr() ) ){
+                    GAVNMap.clear();
+                    tempRemoves.clear();
+                    break;
+                }
                 Value key = store.getAddr();
                 if( GAVNMap.containsKey(key) ){
                     Value value = GAVNMap.get(key);
@@ -113,6 +131,9 @@ public class GAVN implements Pass {
         for( BasicBlock basicBlock : basicBlocks ){
             ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
             for( Instruction instruction : instructions ){
+                if( instruction instanceof Store store && mysteriousStore( store.getAddr() ) ){
+                    geps.clear();
+                }
                 if( instruction instanceof GEP gep){
                     geps.add(gep);
                 }

@@ -38,13 +38,15 @@ public class ConstArrayFold implements Pass {
                     if( instruction instanceof Store store ){
                         Value pointer = store.getAddr();
                         Value root = AliasAnalysis.searchRoot(pointer);
-                        if( root instanceof GlobalVariable globalVariable && globalVariable.getInitVal() instanceof ConstArray){
+                        if( root instanceof GlobalVariable globalVariable ){
                             globalVariableArray.remove(globalVariable);
                         }
                     } else if( instruction instanceof Call call ){
                         for( Value arg : call.getArgs() ){
                             Value root = AliasAnalysis.searchRoot(arg);
-                            if( root instanceof GlobalVariable globalVariable && globalVariable.getInitVal() instanceof ConstArray){
+//                            System.out.println(call);
+                            if( root instanceof GlobalVariable globalVariable ){
+//                                System.out.println(root);
                                 globalVariableArray.remove(globalVariable);
                             }
                         }

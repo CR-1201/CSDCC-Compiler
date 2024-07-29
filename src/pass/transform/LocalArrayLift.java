@@ -4,6 +4,7 @@ import ir.*;
 import ir.Module;
 import ir.constants.*;
 import ir.instructions.Instruction;
+import ir.instructions.binaryInstructions.Sub;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.otherInstructions.Call;
 import ir.types.ArrayType;
@@ -80,16 +81,16 @@ public class LocalArrayLift implements Pass {
                             if (originInitValues.get(j) instanceof ConstInt constInt) {
                                 initValues.set(j, constInt);
                             }
+                            if( originInitValues.get(j) instanceof Sub sub ){
+                                Value v1 = sub.getOperator(0), v2 = sub.getOperator(1);
+                                if( v1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2 ){
+                                    initValues.set(j, new ConstInt(constInt1.getValue()-constInt2.getValue()));
+                                }
+                            }
+
                         }
 
                         ArrayList<Instruction> initInstructions = alloca.initInstructions;
-
-                        for (Instruction inst : initInstructions) {
-                            if (inst instanceof Call) {
-                                constFlag = false;
-                            }
-                            inst.removeSelf();
-                        }
 
                         String name = "lift_" + alloca.getName().replace("%", "");
                         boolean isAllZero = true;
@@ -99,6 +100,14 @@ public class LocalArrayLift implements Pass {
                                 break;
                             }
                         }
+
+                        for (Instruction inst : initInstructions) {
+                            if (inst instanceof Call) {
+                                constFlag = false;
+                            }
+                            inst.removeSelf();
+                        }
+
                         if (isAllZero) {
                             ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
                             GlobalVariable globalVariable = builder.buildGlobalVariable(name, zeroInitializer, constFlag);

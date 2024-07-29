@@ -26,7 +26,7 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
-//        passes.add(new LocalArrayLift());
+        passes.add(new LocalArrayLift());
         // LocalArrayLift只用一次
 
         passes.add(new ConstArrayFold());

@@ -2,15 +2,13 @@ package pass.transform;
 
 import ir.*;
 import ir.Module;
-import ir.constants.ConstArray;
-import ir.constants.ConstFloat;
-import ir.constants.ConstInt;
-import ir.constants.Constant;
+import ir.constants.*;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
+import ir.types.*;
 import pass.Pass;
 import pass.analysis.AliasAnalysis;
 
@@ -106,13 +104,24 @@ public class ConstArrayFold implements Pass {
     private Value getGlobalArrayValue( GlobalVariable globalVariable, ArrayList<Integer> indexes ){
         Constant initVal = globalVariable.getInitVal();
 
-        for (Integer index : indexes) {
+        if( initVal instanceof ZeroInitializer zeroInitializer){
+            ValueType valueType = zeroInitializer.getValueType();
+            if( valueType instanceof ArrayType arrayType ){
+                if( arrayType.getBaseType() instanceof IntType){
+                    return new ConstInt(0);
+                }
+                if( arrayType.getBaseType() instanceof FloatType){
+                    return new ConstInt(0);
+                }
+            }
+        }
 
+        for (Integer index : indexes) {
             if (initVal instanceof ConstArray constArray) {
                 initVal = constArray.getElementByIndex(index);
             } else break;
         }
-        
+
 
         if( initVal instanceof ConstInt constInt ){
             return constInt;

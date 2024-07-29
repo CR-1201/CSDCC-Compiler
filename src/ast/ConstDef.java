@@ -6,8 +6,10 @@ import ir.Value;
 import ir.constants.ConstArray;
 import ir.constants.ConstInt;
 import ir.constants.Constant;
+import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.memoryInstructions.Store;
 import ir.types.*;
 import token.Token;
 
@@ -87,13 +89,17 @@ public class ConstDef extends Node{
                 // 登记符号表
                 irSymbolTable.addValue(ident, allocArray);
 
+                ArrayList<Instruction> initValInstructions = new ArrayList<>();
+
                 // 获得一个指针,这个指针指向初始化数组的一个元素
                 GEP basePtr = builder.buildGEP(curBlock, allocArray, ConstInt.ZERO, ConstInt.ZERO);
+                initValInstructions.add(basePtr);
 
                 for( int i = 1; i < dims.size(); i++ ){
                     // 如果是一个多维数组,继续 GEP,basePtr会变成一个指向具体的 int 的指针,即 int*
                     // basePtr 是指向 allocArray 基地址的
                     basePtr = builder.buildGEP(curBlock, basePtr, ConstInt.ZERO, ConstInt.ZERO);
+                    initValInstructions.add(basePtr);
                 }
 
                 allocArray.setInitValues(valueArrayUp);
@@ -104,15 +110,22 @@ public class ConstDef extends Node{
 
                     Value source = valueArrayUp.get(i);
                     GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
+                    initValInstructions.add(curPtr);
 
                     if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
                         source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
+                        initValInstructions.add((Instruction) source);
                     } else if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){
                         source = builder.buildConversion(curBlock,"sitofp",new FloatType(), source);
+                        initValInstructions.add((Instruction) source);
                     }
-                    
-                    builder.buildStore(curBlock, source, curPtr);
+
+                    Store store = builder.buildStore(curBlock, source, curPtr);
+                    initValInstructions.add(store);
                 }
+
+                allocArray.initInstructions = initValInstructions;
+                allocArray.parentBlock = curBlock;
             }
 
         }

@@ -4,9 +4,12 @@ import ir.Function;
 import ir.GlobalVariable;
 import ir.Value;
 import ir.constants.*;
+import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.BitCast;
+import ir.instructions.otherInstructions.Call;
 import ir.types.*;
 import token.Token;
 
@@ -143,12 +146,17 @@ public class VarDef extends Node{
             if (initVal != null) {
                 initVal.setDims(new ArrayList<>(dims));
                 initVal.buildIrTree();
+
+                ArrayList<Instruction> initValInstructions = new ArrayList<>();
+
                 GEP basePtr = builder.buildGEP(curBlock, allocArray, ConstInt.ZERO, ConstInt.ZERO);
+                initValInstructions.add(basePtr);
 
                 for( int i = 1; i < dims.size(); i++ ){
                     // 如果是一个多维数组,继续 GEP, basePtr会变成一个指向具体的 int 的指针,即 int*
                     // basePtr 是指向 allocArray 基地址的
                     basePtr = builder.buildGEP(curBlock, basePtr, ConstInt.ZERO, ConstInt.ZERO);
+                    initValInstructions.add(basePtr);
                 }
 
                 ArrayList<Value> argList = new ArrayList<>();
@@ -164,7 +172,8 @@ public class VarDef extends Node{
                 argList.add(new ConstInt(valueArrayUp.size()*4));
 
 
-                builder.buildCall(curBlock, Function.memset, argList);
+                Call call = builder.buildCall(curBlock, Function.memset, argList);
+                initValInstructions.add(call);
 
                 allocArray.setInitValues(valueArrayUp);
                 // 利用 store 往内存中存值
@@ -175,14 +184,22 @@ public class VarDef extends Node{
                     if( source instanceof ConstStr ) continue;
 
                     GEP curPtr = builder.buildGEP(curBlock, basePtr, new ConstInt(i));
+                    initValInstructions.add(curPtr);
+
                     if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof IntType && source.getValueType() instanceof FloatType){
                         source = builder.buildConversion(curBlock,"fptosi",new IntType(32), source);
+                        initValInstructions.add((Instruction) source);
                     } else if( ((PointerType) curPtr.getValueType()).getPointeeType() instanceof FloatType && source.getValueType() instanceof IntType){
                         source = builder.buildConversion(curBlock,"sitofp",new FloatType(), source);
+                        initValInstructions.add((Instruction) source);
                     }
 
-                    builder.buildStore(curBlock, source, curPtr);
+                    Store store = builder.buildStore(curBlock, source, curPtr);
+                    initValInstructions.add(store);
                 }
+
+                allocArray.initInstructions = initValInstructions;
+                allocArray.parentBlock = curBlock;
             }
         }
     }

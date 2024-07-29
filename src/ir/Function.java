@@ -46,9 +46,10 @@ public class Function extends Value{
     public final HashMap<String, Value> valueSymbolTable = new HashMap<>();
     // 当一个函数向内存中写值的时候,就是有副作用的
     private boolean sideEffect = false;
-    //调用图相关
+    //调用图相关 该函数调用的函数集合
+    private final HashSet<Function> callees = new HashSet<>();
+    // 调用该函数的集合
     private final HashSet<Function> callers = new HashSet<>();
-
 
     // ============================== Loop Info ================================
     private ArrayList<Loop> topLoops = new ArrayList<>();
@@ -73,6 +74,10 @@ public class Function extends Value{
         isBuiltIn = true;
         returnType = null;
 //        blocks.add(new BasicBlock());
+    }
+
+    public HashSet<Function> getCallees(){
+        return callees;
     }
 
     public HashSet<Function> getCallers(){
@@ -178,8 +183,17 @@ public class Function extends Value{
     }
 
     // 清除调用函数
+    public void clearCallees() {
+        this.callees.clear();
+    }
+
     public void clearCallers() {
         this.callers.clear();
+    }
+
+    // 增加调用函数
+    public void addCallee(Function func) {
+        this.callees.add(func);
     }
 
     // 增加调用函数
@@ -189,7 +203,7 @@ public class Function extends Value{
 
     // 获取调用函数列表
     public ArrayList<Function> getCallersArray() {
-        return new ArrayList<>(this.callers);
+        return new ArrayList<>(this.callees);
     }
 
 

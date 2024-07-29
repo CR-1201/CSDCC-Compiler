@@ -5,9 +5,6 @@ import ir.Module;
 import ir.constants.*;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Alloca;
-import ir.instructions.memoryInstructions.GEP;
-import ir.instructions.memoryInstructions.Store;
-import ir.instructions.otherInstructions.Call;
 import ir.types.ArrayType;
 import ir.types.IntType;
 import ir.types.ValueType;
@@ -40,15 +37,16 @@ public class LocalArrayLift implements Pass {
         ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
         for (BasicBlock basicBlock : blocks) {
 
-            if(basicBlock.getLoopDepth() != 0){
-                continue;
-            }
-
             ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
             for (int i = 0; i < instructions.size(); i++) {
                 Instruction instruction = instructions.get(i);
 //                System.out.println(instruction);
                 if( instruction instanceof Alloca alloca ){
+
+                    if(alloca.parentBlock != null && alloca.parentBlock.getLoopDepth() != 0){
+                        continue;
+                    }
+
                     ValueType valueType = alloca.getAllocatedType();
                     if( valueType instanceof ArrayType arrayType ){
 
@@ -59,7 +57,6 @@ public class LocalArrayLift implements Pass {
                         }
 
                         ArrayList<Value> originInitValues = alloca.getInitValues();
-
                         if( originInitValues == null ) continue;
 
                         ArrayList<Integer> numList = arrayType.getNumList();
@@ -74,48 +71,21 @@ public class LocalArrayLift implements Pass {
                         for (int j = 0; j < sum; j++) {
                             initValues.add(new ConstInt(0));
                         }
-                        Instruction gep = null;
-                        for( Value value : alloca.getUsers() ){
-                            if( value instanceof GEP value_gep ){
-                                gep = value_gep; //找到第一个GEP
-                                break;
-                            }
-                        }
-
-                        if( gep == null ){
-                            continue;
-                        }
-
-                        int k = instructions.indexOf(gep), x = 0;
-                        if( instructions.get(k+1) instanceof Call){
-                            constFlag = false;
-
-                            gep.removeSelf();
-
-                            Instruction memset = instructions.get(++k);
-                            memset.removeSelf();
-
-                            Instruction store_temp = instructions.get(++k);
-                            store_temp.removeSelf();
-
-                            x = 1; k++;
-                        }
-                        k--;
 
 
-                        for( int j = x; j < originInitValues.size() ; j++ ){
+                        for( int j = 0; j < originInitValues.size() ; j++ ){
 //                            System.out.println(originInitValues.get(j));
                             if( originInitValues.get(j) instanceof ConstStr ){
                                 continue;
                             }
-                            Instruction temp_gep = instructions.get(++k);
-                            Instruction temp_store = instructions.get(++k);
-//                            System.out.println(k);
-                            if( temp_store instanceof Store store && store.getValue() instanceof ConstInt ){
-                                initValues.set(j,store.getValue());
-                                temp_gep.removeSelf();
-                                temp_store.removeSelf();
+                            if( originInitValues.get(j) instanceof ConstInt constInt){
+                                initValues.set(i, constInt);
                             }
+                        }
+
+                        ArrayList<Instruction> initInstructions = alloca.initInstructions;
+                        for( Instruction inst : initInstructions ){
+                            inst.removeSelf();
                         }
 
                         String name = "lift_" + alloca.getName().replace("%", "");

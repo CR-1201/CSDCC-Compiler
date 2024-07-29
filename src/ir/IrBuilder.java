@@ -243,9 +243,10 @@ public class IrBuilder {
      * @param content 存储内容
      * @param addr 地址
      */
-    public void buildStore(BasicBlock parent, Value content, Value addr){
+    public Store buildStore(BasicBlock parent, Value content, Value addr){
         Store store = new Store(parent, content, addr);
         parent.insertTail(store);
+        return store;
     }
 
     public void buildStoreBeforeInstr(BasicBlock parent, Value val, Value location, Instruction before){

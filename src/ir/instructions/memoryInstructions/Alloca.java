@@ -5,6 +5,7 @@ import ir.User;
 import ir.Value;
 import ir.constants.ConstArray;
 import ir.constants.Constant;
+import ir.instructions.Instruction;
 import ir.types.ArrayType;
 import ir.types.PointerType;
 import ir.types.ValueType;
@@ -24,6 +25,9 @@ public class Alloca extends MemoryInstruction{
     private final ConstArray initVal;
 
     ArrayList<Value> initValues = null;
+
+    public ArrayList<Instruction> initInstructions = null;
+    public BasicBlock parentBlock = null;
 
     /**
     * 新建一个 alloca 指令,其类型是分配空间类型的指针

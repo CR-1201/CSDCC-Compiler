@@ -35,9 +35,11 @@ public class LICM implements Pass {
 
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
-            defGvInFunc.put(function, new HashSet<>());
-            useGvInFunc.put(function, new HashSet<>());
-            callMaps.put(function, new HashSet<>());
+            if (!function.getIsBuiltIn()) {
+                defGvInFunc.put(function, new HashSet<>());
+                useGvInFunc.put(function, new HashSet<>());
+                callMaps.put(function, new HashSet<>());
+            }
         }
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
@@ -83,6 +85,9 @@ public class LICM implements Pass {
 
         for (GlobalVariable gv : Module.getModule().getGlobalVariablesArray()) {
             for (Instruction inst : useMaps.get(gv)) {
+//                System.out.println(inst.getParent().getParent().getName());
+//                System.out.println(useGvInFunc.get(inst.getParent().getParent()));
+//                System.out.println(inst);
                 useGvInFunc.get(inst.getParent().getParent()).add(gv);
             }
             for (Instruction inst : defMaps.get(gv)) {
@@ -335,6 +340,9 @@ public class LICM implements Pass {
                     return;
                 }
             }
+        }
+        if (block.getLoop() == null) {
+            return;
         }
         if (block.getLoop().getDepth() == 0) {
             return;

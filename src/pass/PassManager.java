@@ -36,7 +36,7 @@ public class PassManager {
         passes.add(new MathOptimize());
 
         passes.add(new CFG());
-        passes.add(new InlineFunction());
+//        passes.add(new InlineFunction());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());

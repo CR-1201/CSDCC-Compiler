@@ -28,6 +28,8 @@ public class PassManager {
         passes.add(new Mem2reg());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
+        passes.add(new ConstArrayFold());
+        passes.add(new MathOptimize());
         passes.add(new LocalArrayLift());
         // LocalArrayLift只用一次
 

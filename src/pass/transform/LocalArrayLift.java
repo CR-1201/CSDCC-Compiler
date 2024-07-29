@@ -6,7 +6,10 @@ import ir.constants.*;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.Sub;
 import ir.instructions.memoryInstructions.Alloca;
+import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
+import ir.instructions.otherInstructions.Conversion;
 import ir.types.ArrayType;
 import ir.types.IntType;
 import ir.types.ValueType;
@@ -72,25 +75,43 @@ public class LocalArrayLift implements Pass {
                             initValues.add(new ConstInt(0));
                         }
 
+                        ArrayList<Instruction> initInstructions = alloca.initInstructions;
 
-                        for (int j = 0; j < originInitValues.size(); j++) {
-//                            System.out.println(originInitValues.get(j));
+                        ArrayList<Store> storeList = new ArrayList<>();
+                        for (Instruction inst : initInstructions) {
+                            if (inst instanceof Call) {
+                                constFlag = false;
+                            }
+                            if (inst instanceof Store store) {
+                                storeList.add(store);
+                            }
+                        }
+
+                        ArrayList<Value> deleteList = new ArrayList<>();
+
+//                        System.out.println(originInitValues);
+                        for (int j = 0, k = 0; j < originInitValues.size(); j++) {
+
                             if (originInitValues.get(j) instanceof ConstStr) {
                                 continue;
                             }
-                            if (originInitValues.get(j) instanceof ConstInt constInt) {
-                                initValues.set(j, constInt);
-                            }
-                            if( originInitValues.get(j) instanceof Sub sub ){
-                                Value v1 = sub.getOperator(0), v2 = sub.getOperator(1);
-                                if( v1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2 ){
-                                    initValues.set(j, new ConstInt(constInt1.getValue()-constInt2.getValue()));
+
+                            if( k < storeList.size() && storeList.get(k).getValue() instanceof ConstInt){
+                                initValues.set(j,storeList.get(k).getValue());
+                                Store store = storeList.get(k);
+                                if( store.getAddr() instanceof Conversion conversion ){
+                                    deleteList.add(conversion);
+                                    deleteList.add(conversion.getConversionValue());
+                                    deleteList.add(store);
+                                } else if( store.getAddr() instanceof GEP gep){
+                                    deleteList.add(gep);
+                                    deleteList.add(store);
                                 }
                             }
 
+                            k++;
                         }
 
-                        ArrayList<Instruction> initInstructions = alloca.initInstructions;
 
                         String name = "lift_" + alloca.getName().replace("%", "");
                         boolean isAllZero = true;
@@ -101,11 +122,14 @@ public class LocalArrayLift implements Pass {
                             }
                         }
 
-                        for (Instruction inst : initInstructions) {
-                            if (inst instanceof Call) {
-                                constFlag = false;
-                            }
-                            inst.removeSelf();
+//                        System.out.println(initValues);
+
+                        for( Instruction inst : initInstructions ){
+                            if( inst instanceof Store || inst instanceof GEP || inst instanceof Conversion){
+                                if( deleteList.contains(inst)){
+                                    inst.removeSelf();
+                                }
+                            } else inst.removeSelf();
                         }
 
                         if (isAllZero) {

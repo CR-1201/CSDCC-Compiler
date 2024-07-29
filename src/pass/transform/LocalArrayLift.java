@@ -37,28 +37,26 @@ public class LocalArrayLift implements Pass {
 
         ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
         for (BasicBlock basicBlock : blocks) {
-
             ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
-            for (int i = 0; i < instructions.size(); i++) {
-                Instruction instruction = instructions.get(i);
-//                System.out.println(instruction);
-                if( instruction instanceof Alloca alloca ){
+            for (Instruction instruction : instructions) {
 
-                    if(alloca.parentBlock != null && alloca.parentBlock.getLoopDepth() != 0){
+                if (instruction instanceof Alloca alloca) {
+//                    System.out.println(instruction);
+                    if (alloca.parentBlock != null && alloca.parentBlock.getLoopDepth() != 0) {
                         continue;
                     }
 
                     ValueType valueType = alloca.getAllocatedType();
-                    if( valueType instanceof ArrayType arrayType ){
+                    if (valueType instanceof ArrayType arrayType) {
 
                         boolean constFlag = true;
 
-                        if( !(arrayType.getBaseType() instanceof IntType) ){
+                        if (!(arrayType.getBaseType() instanceof IntType)) {
                             continue;
                         }
 
                         ArrayList<Value> originInitValues = alloca.getInitValues();
-                        if( originInitValues == null ) continue;
+                        if (originInitValues == null) continue;
 
                         ArrayList<Integer> numList = arrayType.getNumList();
                         this.dims = numList;
@@ -74,46 +72,47 @@ public class LocalArrayLift implements Pass {
                         }
 
 
-                        for( int j = 0; j < originInitValues.size() ; j++ ){
+                        for (int j = 0; j < originInitValues.size(); j++) {
 //                            System.out.println(originInitValues.get(j));
-                            if( originInitValues.get(j) instanceof ConstStr ){
+                            if (originInitValues.get(j) instanceof ConstStr) {
                                 continue;
                             }
-                            if( originInitValues.get(j) instanceof ConstInt constInt){
+                            if (originInitValues.get(j) instanceof ConstInt constInt) {
                                 initValues.set(j, constInt);
                             }
                         }
 
                         ArrayList<Instruction> initInstructions = alloca.initInstructions;
-                        for( Instruction inst : initInstructions ){
-                            if( inst instanceof Call ){
+
+                        for (Instruction inst : initInstructions) {
+                            if (inst instanceof Call) {
                                 constFlag = false;
-                                inst.removeSelf();
                             }
+                            inst.removeSelf();
                         }
 
                         String name = "lift_" + alloca.getName().replace("%", "");
                         boolean isAllZero = true;
-                        for( Value value : initValues ){
-                            if( value instanceof ConstInt constInt && constInt.getValue() != 0){
+                        for (Value value : initValues) {
+                            if (value instanceof ConstInt constInt && constInt.getValue() != 0) {
                                 isAllZero = false;
                                 break;
                             }
                         }
-                        if( isAllZero ){
+                        if (isAllZero) {
                             ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
                             GlobalVariable globalVariable = builder.buildGlobalVariable(name, zeroInitializer, constFlag);
                             alloca.replaceAllUsesWith(globalVariable);
                             alloca.removeSelf();
                         } else {
-                            ConstArray constArray = getArrayTree(initValues,0);
-                            GlobalVariable globalVariable = builder.buildGlobalVariable(name,constArray,constFlag);
+                            ConstArray constArray = getArrayTree(initValues, 0);
+                            GlobalVariable globalVariable = builder.buildGlobalVariable(name, constArray, constFlag);
                             alloca.replaceAllUsesWith(globalVariable);
                             alloca.removeSelf();
                         }
 
                     }
-                } else break;
+                }
             }
         }
     }

@@ -77,7 +77,7 @@ public class GAVN implements Pass {
                 }
             } else if( instruction instanceof Store store){
                 if( mysteriousStore( store.getAddr() ) ){
-                    GAVNMap.clear();
+                    deleteGEP((GEP) store.getAddr());
                 } else GAVNMap.remove( store.getAddr() );
             } else if( instruction instanceof Call call && !(is_pure.containsKey(call.getFunction()) && is_pure.get(call.getFunction())) ){
                 //保守起见 碰到call非纯函数就清空
@@ -97,6 +97,36 @@ public class GAVN implements Pass {
         return false;
     }
 
+    private void deleteGEP(GEP gep) {
+        ArrayList<GEP> deleteGeps = new ArrayList<>();
+        for (Value value : GAVNMap.keySet()) {
+            if( !(value instanceof GEP temp_gep) ){
+                continue;
+            }
+            boolean deleteFlag = true;
+            if (!(temp_gep.getBase().equals(gep.getBase()))) {
+                continue;
+            }
+            if (temp_gep.getIndex().size() != gep.getIndex().size()) {
+                continue;
+            }
+            for (int j = 0; j < gep.getIndex().size(); j++) {
+                if (gep.getIndex().get(j) instanceof ConstInt constInt1 && temp_gep.getIndex().get(j) instanceof ConstInt constInt2) {
+                    if (constInt1 != constInt2) {
+                        deleteFlag = false;
+                        break;
+                    }
+                }
+            }
+            if (deleteFlag) {
+                deleteGeps.add(temp_gep);
+            }
+        }
+        for (GEP deleteGep : deleteGeps) {
+            GAVNMap.remove(deleteGep);
+        }
+    }
+
     private void replaceLoad(BasicBlock basicBlock) {
         HashMap<Value,Value> tempRemoves = new HashMap<>();
         ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
@@ -106,7 +136,7 @@ public class GAVN implements Pass {
                 load.removeSelf();
             } else if( instruction instanceof Store store ){
                 if( mysteriousStore( store.getAddr() ) ){
-                    GAVNMap.clear();
+                    deleteGEP((GEP) store.getAddr());
                     tempRemoves.clear();
                     break;
                 }
@@ -132,7 +162,31 @@ public class GAVN implements Pass {
             ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
             for( Instruction instruction : instructions ){
                 if( instruction instanceof Store store && mysteriousStore( store.getAddr() ) ){
-                    geps.clear();
+                    GEP gep = (GEP) store.getAddr();
+                    ArrayList<GEP> deleteGeps = new ArrayList<>();
+                    for (GEP temp_gep : geps) {
+                        boolean deleteFlag = true;
+                        if (!(temp_gep.getBase().equals(gep.getBase()))) {
+                            continue;
+                        }
+                        if (temp_gep.getIndex().size() != gep.getIndex().size()) {
+                            continue;
+                        }
+                        for (int j = 0; j < gep.getIndex().size(); j++) {
+                            if (gep.getIndex().get(j) instanceof ConstInt constInt1 && temp_gep.getIndex().get(j) instanceof ConstInt constInt2) {
+                                if (constInt1 != constInt2) {
+                                    deleteFlag = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (deleteFlag) {
+                            deleteGeps.add(temp_gep);
+                        }
+                    }
+                    for (GEP deleteGep : deleteGeps) {
+                        geps.remove(deleteGep);
+                    }
                 }
                 if( instruction instanceof GEP gep){
                     geps.add(gep);

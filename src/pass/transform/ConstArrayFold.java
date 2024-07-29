@@ -24,6 +24,7 @@ public class ConstArrayFold implements Pass {
     @Override
     public void run() {
         initConstArray();
+//        System.out.println(globalVariableArray);
         flodConstArray();
     }
 
@@ -65,6 +66,7 @@ public class ConstArrayFold implements Pass {
                     if( instruction instanceof GEP gep ){
                         Value ptr = gep.getBase();
                         if( ptr instanceof GlobalVariable globalVariable && globalVariableArray.contains(globalVariable) ){
+//                            System.out.println(gep);
                             ArrayList<Value> indexes = gep.getIndex();
                             boolean allConstInt = true;
                             for( Value index : indexes ){
@@ -82,6 +84,7 @@ public class ConstArrayFold implements Pass {
 //                                System.out.println(intIndexes);
 
                                 Value retValue = getGlobalArrayValue(globalVariable,intIndexes);
+//                                System.out.println(retValue);
                                 if( retValue != null ){
 //                                    System.out.println(gep);
                                     ArrayList<User> users = new ArrayList<>(gep.getUsers());
@@ -102,12 +105,14 @@ public class ConstArrayFold implements Pass {
 
     private Value getGlobalArrayValue( GlobalVariable globalVariable, ArrayList<Integer> indexes ){
         Constant initVal = globalVariable.getInitVal();
-//        System.out.println(initVal);
+
         for (Integer index : indexes) {
+
             if (initVal instanceof ConstArray constArray) {
                 initVal = constArray.getElementByIndex(index);
             } else break;
         }
+        
 
         if( initVal instanceof ConstInt constInt ){
             return constInt;

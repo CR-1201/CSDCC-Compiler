@@ -29,6 +29,8 @@ public class PassManager {
         passes.add(new LocalArrayLift());
         // LocalArrayLift只用一次
 
+        passes.add(new GepFuse());
+        //必须得做GEPFuse
         passes.add(new ConstArrayFold());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
@@ -51,8 +53,6 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
-
-        passes.add(new GepFuse());
 
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());

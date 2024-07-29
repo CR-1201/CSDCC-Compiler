@@ -25,8 +25,9 @@ import java.util.HashSet;
 public class LoopUnroll implements Pass {
     private final CFG cfg = new CFG();
     private final BlockUtil blockUtil = new BlockUtil();
+    private final CloneUtil cloneUtil = new CloneUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 1000;
+    private final int LOOP_MAX_LINE = 15000;
 
     private BasicBlock header;
     private BasicBlock next;
@@ -60,6 +61,11 @@ public class LoopUnroll implements Pass {
         }
         for (Loop loop : allLoops) {
             constLoopUnroll(loop);
+            /*
+             * ATTENTION:
+             * 不能在某一个循环达到限制之后，就直接return。
+             * 因为函数后面其他的Top循环还需要被展开。
+             */
         }
     }
 
@@ -82,7 +88,7 @@ public class LoopUnroll implements Pass {
         if (step == 0) {
             return;
         }
-        int loopTimes = computeLoopTimes(init, end, step, idcAlu, cond.getCondition());
+        int loopTimes = loop.computeLoopTimes(init, end, step, idcAlu, cond.getCondition());
         if (loopTimes <= 0) {
             return;
         } else {
@@ -94,7 +100,6 @@ public class LoopUnroll implements Pass {
         isUnrolled = true;
         handleUnroll(loop);
     }
-
     private Boolean initUnroll(Loop loop) {
         HashSet<BasicBlock> allExits = new HashSet<>(loop.computeChildrenExits());
         HashSet<BasicBlock> allBlocks = new HashSet<>(loop.getAllBlocks());
@@ -105,10 +110,14 @@ public class LoopUnroll implements Pass {
         }
         int loopTimes = loop.getLoopTimes();
         int loopSize = loop.computeLoopSize();
+//        System.out.println("============ Loop: " + loop.getId() + " ============");
+//        for (BasicBlock block : allBlocks) {
+//            System.out.println(block.getName());
+//        }
+//        System.out.println(loopSize);
         if ((long) loopTimes * loopSize > LOOP_MAX_LINE) {
             return false;
         }
-        System.out.println(loopTimes * loopSize);
         header = loop.getHeader();
         for (BasicBlock block : header.getPrecursors()) {
             if (loop.getLatches().contains(block)) {
@@ -153,14 +162,12 @@ public class LoopUnroll implements Pass {
         latch.removeLastInst();
         ArrayList<BasicBlock> dfs = loop.computeDfsBlocksFromEntry(next);
         Loop parent = loop.getParent();
+        /*
+        对于第一次展开，我们只需要保证原来 loop 中的块的设置新的 loop 为 loop.getParent即可。
+        不需要把块加进上层的块，这是没有意义的，因为本身就已经有了。
+         */
         if (parent != null) {
             parent.removeChild(loop);
-            for (BasicBlock bb : loop.getAllBlocks()) {
-                bb.setLoop(parent);
-                if (!parent.getAllBlocks().contains(bb)) {
-                    parent.addBlock(bb);
-                }
-            }
             for (Loop child : loop.getChildren()) {
                 child.setParent(parent);
             }
@@ -169,11 +176,12 @@ public class LoopUnroll implements Pass {
         }
         BasicBlock oldNext = next;
         BasicBlock oldLatch = latch;
-        CloneUtil cloneUtil = new CloneUtil();
+        cloneUtil.clearCloneMap();
         for (Value value : phiMap.keySet()) {
             cloneUtil.insertCloneMap(value, phiMap.get(value));
         }
-        for (int loopTime = 0; loopTime < loop.getLoopTimes() - 1; loopTime++) {
+        int loopTime = loop.getLoopTimes();
+        for (int curLoopTime = 0; curLoopTime < loopTime - 1; curLoopTime++) {
             for (BasicBlock block : dfs) {
                 BasicBlock clonedBlock = IrBuilder.getIrBuilder().buildBasicBlock(header.getParent());
                 cloneUtil.insertCloneMap(block, clonedBlock);
@@ -182,7 +190,12 @@ public class LoopUnroll implements Pass {
                 BasicBlock clonedBlock = (BasicBlock) cloneUtil.findValue(block);
                 cloneUtil.cloneBlock(block, clonedBlock);
                 clonedBlock.setLoop(block.getLoop());
-                block.getLoop().addBlock(clonedBlock);
+                /*
+                 * 应该是该循环所有的外层循环都有新的Block
+                 * 同时，需要注意，AllBlocks 是 ArrayList，需要去重
+                 */
+                block.getLoop().addBlockInLoopChain(clonedBlock);
+//              block.getLoop().addBlock(clonedBlock);
             }
             ArrayList<BasicBlock> beforeDfs = new ArrayList<>(dfs);
             dfs.clear();
@@ -234,43 +247,5 @@ public class LoopUnroll implements Pass {
                 }
             }
         }
-    }
-
-    private int computeLoopTimes(int init, int end, int step, Instruction alu, Icmp.Condition cmp) {
-        int loopTimes = -1;
-        if (alu instanceof Add) {
-            if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : -1;
-            } else if (cmp.equals(Icmp.Condition.NE)) {
-                loopTimes = ((end - init) % step == 0) ? (end - init) / step : -1;
-            } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
-                loopTimes = (end - init) / step + 1;
-            } else if (cmp.equals(Icmp.Condition.GT) || cmp.equals(Icmp.Condition.LT)) {
-                loopTimes = ((end - init) % step == 0) ? (end - init) / step : (end - init) / step + 1;
-            }
-        } else if (alu instanceof Sub) {
-            if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : -1;
-            } else if (cmp.equals(Icmp.Condition.NE)) {
-                loopTimes = ((init - end) % step == 0) ? (init - end) / step : -1;
-            } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
-                loopTimes = (init - end) / step + 1;
-            } else if (cmp.equals(Icmp.Condition.GT) || cmp.equals(Icmp.Condition.LT)) {
-                loopTimes = ((init - end) % step == 0) ? (init - end) / step : (init - end) / step + 1;
-            }
-        } else if (alu instanceof Mul) {
-            double val = Math.log(end / init) / Math.log(step);
-            boolean tag = init * Math.pow(step, val) == end;
-            if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : -1;
-            } else if (cmp.equals(Icmp.Condition.NE)) {
-                loopTimes = tag ? (int) val : -1;
-            } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
-                loopTimes = (int) val + 1;
-            } else if (cmp.equals(Icmp.Condition.GT) || cmp.equals(Icmp.Condition.LT)) {
-                loopTimes = tag ? (int) val : (int) val + 1;
-            }
-        }
-        return loopTimes;
     }
 }

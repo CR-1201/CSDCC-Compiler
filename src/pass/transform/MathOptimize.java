@@ -89,7 +89,7 @@ public class MathOptimize implements Pass {
 
         for( int k = 0; k < addsToMul.size() - 1; k++ ){
             Instruction curInst = addsToMul.get(k);
-            curInst.eraseFromParent();
+            curInst.removeSelf();
         }
         Instruction lastInst = addsToMul.get(num - 1);
 
@@ -97,11 +97,11 @@ public class MathOptimize implements Pass {
             if( multer.getValueType() instanceof IntType ){
                 Value value = builder.buildMulBeforeInstr(block, new IntType(32),multer,new ConstInt(num+1),lastInst);
                 lastInst.replaceAllUsesWith(value);
-                lastInst.eraseFromParent();
+                lastInst.removeSelf();
             } else if( multer.getValueType() instanceof FloatType){
                 Value value = builder.buildMulBeforeInstr(block, new FloatType(),multer,new ConstFloat((float) (num+1)),lastInst);
                 lastInst.replaceAllUsesWith(value);
-                lastInst.eraseFromParent();
+                lastInst.removeSelf();
             }
         } else {
             if( multer.getValueType() instanceof IntType ){

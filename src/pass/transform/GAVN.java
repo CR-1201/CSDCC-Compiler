@@ -71,7 +71,7 @@ public class GAVN implements Pass {
             if(instruction instanceof Load load){
                 if( GAVNMap.containsKey(load.getAddr())){
                     load.replaceAllUsesWith((GAVNMap.get(load.getAddr())));
-                    load.eraseFromParent();
+                    load.removeSelf();
                 } else {
                     GAVNMap.put(load.getAddr(), load);
                 }
@@ -90,7 +90,7 @@ public class GAVN implements Pass {
         for( Instruction instruction : instructions){
             if( instruction instanceof Load load && GAVNMap.containsKey(load.getAddr()) ){
                 load.replaceAllUsesWith((GAVNMap.get(load.getAddr())));
-                load.eraseFromParent();
+                load.removeSelf();
             } else if( instruction instanceof Store store ){
                 Value key = store.getAddr();
                 if( GAVNMap.containsKey(key) ){
@@ -160,7 +160,7 @@ public class GAVN implements Pass {
         if( GAVNMap.containsKey(load.getAddr()) ){
             Value addr = GAVNMap.get(load.getAddr());
             load.replaceAllUsesWith(addr);
-            load.eraseFromParent();
+            load.removeSelf();
             return false;
         }
 

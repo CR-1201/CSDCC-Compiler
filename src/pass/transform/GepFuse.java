@@ -47,9 +47,50 @@ public class GepFuse implements Pass{
                 if( instruction instanceof GEP gep && gep.getBase() instanceof GEP preGep ){
                     if( canFuse(preGep,gep) ){
                         fuse(preGep,gep);
+                    } else if( canValueFuse(preGep,gep) ){
+                        valueFuse(preGep,gep);
                     }
                 }
             }
+        }
+    }
+
+    private void valueFuse(GEP preGep,GEP gep){
+        gep.modifyTarget(preGep.getBase());
+
+        ArrayList<Value> preIndexes = preGep.getIndex();
+        ArrayList<Value> nowIndexes = gep.getIndex();
+
+        ArrayList<Value> indexes = new ArrayList<>();
+
+        for (int i = 0; i < preIndexes.size() - 1; i++) {
+            indexes.add(preIndexes.get(i));
+        }
+
+        Value preValue = preIndexes.get(preIndexes.size() - 1);
+        Value nowValue = nowIndexes.get(0);
+
+        if( nowValue instanceof ConstInt ){
+            int nowConst = ((ConstInt) nowIndexes.get(0)).getValue();
+            // 只考虑now gep 的第一维是0的情况
+            if( nowConst == 0 ){
+                indexes.add(preValue);
+            }
+        } else if( preValue instanceof ConstInt ){
+            int preConst = ((ConstInt) preValue).getValue();
+            if( preConst == 0 ){
+                indexes.add(nowValue);
+            }
+        } else return;
+
+        for(int i = 1; i < nowIndexes.size(); i++){
+            indexes.add(nowIndexes.get(i));
+        }
+
+        gep.modifyIndexes(indexes);
+
+        if( preGep.getUsers().isEmpty() ){
+            preGep.removeSelf();
         }
     }
 
@@ -93,5 +134,12 @@ public class GepFuse implements Pass{
         Value nowFirstValue = gep.getIndex().get(0);
 
         return preLastValue instanceof Constant && nowFirstValue instanceof Constant;
+    }
+
+    private boolean canValueFuse(GEP preGep, GEP gep){
+        Value preLastValue = preGep.getIndex().get(preGep.getIndex().size() - 1);
+        Value nowFirstValue = gep.getIndex().get(0);
+
+        return preLastValue instanceof Constant || nowFirstValue instanceof Constant;
     }
 }

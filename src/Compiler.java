@@ -39,7 +39,6 @@ public class Compiler {
         // ir build
         CompUnit syntaxTreeRoot = ParserAnalyze.getParser().getCompUnit();
         IrBuilder.getIrBuilder().buildModule(syntaxTreeRoot);
-        IOFunc.clear(Config.irRawOutputPath);
         IOFunc.output(Module.getModule().toString(),Config.irRawOutputPath);
 
         // pass

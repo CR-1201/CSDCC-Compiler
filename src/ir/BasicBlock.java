@@ -82,6 +82,13 @@ public class BasicBlock extends Value{
         return successors;
     }
 
+    public void clearCfgInfo() {
+        precursors.clear();
+        successors.clear();
+    }
+
+    // ========================== Dom Info ==========================
+
     public HashSet<BasicBlock> getRSuccessors() {
         return precursors;
     }
@@ -197,6 +204,17 @@ public class BasicBlock extends Value{
         return other.rDomers.contains(this);
     }
 
+    public void clearDomInfo() {
+        domers.clear();
+        idomer = null;
+        doms.clear();
+        idoms.clear();
+        dominanceFrontier.clear();
+        domLevel = 0;
+    }
+
+    // =================================================================
+
     // ========================== Loop Info ==========================
     public Loop getLoop() {
         return loop;
@@ -236,6 +254,20 @@ public class BasicBlock extends Value{
             if (oldInst.equals(target)){
                 int index = instructions.indexOf(oldInst);
                 instructions.add(index, inst);
+                if (inst.getParent() != this) {
+                    inst.setParent(this);
+                }
+                return;
+            }
+        }
+    }
+
+    // 将 instruction 插入到 target 指令的后面
+    public void insertAfter(Instruction inst, Instruction target){
+        for (Instruction oldInst : instructions) {
+            if (oldInst.equals(target)){
+                int index = instructions.indexOf(oldInst);
+                instructions.add(index+1, inst);
                 if (inst.getParent() != this) {
                     inst.setParent(this);
                 }

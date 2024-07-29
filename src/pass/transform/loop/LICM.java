@@ -22,22 +22,27 @@ import java.util.HashSet;
  * LICM： Loop Invariant Code Motion 循环不变代码外提
  */
 public class LICM implements Pass {
-    private HashMap<Alloca, HashSet<Instruction>> allocaDefMaps = new HashMap<>();
-    private HashMap<Alloca, HashSet<Instruction>> allocaUseMaps = new HashMap<>();
-    private HashMap<Value, HashSet<Instruction>> defMaps = new HashMap<>();
-    private HashMap<Value, HashSet<Instruction>> useMaps = new HashMap<>();
-    private HashMap<Function, HashSet<Value>> defGvInFunc = new HashMap<>();
-    private HashMap<Function, HashSet<Value>> useGvInFunc = new HashMap<>();
-    private HashMap<Function, HashSet<Function>> callMaps = new HashMap<>();
-    private HashMap<Value, HashSet<Loop>> useLoops = new HashMap<>();
-    private HashMap<Value, HashSet<Loop>> defLoops = new HashMap<>();
+    private final HashMap<Alloca, HashSet<Instruction>> allocaDefMaps = new HashMap<>();
+    private final HashMap<Alloca, HashSet<Instruction>> allocaUseMaps = new HashMap<>();
+    private final HashMap<Value, HashSet<Instruction>> defMaps = new HashMap<>();
+    private final HashMap<Value, HashSet<Instruction>> useMaps = new HashMap<>();
+    private final HashMap<Function, HashSet<Value>> defGvInFunc = new HashMap<>();
+    private final HashMap<Function, HashSet<Value>> useGvInFunc = new HashMap<>();
+    private final HashMap<Function, HashSet<Function>> callMaps = new HashMap<>();
+    private final HashMap<Value, HashSet<Loop>> useLoops = new HashMap<>();
+    private final HashMap<Value, HashSet<Loop>> defLoops = new HashMap<>();
 
 
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
+            defGvInFunc.put(function, new HashSet<>());
+            useGvInFunc.put(function, new HashSet<>());
+            callMaps.put(function, new HashSet<>());
+        }
+        for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
                 constDefMotion4Array(function);
-//                licm(function);
+                licm(function);
             }
         }
     }
@@ -50,11 +55,9 @@ public class LICM implements Pass {
         defLoops.clear();
         useLoops.clear();
     }
+
     private void licm(Function func) {
         clear();
-        defGvInFunc.put(func, new HashSet<>());
-        useGvInFunc.put(func, new HashSet<>());
-        callMaps.put(func, new HashSet<>());
         for (BasicBlock block : func.getBasicBlocksArray()) {
             ArrayList<Instruction> instructions = block.getInstructionsArray();
             for (Instruction inst : instructions) {
@@ -77,6 +80,7 @@ public class LICM implements Pass {
                 dfs4array(gv, (Instruction) user);
             }
         }
+
         for (GlobalVariable gv : Module.getModule().getGlobalVariablesArray()) {
             for (Instruction inst : useMaps.get(gv)) {
                 useGvInFunc.get(inst.getParent().getParent()).add(gv);
@@ -89,21 +93,19 @@ public class LICM implements Pass {
         boolean flag = true;
         while (flag) {
             flag = false;
-            for (Function function : Module.getModule().getFunctionsArray()) {
-                for (Function callee : callMaps.get(function)) {
-                    for (Value value : useGvInFunc.get(callee)) {
-                        boolean ret = !useGvInFunc.get(function).contains(value);
-                        useGvInFunc.get(function).add(value);
-                        if (ret) {
-                            flag = true;
-                        }
+            for (Function callee : callMaps.get(func)) {
+                for (Value value : useGvInFunc.get(callee)) {
+                    boolean ret = !useGvInFunc.get(func).contains(value);
+                    useGvInFunc.get(func).add(value);
+                    if (ret) {
+                        flag = true;
                     }
-                    for (Value value : defGvInFunc.get(callee)) {
-                        boolean ret = !defGvInFunc.get(function).contains(value);
-                        defGvInFunc.get(function).add(value);
-                        if (ret) {
-                            flag = true;
-                        }
+                }
+                for (Value value : defGvInFunc.get(callee)) {
+                    boolean ret = !defGvInFunc.get(func).contains(value);
+                    defGvInFunc.get(func).add(value);
+                    if (ret) {
+                        flag = true;
                     }
                 }
             }
@@ -228,6 +230,9 @@ public class LICM implements Pass {
             }
             Load load = (Load) user;
             Loop loop = user.getParent().getLoop();
+            if (loop == null) {
+                continue;
+            }
             if (loop.getDepth() == 0) {
                 continue;
             }

@@ -19,14 +19,14 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
-        passes.add(new GepFuse());
+
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
-        passes.add(new LocalArrayLift());
+//        passes.add(new LocalArrayLift());
         // LocalArrayLift只用一次
 
         passes.add(new ConstArrayFold());
@@ -46,16 +46,14 @@ public class PassManager {
 //        passes.add(new UselessReturnEmit());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
-
         GVNGCMPass();
+        passes.add(new GepFuse());
 
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
 
-        passes.add(new GepSplit());
-        GVNGCMPass();
 
         passes.add(new CFG());
         passes.add(new Dom());
@@ -72,7 +70,7 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
 
-//        passes.add(new GepSplit());
+        passes.add(new GepSplit());
         for (Pass pass : passes) {
             pass.run();
         }

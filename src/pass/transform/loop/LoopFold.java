@@ -1,13 +1,15 @@
 package pass.transform.loop;
 
-import ir.BasicBlock;
-import ir.Function;
-import ir.IrBuilder;
+import ir.*;
 import ir.Module;
+import ir.constants.ConstInt;
 import pass.Pass;
 import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
 import pass.analysis.LoopVarAnalysis;
+import utils.IOFunc;
+
+import java.util.HashSet;
 
 /**
  * 把重复计算的循环给进行折叠
@@ -47,10 +49,24 @@ public class LoopFold implements Pass {
      * @return true/false
      */
     private Boolean isFoldingLoop(Loop loop) {
-        BasicBlock exit = null;
+        BasicBlock exit = null, latch = null;
         if (!loop.isSimpleLoop() || !loop.getIsSetInductorVar()) {
             return false;
         }
+        if (!(loop.getIdcStep() instanceof ConstInt step && step.getValue() == 1)) {
+            return false;
+        }
+        if (!(loop.getIdcInit() instanceof ConstInt init && init.getValue() == 0)) {
+            return false;
+        }
+        exit = loop.getExits().iterator().next();
+        latch = loop.getLatches().iterator().next();
+        HashSet<Value> idcInsts = new HashSet<>();
+        idcInsts.add(loop.getIdcVar());
+        idcInsts.add(loop.getCond());
+        idcInsts.add(loop.getIdcAlu());
+        idcInsts.add(loop.getHeader().getTailInstruction());
+        idcInsts.add(latch.getTailInstruction());
         return null;
     }
 }

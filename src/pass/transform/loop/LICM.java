@@ -60,7 +60,7 @@ public class LICM implements Pass {
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
                 loopAnalysis.analyzeLoopInfo(function);
-//                constDefMotion4Array(function);
+                constArrayDefMotion(function);
                 loopInvariantCodeMotion(function);
             }
         }
@@ -259,7 +259,7 @@ public class LICM implements Pass {
         return useLoop == defLoop;
     }
 
-    private void constDefMotion4Array(Function function) {
+    private void constArrayDefMotion(Function function) {
         clear();
         for (BasicBlock block : function.getBasicBlocksArray()) {
             for (Instruction inst : block.getInstructionsArray()) {
@@ -271,7 +271,7 @@ public class LICM implements Pass {
             }
         }
         for (Alloca alloca : allocaDefMaps.keySet()) {
-            lift(alloca);
+            defMotion(alloca);
         }
     }
     private void dfs(Alloca alloca, Instruction inst) {
@@ -311,7 +311,7 @@ public class LICM implements Pass {
             }
         }
     }
-    private void lift(Alloca alloca) {
+    private void defMotion(Alloca alloca) {
         HashSet<Instruction> allocaDefs = allocaDefMaps.get(alloca);
         BasicBlock block = null;
         // 这里是保证所有的 def 都必须在同一个基本块
@@ -368,7 +368,7 @@ public class LICM implements Pass {
             return;
         }
         HashSet<Instruction> liftInst = new HashSet<>();
-        BasicBlock entering = loop.getHeader().getPrecursors().iterator().next();
+        BasicBlock entering = loop.getEnterings().iterator().next();
         for (Instruction instruction : block.getInstructionsArray()) {
             if (allocaDefs.contains(instruction)) {
                 liftInst.add(instruction);

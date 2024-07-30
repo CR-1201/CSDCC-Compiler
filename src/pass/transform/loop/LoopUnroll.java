@@ -66,9 +66,6 @@ public class LoopUnroll implements Pass {
              * 不能在某一个循环达到限制之后，就直接return。
              * 因为函数后面其他的Top循环还需要被展开。
              */
-//            if (stopUnroll) {
-//                return;
-//            }
         }
     }
 
@@ -165,14 +162,12 @@ public class LoopUnroll implements Pass {
         latch.removeLastInst();
         ArrayList<BasicBlock> dfs = loop.computeDfsBlocksFromEntry(next);
         Loop parent = loop.getParent();
+        /*
+        对于第一次展开，我们只需要保证原来 loop 中的块的设置新的 loop 为 loop.getParent即可。
+        不需要把块加进上层的块，这是没有意义的，因为本身就已经有了。
+         */
         if (parent != null) {
             parent.removeChild(loop);
-            for (BasicBlock bb : loop.getAllBlocks()) {
-                bb.setLoop(parent);
-                if (!parent.getAllBlocks().contains(bb)) {
-                    parent.addBlock(bb);
-                }
-            }
             for (Loop child : loop.getChildren()) {
                 child.setParent(parent);
             }
@@ -197,13 +192,10 @@ public class LoopUnroll implements Pass {
                 clonedBlock.setLoop(block.getLoop());
                 /*
                  * 应该是该循环所有的外层循环都有新的Block
+                 * 同时，需要注意，AllBlocks 是 ArrayList，需要去重
                  */
-                Loop curLoop = block.getLoop();
-                while (curLoop != null) {
-                    curLoop.addBlock(clonedBlock);
-                    curLoop = curLoop.getParent();
-                }
-//                block.getLoop().addBlock(clonedBlock);
+                block.getLoop().addBlockInLoopChain(clonedBlock);
+//              block.getLoop().addBlock(clonedBlock);
             }
             ArrayList<BasicBlock> beforeDfs = new ArrayList<>(dfs);
             dfs.clear();

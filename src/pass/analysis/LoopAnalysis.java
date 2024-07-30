@@ -31,12 +31,12 @@ public class LoopAnalysis implements Pass {
 
     public void analyzeLoopInfo(Function function) {
         clear();
-        /**
+        /*
          * ATTENTION:
          * 循环分析之前一定要清空循环的所有相关信息，不然会出现意想不到的错误
          */
-        for (Loop topLoop : function.getAllLoops()) {
-            topLoop.removeSelf();
+        for (Loop deleteLoop : function.getAllLoops()) {
+            deleteLoop.removeSelf();
         }
         HashSet<BasicBlock> latches = new HashSet<>();
         ArrayList<BasicBlock> domPostOrder = dom.getDomTreePostOrder(function);

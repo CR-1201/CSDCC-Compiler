@@ -60,6 +60,9 @@ public class Loop {
         this.header = header;
         this.latches.addAll(latches);
     }
+    public void resetLoopIdCounter() {
+        idCounter = 0;
+    }
     public int getId() {
         return id;
     }
@@ -136,6 +139,16 @@ public class Loop {
         }
     }
 
+    public void addBlockInLoopChain(BasicBlock block) {
+        Loop curLoop = this;
+        while (curLoop != null) {
+            if (!curLoop.getAllBlocks().contains(block)) {
+                curLoop.addBlock(block);
+            }
+            curLoop = curLoop.getParent();
+        }
+    }
+
     public ArrayList<BasicBlock> getAllBlocks() {
         return allBlocks;
     }
@@ -148,6 +161,13 @@ public class Loop {
         clearInductorVar();
         for (BasicBlock block : allBlocks) {
             block.removeLoop();
+        }
+        /*
+        Parent Loop 中也需要移除此 Loop
+         */
+        if (parent != null) {
+            parent.removeChild(this);
+            parent = null;
         }
     }
 

@@ -19,7 +19,6 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
-
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
@@ -50,7 +49,7 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
 //        passes.add(new UselessReturnEmit());
-        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面, 一定要进行函数副作用的分析
 
         GVNGCMPass();
 
@@ -78,6 +77,11 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+
+        passes.add(new Peephole());
+        passes.add(new SCCP());
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
 
         passes.add(new InstructionCleanUp());
 

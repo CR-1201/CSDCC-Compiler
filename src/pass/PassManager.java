@@ -36,7 +36,7 @@ public class PassManager {
         passes.add(new MathOptimize());
 
         passes.add(new CFG());
-//        passes.add(new InlineFunction());
+        passes.add(new InlineFunction());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
@@ -57,22 +57,22 @@ public class PassManager {
 
         passes.add(new LICM());
 
-//        passes.add(new LCSSA());
-//        passes.add(new LoopUnroll());
-//        passes.add(new MergeBlocks());
-//        passes.add(new DeadCodeEmit());
-////
-//        passes.add(new GepSplit());
-////
-//        passes.add(new CSE());
-////        // SCCP后可能出现没有value的phi
-//        passes.add(new SCCP());
-//        passes.add(new UselessPhiEmit());
-//        passes.add(new SimplifyInst());
-////
-//        passes.add(new MathOptimize());
+        passes.add(new LCSSA());
+        passes.add(new LoopUnroll());
+        passes.add(new MergeBlocks());
+        passes.add(new DeadCodeEmit());
 //
-//        GVNGCMPass();
+        passes.add(new GepSplit());
+//
+//        passes.add(new CSE());
+//        // SCCP后可能出现没有value的phi
+        passes.add(new SCCP());
+        passes.add(new UselessPhiEmit());
+        passes.add(new SimplifyInst());
+//
+        passes.add(new MathOptimize());
+
+        GVNGCMPass();
 
 //        passes.add(new CFG());
 //        passes.add(new Dom());

@@ -111,6 +111,17 @@ public class Loop {
         return exitings;
     }
 
+    public HashSet<BasicBlock> getEnterings() {
+        HashSet<BasicBlock> precs = header.getPrecursors();
+        HashSet<BasicBlock> enterings = new HashSet<>();
+        for (BasicBlock prec : precs) {
+            if (!latches.contains(prec)) {
+                enterings.add(prec);
+            }
+        }
+        return enterings;
+    }
+
     public void addChild(Loop child) {
         if (!children.contains(child)) {
             children.add(child);

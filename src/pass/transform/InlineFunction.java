@@ -92,7 +92,7 @@ public class InlineFunction implements Pass {
                     if (instruction instanceof Alloca alloca) {
                         Alloca newAlloca = irBuilder.buildALLOCA(alloca, firstBasicBlock);
                         alloca.replaceAllUsesWith(newAlloca);
-                        alloca.eraseFromParent();
+                        alloca.removeSelf();
                     }
                 }
             }
@@ -173,7 +173,7 @@ public class InlineFunction implements Pass {
         for (Function func : irModule.getFunctionsArray()) {
             if (!func.getIsBuiltIn()) {
                 if (!callerFunctions.containsKey(func) && !func.getName().equals("@main")) {
-                    func.eraseFromParent();
+                    func.removeSelf();
                 }
             }
         }

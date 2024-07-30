@@ -318,10 +318,10 @@ public class BasicBlock extends Value{
         for (BasicBlock successor : this.getSuccessors()) {
             successor.getPrecursors().remove(this);
         }
-        for (Instruction inst : instructions) {
+        ArrayList<Instruction> insts = getInstructionsArray();
+        for (Instruction inst : insts) {
             inst.removeAllOperators();
-            // 这里 parent 等下要被删掉了，没必要再erase，反而会报错。
-//            inst.eraseFromParent();
+            inst.eraseFromParent();
         }
         getParent().removeBlock(this);
     }

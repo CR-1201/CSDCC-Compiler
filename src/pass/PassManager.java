@@ -11,6 +11,7 @@ import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.LCSSA;
 import pass.transform.loop.LICM;
+import pass.transform.loop.LoopFold;
 import pass.transform.loop.LoopUnroll;
 
 import java.util.ArrayList;
@@ -27,8 +28,9 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
+
 //        passes.add(new LocalArrayLift());
-        // LocalArrayLift只用一次
+//         LocalArrayLift只用一次
 
 //        passes.add(new ConstArrayFold());
         passes.add(new SCCP());
@@ -40,7 +42,6 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
-
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
@@ -59,6 +60,9 @@ public class PassManager {
 
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
+
+        passes.add(new LoopFold());
+
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
 //

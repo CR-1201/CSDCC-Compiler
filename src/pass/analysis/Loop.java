@@ -13,6 +13,7 @@ import java.util.HashSet;
 
 public class Loop {
     private static int idCounter = 0;
+    // ========================= Loop Base Info =========================
     private int id;
     private int depth;
     /**
@@ -52,11 +53,20 @@ public class Loop {
     private Value idcStep = null;
     private Icmp cond = null;
     private int loopTimes;
-    private boolean isSetInductorVar = false;
+    private boolean isInductorVarSet = false;
+
+
+    // ========================= Compute Var =========================
+    private boolean isComputeLoopSet = false;
+    private Value cptInit;
+    private Value cptAlu;
+    private Value cptPhi;
+    private int aluIdx = 0;
 
     public Loop (BasicBlock header, HashSet<BasicBlock> latches) {
         this.id = idCounter++;
         header.setLoop(this);
+        header.setIsLoopHeader();
         this.header = header;
         this.latches.addAll(latches);
     }
@@ -168,7 +178,15 @@ public class Loop {
         allBlocks.remove(block);
     }
 
-    public void removeSelf() {
+    public void removeBlockInLoopChain(BasicBlock block) {
+        Loop curLoop = this;
+        while (curLoop != null) {
+            curLoop.removeBlock(block);
+            curLoop = curLoop.getParent();
+        }
+    }
+
+    public void removeLoopInfo() {
         clearInductorVar();
         for (BasicBlock block : allBlocks) {
             block.removeLoop();
@@ -176,6 +194,21 @@ public class Loop {
         /*
         Parent Loop 中也需要移除此 Loop
          */
+        if (parent != null) {
+            parent.removeChild(this);
+            parent = null;
+        }
+    }
+
+    /**
+     * 删除循环本身，以及循环内的 Blocks
+     */
+    public void removeSelf() {
+        ArrayList<BasicBlock> blocks = new ArrayList<>(allBlocks);
+        for (BasicBlock block : blocks) {
+            removeBlockInLoopChain(block);
+            block.removeSelf();
+        }
         if (parent != null) {
             parent.removeChild(this);
             parent = null;
@@ -190,7 +223,7 @@ public class Loop {
         idcStep = null;
         cond = null;
         loopTimes = -1;
-        isSetInductorVar = false;
+        isInductorVarSet = false;
     }
 
     public ArrayList<Loop> computeDfsLoops() {
@@ -307,7 +340,7 @@ public class Loop {
         this.idcAlu = idcAlu;
         this.idcStep = idcStep;
         this.cond = cond;
-        this.isSetInductorVar = true;
+        this.isInductorVarSet = true;
     }
 
     public Value getIdcVar() {
@@ -341,7 +374,43 @@ public class Loop {
     public int getLoopTimes() {
         return loopTimes;
     }
-    public Boolean getIsSetInductorVar() {
-        return isSetInductorVar;
+    public Boolean isInductorVarSet() {
+        return isInductorVarSet;
+    }
+
+    public void clearComputeInfo() {
+        this.isComputeLoopSet = false;
+        this.cptAlu = null;
+        this.cptPhi = null;
+        this.cptInit = null;
+        this.aluIdx = 0;
+    }
+
+    public void setComputeInfo(Value cptInit, Value cptAlu, Value cptPhi, int idx) {
+        this.isComputeLoopSet = true;
+        this.cptInit = cptInit;
+        this.cptAlu = cptAlu;
+        this.cptPhi = cptPhi;
+        this.aluIdx = idx;
+    }
+
+    public Boolean isComputeInfoSet() {
+        return isComputeLoopSet;
+    }
+
+    public Value getCptAlu() {
+        return cptAlu;
+    }
+
+    public Value getCptPhi() {
+        return cptPhi;
+    }
+
+    public Value getCptInit() {
+        return cptInit;
+    }
+
+    public int getAluIdx() {
+        return aluIdx;
     }
 }

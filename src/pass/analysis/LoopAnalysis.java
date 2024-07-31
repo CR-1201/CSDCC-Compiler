@@ -36,7 +36,7 @@ public class LoopAnalysis implements Pass {
          * 循环分析之前一定要清空循环的所有相关信息，不然会出现意想不到的错误
          */
         for (Loop deleteLoop : function.getAllLoops()) {
-            deleteLoop.removeSelf();
+            deleteLoop.removeLoopInfo();
         }
         HashSet<BasicBlock> latches = new HashSet<>();
         ArrayList<BasicBlock> domPostOrder = dom.getDomTreePostOrder(function);

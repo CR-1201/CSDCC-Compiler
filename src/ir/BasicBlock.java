@@ -33,9 +33,36 @@ public class BasicBlock extends Value{
     private BasicBlock idomer;
     // 在支配树中的深度
     private int domLevel;
+
+    public Boolean isSimpleBlock() {
+        if (instructions.size() != 1) {
+            return false;
+        }
+        if (!(instructions.get(0) instanceof Br br && !br.getHasCondition())) {
+            return false;
+        }
+        if (precursors.size() != 1 || successors.size() != 1) {
+            return false;
+        }
+        return true;
+    }
+
     // ========================== Loop Info ==========================
     // 当前 Basicblock 所在的循环，如果 loop 为 null，说明此BasicBlock不在任何循环中
     private Loop loop;
+    private Boolean isLoopHeader = false;
+
+    public void setIsLoopHeader() {
+        this.isLoopHeader = true;
+    }
+    public void clearIsLoopHeader() {
+        this.isLoopHeader = false;
+    }
+
+    public Boolean isLoopHeader() {
+        return this.isLoopHeader;
+    }
+
     // 支配边际,即刚好不被当前基本块支配的基本块
     private final HashSet<BasicBlock> dominanceFrontier = new HashSet<>();
 
@@ -155,6 +182,9 @@ public class BasicBlock extends Value{
 
     public void removeLoop() {
         this.loop = null;
+        if (isLoopHeader) {
+            isLoopHeader = false;
+        }
     }
 
     public BasicBlock(int nameNum, Function parent){

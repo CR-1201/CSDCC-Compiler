@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Stack;
 
 public class LCSSA implements Pass {
+    HashMap<BasicBlock, Phi> exit2phi = new HashMap<>();
 
     @Override
     public void run() {
@@ -56,7 +57,7 @@ public class LCSSA implements Pass {
             for (BasicBlock block : loop.getAllBlocks()) {
                 ArrayList<Instruction> insts = new ArrayList<>(block.getInstructions());
                 for (Instruction inst : insts) {
-                    if (isUsedOutside(inst, loop)) {
+                    if (inst.isUsedOutside(loop)) {
                         addPhiAtExit(inst, loop);
                     }
                 }
@@ -64,29 +65,6 @@ public class LCSSA implements Pass {
         }
     }
 
-    /**
-     * 指令 inst 是否在 循环外被使用
-     * @param inst 指令
-     * @param loop 循环
-     * @return true/false
-     */
-    private Boolean isUsedOutside(Instruction inst, Loop loop) {
-        for (User user : inst.getUsers()) {
-            if (user instanceof Instruction i) {
-                BasicBlock usedBlock = i.getParent();
-                if (i instanceof Phi phi) {
-                    int idx = phi.getOperators().indexOf(inst);
-                    usedBlock = (BasicBlock) phi.getOperator(idx + phi.getPrecursorNum());
-                }
-                if (!loop.getAllBlocks().contains(usedBlock)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    HashMap<BasicBlock, Phi> exit2phi = new HashMap<>();
     private void addPhiAtExit(Instruction inst, Loop loop) {
         exit2phi.clear();
         BasicBlock block = inst.getParent();

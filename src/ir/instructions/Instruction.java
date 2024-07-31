@@ -3,7 +3,9 @@ package ir.instructions;
 import ir.BasicBlock;
 import ir.User;
 import ir.Value;
+import ir.instructions.otherInstructions.Phi;
 import ir.types.DataType;
+import pass.analysis.Loop;
 
 import java.util.ArrayList;
 
@@ -43,6 +45,29 @@ public class Instruction extends User {
         eraseFromParent();
         target.insertTail(this);
         this.setParent(target);
+    }
+
+    /**
+     * 指令 inst 是否在循环外被使用
+     * 其中 phi 指令对某一个 inst 的使用，本质上是对应的前驱块对这个指令的使用
+     * @param loop 循环
+     * @return true/false
+     */
+    public Boolean isUsedOutside(Loop loop) {
+        for (User user : getUsers()) {
+            if (user instanceof Instruction i) {
+                BasicBlock usedBlock = i.getParent();
+                if (i instanceof Phi phi) {
+                    int idx = phi.getOperators().indexOf(this);
+                    usedBlock = (BasicBlock) phi.getOperator(idx + phi.getPrecursorNum());
+                }
+                if (!loop.getAllBlocks().contains(usedBlock) || !loop.getAllBlocks().contains(i.getParent())) {
+                    return true;
+                }
+
+            }
+        }
+        return false;
     }
 
     @Override

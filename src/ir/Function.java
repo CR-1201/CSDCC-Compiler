@@ -1,5 +1,6 @@
 package ir;
 
+import ir.instructions.Instruction;
 import ir.types.DataType;
 import ir.types.FunctionType;
 import ir.types.VoidType;
@@ -230,6 +231,16 @@ public class Function extends Value{
         this.topLoops.remove(loop);
     }
     // ============================== Loop End ================================
+
+    public void removeSelf() {
+        ArrayList<BasicBlock> basicBlocks = getBasicBlocksArray();
+        for (BasicBlock block : basicBlocks) {
+            block.removeSelf();
+        }
+        eraseFromParent();
+    }
+
+
 
     /**
      * 编译器可以假设标记为 dso_local 的函数或变量将解析为同一链接单元中的符号

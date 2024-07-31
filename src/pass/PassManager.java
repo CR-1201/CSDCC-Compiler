@@ -10,6 +10,8 @@ import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.LCSSA;
+import pass.transform.loop.LICM;
+import pass.transform.loop.LoopFold;
 import pass.transform.loop.LoopUnroll;
 
 import java.util.ArrayList;
@@ -19,22 +21,18 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
+
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
-        passes.add(new SCCP());
-        passes.add(new SimplifyInst());
-        passes.add(new ConstArrayFold());
-        passes.add(new MathOptimize());
-        passes.add(new LocalArrayLift());
-        // LocalArrayLift只用一次
 
-        passes.add(new GepFuse());
-        //必须得做GEPFuse
-        passes.add(new ConstArrayFold());
+//        passes.add(new LocalArrayLift());
+//         LocalArrayLift只用一次
+
+//        passes.add(new ConstArrayFold());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
@@ -44,46 +42,47 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
-
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
 //        passes.add(new UselessReturnEmit());
-        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面, 一定要进行函数副作用的分析
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
         GVNGCMPass();
 
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+
+        passes.add(new GepFuse());
+
+        passes.add(new LICM());
 
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
+
+        passes.add(new LoopFold());
+
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
-
+//
         passes.add(new GepSplit());
-
+//
 //        passes.add(new CSE());
-        // SCCP后可能出现没有value的phi
+//        // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
-
+//
         passes.add(new MathOptimize());
 
         GVNGCMPass();
 
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+//        passes.add(new CFG());
+//        passes.add(new Dom());
+//        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
 
-        passes.add(new Peephole());
-        passes.add(new SCCP());
-        passes.add(new SimplifyInst());
-        passes.add(new MathOptimize());
-
-        passes.add(new InstructionCleanUp());
+//        passes.add(new InstructionCleanUp());
 
 
         for (Pass pass : passes) {
@@ -96,6 +95,7 @@ public class PassManager {
      * GVN 和 GCM 之前一定要先进行副作用判断，来确定某一个函数是否可以被处理
      */
     private void GVNGCMPass() {
+        passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GCMGVN());
     }

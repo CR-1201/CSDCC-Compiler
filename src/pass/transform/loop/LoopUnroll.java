@@ -9,14 +9,12 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
-import ir.types.IntType;
 import pass.Pass;
 import pass.analysis.CFG;
 import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
 import pass.utility.BlockUtil;
 import pass.utility.CloneUtil;
-import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +68,7 @@ public class LoopUnroll implements Pass {
     }
 
     private void constLoopUnroll(Loop loop) {
-        if (!loop.getIsSetInductorVar()) {
+        if (!loop.isInductorVarSet()) {
             return;
         }
         Value idcVar = loop.getIdcVar();
@@ -90,6 +88,7 @@ public class LoopUnroll implements Pass {
         }
         int loopTimes = loop.computeLoopTimes(init, end, step, idcAlu, cond.getCondition());
         if (loopTimes <= 0) {
+            // 说明这个 loop 其实是无用的 loop，可以直接删掉
             return;
         } else {
             loop.setLoopTimes(loopTimes);

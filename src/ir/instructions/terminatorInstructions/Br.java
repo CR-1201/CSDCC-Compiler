@@ -6,15 +6,6 @@ import ir.types.VoidType;
 
 import java.util.ArrayList;
 
-/**
- @author Conroy
- br i1 <cond>, label <iftrue>, label <iffalse>
- br label <dest>
- FIXME
- 如果让 Br 在新建的时候就维护 CFG 图,就会出现过于耦联的结果
- 比如说 break 的时候会导致一个正常的块有一个 TMP_BLOCK 的前驱
- */
-
 public class Br extends TerInstruction{
     // 有条件跳转还是无条件跳转
     private boolean hasCondition;
@@ -93,11 +84,6 @@ public class Br extends TerInstruction{
         return result;
     }
 
-    /**
-     * 重载 updateValue 方法,如果设置的是跳转基本块,会自动更新所属 Block 的 successor
-     * @param index 索引
-     * @param newValue 新 Value
-     */
     @Override
     public void setOperator(int index, Value newValue){
         if (!hasCondition) {

@@ -66,6 +66,13 @@ public class LoopVarAnalysis {
             }
             if (alu instanceof Add || alu instanceof Sub || alu instanceof Mul) {
                 loop.setInductorVar(idcVar, idcEnd, idcInit, idcAlu, idcStep, cond);
+//                System.out.println("======= loop : " + loop.getId() + " =======");
+//                System.out.println(idcVar);
+//                System.out.println(idcEnd);
+//                System.out.println(idcInit);
+//                System.out.println(idcAlu);
+//                System.out.println(idcStep);
+//                System.out.println(cond);
             }
         }
     }

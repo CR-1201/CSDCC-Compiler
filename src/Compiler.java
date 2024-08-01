@@ -2,6 +2,8 @@ import ast.CompUnit;
 import config.Config;
 import frontend.LexicalAnalyze;
 import frontend.ParserAnalyze;
+import ir.BasicBlock;
+import ir.Function;
 import ir.IrBuilder;
 import ir.Module;
 import pass.PassManager;

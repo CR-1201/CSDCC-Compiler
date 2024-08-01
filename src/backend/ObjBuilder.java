@@ -87,6 +87,7 @@ public class ObjBuilder {
 
         RegisterAllocer rar = new RegisterAllocer(objModule);
         rar.alloc(false);
+        rar = new RegisterAllocer(objModule);
         rar.alloc(true);
         for (ObjFunction function : objModule.getFunctions()) {
             placeLiteralPool(function);

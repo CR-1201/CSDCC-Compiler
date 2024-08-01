@@ -32,12 +32,11 @@ public class CFG implements Pass {
 
     public void buildCFG(Function function) {
         deleteCFG(function);
-//        BasicBlock entry = function.getFirstBlock();
-//        if (entry != null) {
-//            visited.clear();
-//            setCFG(entry);
-//        }
-        setCFG(function.getBasicBlocksArray());
+        BasicBlock entry = function.getFirstBlock();
+        if (entry != null) {
+            visited.clear();
+            setCFG(entry);
+        }
         deleteUnreachableBlock(function);
     }
     private void deleteCFG(Function function) {

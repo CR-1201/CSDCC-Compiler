@@ -1,13 +1,459 @@
 .arch armv7ve
 
+.global	_g_image
+
+.bss
+.align 4
+_g_image:
+	.zero	4194304
+.global	_g_width
+
+.bss
+.align 4
+_g_width:
+	.zero	4
+.global	_g_height
+
+.bss
+.align 4
+_g_height:
+	.zero	4
 .text
+.global	my_sin_impl
+my_sin_impl:
+b7:
+	vmov	vf0,	s0
+	vldr	vf1,	=0x0
+	vcmp.f32	vf0,	vf1
+	vmrs	APSR_nzcv, fpscr
+	bgt	b62
+	b	b63
+.ltorg
+b60:
+	vmov	vf2,	vf16
+	vldr	vf3,	=0x358637BD
+	vcmp.f32	vf2,	vf3
+	vmrs	APSR_nzcv, fpscr
+	ble	b8
+	b	b9
+.ltorg
+b8:
+	vmov	s0,	vf0
+	bx	lr
+.ltorg
+b9:
+	vldr	vf4,	=0x40400000
+	vdiv.f32	vf5,	vf0,	vf4
+	vmov	s0,	vf5
+	bl	my_sin_impl
+	vmov	vf6,	s0
+	vldr	vf7,	=0x40400000
+	vmul.f32	vf8,	vf6,	vf7
+	vldr	vf9,	=0x40800000
+	vmul.f32	vf10,	vf6,	vf9
+	vmul.f32	vf11,	vf10,	vf6
+	vmul.f32	vf12,	vf11,	vf6
+	vsub.f32	vf13,	vf8,	vf12
+	vmov	s0,	vf13
+	bx	lr
+.ltorg
+b62:
+	vmov	vf16,	vf0
+	b	b60
+.ltorg
+b63:
+	vldr	vf14,	=0x0
+	vsub.f32	vf15,	vf14,	vf0
+	vmov	vf16,	vf15
+	b	b60
+.ltorg
+.global	my_sin
+my_sin:
+b12:
+	vmov	vf17,	s0
+	vldr	vf18,	=0x40C90FDB
+	vcmp.f32	vf17,	vf18
+	vmrs	APSR_nzcv, fpscr
+	bgt	b13
+	b	b15
+.ltorg
+b13:
+	vldr	vf19,	=0x40C90FDB
+	vdiv.f32	vf20,	vf17,	vf19
+	vcvt.s32.f32	vf21,	vf20
+	vmov	v3,	vf21
+	vmov	vf22,	v3
+	vcvt.f32.s32	vf22,	vf22
+	vldr	vf23,	=0x40C90FDB
+	vmul.f32	vf24,	vf22,	vf23
+	vsub.f32	vf25,	vf17,	vf24
+	vmov	vf37,	vf25
+	b	b14
+.ltorg
+b14:
+	vmov	vf26,	vf37
+	vldr	vf27,	=0x40490FDB
+	vcmp.f32	vf26,	vf27
+	vmrs	APSR_nzcv, fpscr
+	vmov	vf38,	vf26
+	bgt	b16
+	b	b17
+.ltorg
+b16:
+	vldr	vf28,	=0x40C90FDB
+	vsub.f32	vf29,	vf26,	vf28
+	vmov	vf38,	vf29
+	b	b17
+.ltorg
+b17:
+	vmov	vf30,	vf38
+	vldr	vf31,	=0xC0490FDB
+	vcmp.f32	vf30,	vf31
+	vmrs	APSR_nzcv, fpscr
+	vmov	vf39,	vf30
+	blt	b18
+	b	b19
+.ltorg
+b18:
+	vldr	vf32,	=0x40C90FDB
+	vadd.f32	vf33,	vf30,	vf32
+	vmov	vf39,	vf33
+	b	b19
+.ltorg
+b19:
+	vmov	vf34,	vf39
+	vmov	s0,	vf34
+	bl	my_sin_impl
+	vmov	vf35,	s0
+	vmov	s0,	vf35
+	bx	lr
+.ltorg
+b15:
+	vldr	vf36,	=0xC0C90FDB
+	vcmp.f32	vf17,	vf36
+	vmrs	APSR_nzcv, fpscr
+	vmov	vf37,	vf17
+	blt	b13
+	b	b14
+.ltorg
+.global	my_cos
+my_cos:
+b21:
+	vmov	vf40,	s0
+	vldr	vf41,	=0x3FC90FDB
+	vadd.f32	vf42,	vf40,	vf41
+	vmov	s0,	vf42
+	bl	my_sin
+	vmov	vf43,	s0
+	vmov	s0,	vf43
+	bx	lr
+.ltorg
+.global	rotate
+rotate:
+b40:
+	mov	v15,	r1
+	mov	v11,	r0
+	vmov	vf44,	s0
+	vmov	s0,	vf44
+	bl	my_sin
+	vmov	vf45,	s0
+	vmov	s0,	vf44
+	bl	my_cos
+	vmov	vf46,	s0
+	movw	v7,	:lower16:_g_width
+	movt	v7,	:upper16:_g_width
+	ldr	v7,	[v7]
+	movw	v8,	:lower16:_g_height
+	movt	v8,	:upper16:_g_height
+	ldr	v8,	[v8]
+	mov	v9,	#2
+	sdiv	v10,	v7,	v9
+	sub	v12,	v11,	v10
+	vmov	vf47,	v12
+	vcvt.f32.s32	vf47,	vf47
+	vmul.f32	vf48,	vf47,	vf46
+	mov	v13,	#2
+	sdiv	v14,	v8,	v13
+	sub	v16,	v15,	v14
+	vmov	vf49,	v16
+	vcvt.f32.s32	vf49,	vf49
+	vmul.f32	vf50,	vf49,	vf45
+	vsub.f32	vf51,	vf48,	vf50
+	vmov	vf52,	v10
+	vcvt.f32.s32	vf52,	vf52
+	vadd.f32	vf53,	vf51,	vf52
+	vcvt.s32.f32	vf54,	vf53
+	vmov	v17,	vf54
+	mov	v18,	#0
+	cmp	v17,	v18
+	blt	b41
+	b	b45
+.ltorg
+b41:
+	mov	r0,	#0
+	bx	lr
+.ltorg
+b45:
+	cmp	v17,	v7
+	bge	b41
+	b	b44
+.ltorg
+b44:
+	vmov	vf55,	v12
+	vcvt.f32.s32	vf55,	vf55
+	vmul.f32	vf56,	vf55,	vf45
+	vmov	vf57,	v16
+	vcvt.f32.s32	vf57,	vf57
+	vmul.f32	vf58,	vf57,	vf46
+	vadd.f32	vf59,	vf56,	vf58
+	vmov	vf60,	v14
+	vcvt.f32.s32	vf60,	vf60
+	vadd.f32	vf61,	vf59,	vf60
+	vcvt.s32.f32	vf62,	vf61
+	vmov	v21,	vf62
+	mov	v22,	#0
+	cmp	v21,	v22
+	blt	b41
+	b	b43
+.ltorg
+b43:
+	movw	v24,	:lower16:_g_height
+	movt	v24,	:upper16:_g_height
+	ldr	v24,	[v24]
+	cmp	v21,	v24
+	bge	b41
+	b	b42
+.ltorg
+b42:
+	movw	v26,	:lower16:_g_width
+	movt	v26,	:upper16:_g_width
+	ldr	v26,	[v26]
+	mul	v27,	v21,	v26
+	add	v28,	v27,	v17
+	movw	v29,	:lower16:_g_image
+	movt	v29,	:upper16:_g_image
+	mov	v31,	#4
+	mla	v30,	v28,	v31,	v29
+	ldr	v32,	[v30]
+	mov	r0,	v32
+	bx	lr
+.ltorg
+.global	write_pgm
+write_pgm:
+b48:
+	vmov	vf63,	s0
+	mov	r0,	#80
+	bl	putch
+	mov	r0,	#50
+	bl	putch
+	mov	r0,	#10
+	bl	putch
+	movw	v33,	:lower16:_g_width
+	movt	v33,	:upper16:_g_width
+	ldr	v33,	[v33]
+	mov	r0,	v33
+	bl	putint
+	mov	r0,	#32
+	bl	putch
+	movw	v34,	:lower16:_g_height
+	movt	v34,	:upper16:_g_height
+	ldr	v34,	[v34]
+	mov	r0,	v34
+	bl	putint
+	mov	r0,	#32
+	bl	putch
+	mov	r0,	#255
+	bl	putint
+	mov	r0,	#10
+	bl	putch
+	movw	v35,	:lower16:_g_height
+	movt	v35,	:upper16:_g_height
+	ldr	v35,	[v35]
+	movw	v36,	:lower16:_g_width
+	movt	v36,	:upper16:_g_width
+	ldr	v36,	[v36]
+	mov	v46,	#0
+	b	b49
+.ltorg
+b49:
+	mov	v37,	v46
+	cmp	v37,	v35
+	blt	b50
+	b	b51
+.ltorg
+b50:
+	mov	v47,	#0
+	b	b52
+.ltorg
+b52:
+	mov	v39,	v47
+	cmp	v39,	v36
+	blt	b53
+	b	b54
+.ltorg
+b53:
+	mov	r0,	v39
+	mov	r1,	v37
+	vmov	s0,	vf63
+	bl	rotate
+	mov	v41,	r0
+	mov	r0,	v41
+	bl	putint
+	mov	r0,	#32
+	bl	putch
+	mov	v42,	#1
+	add	v43,	v39,	v42
+	mov	v47,	v43
+	b	b52
+.ltorg
+b54:
+	mov	r0,	#10
+	bl	putch
+	mov	v44,	#1
+	add	v45,	v37,	v44
+	mov	v46,	v45
+	b	b49
+.ltorg
+b51:
+	bx	lr
+.ltorg
 .global	main
 main:
 	push	{lr}
 	sub	sp,	sp,	#4
-b0:
+b55:
+	bl	getfloat
+	vmov	vf64,	s0
+	bl	getch
+	mov	v48,	r0
+	bl	getch
+	mov	v49,	r0
+	mov	v50,	#80
+	cmp	v49,	v50
+	bne	b68
+	b	b69
+.ltorg
+b66:
+	mov	v52,	v88
+	mov	v53,	#0
+	cmp	v52,	v53
+	blt	b56
+	b	b57
+.ltorg
+b56:
+	mvn	r0,	#0
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg
+b57:
+	vmov	s0,	vf64
+	bl	write_pgm
 	mov	r0,	#0
 	add	sp,	sp,	#4
 	pop	{pc}
 	bx	lr
+.ltorg
+b68:
+	mvn	v88,	#0
+	b	b66
+.ltorg
+b69:
+	bl	getch
+	mov	v55,	r0
+	mov	v56,	#50
+	cmp	v55,	v56
+	bne	b68
+	b	b70
+.ltorg
+b70:
+	bl	getint
+	mov	v58,	r0
+	movw	v59,	:lower16:_g_width
+	movt	v59,	:upper16:_g_width
+	str	v58,	[v59]
+	bl	getint
+	mov	v60,	r0
+	movw	v61,	:lower16:_g_height
+	movt	v61,	:upper16:_g_height
+	str	v60,	[v61]
+	movw	v62,	:lower16:_g_width
+	movt	v62,	:upper16:_g_width
+	ldr	v62,	[v62]
+	mov	v63,	#1024
+	cmp	v62,	v63
+	bgt	b73
+	b	b71
+.ltorg
+b71:
+	movw	v65,	:lower16:_g_height
+	movt	v65,	:upper16:_g_height
+	ldr	v65,	[v65]
+	mov	v66,	#1024
+	cmp	v65,	v66
+	bgt	b73
+	b	b72
+.ltorg
+b72:
+	bl	getint
+	mov	v68,	r0
+	mov	v69,	#255
+	cmp	v68,	v69
+	bne	b73
+	b	b74
+.ltorg
+b74:
+	movw	v71,	:lower16:_g_height
+	movt	v71,	:upper16:_g_height
+	ldr	v71,	[v71]
+	movw	v72,	:lower16:_g_width
+	movt	v72,	:upper16:_g_width
+	ldr	v72,	[v72]
+	mov	v86,	#0
+	b	b75
+.ltorg
+b75:
+	mov	v73,	v86
+	cmp	v73,	v71
+	blt	b76
+	b	b80
+.ltorg
+b80:
+	mov	v88,	#0
+	b	b66
+.ltorg
+b76:
+	mul	v75,	v73,	v72
+	mov	v87,	#0
+	b	b77
+.ltorg
+b77:
+	mov	v76,	v87
+	cmp	v76,	v72
+	blt	b78
+	b	b79
+.ltorg
+b78:
+	bl	getint
+	mov	v78,	r0
+	add	v79,	v75,	v76
+	movw	v29,	:lower16:_g_image
+	movt	v29,	:upper16:_g_image
+	mov	v81,	#4
+	mla	v80,	v79,	v81,	v29
+	str	v78,	[v80]
+	mov	v82,	#1
+	add	v83,	v76,	v82
+	mov	v87,	v83
+	b	b77
+.ltorg
+b79:
+	mov	v84,	#1
+	add	v85,	v73,	v84
+	mov	v86,	v85
+	b	b75
+.ltorg
+b73:
+	mvn	v88,	#0
+	b	b66
 .ltorg

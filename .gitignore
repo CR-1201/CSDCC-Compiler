@@ -7,7 +7,8 @@
 /llvmchecker
 *.iml
 diff
-testfile.sy
+testcase.sy
+testcase.s
 llvm_ir.ll
 llvm_ir_raw.ll
 error.txt
@@ -17,6 +18,8 @@ tests/asm
 tests/ans
 tests/output
 tests/error.txt
+tests/ARM_raw.txt
+tests/llvm_ir_raw.txt
 compiler.jar
 tests/lib/libsysy.so
 .idea/workspace.xml

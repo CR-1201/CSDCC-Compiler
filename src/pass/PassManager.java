@@ -85,6 +85,7 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
 
+//        passes.add(new GepFuse());
 
         for (Pass pass : passes) {
             pass.run();

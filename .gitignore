@@ -6,10 +6,11 @@
 /checkir
 /llvmchecker
 *.iml
-testfile.txt
-output.txt
-llvm_ir.txt
-llvm_ir_raw.txt
+diff
+testcase.sy
+testcase.s
+llvm_ir.ll
+llvm_ir_raw.ll
 error.txt
 tests/ir
 tests/ir_std
@@ -17,6 +18,8 @@ tests/asm
 tests/ans
 tests/output
 tests/error.txt
+tests/ARM_raw.txt
+tests/llvm_ir_raw.txt
 compiler.jar
 tests/lib/libsysy.so
 .idea/workspace.xml

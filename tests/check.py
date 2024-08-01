@@ -159,14 +159,17 @@ def check(stop_event, test_file, input_file='', ans_file=''):
         append_return(output_file, res.returncode)
         time_output = res.stderr
 
-        m = TIME_PATTERN.search(time_output)
-        if m or time_output == '':
-            time_res['my'] = convert_time_to_us(m) if m else 0
-        else:
-            print(f'[ERROR FILE] {test_file}')
-            print(f'Error running {asm_runnable}: {res.stderr}. Full res: {res}')
-            stop_event.set()
-            return False
+    """
+    get TOTAL time
+    """
+    m = TIME_PATTERN.search(time_output)
+    if m or time_output == '':
+        time_res['my'] = convert_time_to_us(m) if m else 0
+    else:
+        print(f'[ERROR FILE] {test_file}')
+        print(f'Error running {asm_runnable}: {res.stderr}. Full res: {res}')
+        stop_event.set()
+        return False
     
     """
     get std answer

@@ -27,6 +27,7 @@ public class LoopFold implements Pass {
      */
     private final HashSet<Loop> foldedLoops = new HashSet<>();
     private final HashSet<Loop> foldingLoops = new HashSet<>();
+
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
@@ -60,7 +61,7 @@ public class LoopFold implements Pass {
             BasicBlock entering = loop.getEnterings().iterator().next();
             BasicBlock exit = loop.getExits().iterator().next();
             if (entering.getTailInstruction() instanceof Br br) {
-                int idx  = br.getOperators().indexOf(loop.getHeader());
+                int idx = br.getOperators().indexOf(loop.getHeader());
                 br.setOperator(idx, exit);
                 for (Instruction inst : loop.getHeader().getInstructions()) {
                     if (inst instanceof Phi phi) {

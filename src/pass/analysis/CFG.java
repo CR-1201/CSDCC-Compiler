@@ -3,16 +3,14 @@ package pass.analysis;
 import ir.BasicBlock;
 import ir.Function;
 import ir.Module;
-import ir.User;
 import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
-import pass.Pass;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
+import pass.Pass;
 
 /**
  * CFG: 控制流图，是每一个函数内部的，每一个函数内都有一个CFG
@@ -45,9 +43,11 @@ public class CFG implements Pass {
         }
     }
 
+    /**
+     * 递归版本的 setCFG
+     */
 //    private void setCFG(BasicBlock entry) {
 //        visited.add(entry);
-//
 //        // 基本块的最后一条指令一定是终结指令
 //        Instruction tail = entry.getTailInstruction();
 //        if (tail instanceof Br br) {
@@ -75,6 +75,10 @@ public class CFG implements Pass {
 //        }
 //    }
 
+    /**
+     * 迭代版本 -> 应对 github action 时爆栈的错误
+     * @param entry
+     */
     private void setCFG(BasicBlock entry) {
         // 使用栈来存储待处理的节点
         Stack<BasicBlock> stack = new Stack<>();
@@ -112,6 +116,8 @@ public class CFG implements Pass {
             }
         }
     }
+
+
 
     public void deleteUnreachableBlock(Function function) {
         BasicBlock entry = function.getFirstBlock();

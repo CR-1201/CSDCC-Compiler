@@ -6,7 +6,6 @@ import threading
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-TEST_IR = False
 TIMEOUT = 600
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
 TEST_DIR = f'{ROOT_DIR}/tests'
@@ -19,14 +18,9 @@ pass_cnt_lock = threading.Lock()
 def init():
     subprocess.run('make build', cwd=ROOT_DIR, shell=True)
     lib_file = 'lib/libsysy.so'
-    cmd_list = [
-        f'clang -shared -fPIC lib/sylib.c -o {lib_file}',
-        f'arm-linux-gnueabihf-gcc -c lib/sylib.c -o lib/libsysy.o',
-        f'arm-linux-gnueabihf-ar rcs lib/libsysy.a lib/libsysy.o',
-    ]
-    for cmd in cmd_list:
-        print(f'Running {cmd}')
-        subprocess.run(cmd, cwd=TEST_DIR, shell=True)
+    cmd = f'clang -shared -fPIC lib/sylib.c -o {lib_file}'
+    print(f'Running {cmd}')
+    subprocess.run(cmd, cwd=TEST_DIR, shell=True, check=True)
 
     # setup testcases
     dir_list = ['testcases']
@@ -85,13 +79,10 @@ def check(stop_event, test_file, input_file='', ans_file=''):
     ir_runnable = f'ir/{filename}'
     ir_std = f'ir_std/{filename}.ll'
     ir_std_runnable = f'ir_std/{filename}'
-    asm_file = f'asm/{filename}.s'
-    asm_runnable = f'asm/{filename}'
+    asm_file = f'asm/{filename}.asm'
     output_file = f'output/{test_file}'
 
-    """
-    run compiler
-    """
+    # run compiler
     try:
         create_folder_for(ir_file)
         create_folder_for(asm_file)
@@ -104,70 +95,50 @@ def check(stop_event, test_file, input_file='', ans_file=''):
         stop_event.set()
         return False
 
-    time_output = ''
+    # link with lib.ll
+    try:
+        cmd = f'clang {ir_file} -L./lib -lsysy -o {ir_runnable}'
+        print(f'Running: {cmd}')
+        subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        print(f'[ERROR FILE] {test_file}')
+        print(f'Error running clang for {ir_file}:\n{e.output.decode()}')
+        stop_event.set()
+        return False
 
-    """
-    link and run ir
-    """
-    if TEST_IR:
-        try:
-            cmd = f'clang {ir_file} -L./lib -lsysy -o {ir_runnable}'
-            print(f'Running: {cmd}')
-            subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as e:
+    # run ir
+    time_output = ''
+    try:
+        create_folder_for(output_file)
+        cmd = f'./{ir_runnable} < {input_file} > {output_file}'
+        if not input_file:
+            cmd = f'./{ir_runnable} > {output_file}'
+        print(f'Running: {cmd}')
+        r = subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
+        time_output = r.decode()
+        append_return(output_file, 0)
+    except subprocess.CalledProcessError as e:
+        if TIME_PATTERN.search(e.output.decode()):
+            append_return(output_file, e.returncode)
+            time_output = e.output.decode()
+        else:
             print(f'[ERROR FILE] {test_file}')
-            print(f'Error running clang for {ir_file}:\n{e.output.decode()}')
+            print(f'Error running {ir_runnable}:{e.output.decode()}')
             stop_event.set()
             return False
 
-        try:
-            create_folder_for(output_file)
-            cmd = f'./{ir_runnable} < {input_file} > {output_file}'
-            if not input_file:
-                cmd = f'./{ir_runnable} > {output_file}'
-            print(f'Running: {cmd}')
-            r = subprocess.check_output(cmd, cwd=TEST_DIR, shell=True, stderr=subprocess.STDOUT)
-            time_output = r.decode()
-            append_return(output_file, 0)
-        except subprocess.CalledProcessError as e:
-            if TIME_PATTERN.search(e.output.decode()):
-                append_return(output_file, e.returncode)
-                time_output = e.output.decode()
-            else:
-                print(f'[ERROR FILE] {test_file}')
-                print(f'Error running {ir_runnable}: {e.output.decode()}')
-                stop_event.set()
-                return False
-
-    """
-    run asm
-    """
-    create_folder_for(asm_runnable)
-    create_folder_for(output_file)
-    cmd = f'arm-linux-gnueabihf-gcc -march=armv7-a -static -g {asm_file} lib/libsysy.a -o {asm_runnable}'
-    print(f'Running {cmd}')
-    res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
-    cmd = f'qemu-arm-static {asm_runnable} < {input_file} > {output_file}'
-    if not input_file:
-        cmd = f'qemu-arm-static {asm_runnable} > {output_file}'
-    print(f'Running {cmd}')
-    res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
-    append_return(output_file, res.returncode)
-    time_output = res.stderr
-    print(res)
-
     m = TIME_PATTERN.search(time_output)
-    if m or time_output == '':
-        time_res['my'] = convert_time_to_us(m) if m else 0
+    if m:
+        time_res['my'] = convert_time_to_us(m)
     else:
         print(f'[ERROR FILE] {test_file}')
-        print(f'Error running {asm_runnable}: {res.stderr}. Full res: {res}')
+        print(f'Error running {ir_runnable}: no time measurement')
         stop_event.set()
         return False
     
-    """
-    get std answer
-    """
+    # TODO: run asm
+
+    # get std answer
     if not ans_file:
         ans_file = f'ans/{test_file}'
         create_folder_for(ir_std)
@@ -179,9 +150,7 @@ def check(stop_event, test_file, input_file='', ans_file=''):
             cmd = f'./{ir_std_runnable} > {ans_file}'
         subprocess.run(cmd, cwd=TEST_DIR, shell=True)
 
-    """
-    get clang time
-    """
+    # get clang time
     for opt in range(1, 4):
         create_folder_for(ir_std_runnable)
         subprocess.run(f'clang -x c {test_file} lib/sylib.c -include lib/sylib.h -Wall -Wno-unused-result -O{opt} -o {ir_std_runnable}', cwd=TEST_DIR, shell=True, stderr=subprocess.PIPE)
@@ -192,8 +161,8 @@ def check(stop_event, test_file, input_file='', ans_file=''):
         res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
         e = res.stderr
         m = TIME_PATTERN.search(e)
-        if m or e == '':
-            time_res[f'O{opt}'] = convert_time_to_us(m) if m else 0
+        if m:
+            time_res[f'O{opt}'] = convert_time_to_us(m)
         else:
             print(f'ERROR: {e}')
 
@@ -268,7 +237,6 @@ if __name__ == '__main__':
 
     print(f'test_num: {len(TEST_CASES)}, pass_num: {pass_cnt}')
     df = pd.DataFrame([{'file': file, **res} for file, res in results])
-    df = df[df['my'] != 0]
     df = df.sort_values(by='my', ascending=False)
     print(df.to_string(index=False))
 

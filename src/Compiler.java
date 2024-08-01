@@ -65,11 +65,11 @@ public class Compiler {
         IOFunc.output(Module.getModule().toString(), Config.irOutputPath);
 
         // 生成目标代码
-        ObjBuilder.getObjBuilder().build();
-
-        ObjPassManager objPassManager = new ObjPassManager();
-        objPassManager.run();
-
-        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
+//        ObjBuilder.getObjBuilder().build();
+//
+//        ObjPassManager objPassManager = new ObjPassManager();
+//        objPassManager.run();
+//
+//        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
     }
 }

@@ -3,10 +3,12 @@ import os
 import subprocess
 import glob
 import threading
+import argparse
 import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-TEST_IR = False
+TEST_IR = True
+TEST_ASM = False
 TIMEOUT = 600
 ROOT_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '../..'))
 TEST_DIR = f'{ROOT_DIR}/tests'
@@ -27,6 +29,7 @@ def init():
     for cmd in cmd_list:
         print(f'Running {cmd}')
         subprocess.run(cmd, cwd=TEST_DIR, shell=True)
+    os.environ['LD_LIBRARY_PATH'] = f'{TEST_DIR}/lib'
 
     # setup testcases
     dir_list = ['testcases']
@@ -142,28 +145,28 @@ def check(stop_event, test_file, input_file='', ans_file=''):
     """
     run asm
     """
-    create_folder_for(asm_runnable)
-    create_folder_for(output_file)
-    cmd = f'arm-linux-gnueabihf-gcc -march=armv7-a -static -g {asm_file} lib/libsysy.a -o {asm_runnable}'
-    print(f'Running {cmd}')
-    res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
-    cmd = f'qemu-arm-static {asm_runnable} < {input_file} > {output_file}'
-    if not input_file:
-        cmd = f'qemu-arm-static {asm_runnable} > {output_file}'
-    print(f'Running {cmd}')
-    res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
-    append_return(output_file, res.returncode)
-    time_output = res.stderr
-    print(res)
+    if TEST_ASM:
+        create_folder_for(asm_runnable)
+        create_folder_for(output_file)
+        cmd = f'arm-linux-gnueabihf-gcc -march=armv7-a -static -g {asm_file} lib/libsysy.a -o {asm_runnable}'
+        print(f'Running {cmd}')
+        res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
+        cmd = f'qemu-arm-static {asm_runnable} < {input_file} > {output_file}'
+        if not input_file:
+            cmd = f'qemu-arm-static {asm_runnable} > {output_file}'
+        print(f'Running {cmd}')
+        res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)
+        append_return(output_file, res.returncode)
+        time_output = res.stderr
 
-    m = TIME_PATTERN.search(time_output)
-    if m or time_output == '':
-        time_res['my'] = convert_time_to_us(m) if m else 0
-    else:
-        print(f'[ERROR FILE] {test_file}')
-        print(f'Error running {asm_runnable}: {res.stderr}. Full res: {res}')
-        stop_event.set()
-        return False
+        m = TIME_PATTERN.search(time_output)
+        if m or time_output == '':
+            time_res['my'] = convert_time_to_us(m) if m else 0
+        else:
+            print(f'[ERROR FILE] {test_file}')
+            print(f'Error running {asm_runnable}: {res.stderr}. Full res: {res}')
+            stop_event.set()
+            return False
     
     """
     get std answer
@@ -233,6 +236,16 @@ def check_wrapper(stop_event, case, results, results_lock):
     return True
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Process some input arguments.")
+    parser.add_argument("input", choices=["ir", "asm"], help="Input type: 'ir' or 'asm'")
+    args = parser.parse_args()
+    if args.input == "ir":
+        TEST_IR = True
+        TEST_ASM = False
+    elif args.input == "asm":
+        TEST_IR = False
+        TEST_ASM = True
+
     stop_event = threading.Event()
     init()
 

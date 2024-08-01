@@ -29,10 +29,10 @@ public class PassManager {
         passes.add(new GlobalValueLocalize());
         passes.add(new Mem2reg());
 
-//        passes.add(new LocalArrayLift());
+        passes.add(new LocalArrayLift());
 //         LocalArrayLift只用一次
 
-//        passes.add(new ConstArrayFold());
+        passes.add(new ConstArrayFold());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
@@ -78,12 +78,14 @@ public class PassManager {
 
         GVNGCMPass();
 
-//        passes.add(new CFG());
-//        passes.add(new Dom());
-//        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
 
-//        passes.add(new InstructionCleanUp());
+        passes.add(new InstructionCleanUp());
 
+        passes.add(new CFG());
+        passes.add(new Dom());
 //        passes.add(new GepFuse());
 
         for (Pass pass : passes) {

@@ -94,13 +94,11 @@ public class LoopFold implements Pass {
         if (!loop.getIdcInit().equals(nextLoop.getIdcInit()) || !loop.getIdcStep().equals(nextLoop.getIdcStep()) || !loop.getIdcEnd().equals(nextLoop.getIdcEnd())) {
             return;
         }
-        if (loop.getCond() instanceof Icmp icmpPre && nextLoop.getCond() instanceof Icmp icmpPost) {
-            if (icmpPost.getCondition() != icmpPre.getCondition()) {
-                return;
-            }
-        } else {
+
+        if (loop.getCond().getCondition() != nextLoop.getCond().getCondition()) {
             return;
         }
+
         BinaryInstruction preCptAlu = (BinaryInstruction) loop.getCptAlu();
         Phi preCptPhi = (Phi) loop.getCptPhi();
         Value preCptInit = loop.getCptInit();

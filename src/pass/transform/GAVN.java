@@ -173,6 +173,10 @@ public class GAVN implements Pass {
                 if( instruction instanceof GEP gep){
                     geps.add(gep);
                 }
+                if( instruction instanceof Call call && !(is_pure.containsKey(call.getFunction()) && is_pure.get(call.getFunction())) ){
+                    //保守起见 碰到call非纯函数就清空
+                    geps.clear();
+                }
             }
         }
 

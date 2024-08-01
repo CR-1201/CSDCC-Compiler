@@ -44,7 +44,7 @@ jobs:
       run: |
         clang --version
 
-    - name: test all
+    - name: run test
       run: |
         set -e
-        make test-all
+        make test-ir

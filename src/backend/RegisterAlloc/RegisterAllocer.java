@@ -110,6 +110,7 @@ public class RegisterAllocer {
     private void switchV2R(ObjFunction func) {
         for (ObjBlock block : func.getBlocks()) {
             for (ObjInstruction instr : block.getInstructions()) {
+                if (instr instanceof ObjCall) continue;
                 ArrayList<ObjRegister> defs = new ArrayList<>(instr.getDef());
                 ArrayList<ObjRegister> uses = new ArrayList<>(instr.getUse());
 
@@ -181,28 +182,28 @@ public class RegisterAllocer {
     }
 
     private void AddEdge(ObjRegister u, ObjRegister v) {
-        if (u.isFloat() != v.isFloat())
-            return;
-        Edge e = new Edge(u, v);
-        if (!adjSet.contains(e) && !u.equals(v)) {
-            adjSet.add(e);
-            adjSet.add(e.reverse());
-            if (!precolored.contains(u)) {
-                adjList.putIfAbsent(u, new HashSet<>());
-                adjList.get(u).add(v);
-                if (degree.containsKey(u)) {
-                    degree.compute(u, (key, value) -> value + 1);
-                } else {
-                    degree.put(u, 1);
+        if ((type && !u.isFloat() && !v.isFloat()) || (!type && u.isFloat() && v.isFloat())) {
+            Edge e = new Edge(u, v);
+            if (!adjSet.contains(e) && !u.equals(v)) {
+                adjSet.add(e);
+                adjSet.add(e.reverse());
+                if (!precolored.contains(u)) {
+                    adjList.putIfAbsent(u, new HashSet<>());
+                    adjList.get(u).add(v);
+                    if (degree.containsKey(u)) {
+                        degree.compute(u, (key, value) -> value + 1);
+                    } else {
+                        degree.put(u, 1);
+                    }
                 }
-            }
-            if (!precolored.contains(v)) {
-                adjList.putIfAbsent(v, new HashSet<>());
-                adjList.get(v).add(u);
-                if (degree.containsKey(v)) {
-                    degree.compute(v, (key, value) -> value + 1);
-                } else {
-                    degree.put(v, 1);
+                if (!precolored.contains(v)) {
+                    adjList.putIfAbsent(v, new HashSet<>());
+                    adjList.get(v).add(u);
+                    if (degree.containsKey(v)) {
+                        degree.compute(v, (key, value) -> value + 1);
+                    } else {
+                        degree.put(v, 1);
+                    }
                 }
             }
         }
@@ -241,7 +242,7 @@ public class RegisterAllocer {
     }
 
     private void Simplify() {
-        ObjRegister n = simplifyWorklist.stream().findFirst().get();
+        ObjRegister n = simplifyWorklist.iterator().next();
         simplifyWorklist.remove(n);
         selectStack.push(n);
         for (ObjRegister m : Adjacent(n)) {
@@ -275,7 +276,7 @@ public class RegisterAllocer {
     }
 
     private void Coalesce() {
-        ObjInstruction m = worklistMoves.stream().findFirst().get();
+        ObjInstruction m = worklistMoves.stream().iterator().next();
         ObjRegister x = (ObjRegister) ((ObjMove) m).getDst();
         ObjRegister y = (ObjRegister) ((ObjMove) m).getRhs();
         x = GetAlias(x);
@@ -392,11 +393,11 @@ public class RegisterAllocer {
     }
 
     private void AssignColors() {
-        Set<ObjRegister> used = ObjRegister.getAllAllocatableRegs().stream().filter(adjList::containsKey).collect(Collectors.toSet());
+//        Set<ObjRegister> used = ObjRegister.getAllAllocatableRegs().stream().filter(adjList::containsKey).collect(Collectors.toSet());
         while (!selectStack.isEmpty()) {
             ObjRegister n = selectStack.pop();
-            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type)).stream().filter(oneReg -> ObjRegister.isCalleeSave(oneReg, type) || (ObjRegister.isCallerSave(oneReg, type) && !used.contains(ObjRegister.getPhysicalRegisterById(oneReg, type)))).collect(Collectors.toSet());
-//            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type));
+//            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type)).stream().filter(oneReg -> ObjRegister.isCalleeSave(oneReg, type) || (ObjRegister.isCallerSave(oneReg, type) && !used.contains(ObjRegister.getPhysicalRegisterById(oneReg, type)))).collect(Collectors.toSet());
+            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type));
             for (ObjRegister w : adjList.getOrDefault(n, new HashSet<>())) {
                 ObjRegister aw = GetAlias(w);
                 if (coloredNodes.contains(aw) || precolored.contains(aw)) {
@@ -406,7 +407,7 @@ public class RegisterAllocer {
             if (okColors.isEmpty()) spilledNodes.add(n);
             else {
                 coloredNodes.add(n);
-                int c = okColors.stream().findFirst().get();
+                int c = okColors.iterator().next();
                 color.put(n, c);
             }
         }
@@ -423,6 +424,7 @@ public class RegisterAllocer {
             for (ObjBlock block : objFunction.getBlocks()) {
                 LinkedList<ObjInstruction> temp = new LinkedList<>(block.getInstructions());
                 for (ObjInstruction instr : temp) {
+                    if (instr instanceof ObjCall) continue;
                     ObjRegister vReg = null;
                     ObjInstruction firstUse = null;
                     ObjInstruction lastDef = null;

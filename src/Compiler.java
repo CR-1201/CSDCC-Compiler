@@ -5,6 +5,8 @@ import backend.pass.ObjPassManager;
 import config.Config;
 import frontend.LexicalAnalyze;
 import frontend.ParserAnalyze;
+import ir.BasicBlock;
+import ir.Function;
 import ir.IrBuilder;
 import ir.Module;
 import pass.PassManager;
@@ -63,7 +65,7 @@ public class Compiler {
         ObjBuilder.getObjBuilder().build();
 
         ObjPassManager objPassManager = new ObjPassManager();
-//        objPassManager.run();
+        objPassManager.run();
 
         IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
     }

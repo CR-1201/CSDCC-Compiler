@@ -23,6 +23,7 @@ import ir.instructions.otherInstructions.*;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
+import utils.IOFunc;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,6 +56,7 @@ public class ObjBuilder {
     private static HashMap<String, ArrayList<String>> preMap = new HashMap<>();
     private static HashMap<String, String[]> succMap = new HashMap<>();
 
+
     private void firstPass() {
         for (Value function : module.getFunctions()) {
             for (Value block : ((Function) function).getBasicBlocks()) {
@@ -78,12 +80,14 @@ public class ObjBuilder {
                 ObjFunction objFunction = buildObjFunc((Function) function);
                 objModule.addFunction(objFunction);
                 buildPhi((Function) function, objFunction);
-
             }
         }
+        IOFunc.clear("ARM_raw.txt");
+        IOFunc.output(objModule.toString(), "ARM_raw.txt");
+
         RegisterAllocer rar = new RegisterAllocer(objModule);
-        rar.alloc(true);
         rar.alloc(false);
+        rar.alloc(true);
         for (ObjFunction function : objModule.getFunctions()) {
             placeLiteralPool(function);
         }
@@ -174,7 +178,9 @@ public class ObjBuilder {
     public ObjFunction buildObjFunc(Function function) {
         ObjFunction objFunction = new ObjFunction(function.getName());
         for (BasicBlock basicBlock : function.getBlocksFromDom()) {
-            objFunction.addObjBlock(buildBasicBlock(objFunction, basicBlock));
+            ObjBlock b = buildBasicBlock(objFunction, basicBlock);
+            objFunction.addObjBlock(b);
+            b.bb = basicBlock;
         }
 
         return objFunction;

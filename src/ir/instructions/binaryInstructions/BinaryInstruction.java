@@ -2,6 +2,7 @@ package ir.instructions.binaryInstructions;
 
 import ir.BasicBlock;
 import ir.Value;
+import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.types.DataType;
 
@@ -54,5 +55,14 @@ public abstract class BinaryInstruction extends Instruction {
             isSame =  cmp_1.getCondition().equals(cmp_2.getCondition());
         }
         return isSame;
+    }
+
+    /**
+     * Binary Instruction 的两个操作数中，只有一个操作数是常数，另一个是变量
+     */
+    public Boolean with1Const() {
+        boolean isLeftConst = getOp1() instanceof Constant;
+        boolean isRightConst = getOp2() instanceof Constant;
+        return (isLeftConst && !isRightConst) || (!isLeftConst && isRightConst);
     }
 }

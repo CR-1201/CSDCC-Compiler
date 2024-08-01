@@ -1,5 +1,9 @@
-@_g_x = dso_local global [600 x [600 x [600 x i32]]] zeroinitializer
-@_g_y = dso_local global [600 x [600 x [600 x i32]]] zeroinitializer
+@_g_a = dso_local global [30 x [30 x i32]] zeroinitializer
+@_g_step = dso_local global [4 x [2 x i32]] [[2 x i32] [i32 1, i32 0], [2 x i32] [i32 -1, i32 0], [2 x i32] [i32 0, i32 1], [2 x i32] [i32 0, i32 -1]]
+@_g_w = dso_local global i32 0
+@_g_h = dso_local global i32 0
+@_g_x_1 = dso_local global i32 0
+@_g_y_1 = dso_local global i32 0
 
 declare dso_local i32 @getint()
 declare dso_local i32 @getch()
@@ -14,105 +18,1986 @@ declare dso_local void @putfarray(i32 %a0, float* %a1)
 declare dso_local void @memset(i32* %a0, i32 %a1, i32 %a2)
 declare dso_local void @_sysy_starttime()
 declare dso_local void @_sysy_stoptime()
-define dso_local i32 @main() {
+define dso_local i32 @search(i32 %a0, i32 %a1, i32 %a2) {
 b0:
-	%v5 = call i32 @getint()
-	%v6 = call i32 @getint()
-	call void @_sysy_starttime()
-	br label %b1
+	%v4 = icmp sgt i32 %a2, 10
+	br i1 %v4, label %b1, label %b2
 b1:
-	%p10 = phi i32 [ 0, %b0 ],  [ %v33, %b6 ]
-	%v9 = icmp slt i32 %p10, %v5
-	br i1 %v9, label %b2, label %b3
+	ret i32 1073741824
 b2:
+	%v82 = add i32 %a2, 1
 	br label %b4
-b3:
-	%v36 = sub i32 %v5, 1
-	br label %b10
 b4:
-	%p6 = phi i32 [ 0, %b2 ],  [ %v31, %b9 ]
-	%v12 = icmp slt i32 %p6, %v5
-	br i1 %v12, label %b5, label %b6
+	%p8 = phi i32 [ 1073741824, %b2 ],  [ %p8, %b19 ],  [ %p9, %b25 ],  [ %p8, %b17 ]
+	%p7 = phi i32 [ 0, %b2 ],  [ %v63, %b19 ],  [ %v94, %b25 ],  [ %v49, %b17 ]
+	%v8 = icmp slt i32 %p7, 4
+	br i1 %v8, label %b5, label %b6
 b5:
+	%v35 = getelementptr inbounds [4 x [2 x i32]], [4 x [2 x i32]]* @_g_step, i32 0, i32 %p7, i32 1
+	%v29 = getelementptr inbounds [4 x [2 x i32]], [4 x [2 x i32]]* @_g_step, i32 0, i32 %p7, i32 0
 	br label %b7
 b6:
-	%v33 = add i32 %p10, 1
-	br label %b1
+	%v96 = icmp sgt i32 %p8, 10
+	br i1 %v96, label %b26, label %b27
 b7:
-	%p5 = phi i32 [ 0, %b5 ],  [ %v29, %b8 ]
-	%v15 = icmp slt i32 %p5, %v5
-	br i1 %v15, label %b8, label %b9
+	%p6 = phi i32 [ 0, %b5 ],  [ %v39, %b11 ]
+	%p4 = phi i32 [ %a0, %b5 ],  [ %v31, %b11 ]
+	%p2 = phi i32 [ %a1, %b5 ],  [ %v37, %b11 ]
+	%v17 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 %p4, i32 %p2
+	%v18 = load i32, i32* %v17
+	%v19 = icmp ne i32 %v18, 1
+	br i1 %v19, label %b8, label %b9
 b8:
-	%v21 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %p10, i32 %p6, i32 %p5
-	store i32 1, i32* %v21
-	%v27 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_y, i32 0, i32 %p10, i32 %p6, i32 %p5
-	store i32 0, i32* %v27
-	%v29 = add i32 %p5, 1
-	br label %b7
+	%v21 = load i32, i32* @_g_x_1
+	%v22 = icmp eq i32 %p4, %v21
+	br i1 %v22, label %b12, label %b11
 b9:
-	%v31 = add i32 %p6, 1
-	br label %b4
+	%v41 = load i32, i32* @_g_x_1
+	%v42 = icmp eq i32 %p4, %v41
+	br i1 %v42, label %b15, label %b14
 b10:
-	%p11 = phi i32 [ 1, %b3 ],  [ %v112, %b15 ]
-	%p9 = phi i32 [ 1, %b3 ],  [ %p8, %b15 ]
-	%v37 = icmp slt i32 %p11, %v36
-	br i1 %v37, label %b11, label %b12
+	br label %b9
 b11:
-	%v61 = add i32 %p11, 1
-	%v53 = sub i32 %p11, 1
-	br label %b13
+	%v30 = load i32, i32* %v29
+	%v36 = load i32, i32* %v35
+	%v39 = add i32 %p6, 1
+	%v37 = add i32 %p2, %v36
+	%v31 = add i32 %p4, %v30
+	br label %b7
 b12:
-	call void @_sysy_stoptime()
-	%v116 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 0, i32 0, i32 0
-	call void @putarray(i32 %v5, i32* %v116)
-	%v119 = sdiv i32 %v5, 2
-	%v124 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %v119, i32 %v119, i32 0
-	call void @putarray(i32 %v5, i32* %v124)
-	%v130 = sub i32 %p9, 1
-	%v127 = sub i32 %p11, 1
-	%v132 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %v127, i32 %v130, i32 0
-	call void @putarray(i32 %v5, i32* %v132)
-	ret i32 0
+	%v24 = load i32, i32* @_g_y_1
+	%v25 = icmp eq i32 %p2, %v24
+	br i1 %v25, label %b10, label %b11
 b13:
-	%p8 = phi i32 [ 1, %b11 ],  [ %v110, %b18 ]
-	%v41 = icmp slt i32 %p8, %v36
-	br i1 %v41, label %b14, label %b15
+	ret i32 1
 b14:
-	%v81 = add i32 %p8, 1
-	%v72 = sub i32 %p8, 1
-	br label %b16
+	%v47 = icmp sle i32 %p6, 1
+	br i1 %v47, label %b17, label %b18
 b15:
-	%v112 = add i32 %p11, 1
-	br label %b10
-b16:
-	%p1 = phi i32 [ 1, %b14 ],  [ %v101, %b17 ]
-	%v45 = icmp slt i32 %p1, %v36
-	br i1 %v45, label %b17, label %b18
+	%v44 = load i32, i32* @_g_y_1
+	%v45 = icmp eq i32 %p2, %v44
+	br i1 %v45, label %b13, label %b14
 b17:
-	%v58 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %v53, i32 %p8, i32 %p1
-	%v59 = load i32, i32* %v58
-	%v66 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %v61, i32 %p8, i32 %p1
-	%v67 = load i32, i32* %v66
-	%v75 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %p11, i32 %v72, i32 %p1
-	%v76 = load i32, i32* %v75
-	%v84 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %p11, i32 %v81, i32 %p1
-	%v85 = load i32, i32* %v84
-	%v92 = sub i32 %p1, 1
-	%v93 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %p11, i32 %p8, i32 %v92
-	%v94 = load i32, i32* %v93
-	%v101 = add i32 %p1, 1
-	%v102 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %p11, i32 %p8, i32 %v101
-	%v103 = load i32, i32* %v102
-	%v68 = add i32 %v59, %v67
-	%v77 = add i32 %v68, %v76
-	%v86 = add i32 %v77, %v85
-	%v95 = add i32 %v86, %v94
-	%v104 = add i32 %v95, %v103
-	%v106 = sdiv i32 %v104, %v6
-	%v51 = getelementptr inbounds [600 x [600 x [600 x i32]]], [600 x [600 x [600 x i32]]]* @_g_x, i32 0, i32 %p11, i32 %p8, i32 %p1
-	store i32 %v106, i32* %v51
-	br label %b16
+	%v49 = add i32 %p7, 1
+	br label %b4
 b18:
-	%v110 = add i32 %p8, 1
-	br label %b13
+	%v51 = icmp eq i32 %p4, 0
+	br i1 %v51, label %b19, label %b23
+b19:
+	%v63 = add i32 %p7, 1
+	br label %b4
+b20:
+	store i32 0, i32* %v17
+	%v72 = getelementptr inbounds [4 x [2 x i32]], [4 x [2 x i32]]* @_g_step, i32 0, i32 %p7, i32 0
+	%v73 = load i32, i32* %v72
+	%v78 = getelementptr inbounds [4 x [2 x i32]], [4 x [2 x i32]]* @_g_step, i32 0, i32 %p7, i32 1
+	%v79 = load i32, i32* %v78
+	%v80 = sub i32 %p2, %v79
+	%v74 = sub i32 %p4, %v73
+	%v83 = call i32 @search(i32 %v74, i32 %v80, i32 %v82)
+	%v84 = add i32 %v83, 1
+	%v87 = icmp slt i32 %v84, %p8
+	br i1 %v87, label %b24, label %b25
+b21:
+	%v59 = load i32, i32* @_g_w
+	%v60 = add i32 %v59, 1
+	%v61 = icmp eq i32 %p2, %v60
+	br i1 %v61, label %b19, label %b20
+b22:
+	%v57 = icmp eq i32 %p2, 0
+	br i1 %v57, label %b19, label %b21
+b23:
+	%v53 = load i32, i32* @_g_h
+	%v54 = add i32 %v53, 1
+	%v55 = icmp eq i32 %p4, %v54
+	br i1 %v55, label %b19, label %b22
+b24:
+	br label %b25
+b25:
+	%p9 = phi i32 [ %p8, %b20 ],  [ %v84, %b24 ]
+	store i32 1, i32* %v17
+	%v94 = add i32 %p7, 1
+	br label %b4
+b26:
+	ret i32 1073741824
+b27:
+	ret i32 %p8
+}
+define dso_local i32 @main() {
+b30:
+	%v98 = call i32 @getint()
+	store i32 %v98, i32* @_g_w
+	%v99 = call i32 @getint()
+	store i32 %v99, i32* @_g_h
+	br label %b31
+b31:
+	%p15 = phi i32 [ 0, %b30 ],  [ %p14, %b53 ]
+	%p11 = phi i32 [ 0, %b30 ],  [ %p10, %b53 ]
+	%v100 = load i32, i32* @_g_w
+	%v101 = icmp ne i32 %v100, 0
+	br i1 %v101, label %b32, label %b33
+b32:
+	%v111 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 0
+	store i32 1, i32* %v111
+	%v159 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 1
+	store i32 1, i32* %v159
+	%v161 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 2
+	store i32 1, i32* %v161
+	%v163 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 3
+	store i32 1, i32* %v163
+	%v165 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 4
+	store i32 1, i32* %v165
+	%v167 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 5
+	store i32 1, i32* %v167
+	%v169 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 6
+	store i32 1, i32* %v169
+	%v171 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 7
+	store i32 1, i32* %v171
+	%v173 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 8
+	store i32 1, i32* %v173
+	%v175 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 9
+	store i32 1, i32* %v175
+	%v177 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 10
+	store i32 1, i32* %v177
+	%v179 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 11
+	store i32 1, i32* %v179
+	%v181 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 12
+	store i32 1, i32* %v181
+	%v183 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 13
+	store i32 1, i32* %v183
+	%v185 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 14
+	store i32 1, i32* %v185
+	%v187 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 15
+	store i32 1, i32* %v187
+	%v189 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 16
+	store i32 1, i32* %v189
+	%v191 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 17
+	store i32 1, i32* %v191
+	%v193 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 18
+	store i32 1, i32* %v193
+	%v195 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 19
+	store i32 1, i32* %v195
+	%v197 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 20
+	store i32 1, i32* %v197
+	%v199 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 21
+	store i32 1, i32* %v199
+	%v201 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 22
+	store i32 1, i32* %v201
+	%v203 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 23
+	store i32 1, i32* %v203
+	%v205 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 24
+	store i32 1, i32* %v205
+	%v207 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 25
+	store i32 1, i32* %v207
+	%v209 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 26
+	store i32 1, i32* %v209
+	%v211 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 27
+	store i32 1, i32* %v211
+	%v213 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 28
+	store i32 1, i32* %v213
+	%v215 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 0, i32 29
+	store i32 1, i32* %v215
+	%v218 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 0
+	store i32 1, i32* %v218
+	%v220 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 1
+	store i32 1, i32* %v220
+	%v222 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 2
+	store i32 1, i32* %v222
+	%v224 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 3
+	store i32 1, i32* %v224
+	%v226 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 4
+	store i32 1, i32* %v226
+	%v228 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 5
+	store i32 1, i32* %v228
+	%v230 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 6
+	store i32 1, i32* %v230
+	%v232 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 7
+	store i32 1, i32* %v232
+	%v234 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 8
+	store i32 1, i32* %v234
+	%v236 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 9
+	store i32 1, i32* %v236
+	%v238 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 10
+	store i32 1, i32* %v238
+	%v240 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 11
+	store i32 1, i32* %v240
+	%v242 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 12
+	store i32 1, i32* %v242
+	%v244 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 13
+	store i32 1, i32* %v244
+	%v246 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 14
+	store i32 1, i32* %v246
+	%v248 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 15
+	store i32 1, i32* %v248
+	%v250 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 16
+	store i32 1, i32* %v250
+	%v252 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 17
+	store i32 1, i32* %v252
+	%v254 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 18
+	store i32 1, i32* %v254
+	%v256 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 19
+	store i32 1, i32* %v256
+	%v258 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 20
+	store i32 1, i32* %v258
+	%v260 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 21
+	store i32 1, i32* %v260
+	%v262 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 22
+	store i32 1, i32* %v262
+	%v264 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 23
+	store i32 1, i32* %v264
+	%v266 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 24
+	store i32 1, i32* %v266
+	%v268 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 25
+	store i32 1, i32* %v268
+	%v270 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 26
+	store i32 1, i32* %v270
+	%v272 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 27
+	store i32 1, i32* %v272
+	%v274 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 28
+	store i32 1, i32* %v274
+	%v276 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 1, i32 29
+	store i32 1, i32* %v276
+	%v280 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 0
+	store i32 1, i32* %v280
+	%v282 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 1
+	store i32 1, i32* %v282
+	%v284 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 2
+	store i32 1, i32* %v284
+	%v286 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 3
+	store i32 1, i32* %v286
+	%v288 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 4
+	store i32 1, i32* %v288
+	%v290 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 5
+	store i32 1, i32* %v290
+	%v292 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 6
+	store i32 1, i32* %v292
+	%v294 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 7
+	store i32 1, i32* %v294
+	%v296 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 8
+	store i32 1, i32* %v296
+	%v298 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 9
+	store i32 1, i32* %v298
+	%v300 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 10
+	store i32 1, i32* %v300
+	%v302 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 11
+	store i32 1, i32* %v302
+	%v304 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 12
+	store i32 1, i32* %v304
+	%v306 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 13
+	store i32 1, i32* %v306
+	%v308 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 14
+	store i32 1, i32* %v308
+	%v310 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 15
+	store i32 1, i32* %v310
+	%v312 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 16
+	store i32 1, i32* %v312
+	%v314 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 17
+	store i32 1, i32* %v314
+	%v316 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 18
+	store i32 1, i32* %v316
+	%v318 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 19
+	store i32 1, i32* %v318
+	%v320 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 20
+	store i32 1, i32* %v320
+	%v322 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 21
+	store i32 1, i32* %v322
+	%v324 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 22
+	store i32 1, i32* %v324
+	%v326 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 23
+	store i32 1, i32* %v326
+	%v328 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 24
+	store i32 1, i32* %v328
+	%v330 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 25
+	store i32 1, i32* %v330
+	%v332 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 26
+	store i32 1, i32* %v332
+	%v334 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 27
+	store i32 1, i32* %v334
+	%v336 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 28
+	store i32 1, i32* %v336
+	%v338 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 2, i32 29
+	store i32 1, i32* %v338
+	%v342 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 0
+	store i32 1, i32* %v342
+	%v344 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 1
+	store i32 1, i32* %v344
+	%v346 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 2
+	store i32 1, i32* %v346
+	%v348 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 3
+	store i32 1, i32* %v348
+	%v350 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 4
+	store i32 1, i32* %v350
+	%v352 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 5
+	store i32 1, i32* %v352
+	%v354 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 6
+	store i32 1, i32* %v354
+	%v356 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 7
+	store i32 1, i32* %v356
+	%v358 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 8
+	store i32 1, i32* %v358
+	%v360 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 9
+	store i32 1, i32* %v360
+	%v362 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 10
+	store i32 1, i32* %v362
+	%v364 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 11
+	store i32 1, i32* %v364
+	%v366 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 12
+	store i32 1, i32* %v366
+	%v368 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 13
+	store i32 1, i32* %v368
+	%v370 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 14
+	store i32 1, i32* %v370
+	%v372 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 15
+	store i32 1, i32* %v372
+	%v374 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 16
+	store i32 1, i32* %v374
+	%v376 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 17
+	store i32 1, i32* %v376
+	%v378 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 18
+	store i32 1, i32* %v378
+	%v380 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 19
+	store i32 1, i32* %v380
+	%v382 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 20
+	store i32 1, i32* %v382
+	%v384 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 21
+	store i32 1, i32* %v384
+	%v386 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 22
+	store i32 1, i32* %v386
+	%v388 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 23
+	store i32 1, i32* %v388
+	%v390 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 24
+	store i32 1, i32* %v390
+	%v392 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 25
+	store i32 1, i32* %v392
+	%v394 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 26
+	store i32 1, i32* %v394
+	%v396 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 27
+	store i32 1, i32* %v396
+	%v398 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 28
+	store i32 1, i32* %v398
+	%v400 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 3, i32 29
+	store i32 1, i32* %v400
+	%v404 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 0
+	store i32 1, i32* %v404
+	%v406 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 1
+	store i32 1, i32* %v406
+	%v408 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 2
+	store i32 1, i32* %v408
+	%v410 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 3
+	store i32 1, i32* %v410
+	%v412 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 4
+	store i32 1, i32* %v412
+	%v414 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 5
+	store i32 1, i32* %v414
+	%v416 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 6
+	store i32 1, i32* %v416
+	%v418 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 7
+	store i32 1, i32* %v418
+	%v420 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 8
+	store i32 1, i32* %v420
+	%v422 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 9
+	store i32 1, i32* %v422
+	%v424 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 10
+	store i32 1, i32* %v424
+	%v426 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 11
+	store i32 1, i32* %v426
+	%v428 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 12
+	store i32 1, i32* %v428
+	%v430 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 13
+	store i32 1, i32* %v430
+	%v432 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 14
+	store i32 1, i32* %v432
+	%v434 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 15
+	store i32 1, i32* %v434
+	%v436 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 16
+	store i32 1, i32* %v436
+	%v438 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 17
+	store i32 1, i32* %v438
+	%v440 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 18
+	store i32 1, i32* %v440
+	%v442 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 19
+	store i32 1, i32* %v442
+	%v444 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 20
+	store i32 1, i32* %v444
+	%v446 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 21
+	store i32 1, i32* %v446
+	%v448 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 22
+	store i32 1, i32* %v448
+	%v450 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 23
+	store i32 1, i32* %v450
+	%v452 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 24
+	store i32 1, i32* %v452
+	%v454 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 25
+	store i32 1, i32* %v454
+	%v456 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 26
+	store i32 1, i32* %v456
+	%v458 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 27
+	store i32 1, i32* %v458
+	%v460 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 28
+	store i32 1, i32* %v460
+	%v462 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 4, i32 29
+	store i32 1, i32* %v462
+	%v466 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 0
+	store i32 1, i32* %v466
+	%v468 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 1
+	store i32 1, i32* %v468
+	%v470 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 2
+	store i32 1, i32* %v470
+	%v472 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 3
+	store i32 1, i32* %v472
+	%v474 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 4
+	store i32 1, i32* %v474
+	%v476 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 5
+	store i32 1, i32* %v476
+	%v478 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 6
+	store i32 1, i32* %v478
+	%v480 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 7
+	store i32 1, i32* %v480
+	%v482 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 8
+	store i32 1, i32* %v482
+	%v484 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 9
+	store i32 1, i32* %v484
+	%v486 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 10
+	store i32 1, i32* %v486
+	%v488 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 11
+	store i32 1, i32* %v488
+	%v490 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 12
+	store i32 1, i32* %v490
+	%v492 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 13
+	store i32 1, i32* %v492
+	%v494 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 14
+	store i32 1, i32* %v494
+	%v496 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 15
+	store i32 1, i32* %v496
+	%v498 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 16
+	store i32 1, i32* %v498
+	%v500 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 17
+	store i32 1, i32* %v500
+	%v502 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 18
+	store i32 1, i32* %v502
+	%v504 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 19
+	store i32 1, i32* %v504
+	%v506 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 20
+	store i32 1, i32* %v506
+	%v508 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 21
+	store i32 1, i32* %v508
+	%v510 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 22
+	store i32 1, i32* %v510
+	%v512 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 23
+	store i32 1, i32* %v512
+	%v514 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 24
+	store i32 1, i32* %v514
+	%v516 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 25
+	store i32 1, i32* %v516
+	%v518 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 26
+	store i32 1, i32* %v518
+	%v520 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 27
+	store i32 1, i32* %v520
+	%v522 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 28
+	store i32 1, i32* %v522
+	%v524 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 5, i32 29
+	store i32 1, i32* %v524
+	%v528 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 0
+	store i32 1, i32* %v528
+	%v530 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 1
+	store i32 1, i32* %v530
+	%v532 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 2
+	store i32 1, i32* %v532
+	%v534 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 3
+	store i32 1, i32* %v534
+	%v536 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 4
+	store i32 1, i32* %v536
+	%v538 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 5
+	store i32 1, i32* %v538
+	%v540 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 6
+	store i32 1, i32* %v540
+	%v542 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 7
+	store i32 1, i32* %v542
+	%v544 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 8
+	store i32 1, i32* %v544
+	%v546 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 9
+	store i32 1, i32* %v546
+	%v548 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 10
+	store i32 1, i32* %v548
+	%v550 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 11
+	store i32 1, i32* %v550
+	%v552 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 12
+	store i32 1, i32* %v552
+	%v554 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 13
+	store i32 1, i32* %v554
+	%v556 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 14
+	store i32 1, i32* %v556
+	%v558 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 15
+	store i32 1, i32* %v558
+	%v560 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 16
+	store i32 1, i32* %v560
+	%v562 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 17
+	store i32 1, i32* %v562
+	%v564 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 18
+	store i32 1, i32* %v564
+	%v566 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 19
+	store i32 1, i32* %v566
+	%v568 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 20
+	store i32 1, i32* %v568
+	%v570 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 21
+	store i32 1, i32* %v570
+	%v572 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 22
+	store i32 1, i32* %v572
+	%v574 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 23
+	store i32 1, i32* %v574
+	%v576 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 24
+	store i32 1, i32* %v576
+	%v578 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 25
+	store i32 1, i32* %v578
+	%v580 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 26
+	store i32 1, i32* %v580
+	%v582 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 27
+	store i32 1, i32* %v582
+	%v584 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 28
+	store i32 1, i32* %v584
+	%v586 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 6, i32 29
+	store i32 1, i32* %v586
+	%v590 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 0
+	store i32 1, i32* %v590
+	%v592 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 1
+	store i32 1, i32* %v592
+	%v594 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 2
+	store i32 1, i32* %v594
+	%v596 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 3
+	store i32 1, i32* %v596
+	%v598 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 4
+	store i32 1, i32* %v598
+	%v600 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 5
+	store i32 1, i32* %v600
+	%v602 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 6
+	store i32 1, i32* %v602
+	%v604 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 7
+	store i32 1, i32* %v604
+	%v606 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 8
+	store i32 1, i32* %v606
+	%v608 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 9
+	store i32 1, i32* %v608
+	%v610 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 10
+	store i32 1, i32* %v610
+	%v612 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 11
+	store i32 1, i32* %v612
+	%v614 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 12
+	store i32 1, i32* %v614
+	%v616 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 13
+	store i32 1, i32* %v616
+	%v618 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 14
+	store i32 1, i32* %v618
+	%v620 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 15
+	store i32 1, i32* %v620
+	%v622 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 16
+	store i32 1, i32* %v622
+	%v624 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 17
+	store i32 1, i32* %v624
+	%v626 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 18
+	store i32 1, i32* %v626
+	%v628 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 19
+	store i32 1, i32* %v628
+	%v630 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 20
+	store i32 1, i32* %v630
+	%v632 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 21
+	store i32 1, i32* %v632
+	%v634 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 22
+	store i32 1, i32* %v634
+	%v636 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 23
+	store i32 1, i32* %v636
+	%v638 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 24
+	store i32 1, i32* %v638
+	%v640 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 25
+	store i32 1, i32* %v640
+	%v642 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 26
+	store i32 1, i32* %v642
+	%v644 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 27
+	store i32 1, i32* %v644
+	%v646 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 28
+	store i32 1, i32* %v646
+	%v648 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 7, i32 29
+	store i32 1, i32* %v648
+	%v652 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 0
+	store i32 1, i32* %v652
+	%v654 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 1
+	store i32 1, i32* %v654
+	%v656 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 2
+	store i32 1, i32* %v656
+	%v658 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 3
+	store i32 1, i32* %v658
+	%v660 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 4
+	store i32 1, i32* %v660
+	%v662 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 5
+	store i32 1, i32* %v662
+	%v664 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 6
+	store i32 1, i32* %v664
+	%v666 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 7
+	store i32 1, i32* %v666
+	%v668 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 8
+	store i32 1, i32* %v668
+	%v670 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 9
+	store i32 1, i32* %v670
+	%v672 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 10
+	store i32 1, i32* %v672
+	%v674 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 11
+	store i32 1, i32* %v674
+	%v676 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 12
+	store i32 1, i32* %v676
+	%v678 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 13
+	store i32 1, i32* %v678
+	%v680 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 14
+	store i32 1, i32* %v680
+	%v682 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 15
+	store i32 1, i32* %v682
+	%v684 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 16
+	store i32 1, i32* %v684
+	%v686 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 17
+	store i32 1, i32* %v686
+	%v688 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 18
+	store i32 1, i32* %v688
+	%v690 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 19
+	store i32 1, i32* %v690
+	%v692 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 20
+	store i32 1, i32* %v692
+	%v694 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 21
+	store i32 1, i32* %v694
+	%v696 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 22
+	store i32 1, i32* %v696
+	%v698 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 23
+	store i32 1, i32* %v698
+	%v700 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 24
+	store i32 1, i32* %v700
+	%v702 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 25
+	store i32 1, i32* %v702
+	%v704 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 26
+	store i32 1, i32* %v704
+	%v706 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 27
+	store i32 1, i32* %v706
+	%v708 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 28
+	store i32 1, i32* %v708
+	%v710 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 8, i32 29
+	store i32 1, i32* %v710
+	%v714 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 0
+	store i32 1, i32* %v714
+	%v716 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 1
+	store i32 1, i32* %v716
+	%v718 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 2
+	store i32 1, i32* %v718
+	%v720 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 3
+	store i32 1, i32* %v720
+	%v722 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 4
+	store i32 1, i32* %v722
+	%v724 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 5
+	store i32 1, i32* %v724
+	%v726 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 6
+	store i32 1, i32* %v726
+	%v728 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 7
+	store i32 1, i32* %v728
+	%v730 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 8
+	store i32 1, i32* %v730
+	%v732 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 9
+	store i32 1, i32* %v732
+	%v734 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 10
+	store i32 1, i32* %v734
+	%v736 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 11
+	store i32 1, i32* %v736
+	%v738 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 12
+	store i32 1, i32* %v738
+	%v740 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 13
+	store i32 1, i32* %v740
+	%v742 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 14
+	store i32 1, i32* %v742
+	%v744 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 15
+	store i32 1, i32* %v744
+	%v746 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 16
+	store i32 1, i32* %v746
+	%v748 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 17
+	store i32 1, i32* %v748
+	%v750 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 18
+	store i32 1, i32* %v750
+	%v752 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 19
+	store i32 1, i32* %v752
+	%v754 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 20
+	store i32 1, i32* %v754
+	%v756 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 21
+	store i32 1, i32* %v756
+	%v758 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 22
+	store i32 1, i32* %v758
+	%v760 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 23
+	store i32 1, i32* %v760
+	%v762 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 24
+	store i32 1, i32* %v762
+	%v764 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 25
+	store i32 1, i32* %v764
+	%v766 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 26
+	store i32 1, i32* %v766
+	%v768 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 27
+	store i32 1, i32* %v768
+	%v770 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 28
+	store i32 1, i32* %v770
+	%v772 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 9, i32 29
+	store i32 1, i32* %v772
+	%v776 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 0
+	store i32 1, i32* %v776
+	%v778 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 1
+	store i32 1, i32* %v778
+	%v780 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 2
+	store i32 1, i32* %v780
+	%v782 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 3
+	store i32 1, i32* %v782
+	%v784 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 4
+	store i32 1, i32* %v784
+	%v786 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 5
+	store i32 1, i32* %v786
+	%v788 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 6
+	store i32 1, i32* %v788
+	%v790 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 7
+	store i32 1, i32* %v790
+	%v792 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 8
+	store i32 1, i32* %v792
+	%v794 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 9
+	store i32 1, i32* %v794
+	%v796 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 10
+	store i32 1, i32* %v796
+	%v798 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 11
+	store i32 1, i32* %v798
+	%v800 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 12
+	store i32 1, i32* %v800
+	%v802 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 13
+	store i32 1, i32* %v802
+	%v804 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 14
+	store i32 1, i32* %v804
+	%v806 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 15
+	store i32 1, i32* %v806
+	%v808 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 16
+	store i32 1, i32* %v808
+	%v810 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 17
+	store i32 1, i32* %v810
+	%v812 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 18
+	store i32 1, i32* %v812
+	%v814 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 19
+	store i32 1, i32* %v814
+	%v816 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 20
+	store i32 1, i32* %v816
+	%v818 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 21
+	store i32 1, i32* %v818
+	%v820 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 22
+	store i32 1, i32* %v820
+	%v822 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 23
+	store i32 1, i32* %v822
+	%v824 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 24
+	store i32 1, i32* %v824
+	%v826 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 25
+	store i32 1, i32* %v826
+	%v828 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 26
+	store i32 1, i32* %v828
+	%v830 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 27
+	store i32 1, i32* %v830
+	%v832 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 28
+	store i32 1, i32* %v832
+	%v834 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 10, i32 29
+	store i32 1, i32* %v834
+	%v838 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 0
+	store i32 1, i32* %v838
+	%v840 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 1
+	store i32 1, i32* %v840
+	%v842 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 2
+	store i32 1, i32* %v842
+	%v844 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 3
+	store i32 1, i32* %v844
+	%v846 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 4
+	store i32 1, i32* %v846
+	%v848 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 5
+	store i32 1, i32* %v848
+	%v850 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 6
+	store i32 1, i32* %v850
+	%v852 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 7
+	store i32 1, i32* %v852
+	%v854 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 8
+	store i32 1, i32* %v854
+	%v856 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 9
+	store i32 1, i32* %v856
+	%v858 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 10
+	store i32 1, i32* %v858
+	%v860 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 11
+	store i32 1, i32* %v860
+	%v862 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 12
+	store i32 1, i32* %v862
+	%v864 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 13
+	store i32 1, i32* %v864
+	%v866 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 14
+	store i32 1, i32* %v866
+	%v868 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 15
+	store i32 1, i32* %v868
+	%v870 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 16
+	store i32 1, i32* %v870
+	%v872 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 17
+	store i32 1, i32* %v872
+	%v874 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 18
+	store i32 1, i32* %v874
+	%v876 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 19
+	store i32 1, i32* %v876
+	%v878 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 20
+	store i32 1, i32* %v878
+	%v880 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 21
+	store i32 1, i32* %v880
+	%v882 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 22
+	store i32 1, i32* %v882
+	%v884 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 23
+	store i32 1, i32* %v884
+	%v886 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 24
+	store i32 1, i32* %v886
+	%v888 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 25
+	store i32 1, i32* %v888
+	%v890 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 26
+	store i32 1, i32* %v890
+	%v892 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 27
+	store i32 1, i32* %v892
+	%v894 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 28
+	store i32 1, i32* %v894
+	%v896 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 11, i32 29
+	store i32 1, i32* %v896
+	%v900 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 0
+	store i32 1, i32* %v900
+	%v902 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 1
+	store i32 1, i32* %v902
+	%v904 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 2
+	store i32 1, i32* %v904
+	%v906 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 3
+	store i32 1, i32* %v906
+	%v908 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 4
+	store i32 1, i32* %v908
+	%v910 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 5
+	store i32 1, i32* %v910
+	%v912 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 6
+	store i32 1, i32* %v912
+	%v914 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 7
+	store i32 1, i32* %v914
+	%v916 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 8
+	store i32 1, i32* %v916
+	%v918 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 9
+	store i32 1, i32* %v918
+	%v920 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 10
+	store i32 1, i32* %v920
+	%v922 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 11
+	store i32 1, i32* %v922
+	%v924 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 12
+	store i32 1, i32* %v924
+	%v926 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 13
+	store i32 1, i32* %v926
+	%v928 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 14
+	store i32 1, i32* %v928
+	%v930 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 15
+	store i32 1, i32* %v930
+	%v932 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 16
+	store i32 1, i32* %v932
+	%v934 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 17
+	store i32 1, i32* %v934
+	%v936 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 18
+	store i32 1, i32* %v936
+	%v938 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 19
+	store i32 1, i32* %v938
+	%v940 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 20
+	store i32 1, i32* %v940
+	%v942 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 21
+	store i32 1, i32* %v942
+	%v944 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 22
+	store i32 1, i32* %v944
+	%v946 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 23
+	store i32 1, i32* %v946
+	%v948 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 24
+	store i32 1, i32* %v948
+	%v950 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 25
+	store i32 1, i32* %v950
+	%v952 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 26
+	store i32 1, i32* %v952
+	%v954 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 27
+	store i32 1, i32* %v954
+	%v956 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 28
+	store i32 1, i32* %v956
+	%v958 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 12, i32 29
+	store i32 1, i32* %v958
+	%v962 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 0
+	store i32 1, i32* %v962
+	%v964 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 1
+	store i32 1, i32* %v964
+	%v966 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 2
+	store i32 1, i32* %v966
+	%v968 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 3
+	store i32 1, i32* %v968
+	%v970 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 4
+	store i32 1, i32* %v970
+	%v972 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 5
+	store i32 1, i32* %v972
+	%v974 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 6
+	store i32 1, i32* %v974
+	%v976 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 7
+	store i32 1, i32* %v976
+	%v978 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 8
+	store i32 1, i32* %v978
+	%v980 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 9
+	store i32 1, i32* %v980
+	%v982 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 10
+	store i32 1, i32* %v982
+	%v984 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 11
+	store i32 1, i32* %v984
+	%v986 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 12
+	store i32 1, i32* %v986
+	%v988 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 13
+	store i32 1, i32* %v988
+	%v990 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 14
+	store i32 1, i32* %v990
+	%v992 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 15
+	store i32 1, i32* %v992
+	%v994 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 16
+	store i32 1, i32* %v994
+	%v996 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 17
+	store i32 1, i32* %v996
+	%v998 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 18
+	store i32 1, i32* %v998
+	%v1000 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 19
+	store i32 1, i32* %v1000
+	%v1002 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 20
+	store i32 1, i32* %v1002
+	%v1004 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 21
+	store i32 1, i32* %v1004
+	%v1006 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 22
+	store i32 1, i32* %v1006
+	%v1008 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 23
+	store i32 1, i32* %v1008
+	%v1010 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 24
+	store i32 1, i32* %v1010
+	%v1012 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 25
+	store i32 1, i32* %v1012
+	%v1014 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 26
+	store i32 1, i32* %v1014
+	%v1016 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 27
+	store i32 1, i32* %v1016
+	%v1018 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 28
+	store i32 1, i32* %v1018
+	%v1020 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 13, i32 29
+	store i32 1, i32* %v1020
+	%v1024 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 0
+	store i32 1, i32* %v1024
+	%v1026 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 1
+	store i32 1, i32* %v1026
+	%v1028 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 2
+	store i32 1, i32* %v1028
+	%v1030 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 3
+	store i32 1, i32* %v1030
+	%v1032 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 4
+	store i32 1, i32* %v1032
+	%v1034 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 5
+	store i32 1, i32* %v1034
+	%v1036 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 6
+	store i32 1, i32* %v1036
+	%v1038 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 7
+	store i32 1, i32* %v1038
+	%v1040 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 8
+	store i32 1, i32* %v1040
+	%v1042 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 9
+	store i32 1, i32* %v1042
+	%v1044 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 10
+	store i32 1, i32* %v1044
+	%v1046 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 11
+	store i32 1, i32* %v1046
+	%v1048 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 12
+	store i32 1, i32* %v1048
+	%v1050 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 13
+	store i32 1, i32* %v1050
+	%v1052 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 14
+	store i32 1, i32* %v1052
+	%v1054 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 15
+	store i32 1, i32* %v1054
+	%v1056 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 16
+	store i32 1, i32* %v1056
+	%v1058 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 17
+	store i32 1, i32* %v1058
+	%v1060 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 18
+	store i32 1, i32* %v1060
+	%v1062 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 19
+	store i32 1, i32* %v1062
+	%v1064 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 20
+	store i32 1, i32* %v1064
+	%v1066 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 21
+	store i32 1, i32* %v1066
+	%v1068 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 22
+	store i32 1, i32* %v1068
+	%v1070 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 23
+	store i32 1, i32* %v1070
+	%v1072 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 24
+	store i32 1, i32* %v1072
+	%v1074 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 25
+	store i32 1, i32* %v1074
+	%v1076 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 26
+	store i32 1, i32* %v1076
+	%v1078 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 27
+	store i32 1, i32* %v1078
+	%v1080 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 28
+	store i32 1, i32* %v1080
+	%v1082 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 14, i32 29
+	store i32 1, i32* %v1082
+	%v1086 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 0
+	store i32 1, i32* %v1086
+	%v1088 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 1
+	store i32 1, i32* %v1088
+	%v1090 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 2
+	store i32 1, i32* %v1090
+	%v1092 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 3
+	store i32 1, i32* %v1092
+	%v1094 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 4
+	store i32 1, i32* %v1094
+	%v1096 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 5
+	store i32 1, i32* %v1096
+	%v1098 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 6
+	store i32 1, i32* %v1098
+	%v1100 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 7
+	store i32 1, i32* %v1100
+	%v1102 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 8
+	store i32 1, i32* %v1102
+	%v1104 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 9
+	store i32 1, i32* %v1104
+	%v1106 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 10
+	store i32 1, i32* %v1106
+	%v1108 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 11
+	store i32 1, i32* %v1108
+	%v1110 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 12
+	store i32 1, i32* %v1110
+	%v1112 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 13
+	store i32 1, i32* %v1112
+	%v1114 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 14
+	store i32 1, i32* %v1114
+	%v1116 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 15
+	store i32 1, i32* %v1116
+	%v1118 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 16
+	store i32 1, i32* %v1118
+	%v1120 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 17
+	store i32 1, i32* %v1120
+	%v1122 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 18
+	store i32 1, i32* %v1122
+	%v1124 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 19
+	store i32 1, i32* %v1124
+	%v1126 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 20
+	store i32 1, i32* %v1126
+	%v1128 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 21
+	store i32 1, i32* %v1128
+	%v1130 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 22
+	store i32 1, i32* %v1130
+	%v1132 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 23
+	store i32 1, i32* %v1132
+	%v1134 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 24
+	store i32 1, i32* %v1134
+	%v1136 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 25
+	store i32 1, i32* %v1136
+	%v1138 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 26
+	store i32 1, i32* %v1138
+	%v1140 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 27
+	store i32 1, i32* %v1140
+	%v1142 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 28
+	store i32 1, i32* %v1142
+	%v1144 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 15, i32 29
+	store i32 1, i32* %v1144
+	%v1148 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 0
+	store i32 1, i32* %v1148
+	%v1150 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 1
+	store i32 1, i32* %v1150
+	%v1152 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 2
+	store i32 1, i32* %v1152
+	%v1154 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 3
+	store i32 1, i32* %v1154
+	%v1156 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 4
+	store i32 1, i32* %v1156
+	%v1158 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 5
+	store i32 1, i32* %v1158
+	%v1160 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 6
+	store i32 1, i32* %v1160
+	%v1162 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 7
+	store i32 1, i32* %v1162
+	%v1164 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 8
+	store i32 1, i32* %v1164
+	%v1166 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 9
+	store i32 1, i32* %v1166
+	%v1168 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 10
+	store i32 1, i32* %v1168
+	%v1170 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 11
+	store i32 1, i32* %v1170
+	%v1172 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 12
+	store i32 1, i32* %v1172
+	%v1174 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 13
+	store i32 1, i32* %v1174
+	%v1176 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 14
+	store i32 1, i32* %v1176
+	%v1178 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 15
+	store i32 1, i32* %v1178
+	%v1180 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 16
+	store i32 1, i32* %v1180
+	%v1182 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 17
+	store i32 1, i32* %v1182
+	%v1184 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 18
+	store i32 1, i32* %v1184
+	%v1186 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 19
+	store i32 1, i32* %v1186
+	%v1188 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 20
+	store i32 1, i32* %v1188
+	%v1190 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 21
+	store i32 1, i32* %v1190
+	%v1192 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 22
+	store i32 1, i32* %v1192
+	%v1194 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 23
+	store i32 1, i32* %v1194
+	%v1196 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 24
+	store i32 1, i32* %v1196
+	%v1198 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 25
+	store i32 1, i32* %v1198
+	%v1200 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 26
+	store i32 1, i32* %v1200
+	%v1202 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 27
+	store i32 1, i32* %v1202
+	%v1204 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 28
+	store i32 1, i32* %v1204
+	%v1206 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 16, i32 29
+	store i32 1, i32* %v1206
+	%v1210 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 0
+	store i32 1, i32* %v1210
+	%v1212 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 1
+	store i32 1, i32* %v1212
+	%v1214 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 2
+	store i32 1, i32* %v1214
+	%v1216 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 3
+	store i32 1, i32* %v1216
+	%v1218 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 4
+	store i32 1, i32* %v1218
+	%v1220 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 5
+	store i32 1, i32* %v1220
+	%v1222 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 6
+	store i32 1, i32* %v1222
+	%v1224 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 7
+	store i32 1, i32* %v1224
+	%v1226 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 8
+	store i32 1, i32* %v1226
+	%v1228 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 9
+	store i32 1, i32* %v1228
+	%v1230 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 10
+	store i32 1, i32* %v1230
+	%v1232 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 11
+	store i32 1, i32* %v1232
+	%v1234 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 12
+	store i32 1, i32* %v1234
+	%v1236 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 13
+	store i32 1, i32* %v1236
+	%v1238 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 14
+	store i32 1, i32* %v1238
+	%v1240 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 15
+	store i32 1, i32* %v1240
+	%v1242 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 16
+	store i32 1, i32* %v1242
+	%v1244 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 17
+	store i32 1, i32* %v1244
+	%v1246 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 18
+	store i32 1, i32* %v1246
+	%v1248 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 19
+	store i32 1, i32* %v1248
+	%v1250 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 20
+	store i32 1, i32* %v1250
+	%v1252 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 21
+	store i32 1, i32* %v1252
+	%v1254 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 22
+	store i32 1, i32* %v1254
+	%v1256 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 23
+	store i32 1, i32* %v1256
+	%v1258 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 24
+	store i32 1, i32* %v1258
+	%v1260 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 25
+	store i32 1, i32* %v1260
+	%v1262 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 26
+	store i32 1, i32* %v1262
+	%v1264 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 27
+	store i32 1, i32* %v1264
+	%v1266 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 28
+	store i32 1, i32* %v1266
+	%v1268 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 17, i32 29
+	store i32 1, i32* %v1268
+	%v1272 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 0
+	store i32 1, i32* %v1272
+	%v1274 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 1
+	store i32 1, i32* %v1274
+	%v1276 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 2
+	store i32 1, i32* %v1276
+	%v1278 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 3
+	store i32 1, i32* %v1278
+	%v1280 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 4
+	store i32 1, i32* %v1280
+	%v1282 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 5
+	store i32 1, i32* %v1282
+	%v1284 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 6
+	store i32 1, i32* %v1284
+	%v1286 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 7
+	store i32 1, i32* %v1286
+	%v1288 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 8
+	store i32 1, i32* %v1288
+	%v1290 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 9
+	store i32 1, i32* %v1290
+	%v1292 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 10
+	store i32 1, i32* %v1292
+	%v1294 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 11
+	store i32 1, i32* %v1294
+	%v1296 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 12
+	store i32 1, i32* %v1296
+	%v1298 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 13
+	store i32 1, i32* %v1298
+	%v1300 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 14
+	store i32 1, i32* %v1300
+	%v1302 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 15
+	store i32 1, i32* %v1302
+	%v1304 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 16
+	store i32 1, i32* %v1304
+	%v1306 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 17
+	store i32 1, i32* %v1306
+	%v1308 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 18
+	store i32 1, i32* %v1308
+	%v1310 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 19
+	store i32 1, i32* %v1310
+	%v1312 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 20
+	store i32 1, i32* %v1312
+	%v1314 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 21
+	store i32 1, i32* %v1314
+	%v1316 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 22
+	store i32 1, i32* %v1316
+	%v1318 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 23
+	store i32 1, i32* %v1318
+	%v1320 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 24
+	store i32 1, i32* %v1320
+	%v1322 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 25
+	store i32 1, i32* %v1322
+	%v1324 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 26
+	store i32 1, i32* %v1324
+	%v1326 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 27
+	store i32 1, i32* %v1326
+	%v1328 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 28
+	store i32 1, i32* %v1328
+	%v1330 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 18, i32 29
+	store i32 1, i32* %v1330
+	%v1334 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 0
+	store i32 1, i32* %v1334
+	%v1336 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 1
+	store i32 1, i32* %v1336
+	%v1338 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 2
+	store i32 1, i32* %v1338
+	%v1340 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 3
+	store i32 1, i32* %v1340
+	%v1342 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 4
+	store i32 1, i32* %v1342
+	%v1344 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 5
+	store i32 1, i32* %v1344
+	%v1346 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 6
+	store i32 1, i32* %v1346
+	%v1348 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 7
+	store i32 1, i32* %v1348
+	%v1350 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 8
+	store i32 1, i32* %v1350
+	%v1352 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 9
+	store i32 1, i32* %v1352
+	%v1354 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 10
+	store i32 1, i32* %v1354
+	%v1356 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 11
+	store i32 1, i32* %v1356
+	%v1358 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 12
+	store i32 1, i32* %v1358
+	%v1360 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 13
+	store i32 1, i32* %v1360
+	%v1362 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 14
+	store i32 1, i32* %v1362
+	%v1364 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 15
+	store i32 1, i32* %v1364
+	%v1366 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 16
+	store i32 1, i32* %v1366
+	%v1368 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 17
+	store i32 1, i32* %v1368
+	%v1370 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 18
+	store i32 1, i32* %v1370
+	%v1372 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 19
+	store i32 1, i32* %v1372
+	%v1374 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 20
+	store i32 1, i32* %v1374
+	%v1376 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 21
+	store i32 1, i32* %v1376
+	%v1378 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 22
+	store i32 1, i32* %v1378
+	%v1380 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 23
+	store i32 1, i32* %v1380
+	%v1382 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 24
+	store i32 1, i32* %v1382
+	%v1384 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 25
+	store i32 1, i32* %v1384
+	%v1386 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 26
+	store i32 1, i32* %v1386
+	%v1388 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 27
+	store i32 1, i32* %v1388
+	%v1390 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 28
+	store i32 1, i32* %v1390
+	%v1392 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 19, i32 29
+	store i32 1, i32* %v1392
+	%v1396 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 0
+	store i32 1, i32* %v1396
+	%v1398 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 1
+	store i32 1, i32* %v1398
+	%v1400 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 2
+	store i32 1, i32* %v1400
+	%v1402 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 3
+	store i32 1, i32* %v1402
+	%v1404 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 4
+	store i32 1, i32* %v1404
+	%v1406 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 5
+	store i32 1, i32* %v1406
+	%v1408 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 6
+	store i32 1, i32* %v1408
+	%v1410 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 7
+	store i32 1, i32* %v1410
+	%v1412 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 8
+	store i32 1, i32* %v1412
+	%v1414 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 9
+	store i32 1, i32* %v1414
+	%v1416 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 10
+	store i32 1, i32* %v1416
+	%v1418 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 11
+	store i32 1, i32* %v1418
+	%v1420 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 12
+	store i32 1, i32* %v1420
+	%v1422 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 13
+	store i32 1, i32* %v1422
+	%v1424 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 14
+	store i32 1, i32* %v1424
+	%v1426 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 15
+	store i32 1, i32* %v1426
+	%v1428 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 16
+	store i32 1, i32* %v1428
+	%v1430 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 17
+	store i32 1, i32* %v1430
+	%v1432 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 18
+	store i32 1, i32* %v1432
+	%v1434 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 19
+	store i32 1, i32* %v1434
+	%v1436 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 20
+	store i32 1, i32* %v1436
+	%v1438 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 21
+	store i32 1, i32* %v1438
+	%v1440 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 22
+	store i32 1, i32* %v1440
+	%v1442 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 23
+	store i32 1, i32* %v1442
+	%v1444 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 24
+	store i32 1, i32* %v1444
+	%v1446 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 25
+	store i32 1, i32* %v1446
+	%v1448 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 26
+	store i32 1, i32* %v1448
+	%v1450 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 27
+	store i32 1, i32* %v1450
+	%v1452 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 28
+	store i32 1, i32* %v1452
+	%v1454 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 20, i32 29
+	store i32 1, i32* %v1454
+	%v1458 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 0
+	store i32 1, i32* %v1458
+	%v1460 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 1
+	store i32 1, i32* %v1460
+	%v1462 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 2
+	store i32 1, i32* %v1462
+	%v1464 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 3
+	store i32 1, i32* %v1464
+	%v1466 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 4
+	store i32 1, i32* %v1466
+	%v1468 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 5
+	store i32 1, i32* %v1468
+	%v1470 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 6
+	store i32 1, i32* %v1470
+	%v1472 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 7
+	store i32 1, i32* %v1472
+	%v1474 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 8
+	store i32 1, i32* %v1474
+	%v1476 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 9
+	store i32 1, i32* %v1476
+	%v1478 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 10
+	store i32 1, i32* %v1478
+	%v1480 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 11
+	store i32 1, i32* %v1480
+	%v1482 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 12
+	store i32 1, i32* %v1482
+	%v1484 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 13
+	store i32 1, i32* %v1484
+	%v1486 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 14
+	store i32 1, i32* %v1486
+	%v1488 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 15
+	store i32 1, i32* %v1488
+	%v1490 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 16
+	store i32 1, i32* %v1490
+	%v1492 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 17
+	store i32 1, i32* %v1492
+	%v1494 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 18
+	store i32 1, i32* %v1494
+	%v1496 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 19
+	store i32 1, i32* %v1496
+	%v1498 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 20
+	store i32 1, i32* %v1498
+	%v1500 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 21
+	store i32 1, i32* %v1500
+	%v1502 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 22
+	store i32 1, i32* %v1502
+	%v1504 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 23
+	store i32 1, i32* %v1504
+	%v1506 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 24
+	store i32 1, i32* %v1506
+	%v1508 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 25
+	store i32 1, i32* %v1508
+	%v1510 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 26
+	store i32 1, i32* %v1510
+	%v1512 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 27
+	store i32 1, i32* %v1512
+	%v1514 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 28
+	store i32 1, i32* %v1514
+	%v1516 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 21, i32 29
+	store i32 1, i32* %v1516
+	%v1520 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 0
+	store i32 1, i32* %v1520
+	%v1522 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 1
+	store i32 1, i32* %v1522
+	%v1524 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 2
+	store i32 1, i32* %v1524
+	%v1526 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 3
+	store i32 1, i32* %v1526
+	%v1528 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 4
+	store i32 1, i32* %v1528
+	%v1530 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 5
+	store i32 1, i32* %v1530
+	%v1532 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 6
+	store i32 1, i32* %v1532
+	%v1534 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 7
+	store i32 1, i32* %v1534
+	%v1536 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 8
+	store i32 1, i32* %v1536
+	%v1538 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 9
+	store i32 1, i32* %v1538
+	%v1540 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 10
+	store i32 1, i32* %v1540
+	%v1542 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 11
+	store i32 1, i32* %v1542
+	%v1544 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 12
+	store i32 1, i32* %v1544
+	%v1546 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 13
+	store i32 1, i32* %v1546
+	%v1548 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 14
+	store i32 1, i32* %v1548
+	%v1550 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 15
+	store i32 1, i32* %v1550
+	%v1552 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 16
+	store i32 1, i32* %v1552
+	%v1554 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 17
+	store i32 1, i32* %v1554
+	%v1556 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 18
+	store i32 1, i32* %v1556
+	%v1558 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 19
+	store i32 1, i32* %v1558
+	%v1560 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 20
+	store i32 1, i32* %v1560
+	%v1562 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 21
+	store i32 1, i32* %v1562
+	%v1564 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 22
+	store i32 1, i32* %v1564
+	%v1566 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 23
+	store i32 1, i32* %v1566
+	%v1568 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 24
+	store i32 1, i32* %v1568
+	%v1570 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 25
+	store i32 1, i32* %v1570
+	%v1572 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 26
+	store i32 1, i32* %v1572
+	%v1574 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 27
+	store i32 1, i32* %v1574
+	%v1576 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 28
+	store i32 1, i32* %v1576
+	%v1578 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 22, i32 29
+	store i32 1, i32* %v1578
+	%v1582 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 0
+	store i32 1, i32* %v1582
+	%v1584 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 1
+	store i32 1, i32* %v1584
+	%v1586 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 2
+	store i32 1, i32* %v1586
+	%v1588 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 3
+	store i32 1, i32* %v1588
+	%v1590 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 4
+	store i32 1, i32* %v1590
+	%v1592 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 5
+	store i32 1, i32* %v1592
+	%v1594 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 6
+	store i32 1, i32* %v1594
+	%v1596 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 7
+	store i32 1, i32* %v1596
+	%v1598 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 8
+	store i32 1, i32* %v1598
+	%v1600 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 9
+	store i32 1, i32* %v1600
+	%v1602 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 10
+	store i32 1, i32* %v1602
+	%v1604 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 11
+	store i32 1, i32* %v1604
+	%v1606 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 12
+	store i32 1, i32* %v1606
+	%v1608 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 13
+	store i32 1, i32* %v1608
+	%v1610 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 14
+	store i32 1, i32* %v1610
+	%v1612 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 15
+	store i32 1, i32* %v1612
+	%v1614 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 16
+	store i32 1, i32* %v1614
+	%v1616 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 17
+	store i32 1, i32* %v1616
+	%v1618 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 18
+	store i32 1, i32* %v1618
+	%v1620 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 19
+	store i32 1, i32* %v1620
+	%v1622 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 20
+	store i32 1, i32* %v1622
+	%v1624 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 21
+	store i32 1, i32* %v1624
+	%v1626 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 22
+	store i32 1, i32* %v1626
+	%v1628 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 23
+	store i32 1, i32* %v1628
+	%v1630 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 24
+	store i32 1, i32* %v1630
+	%v1632 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 25
+	store i32 1, i32* %v1632
+	%v1634 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 26
+	store i32 1, i32* %v1634
+	%v1636 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 27
+	store i32 1, i32* %v1636
+	%v1638 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 28
+	store i32 1, i32* %v1638
+	%v1640 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 23, i32 29
+	store i32 1, i32* %v1640
+	%v1644 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 0
+	store i32 1, i32* %v1644
+	%v1646 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 1
+	store i32 1, i32* %v1646
+	%v1648 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 2
+	store i32 1, i32* %v1648
+	%v1650 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 3
+	store i32 1, i32* %v1650
+	%v1652 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 4
+	store i32 1, i32* %v1652
+	%v1654 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 5
+	store i32 1, i32* %v1654
+	%v1656 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 6
+	store i32 1, i32* %v1656
+	%v1658 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 7
+	store i32 1, i32* %v1658
+	%v1660 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 8
+	store i32 1, i32* %v1660
+	%v1662 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 9
+	store i32 1, i32* %v1662
+	%v1664 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 10
+	store i32 1, i32* %v1664
+	%v1666 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 11
+	store i32 1, i32* %v1666
+	%v1668 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 12
+	store i32 1, i32* %v1668
+	%v1670 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 13
+	store i32 1, i32* %v1670
+	%v1672 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 14
+	store i32 1, i32* %v1672
+	%v1674 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 15
+	store i32 1, i32* %v1674
+	%v1676 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 16
+	store i32 1, i32* %v1676
+	%v1678 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 17
+	store i32 1, i32* %v1678
+	%v1680 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 18
+	store i32 1, i32* %v1680
+	%v1682 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 19
+	store i32 1, i32* %v1682
+	%v1684 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 20
+	store i32 1, i32* %v1684
+	%v1686 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 21
+	store i32 1, i32* %v1686
+	%v1688 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 22
+	store i32 1, i32* %v1688
+	%v1690 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 23
+	store i32 1, i32* %v1690
+	%v1692 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 24
+	store i32 1, i32* %v1692
+	%v1694 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 25
+	store i32 1, i32* %v1694
+	%v1696 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 26
+	store i32 1, i32* %v1696
+	%v1698 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 27
+	store i32 1, i32* %v1698
+	%v1700 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 28
+	store i32 1, i32* %v1700
+	%v1702 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 24, i32 29
+	store i32 1, i32* %v1702
+	%v1706 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 0
+	store i32 1, i32* %v1706
+	%v1708 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 1
+	store i32 1, i32* %v1708
+	%v1710 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 2
+	store i32 1, i32* %v1710
+	%v1712 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 3
+	store i32 1, i32* %v1712
+	%v1714 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 4
+	store i32 1, i32* %v1714
+	%v1716 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 5
+	store i32 1, i32* %v1716
+	%v1718 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 6
+	store i32 1, i32* %v1718
+	%v1720 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 7
+	store i32 1, i32* %v1720
+	%v1722 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 8
+	store i32 1, i32* %v1722
+	%v1724 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 9
+	store i32 1, i32* %v1724
+	%v1726 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 10
+	store i32 1, i32* %v1726
+	%v1728 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 11
+	store i32 1, i32* %v1728
+	%v1730 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 12
+	store i32 1, i32* %v1730
+	%v1732 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 13
+	store i32 1, i32* %v1732
+	%v1734 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 14
+	store i32 1, i32* %v1734
+	%v1736 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 15
+	store i32 1, i32* %v1736
+	%v1738 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 16
+	store i32 1, i32* %v1738
+	%v1740 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 17
+	store i32 1, i32* %v1740
+	%v1742 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 18
+	store i32 1, i32* %v1742
+	%v1744 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 19
+	store i32 1, i32* %v1744
+	%v1746 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 20
+	store i32 1, i32* %v1746
+	%v1748 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 21
+	store i32 1, i32* %v1748
+	%v1750 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 22
+	store i32 1, i32* %v1750
+	%v1752 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 23
+	store i32 1, i32* %v1752
+	%v1754 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 24
+	store i32 1, i32* %v1754
+	%v1756 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 25
+	store i32 1, i32* %v1756
+	%v1758 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 26
+	store i32 1, i32* %v1758
+	%v1760 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 27
+	store i32 1, i32* %v1760
+	%v1762 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 28
+	store i32 1, i32* %v1762
+	%v1764 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 25, i32 29
+	store i32 1, i32* %v1764
+	%v1768 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 0
+	store i32 1, i32* %v1768
+	%v1770 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 1
+	store i32 1, i32* %v1770
+	%v1772 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 2
+	store i32 1, i32* %v1772
+	%v1774 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 3
+	store i32 1, i32* %v1774
+	%v1776 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 4
+	store i32 1, i32* %v1776
+	%v1778 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 5
+	store i32 1, i32* %v1778
+	%v1780 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 6
+	store i32 1, i32* %v1780
+	%v1782 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 7
+	store i32 1, i32* %v1782
+	%v1784 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 8
+	store i32 1, i32* %v1784
+	%v1786 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 9
+	store i32 1, i32* %v1786
+	%v1788 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 10
+	store i32 1, i32* %v1788
+	%v1790 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 11
+	store i32 1, i32* %v1790
+	%v1792 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 12
+	store i32 1, i32* %v1792
+	%v1794 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 13
+	store i32 1, i32* %v1794
+	%v1796 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 14
+	store i32 1, i32* %v1796
+	%v1798 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 15
+	store i32 1, i32* %v1798
+	%v1800 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 16
+	store i32 1, i32* %v1800
+	%v1802 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 17
+	store i32 1, i32* %v1802
+	%v1804 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 18
+	store i32 1, i32* %v1804
+	%v1806 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 19
+	store i32 1, i32* %v1806
+	%v1808 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 20
+	store i32 1, i32* %v1808
+	%v1810 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 21
+	store i32 1, i32* %v1810
+	%v1812 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 22
+	store i32 1, i32* %v1812
+	%v1814 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 23
+	store i32 1, i32* %v1814
+	%v1816 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 24
+	store i32 1, i32* %v1816
+	%v1818 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 25
+	store i32 1, i32* %v1818
+	%v1820 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 26
+	store i32 1, i32* %v1820
+	%v1822 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 27
+	store i32 1, i32* %v1822
+	%v1824 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 28
+	store i32 1, i32* %v1824
+	%v1826 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 26, i32 29
+	store i32 1, i32* %v1826
+	%v1830 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 0
+	store i32 1, i32* %v1830
+	%v1832 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 1
+	store i32 1, i32* %v1832
+	%v1834 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 2
+	store i32 1, i32* %v1834
+	%v1836 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 3
+	store i32 1, i32* %v1836
+	%v1838 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 4
+	store i32 1, i32* %v1838
+	%v1840 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 5
+	store i32 1, i32* %v1840
+	%v1842 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 6
+	store i32 1, i32* %v1842
+	%v1844 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 7
+	store i32 1, i32* %v1844
+	%v1846 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 8
+	store i32 1, i32* %v1846
+	%v1848 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 9
+	store i32 1, i32* %v1848
+	%v1850 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 10
+	store i32 1, i32* %v1850
+	%v1852 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 11
+	store i32 1, i32* %v1852
+	%v1854 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 12
+	store i32 1, i32* %v1854
+	%v1856 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 13
+	store i32 1, i32* %v1856
+	%v1858 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 14
+	store i32 1, i32* %v1858
+	%v1860 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 15
+	store i32 1, i32* %v1860
+	%v1862 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 16
+	store i32 1, i32* %v1862
+	%v1864 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 17
+	store i32 1, i32* %v1864
+	%v1866 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 18
+	store i32 1, i32* %v1866
+	%v1868 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 19
+	store i32 1, i32* %v1868
+	%v1870 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 20
+	store i32 1, i32* %v1870
+	%v1872 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 21
+	store i32 1, i32* %v1872
+	%v1874 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 22
+	store i32 1, i32* %v1874
+	%v1876 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 23
+	store i32 1, i32* %v1876
+	%v1878 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 24
+	store i32 1, i32* %v1878
+	%v1880 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 25
+	store i32 1, i32* %v1880
+	%v1882 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 26
+	store i32 1, i32* %v1882
+	%v1884 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 27
+	store i32 1, i32* %v1884
+	%v1886 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 28
+	store i32 1, i32* %v1886
+	%v1888 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 27, i32 29
+	store i32 1, i32* %v1888
+	%v1892 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 0
+	store i32 1, i32* %v1892
+	%v1894 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 1
+	store i32 1, i32* %v1894
+	%v1896 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 2
+	store i32 1, i32* %v1896
+	%v1898 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 3
+	store i32 1, i32* %v1898
+	%v1900 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 4
+	store i32 1, i32* %v1900
+	%v1902 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 5
+	store i32 1, i32* %v1902
+	%v1904 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 6
+	store i32 1, i32* %v1904
+	%v1906 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 7
+	store i32 1, i32* %v1906
+	%v1908 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 8
+	store i32 1, i32* %v1908
+	%v1910 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 9
+	store i32 1, i32* %v1910
+	%v1912 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 10
+	store i32 1, i32* %v1912
+	%v1914 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 11
+	store i32 1, i32* %v1914
+	%v1916 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 12
+	store i32 1, i32* %v1916
+	%v1918 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 13
+	store i32 1, i32* %v1918
+	%v1920 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 14
+	store i32 1, i32* %v1920
+	%v1922 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 15
+	store i32 1, i32* %v1922
+	%v1924 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 16
+	store i32 1, i32* %v1924
+	%v1926 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 17
+	store i32 1, i32* %v1926
+	%v1928 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 18
+	store i32 1, i32* %v1928
+	%v1930 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 19
+	store i32 1, i32* %v1930
+	%v1932 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 20
+	store i32 1, i32* %v1932
+	%v1934 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 21
+	store i32 1, i32* %v1934
+	%v1936 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 22
+	store i32 1, i32* %v1936
+	%v1938 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 23
+	store i32 1, i32* %v1938
+	%v1940 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 24
+	store i32 1, i32* %v1940
+	%v1942 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 25
+	store i32 1, i32* %v1942
+	%v1944 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 26
+	store i32 1, i32* %v1944
+	%v1946 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 27
+	store i32 1, i32* %v1946
+	%v1948 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 28
+	store i32 1, i32* %v1948
+	%v1950 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 28, i32 29
+	store i32 1, i32* %v1950
+	%v1954 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 0
+	store i32 1, i32* %v1954
+	%v1956 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 1
+	store i32 1, i32* %v1956
+	%v1958 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 2
+	store i32 1, i32* %v1958
+	%v1960 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 3
+	store i32 1, i32* %v1960
+	%v1962 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 4
+	store i32 1, i32* %v1962
+	%v1964 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 5
+	store i32 1, i32* %v1964
+	%v1966 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 6
+	store i32 1, i32* %v1966
+	%v1968 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 7
+	store i32 1, i32* %v1968
+	%v1970 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 8
+	store i32 1, i32* %v1970
+	%v1972 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 9
+	store i32 1, i32* %v1972
+	%v1974 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 10
+	store i32 1, i32* %v1974
+	%v1976 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 11
+	store i32 1, i32* %v1976
+	%v1978 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 12
+	store i32 1, i32* %v1978
+	%v1980 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 13
+	store i32 1, i32* %v1980
+	%v1982 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 14
+	store i32 1, i32* %v1982
+	%v1984 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 15
+	store i32 1, i32* %v1984
+	%v1986 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 16
+	store i32 1, i32* %v1986
+	%v1988 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 17
+	store i32 1, i32* %v1988
+	%v1990 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 18
+	store i32 1, i32* %v1990
+	%v1992 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 19
+	store i32 1, i32* %v1992
+	%v1994 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 20
+	store i32 1, i32* %v1994
+	%v1996 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 21
+	store i32 1, i32* %v1996
+	%v1998 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 22
+	store i32 1, i32* %v1998
+	%v2000 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 23
+	store i32 1, i32* %v2000
+	%v2002 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 24
+	store i32 1, i32* %v2002
+	%v2004 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 25
+	store i32 1, i32* %v2004
+	%v2006 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 26
+	store i32 1, i32* %v2006
+	%v2008 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 27
+	store i32 1, i32* %v2008
+	%v2010 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 28
+	store i32 1, i32* %v2010
+	%v2012 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 29, i32 29
+	store i32 1, i32* %v2012
+	br label %b40
+b33:
+	ret i32 0
+b40:
+	%p25 = phi i32 [ 1, %b32 ],  [ %v146, %b45 ]
+	%p14 = phi i32 [ %p15, %b32 ],  [ %p17, %b45 ]
+	%p10 = phi i32 [ %p11, %b32 ],  [ %p13, %b45 ]
+	%v117 = load i32, i32* @_g_h
+	%v118 = icmp sle i32 %p25, %v117
+	br i1 %v118, label %b41, label %b42
+b41:
+	br label %b43
+b42:
+	%v150 = call i32 @search(i32 %p14, i32 %p10, i32 1)
+	%v152 = icmp sle i32 %v150, 10
+	br i1 %v152, label %b51, label %b52
+b43:
+	%p22 = phi i32 [ 1, %b41 ],  [ %v144, %b48 ]
+	%p17 = phi i32 [ %p14, %b41 ],  [ %p16, %b48 ]
+	%p13 = phi i32 [ %p10, %b41 ],  [ %p12, %b48 ]
+	%v120 = load i32, i32* @_g_w
+	%v121 = icmp sle i32 %p22, %v120
+	br i1 %v121, label %b44, label %b45
+b44:
+	%v126 = call i32 @getint()
+	%v125 = getelementptr inbounds [30 x [30 x i32]], [30 x [30 x i32]]* @_g_a, i32 0, i32 %p25, i32 %p22
+	store i32 %v126, i32* %v125
+	%v131 = load i32, i32* %v125
+	%v132 = icmp eq i32 %v131, 2
+	br i1 %v132, label %b46, label %b47
+b45:
+	%v146 = add i32 %p25, 1
+	br label %b40
+b46:
+	br label %b48
+b47:
+	%v140 = icmp eq i32 %v131, 3
+	br i1 %v140, label %b49, label %b50
+b48:
+	%p16 = phi i32 [ %p17, %b50 ],  [ %p25, %b46 ]
+	%p12 = phi i32 [ %p13, %b50 ],  [ %p22, %b46 ]
+	%v144 = add i32 %p22, 1
+	br label %b43
+b49:
+	store i32 %p25, i32* @_g_x_1
+	store i32 %p22, i32* @_g_y_1
+	br label %b50
+b50:
+	br label %b48
+b51:
+	call void @putint(i32 %v150)
+	call void @putch(i32 10)
+	br label %b53
+b52:
+	call void @putint(i32 -1)
+	call void @putch(i32 10)
+	br label %b53
+b53:
+	%v155 = call i32 @getint()
+	store i32 %v155, i32* @_g_w
+	%v156 = call i32 @getint()
+	store i32 %v156, i32* @_g_h
+	br label %b31
 }

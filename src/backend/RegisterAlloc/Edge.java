@@ -1,15 +1,16 @@
 package backend.RegisterAlloc;
 
 
-import backend.operand.ObjRegister;
+import backend.operand.ObjOperand;
+import backend.operand.ObjOperand;
 
 import java.util.Objects;
 
 public class Edge {
-    ObjRegister u;
-    ObjRegister v;
+    ObjOperand u;
+    ObjOperand v;
 
-    public Edge(ObjRegister u, ObjRegister v) {
+    public Edge(ObjOperand u, ObjOperand v) {
         this.u = u;
         this.v = v;
     }
@@ -31,19 +32,19 @@ public class Edge {
         return Objects.hash(u, v);
     }
 
-    public ObjRegister getU() {
+    public ObjOperand getU() {
         return u;
     }
 
-    public void setU(ObjRegister u) {
+    public void setU(ObjOperand u) {
         this.u = u;
     }
 
-    public ObjRegister getV() {
+    public ObjOperand getV() {
         return v;
     }
 
-    public void setV(ObjRegister v) {
+    public void setV(ObjOperand v) {
         this.v = v;
     }
 }

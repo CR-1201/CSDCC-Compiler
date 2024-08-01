@@ -2,7 +2,10 @@ package ir.instructions.memoryInstructions;
 
 import ir.BasicBlock;
 import ir.User;
+import ir.Value;
 import ir.constants.ConstArray;
+import ir.constants.Constant;
+import ir.instructions.Instruction;
 import ir.types.ArrayType;
 import ir.types.PointerType;
 import ir.types.ValueType;
@@ -20,6 +23,11 @@ public class Alloca extends MemoryInstruction{
     * 可以在后续的优化中将所有的 store 删掉
     */
     private final ConstArray initVal;
+
+    ArrayList<Value> initValues = null;
+
+    public ArrayList<Instruction> initInstructions = null;
+    public BasicBlock parentBlock = null;
 
     /**
     * 新建一个 alloca 指令,其类型是分配空间类型的指针
@@ -52,6 +60,21 @@ public class Alloca extends MemoryInstruction{
 
     public ConstArray getInitVal(){
         return initVal;
+    }
+
+    public void setInitValues(ArrayList<Value> initValues){
+        this.initValues = initValues;
+    }
+
+    public ArrayList<Value> getInitValues(){
+        return this.initValues;
+    }
+
+    public ArrayList<Constant> getInitValsList(){
+        if(initVal == null){
+            return new ArrayList<>();
+        }
+        return initVal.getElements();
     }
 
     /**

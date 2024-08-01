@@ -51,6 +51,10 @@ public class Call extends Instruction {
         return args;
     }
 
+    public Value getParamAt(int i){
+        return getOperator(i + 1);
+    }
+
     @Override
     public String toString(){
         Function function = (Function) getOperator(0);

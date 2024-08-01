@@ -37,8 +37,11 @@ public class SideEffect implements Pass {
     }
 
     private void initCallGraph() {
-        for (Function func : irModule.getFunctionsArray()) {
+        for (Function func : irModule.getFunctionsArray()){
+            func.clearCallees();
             func.clearCallers();
+        }
+        for (Function func : irModule.getFunctionsArray()) {
             func.setSideEffect(false);
             visitedFunctions.put(func, false);
 
@@ -54,7 +57,8 @@ public class SideEffect implements Pass {
                             Function calledFunction = ((Call) instruction).getFunction();
 
                             if (!calledFunction.getIsBuiltIn()) {
-                                func.addCaller(calledFunction);
+                                func.addCallee(calledFunction);
+                                calledFunction.addCaller(func);
                             } else {
                                 func.setSideEffect(true);
                                 processedFunctions.put(func, true);

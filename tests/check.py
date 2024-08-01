@@ -281,7 +281,7 @@ if __name__ == '__main__':
 
     print(f'test_num: {len(TEST_CASES)}, pass_num: {pass_cnt}')
     df = pd.DataFrame([{'file': file, **res} for file, res in results])
-    df = df[df['my'] != 0]
+#     df = df[df['my'] != 0]
     df = df.sort_values(by='my', ascending=False)
     print(df.to_string(index=False))
 

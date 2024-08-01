@@ -6,10 +6,10 @@
 /checkir
 /llvmchecker
 *.iml
-testfile.txt
-output.txt
-llvm_ir.txt
-llvm_ir_raw.txt
+diff
+testfile.sy
+llvm_ir.ll
+llvm_ir_raw.ll
 error.txt
 tests/ir
 tests/ir_std

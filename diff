@@ -1,0 +1,593 @@
+.arch armv7ve
+
+.text
+.global	my_pow
+my_pow:
+	push	{lr}
+	sub	sp,	sp,	#4
+b5:
+	mov	r1,	#0
+	cmp	r0,	r1
+	blt	b6
+	b	b7
+.ltorg
+b6:
+	mov	r1,	#0
+	sub	r0,	r1,	r0
+	bl	my_pow
+	vldr	s1,	=0x3F800000
+	vdiv.f32	s0,	s1,	s0
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg
+b7:
+	vmov	s1,	s0
+	vldr	s0,	=0x3F800000
+	b	b9
+.ltorg
+b9:
+	mov	r1,	#0
+	cmp	r0,	r1
+	bne	b10
+	b	b11
+.ltorg
+b10:
+	mov	r1,	#2
+	sdiv	r2,	r0,	r1
+	mul	r2,	r2,	r1
+	sub	r2,	r0,	r2
+	mov	r1,	#0
+	cmp	r2,	r1
+	bne	b12
+	b	b13
+.ltorg
+b12:
+	vmul.f32	s0,	s0,	s1
+	b	b13
+.ltorg
+b13:
+	mov	r1,	#2
+	sdiv	r0,	r0,	r1
+	vmul.f32	s1,	s1,	s1
+	b	b9
+.ltorg
+b11:
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	my_sqrt
+my_sqrt:
+	push	{lr}
+	sub	sp,	sp,	#4
+b15:
+	vldr	s1,	=0x42C80000
+	vcmp.f32	s0,	s1
+	vmrs	APSR_nzcv, fpscr
+	bgt	b16
+	b	b17
+.ltorg
+b16:
+	vldr	s1,	=0x42C80000
+	vdiv.f32	s0,	s0,	s1
+	bl	my_sqrt
+	vldr	s1,	=0x41200000
+	vmul.f32	s0,	s0,	s1
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg
+b17:
+	vldr	s1,	=0x40800000
+	vadd.f32	s1,	s0,	s1
+	vldr	s2,	=0x40000000
+	vmul.f32	s2,	s0,	s2
+	vdiv.f32	s1,	s2,	s1
+	vldr	s2,	=0x41000000
+	vdiv.f32	s2,	s0,	s2
+	vldr	s3,	=0x3F000000
+	vadd.f32	s2,	s2,	s3
+	vadd.f32	s1,	s2,	s1
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s2,	s0,	s1
+	vadd.f32	s1,	s1,	s2
+	vldr	s2,	=0x40000000
+	vdiv.f32	s1,	s1,	s2
+	vdiv.f32	s0,	s0,	s1
+	vadd.f32	s0,	s1,	s0
+	vldr	s1,	=0x40000000
+	vdiv.f32	s0,	s0,	s1
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	F2
+F2:
+	push	{lr}
+	sub	sp,	sp,	#4
+b25:
+	vmul.f32	s0,	s0,	s0
+	vldr	s1,	=0x3F800000
+	vsub.f32	s0,	s1,	s0
+	bl	my_sqrt
+	vldr	s1,	=0x3F800000
+	vdiv.f32	s0,	s1,	s0
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	simpson
+simpson:
+	push	{lr}
+	vpush	{s16,s17,s18,s19}
+	sub	sp,	sp,	#4
+b27:
+	vmov	s17,	s1
+	vsub.f32	s19,	s17,	s0
+	vldr	s1,	=0x40000000
+	vdiv.f32	s1,	s19,	s1
+	vadd.f32	s16,	s0,	s1
+	mov	r1,	#1
+	cmp	r0,	r1
+	beq	b28
+	b	b29
+.ltorg
+b28:
+	vldr	s1,	=0x3F800000
+	vdiv.f32	s1,	s1,	s17
+	vldr	s2,	=0x3F800000
+	vdiv.f32	s2,	s2,	s16
+	vldr	s3,	=0x40800000
+	vmul.f32	s2,	s2,	s3
+	vldr	s3,	=0x3F800000
+	vdiv.f32	s0,	s3,	s0
+	vadd.f32	s0,	s0,	s2
+	vadd.f32	s0,	s0,	s1
+	vmul.f32	s0,	s0,	s19
+	vldr	s1,	=0x40C00000
+	vdiv.f32	s0,	s0,	s1
+	add	sp,	sp,	#4
+	vpop	{s16,s17,s18,s19}
+	pop	{pc}
+	bx	lr
+.ltorg
+b29:
+	mov	r1,	#2
+	cmp	r0,	r1
+	beq	b31
+	b	b32
+.ltorg
+b32:
+	vldr	s0,	=0x0
+	add	sp,	sp,	#4
+	vpop	{s16,s17,s18,s19}
+	pop	{pc}
+	bx	lr
+.ltorg
+b31:
+	bl	F2
+	vmov	s18,	s0
+	vmov	s0,	s16
+	bl	F2
+	vmov	s16,	s0
+	vmov	s0,	s17
+	bl	F2
+	vldr	s1,	=0x40800000
+	vmul.f32	s1,	s16,	s1
+	vadd.f32	s1,	s18,	s1
+	vadd.f32	s0,	s1,	s0
+	vmul.f32	s0,	s0,	s19
+	vldr	s1,	=0x40C00000
+	vdiv.f32	s0,	s0,	s1
+	add	sp,	sp,	#4
+	vpop	{s16,s17,s18,s19}
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	asr5
+asr5:
+	push	{r4,lr}
+	vpush	{s16,s17,s18,s19,s20,s21,s22}
+	sub	sp,	sp,	#4
+b35:
+	vmov	s21,	s2
+	vmov	s19,	s3
+	mov	r4,	r0
+	vmov	s16,	s0
+	vmov	s18,	s1
+	vsub.f32	s0,	s18,	s16
+	vldr	s1,	=0x40000000
+	vdiv.f32	s0,	s0,	s1
+	vadd.f32	s17,	s16,	s0
+	vmov	s0,	s16
+	vmov	s1,	s17
+	mov	r0,	r4
+	bl	simpson
+	vmov	s22,	s0
+	vmov	s0,	s17
+	vmov	s1,	s18
+	mov	r0,	r4
+	bl	simpson
+	vmov	s20,	s0
+	vadd.f32	s2,	s22,	s20
+	vsub.f32	s1,	s2,	s19
+	vldr	s0,	=0x0
+	vcmp.f32	s1,	s0
+	vmrs	APSR_nzcv, fpscr
+	bgt	b75
+	b	b76
+.ltorg
+b75:
+	vmov	s0,	s1
+	b	b73
+.ltorg
+b76:
+	vldr	s0,	=0x0
+	vsub.f32	s0,	s0,	s1
+	b	b73
+.ltorg
+b73:
+	vldr	s3,	=0x41700000
+	vmul.f32	s3,	s21,	s3
+	vcmp.f32	s0,	s3
+	vmrs	APSR_nzcv, fpscr
+	ble	b36
+	b	b37
+.ltorg
+b36:
+	vldr	s0,	=0x41700000
+	vdiv.f32	s0,	s1,	s0
+	vadd.f32	s0,	s2,	s0
+	add	sp,	sp,	#4
+	vpop	{s16,s17,s18,s19,s20,s21,s22}
+	pop	{r4,pc}
+	bx	lr
+.ltorg
+b37:
+	vldr	s0,	=0x40000000
+	vdiv.f32	s19,	s21,	s0
+	vmov	s0,	s16
+	vmov	s1,	s17
+	vmov	s2,	s19
+	vmov	s3,	s22
+	mov	r0,	r4
+	bl	asr5
+	vmov	s16,	s0
+	vmov	s0,	s17
+	vmov	s1,	s18
+	vmov	s2,	s19
+	vmov	s3,	s20
+	mov	r0,	r4
+	bl	asr5
+	vadd.f32	s0,	s16,	s0
+	add	sp,	sp,	#4
+	vpop	{s16,s17,s18,s19,s20,s21,s22}
+	pop	{r4,pc}
+	bx	lr
+.ltorg
+.global	asr4
+asr4:
+	push	{r4,lr}
+	vpush	{s16,s17,s18}
+	sub	sp,	sp,	#4
+b40:
+	vmov	s18,	s2
+	mov	r4,	r0
+	vmov	s17,	s1
+	vmov	s16,	s0
+	vmov	s0,	s16
+	vmov	s1,	s17
+	mov	r0,	r4
+	bl	simpson
+	vmov	s3,	s0
+	vmov	s0,	s16
+	vmov	s1,	s17
+	vmov	s2,	s18
+	mov	r0,	r4
+	bl	asr5
+	add	sp,	sp,	#4
+	vpop	{s16,s17,s18}
+	pop	{r4,pc}
+	bx	lr
+.ltorg
+.global	eee
+eee:
+	push	{lr}
+	vpush	{s16,s17,s18}
+b42:
+	vmov	s16,	s0
+	vldr	s0,	=0x3A83126F
+	vcmp.f32	s16,	s0
+	vmrs	APSR_nzcv, fpscr
+	bgt	b43
+	b	b44
+.ltorg
+b43:
+	vldr	s0,	=0x40000000
+	vdiv.f32	s0,	s16,	s0
+	bl	eee
+	vmul.f32	s0,	s0,	s0
+	vpop	{s16,s17,s18}
+	pop	{pc}
+	bx	lr
+.ltorg
+b44:
+	vmov	s0,	s16
+	mov	r0,	#3
+	bl	my_pow
+	vmov	s18,	s0
+	vmov	s0,	s16
+	mov	r0,	#4
+	bl	my_pow
+	vmov	s17,	s0
+	vmov	s0,	s16
+	mov	r0,	#5
+	bl	my_pow
+	vldr	s1,	=0x42F00000
+	vdiv.f32	s3,	s0,	s1
+	vldr	s0,	=0x41C00000
+	vdiv.f32	s4,	s17,	s0
+	vldr	s0,	=0x40C00000
+	vdiv.f32	s1,	s18,	s0
+	vmul.f32	s2,	s16,	s16
+	vldr	s0,	=0x40000000
+	vdiv.f32	s0,	s2,	s0
+	vldr	s2,	=0x3F800000
+	vadd.f32	s2,	s16,	s2
+	vadd.f32	s0,	s2,	s0
+	vadd.f32	s0,	s0,	s1
+	vadd.f32	s0,	s0,	s4
+	vadd.f32	s0,	s0,	s3
+	vpop	{s16,s17,s18}
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	my_exp
+my_exp:
+	push	{r4,lr}
+	vpush	{s16,s17}
+b47:
+	vmov	s16,	s0
+	vldr	s0,	=0x0
+	vcmp.f32	s16,	s0
+	vmrs	APSR_nzcv, fpscr
+	blt	b48
+	b	b49
+.ltorg
+b48:
+	vldr	s0,	=0x0
+	vsub.f32	s0,	s0,	s16
+	bl	my_exp
+	vldr	s1,	=0x3F800000
+	vdiv.f32	s0,	s1,	s0
+	vpop	{s16,s17}
+	pop	{r4,pc}
+	bx	lr
+.ltorg
+b49:
+	vcvt.s32.f32	s0,	s16
+	vmov	r4,	s0
+	vldr	s0,	=0x402DF854
+	mov	r0,	r4
+	bl	my_pow
+	vmov	s17,	s0
+	vmov	s0,	r4
+	vcvt.f32.s32	s0,	s0
+	vsub.f32	s0,	s16,	s0
+	bl	eee
+	vmul.f32	s0,	s17,	s0
+	vpop	{s16,s17}
+	pop	{r4,pc}
+	bx	lr
+.ltorg
+.global	my_ln
+my_ln:
+	push	{lr}
+	sub	sp,	sp,	#4
+b52:
+	vmov	s1,	s0
+	vldr	s0,	=0x3F800000
+	vldr	s2,	=0x322BCC77
+	mov	r0,	#1
+	bl	asr4
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	my_log
+my_log:
+	push	{lr}
+	vpush	{s16,s17}
+	sub	sp,	sp,	#4
+b54:
+	vmov	s16,	s0
+	vmov	s0,	s1
+	bl	my_ln
+	vmov	s17,	s0
+	vmov	s0,	s16
+	bl	my_ln
+	vdiv.f32	s0,	s17,	s0
+	add	sp,	sp,	#4
+	vpop	{s16,s17}
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	my_powf
+my_powf:
+	push	{lr}
+	vpush	{s16}
+b56:
+	vmov	s16,	s1
+	bl	my_ln
+	vmul.f32	s0,	s16,	s0
+	bl	my_exp
+	vpop	{s16}
+	pop	{pc}
+	bx	lr
+.ltorg
+.global	main
+main:
+	push	{lr}
+	sub	sp,	sp,	#4
+b58:
+	bl	getint
+	mov	r4,	r0
+	b	b59
+.ltorg
+b59:
+	mov	r0,	#0
+	cmp	r4,	r0
+	bne	b60
+	b	b61
+.ltorg
+b60:
+	bl	getfloat
+	vmov	s17,	s0
+	bl	getfloat
+	vmov	s16,	s0
+	vldr	s0,	=0x0
+	vcmp.f32	s17,	s0
+	vmrs	APSR_nzcv, fpscr
+	bgt	b79
+	b	b80
+.ltorg
+b79:
+	vmov	s0,	s17
+	b	b77
+.ltorg
+b80:
+	vldr	s0,	=0x0
+	vsub.f32	s0,	s0,	s17
+	b	b77
+.ltorg
+b77:
+	bl	putfloat
+	mov	r0,	#32
+	bl	putch
+	vmov	s0,	s17
+	mov	r0,	#2
+	bl	my_pow
+	bl	putfloat
+	mov	r0,	#32
+	bl	putch
+	vmov	s0,	s17
+	bl	my_sqrt
+	bl	putfloat
+	mov	r0,	#32
+	bl	putch
+	vmov	s0,	s17
+	bl	my_exp
+	bl	putfloat
+	mov	r0,	#32
+	bl	putch
+	vldr	s0,	=0x0
+	vcmp.f32	s17,	s0
+	vmrs	APSR_nzcv, fpscr
+	bgt	b62
+	b	b63
+.ltorg
+b64:
+	mov	r0,	#32
+	bl	putch
+	vldr	s0,	=0x0
+	vcmp.f32	s17,	s0
+	vmrs	APSR_nzcv, fpscr
+	bgt	b68
+	b	b66
+.ltorg
+b66:
+	mov	r0,	#45
+	bl	putch
+	b	b67
+.ltorg
+b67:
+	mov	r0,	#32
+	bl	putch
+	vldr	s0,	=0x0
+	vcmp.f32	s17,	s0
+	vmrs	APSR_nzcv, fpscr
+	bgt	b69
+	b	b70
+.ltorg
+b69:
+	vmov	s0,	s17
+	vmov	s1,	s16
+	bl	my_powf
+	bl	putfloat
+	b	b71
+.ltorg
+b70:
+	mov	r0,	#45
+	bl	putch
+	b	b71
+.ltorg
+b71:
+	mov	r0,	#10
+	bl	putch
+	mov	r0,	#1
+	sub	r4,	r4,	r0
+	b	b59
+.ltorg
+b68:
+	vldr	s0,	=0x0
+	vcmp.f32	s16,	s0
+	vmrs	APSR_nzcv, fpscr
+	bgt	b65
+	b	b66
+.ltorg
+b65:
+	vmov	s0,	s17
+	vmov	s1,	s16
+	bl	my_log
+	bl	putfloat
+	b	b67
+.ltorg
+b62:
+	vmov	s0,	s17
+	bl	my_ln
+	bl	putfloat
+	b	b64
+.ltorg
+b63:
+	mov	r0,	#45
+	bl	putch
+	b	b64
+.ltorg
+b61:
+	mov	r0,	#0
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
+.ltorg

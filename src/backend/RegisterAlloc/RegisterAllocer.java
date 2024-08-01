@@ -380,7 +380,12 @@ public class RegisterAllocer {
     }
 
     private void SelectSpill() {
-        ObjRegister m = spillWorklist.stream().findAny().get(); // 先随便找吧
+//        ObjRegister m = spillWorklist.stream().findAny().get(); // 先随便找吧
+        ObjRegister m = spillWorklist.stream().max((l, r) -> {
+            double value1 = degree.getOrDefault(l, 0).doubleValue();
+            double value2 = degree.getOrDefault(r, 0).doubleValue();
+            return Double.compare(value1, value2);
+        }).get();
         spillWorklist.remove(m);
         simplifyWorklist.add(m);
         FreezeMoves(m);
@@ -476,7 +481,7 @@ public class RegisterAllocer {
                             ObjLoad load = new ObjLoad(vReg, ObjPhyRegister.getRegister("sp"), new ObjImmediate(objFunction.getAllocSize()), vReg.isFloat());
                             block.addInstructionBefore(firstUse, load);
                         } else if (!vReg.isFloat()) {
-                            ObjRegister tmp = ObjPhyRegister.getRegister(12);
+                            ObjRegister tmp = vReg;
                             ObjMove move = new ObjMove(tmp, new ObjImmediate(objFunction.getAllocSize()), false, true);
                             ObjLoad load = new ObjLoad(vReg, ObjPhyRegister.getRegister("sp"), tmp, vReg.isFloat());
                             block.addInstructionBefore(firstUse, move);

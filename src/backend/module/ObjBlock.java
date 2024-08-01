@@ -47,14 +47,14 @@ public class ObjBlock {
         return sb.toString();
     }
 
-    private ArrayList<ObjMove> phiMoveInstructions = new ArrayList<>();
+    private ArrayList<ObjInstruction> phiMoveInstructions = new ArrayList<>();
 
-    public void addPhiMove(ObjMove objMove) {
+    public void addPhiMove(ObjInstruction objMove) {
         phiMoveInstructions.add(objMove);
     }
 
     public void fixPhiMove() {
-        for (ObjMove phi : phiMoveInstructions) {
+        for (ObjInstruction phi : phiMoveInstructions) {
             int size = instructions.size();
             ObjBlock[] succ = ObjBuilder.getSucc(getName());
             if (succ[0] == null) {

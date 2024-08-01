@@ -606,6 +606,7 @@ public class ObjBuilder {
         return rd;
     }
 
+
     private ObjInstruction creatArgLoad(ObjRegister rd, int stackPos, ObjBlock objBlock, boolean isFloat) {
         if (ImmediateUtils.checkOffsetRange(stackPos * 4, isFloat)) {
             return new ObjLoad(rd, ObjPhyRegister.getRegister("sp"), new ObjImmediate(stackPos * 4), isFloat);
@@ -628,15 +629,41 @@ public class ObjBuilder {
                     curBlock.addInstructionToHead(new ObjMove(nreg, tmpreg, phi.getValueType().isFloat(), false));
                     for (Map.Entry<Value, BasicBlock> entry : entries) {
                         Value phiv = entry.getKey();
+                        ObjBlock mphib = n2mbMap.get(entry.getValue().getName().substring(1));
                         if (!(phiv instanceof ConstInt || phiv instanceof ConstFloat)) {
-                            ObjRegister mphiv = v2mMap.containsKey(phiv) ? (ObjRegister) v2mMap.get(phiv) : putNewVGtoMap(phiv, objFunction, curBlock);
-                            ObjBlock mphib = n2mbMap.get(entry.getValue().getName().substring(1));
-                            mphib.addPhiMove(new ObjMove(tmpreg, mphiv, phi.getValueType().isFloat(), false));
+                            if (phiv instanceof Argument arg) {
+                                if (v2mMap.containsKey(arg)) {
+                                    ObjRegister mphiv = v2mMap.containsKey(phiv) ? (ObjRegister) v2mMap.get(phiv) : putNewVGtoMap(phiv, objFunction, curBlock);
+                                    mphib.addPhiMove(new ObjMove(tmpreg, mphiv, phi.getValueType().isFloat(), false));
+                                } else {
+                                    int rank = arg.getArgRank();
+                                    if ((arg.getValueType().isFloat() && rank < 16) || (!arg.getValueType().isFloat() && rank < 4)) {
+                                        ObjRegister rs = putNewVGtoMap(phiv, objFunction, curBlock);
+                                        mphib.addPhiMove(new ObjMove(tmpreg, rs, phi.getValueType().isFloat(), false));
+                                    } else {
+                                        int stackPos = arg.getStackPos();
+                                        assert stackPos >= 0;
+                                        // 这个栈位置后面要寄存器分配后可能需要refresh
+                                        ObjInstruction loadArg;
+                                        if (ImmediateUtils.checkOffsetRange(stackPos * 4, arg.getValueType().isFloat())) {
+                                            loadArg = new ObjLoad(tmpreg, ObjPhyRegister.getRegister("sp"), new ObjImmediate(stackPos * 4), arg.getValueType().isFloat());
+                                        } else {
+                                            ObjRegister rs = new ObjVirRegister();
+                                            ObjMove move = new ObjMove(rs, new ObjImmediate(stackPos * 4), false, true);
+                                            mphib.addPhiMove(move);
+                                            loadArg = new ObjLoad(tmpreg, ObjPhyRegister.getRegister("sp"), rs, arg.getValueType().isFloat(), move);    // 将Move添加进load中，便于后面更新
+                                        }
+                                        mphib.addPhiMove(loadArg);
+                                        objFunction.addArgInstructions(loadArg, mphib);
+                                    }
+                                }
+                            } else {
+                                ObjRegister mphiv = v2mMap.containsKey(phiv) ? (ObjRegister) v2mMap.get(phiv) : putNewVGtoMap(phiv, objFunction, curBlock);
+                                mphib.addPhiMove(new ObjMove(tmpreg, mphiv, phi.getValueType().isFloat(), false));
+                            }
                         } else if (phiv instanceof ConstInt) {
-                            ObjBlock mphib = n2mbMap.get(entry.getValue().getName().substring(1));
                             mphib.addPhiMove(new ObjMove(tmpreg, new ObjImmediate(((ConstInt) phiv).getValue()), false, true));
                         } else {
-                            ObjBlock mphib = n2mbMap.get(entry.getValue().getName().substring(1));
                             mphib.addPhiMove(new ObjMove(tmpreg, new ObjFloatImmediate(((ConstFloat) phiv).getValue()), true, true));
                         }
 
@@ -649,6 +676,7 @@ public class ObjBuilder {
         }
 
     }
+
 
     private ObjRegister createVirRegister(Value value) {
         ObjRegister r;

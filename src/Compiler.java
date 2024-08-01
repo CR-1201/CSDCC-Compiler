@@ -63,7 +63,7 @@ public class Compiler {
         ObjBuilder.getObjBuilder().build();
 
         ObjPassManager objPassManager = new ObjPassManager();
-        objPassManager.run();
+//        objPassManager.run();
 
         IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
     }

@@ -65,6 +65,7 @@ public class LoopUnroll implements Pass {
              * 因为函数后面其他的Top循环还需要被展开。
              */
         }
+//        System.out.println(allLoops);
     }
 
     private void constLoopUnroll(Loop loop) {

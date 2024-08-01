@@ -143,6 +143,7 @@ def check(stop_event, test_file, input_file='', ans_file=''):
     run asm
     """
     create_folder_for(asm_runnable)
+    create_folder_for(output_file)
     cmd = f'arm-linux-gnueabihf-gcc -march=armv7-a -static -g {asm_file} lib/libsysy.a -o {asm_runnable}'
     print(f'Running {cmd}')
     res = subprocess.run(cmd, cwd=TEST_DIR, shell=True, capture_output=True, text=True)

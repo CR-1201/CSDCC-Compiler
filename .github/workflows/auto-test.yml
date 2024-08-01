@@ -28,6 +28,11 @@ jobs:
       with:
         version: "10.0"
 
+    - name: install arm env
+      run: |
+        apt install gcc-arm-linux-gnueabihf
+        apt install qemu-user-static
+
     - name: setup env
       run: |
         sudo apt install -y libtinfo5

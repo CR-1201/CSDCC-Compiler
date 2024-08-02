@@ -12,7 +12,7 @@ import pass.analysis.CFG;
 import java.util.ArrayList;
 
 public class MergeBlocks implements Pass {
-    private CFG cfg = new CFG();
+    private final CFG cfg = new CFG();
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
@@ -100,7 +100,7 @@ public class MergeBlocks implements Pass {
     private Boolean canMerge(BasicBlock block) {
         if (block.getSuccessors().size() != 1) {
             return false;
-        } else if (!block.getInstructions().isEmpty() && block.getTailInstruction() instanceof Br br) {
+        } else if (!block.getInstructions().isEmpty() && block.getTailInstruction() instanceof Br br && !br.getHasCondition()) {
             BasicBlock target = (BasicBlock) br.getOperator(0);
             return target.getPrecursors().size() == 1 && target.getPrecursors().iterator().next() == block;
         }

@@ -43,4 +43,9 @@ public class IOFunc {
         delete(filename);
         output("", filename);
     }
+
+    public static void log(String filename, String content) {
+        clear(filename);
+        output(content, filename);
+    }
 }

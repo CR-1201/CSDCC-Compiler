@@ -107,6 +107,10 @@ public class IrBuilder {
         return mul;
     }
 
+    public Mul buildMul(DataType dataType, Value src1, Value src2) {
+        return new Mul(nameNumCounter++, dataType, null, src1, src2);
+    }
+
     public Mul buildMulBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before) {
         Mul mul = new Mul(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertBefore(mul,before);
@@ -243,9 +247,10 @@ public class IrBuilder {
      * @param content 存储内容
      * @param addr 地址
      */
-    public void buildStore(BasicBlock parent, Value content, Value addr){
+    public Store buildStore(BasicBlock parent, Value content, Value addr){
         Store store = new Store(parent, content, addr);
         parent.insertTail(store);
+        return store;
     }
 
     public void buildStoreBeforeInstr(BasicBlock parent, Value val, Value location, Instruction before){

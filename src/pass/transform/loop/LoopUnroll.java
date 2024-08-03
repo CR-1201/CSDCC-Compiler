@@ -9,7 +9,6 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
-import ir.types.IntType;
 import pass.Pass;
 import pass.analysis.CFG;
 import pass.analysis.Loop;
@@ -36,6 +35,7 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
+        IOFunc.log("checkir/loop.ll", Module.getModule().toString());
         for (Function func : Module.getModule().getFunctionsArray()) {
             if (!func.getIsBuiltIn()) {
                 clear();
@@ -67,10 +67,11 @@ public class LoopUnroll implements Pass {
              * 因为函数后面其他的Top循环还需要被展开。
              */
         }
+//        System.out.println(allLoops);
     }
 
     private void constLoopUnroll(Loop loop) {
-        if (!loop.getIsSetInductorVar()) {
+        if (!loop.isInductorVarSet()) {
             return;
         }
         Value idcVar = loop.getIdcVar();
@@ -90,6 +91,7 @@ public class LoopUnroll implements Pass {
         }
         int loopTimes = loop.computeLoopTimes(init, end, step, idcAlu, cond.getCondition());
         if (loopTimes <= 0) {
+            // 说明这个 loop 其实是无用的 loop，可以直接删掉
             return;
         } else {
             loop.setLoopTimes(loopTimes);

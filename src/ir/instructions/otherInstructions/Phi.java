@@ -1,13 +1,14 @@
 package ir.instructions.otherInstructions;
 
 import ir.BasicBlock;
-import ir.User;
 import ir.Value;
 import ir.instructions.Instruction;
 import ir.types.DataType;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 public class Phi extends Instruction {
     private int precursorNum;
@@ -61,15 +62,34 @@ public class Phi extends Instruction {
         precursorNum --;
     }
 
-    public Value getInputVal(BasicBlock block) {
+    public Value getIncomingFrom(BasicBlock block) {
         for (int i = 0; i < precursorNum; i++) {
             if (getOperator(i + precursorNum) == block) {
                 return getOperator(i);
             }
         }
-        throw new AssertionError("block not found for phi!");
+        return null;
     }
 
+    public ArrayList<Value> getIncomingsFrom(BasicBlock block) {
+        ArrayList<Value> ans = new ArrayList<>();
+        for (int i = 0; i < precursorNum; i++) {
+            if (getOperator(i + precursorNum) == block) {
+                ans.add(getOperator(i));
+            }
+        }
+        return ans;
+    }
+
+
+    public ArrayList<Map.Entry<Value, BasicBlock>> getEntry() {
+        ArrayList<Map.Entry<Value, BasicBlock>> entryPairs = new ArrayList<>();
+        for (int i = 0; i < precursorNum; i++) {
+            if (getOperator(i) == null) break;
+            entryPairs.add(new AbstractMap.SimpleEntry<>(getOperator(i), (BasicBlock) getOperator(i + precursorNum)));
+        }
+        return entryPairs;
+    }
     public void removeIfRedundant(boolean f) {
         if (getUsers().isEmpty()) {
             removeAllOperators();

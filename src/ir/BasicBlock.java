@@ -37,8 +37,6 @@ public class BasicBlock extends Value{
     private BasicBlock idomer;
     // 在支配树中的深度
     private int domLevel;
-    // 支配边际,即刚好不被当前基本块支配的基本块
-    private final HashSet<BasicBlock> dominanceFrontier = new HashSet<>();
 
     // ========================== RDOM Info ==========================
     private HashSet<BasicBlock> rDoms = new HashSet<>();
@@ -56,11 +54,33 @@ public class BasicBlock extends Value{
 
     public HashSet<BasicBlock> getControls() {
         return this.controls;
+
+    public Boolean isSimpleBlock() {
+        if (instructions.size() != 1) {
+            return false;
+        }
+        return instructions.get(0) instanceof Br br && !br.getHasCondition();
     }
 
     // ========================== Loop Info ==========================
     // 当前 Basicblock 所在的循环，如果 loop 为 null，说明此BasicBlock不在任何循环中
     private Loop loop;
+
+    private Boolean isLoopHeader = false;
+
+    public void setIsLoopHeader() {
+        this.isLoopHeader = true;
+    }
+    public void clearIsLoopHeader() {
+        this.isLoopHeader = false;
+    }
+
+    public Boolean isLoopHeader() {
+        return this.isLoopHeader;
+    }
+
+    // 支配边际,即刚好不被当前基本块支配的基本块
+    private final HashSet<BasicBlock> dominanceFrontier = new HashSet<>();
 
     public LinkedList<Instruction> getInstructions(){
         return instructions;
@@ -232,6 +252,9 @@ public class BasicBlock extends Value{
 
     public void removeLoop() {
         this.loop = null;
+        if (isLoopHeader) {
+            isLoopHeader = false;
+        }
     }
 
     public BasicBlock(int nameNum, Function parent){
@@ -395,10 +418,10 @@ public class BasicBlock extends Value{
         for (BasicBlock successor : this.getSuccessors()) {
             successor.getPrecursors().remove(this);
         }
-        for (Instruction inst : instructions) {
+        ArrayList<Instruction> insts = getInstructionsArray();
+        for (Instruction inst : insts) {
             inst.removeAllOperators();
-            // 这里 parent 等下要被删掉了，没必要再erase，反而会报错。
-//            inst.eraseFromParent();
+            inst.eraseFromParent();
         }
         getParent().removeBlock(this);
     }

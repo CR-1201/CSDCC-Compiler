@@ -33,7 +33,8 @@ public class Instruction extends User {
 
     // 在 parent block 中删除自己
     public void eraseFromParent(){
-        getParent().removeInstruction(this);
+        BasicBlock block = getParent();
+        block.removeInstruction(this);
     }
 
     public void removeSelf() {

@@ -77,24 +77,8 @@ public class Alloca extends MemoryInstruction{
         return initVal.getElements();
     }
 
-    /**
-     * 是否可以被提升,本质是只要是没有使用 gep 的,都可以被提升
-     * @return 可提升,则为 true
-     */
     public boolean isPromotable(){
-        if (getUsers().isEmpty()){ // 没有使用
-            return true;
-        }
-        // 使用者中有 GEP ,则与数组有关,否则一般使用者都是 load,store 之类的
-        for (User user : getUsers()){
-            if (user instanceof GEP gep){
-                // promotable alloca must be a single data
-                if (gep.getOperator(0) == this){
-                    return false;
-                }
-            }
-        }
-        return true;
+        return !isArray();
     }
 
     public Boolean isArray() {

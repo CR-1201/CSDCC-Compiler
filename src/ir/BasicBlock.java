@@ -6,10 +6,7 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.LabelType;
 import pass.analysis.Loop;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Stack;
+import java.util.*;
 
 /**
  @author Conroy
@@ -52,6 +49,7 @@ public class BasicBlock extends Value{
     private Loop loop;
     private Boolean isLoopHeader = false;
 
+
     public void setIsLoopHeader() {
         this.isLoopHeader = true;
     }
@@ -61,6 +59,20 @@ public class BasicBlock extends Value{
 
     public Boolean isLoopHeader() {
         return this.isLoopHeader;
+    }
+
+    public boolean isLoopLatch() {
+        if( loop != null ){
+            return loop.getLatches().contains(this);
+        }
+        return false;
+    }
+
+    public boolean isLoopExiting() {
+        if( loop != null ){
+            return loop.getExitings().contains(this);
+        }
+        return false;
     }
 
     // 支配边际,即刚好不被当前基本块支配的基本块
@@ -93,7 +105,7 @@ public class BasicBlock extends Value{
         this.domLevel = domLevel;
     }
 
-    public HashSet<BasicBlock> getDoms(){
+    public HashSet<BasicBlock> getDoms() {
         return doms;
     }
 

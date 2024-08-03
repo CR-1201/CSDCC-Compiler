@@ -1,18 +1,12 @@
 package pass;
 
 import ir.Module;
-import pass.analysis.CFG;
-import pass.analysis.Dom;
-import pass.analysis.LoopAnalysis;
-import pass.analysis.SideEffect;
+import pass.analysis.*;
 import pass.transform.*;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
-import pass.transform.loop.LCSSA;
-import pass.transform.loop.LICM;
-import pass.transform.loop.LoopFold;
-import pass.transform.loop.LoopUnroll;
+import pass.transform.loop.*;
 
 import java.util.ArrayList;
 
@@ -27,7 +21,10 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
+
         passes.add(new Mem2reg());
+
+
 
         passes.add(new LocalArrayLift());
 //         LocalArrayLift只用一次
@@ -63,13 +60,16 @@ public class PassManager {
 
         passes.add(new LoopFold());
 
+        passes.add(new LoopStrengthReduction());
+
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
 //
         passes.add(new GepSplit());
-//
+
 //        passes.add(new CSE());
-//        // SCCP后可能出现没有value的phi
+
+        // SCCP后可能出现没有value的phi
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
@@ -77,6 +77,8 @@ public class PassManager {
         passes.add(new MathOptimize());
 
         GVNGCMPass();
+
+
 
         passes.add(new CFG());
         passes.add(new Dom());
@@ -86,7 +88,7 @@ public class PassManager {
 
         passes.add(new CFG());
         passes.add(new Dom());
-//        passes.add(new GepFuse());
+        passes.add(new GepFuse());
 
         for (Pass pass : passes) {
             pass.run();

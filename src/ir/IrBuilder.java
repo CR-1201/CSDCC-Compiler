@@ -95,6 +95,12 @@ public class IrBuilder {
         return add;
     }
 
+    public Add buildAddBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before){
+        Add add = new Add(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBefore(add,before);
+        return add;
+    }
+
     public Sub buildSub(BasicBlock parent, DataType dataType, Value src1, Value src2){
         Sub sub = new Sub(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertTail(sub);

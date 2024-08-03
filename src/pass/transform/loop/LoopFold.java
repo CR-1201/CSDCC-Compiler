@@ -76,7 +76,7 @@ public class LoopFold implements Pass {
 
     private void findFoldedLoop(Loop loop) {
         BasicBlock exit = loop.getExits().iterator().next();
-        System.out.println(exit.getName());
+//        System.out.println(exit.getName());
         if (exit.getSuccessors().size() != 1) {
             return;
         }

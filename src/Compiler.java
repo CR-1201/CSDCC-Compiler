@@ -32,7 +32,7 @@ public class Compiler {
 
         // 词法分析
         LexicalAnalyze.getLexical().analyze(IOFunc.input(Config.fileInputPath));
-        LexicalAnalyze.getLexical().printTokens();
+//        LexicalAnalyze.getLexical().printTokens();
 
         // 语法分析
         ParserAnalyze.getParser().setTokens(LexicalAnalyze.getLexical().getTokens());

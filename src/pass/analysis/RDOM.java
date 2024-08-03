@@ -30,14 +30,14 @@ public class RDOM implements Pass {
             mergeExit(function);
         }
 
-//        new CFG().run();
-//        new Dom().run();
-//
-//        for (Function function : irModule.getFunctionsArray()) {
-//            if (!function.getIsBuiltIn()) {
-//                buildRDom(function);
-//            }
-//        }
+        new CFG().run();
+        new Dom().run();
+
+        for (Function function : irModule.getFunctionsArray()) {
+            if (!function.getIsBuiltIn()) {
+                buildRDom(function);
+            }
+        }
     }
 
     private void buildRDom(Function function) {
@@ -176,10 +176,6 @@ public class RDOM implements Pass {
                 }
             }
         }
-
-        System.out.println(function.getName());
-        System.out.println(returns.size());
-        System.out.println();
 
         BasicBlock finalBlock = irBuilder.buildBasicBlock(function);
 

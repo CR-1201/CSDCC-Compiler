@@ -15,6 +15,7 @@ tests/ir
 tests/ir_std
 tests/asm
 tests/ans
+tests
 tests/output
 tests/error.txt
 compiler.jar

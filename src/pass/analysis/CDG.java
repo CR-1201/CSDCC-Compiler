@@ -15,15 +15,15 @@ public class CDG implements Pass {
     public void run() {
         new RDOM().run();
 
-//        for (Function function : irModule.getFunctionsArray()) {
-//            for (BasicBlock block : function.getBasicBlocksArray()) {
-//                HashSet<BasicBlock> rdf = block.getRDominanceFrontier();
-//
-//                for (BasicBlock blockF : rdf) {
-//                    blockF.addControl(block);
-//                }
-//            }
-//        }
+        for (Function function : irModule.getFunctionsArray()) {
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                HashSet<BasicBlock> rdf = block.getRDominanceFrontier();
+
+                for (BasicBlock blockF : rdf) {
+                    blockF.addControl(block);
+                }
+            }
+        }
     }
 
 }

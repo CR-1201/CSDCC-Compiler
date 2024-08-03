@@ -1,9 +1,7 @@
 package pass.transform;
 
-import ir.BasicBlock;
-import ir.Function;
+import ir.*;
 import ir.Module;
-import ir.Value;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
@@ -12,10 +10,7 @@ import ir.instructions.terminatorInstructions.Ret;
 import pass.Pass;
 import pass.analysis.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class ADCE implements Pass {
 
@@ -25,60 +20,60 @@ public class ADCE implements Pass {
 
     private final HashSet<BasicBlock> usefulBlocks = new HashSet<>();
 
-    private final Queue<Instruction> workList = new LinkedList<>();
-
     private final HashSet<Loop> toBeRemovedLoop = new HashSet<>();
+
+    private boolean changed;
 
     @Override
     public void run() {
         new CDG().run();
-//        new SideEffect().run();
-//        new LoopAnalysis().run();
+        new SideEffect().run();
+        new LoopAnalysis().run();
 
-//        for (Function function : irModule.getFunctionsArray()) {
-//            if (function.getIsBuiltIn()) {
-//                continue;
-//            }
-//
-//            usefulBlocks.clear();
-//            usefulInstructions.clear();
-//            workList.clear();
-//
-//            markBase(function);
-//            while (!workList.isEmpty()) {
-//                Instruction curInstr = workList.poll();
-//                findClosure(curInstr);
-//            }
-//
-//            for (BasicBlock block : function.getBasicBlocksArray()) {
-//                if (usefulBlocks.contains(block))
-//                    continue;
-//                if (block.getLoop() == null)
-//                    continue;
-//                if (!ifRemoveLoop(block.getLoop()))
-//                    continue;
-//
-//                toBeRemovedLoop.add(block.getLoop());
-//            }
-//        }
-//
-//        for (Loop loop : toBeRemovedLoop) {
-//            BasicBlock preHeader = getPreHeader(loop);
-//            BasicBlock exit = new ArrayList<>(loop.getExits()).get(0);
-//
-//            assert preHeader != null;
-//            assert exit != null;
-////            Br preHeadBrInstr = (Br) preHeader.getTailInstruction();
-////            preHeadBrInstr.setOperator(0, exit);
-//
-//            for (BasicBlock block : loop.getAllBlocks()) {
-////                block.removeSelf();
-//            }
-//        }
+        for (Function function : irModule.getFunctionsArray()) {
+            if (function.getIsBuiltIn()) {
+                continue;
+            }
 
-//        new CFG().run();
-//        new Dom().run();
-//        new SideEffect().run();
+            usefulBlocks.clear();
+            usefulInstructions.clear();
+
+            changed = true;
+            while(changed) {
+                mark(function);
+            }
+
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                if (usefulBlocks.contains(block))
+                    continue;
+                if (block.getLoop() == null)
+                    continue;
+                if (!ifRemoveLoop(block.getLoop()))
+                    continue;
+
+                toBeRemovedLoop.add(block.getLoop());
+            }
+        }
+
+        for (Loop loop : toBeRemovedLoop) {
+            BasicBlock preHeader = getPreHeader(loop);
+            BasicBlock exit = new ArrayList<>(loop.getExits()).get(0);
+
+            if (preHeader == null || exit == null) {
+                continue;
+            }
+
+            Br preHeadBrInstr = (Br) preHeader.getTailInstruction();
+            preHeadBrInstr.setOperator(0, exit);
+
+            for (BasicBlock block : loop.getAllBlocks()) {
+                block.removeSelf();
+            }
+        }
+
+        new CFG().run();
+        new Dom().run();
+        new SideEffect().run();
     }
 
     private BasicBlock getPreHeader(Loop loop) {
@@ -96,30 +91,42 @@ public class ADCE implements Pass {
                 return false;
             }
         }
+
+        for (BasicBlock block : loop.getAllBlocks()) {
+            for (Instruction instruction : block.getInstructionsArray()) {
+                for (User user : instruction.getUsers()) {
+                    if (!loop.getAllBlocks().contains((BasicBlock) user.getParent())) {
+                        return false;
+                    }
+                }
+            }
+        }
+
         return true;
     }
 
-    private void findClosure(Instruction instr) {
-        if (!usefulInstructions.contains(instr)) {
-            usefulInstructions.add(instr);
-            usefulBlocks.add(instr.getParent());
-            workList.add(instr);
-
-            for (Value operand : instr.getOperators()) {
-                if (operand instanceof Instruction instruction && !usefulInstructions.contains(instruction)) {
+    private void mark(Function function) {
+        changed = false;
+        ArrayList<BasicBlock> blockList = function.getBasicBlocksArray();
+        Collections.reverse(blockList);
+        for (BasicBlock block : blockList) {
+            ArrayList<Instruction> instrList = block.getInstructionsArray();
+            Collections.reverse(instrList);
+            for (Instruction instruction : instrList) {
+                if (isUsefulInstr(instruction)) {
                     findClosure(instruction);
                 }
             }
         }
     }
 
-    private void markBase(Function function) {
-        for (BasicBlock block : function.getBasicBlocksArray()) {
-            for (Instruction instr : block.getInstructionsArray()) {
-                if (isUsefulInstr(instr)) {
-                    usefulInstructions.add(instr);
-                    usefulBlocks.add(instr.getParent());
-                    workList.add(instr);
+    private void findClosure(Instruction instruction) {
+        if (!usefulInstructions.contains(instruction)) {
+            add(instruction);
+
+            for (Value operand : instruction.getOperators()) {
+                if (operand instanceof Instruction && !usefulInstructions.contains(operand)) {
+                    findClosure((Instruction) operand);
                 }
             }
         }
@@ -143,6 +150,12 @@ public class ADCE implements Pass {
             }
         }
         return false;
+    }
+
+    private void add(Instruction instruction) {
+        usefulInstructions.add(instruction);
+        usefulBlocks.add(instruction.getParent());
+        changed = true;
     }
 
 }

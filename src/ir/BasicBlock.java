@@ -54,6 +54,7 @@ public class BasicBlock extends Value{
 
     public HashSet<BasicBlock> getControls() {
         return this.controls;
+    }
 
     public Boolean isSimpleBlock() {
         if (instructions.size() != 1) {

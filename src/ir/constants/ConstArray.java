@@ -37,6 +37,19 @@ public class ConstArray extends Constant {
         return elements.get(index);
     }
 
+
+    public ArrayList<Constant> getElementList() {
+        ArrayList<Constant> elemList = new ArrayList<>();
+        if (elements.get(0) instanceof ConstInt || elements.get(0) instanceof ConstFloat) {
+            elemList.addAll(elements);
+        } else {
+            for (Constant element : elements) {
+                elemList.addAll(((ConstArray) element).getElementList());
+            }
+        }
+        return elemList;
+    }
+
     public ArrayList<Constant> getElements(){
         ArrayList<Constant> elements = new ArrayList<>();
         for( Constant element : this.elements ){

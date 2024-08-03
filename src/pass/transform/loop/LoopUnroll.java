@@ -15,6 +15,7 @@ import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
 import pass.utility.BlockUtil;
 import pass.utility.CloneUtil;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +35,7 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
+        IOFunc.log("checkir/loop.ll", Module.getModule().toString());
         for (Function func : Module.getModule().getFunctionsArray()) {
             if (!func.getIsBuiltIn()) {
                 clear();
@@ -65,6 +67,7 @@ public class LoopUnroll implements Pass {
              * 因为函数后面其他的Top循环还需要被展开。
              */
         }
+//        System.out.println(allLoops);
     }
 
     private void constLoopUnroll(Loop loop) {

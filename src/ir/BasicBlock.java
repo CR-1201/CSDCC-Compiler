@@ -35,13 +35,7 @@ public class BasicBlock extends Value{
         if (instructions.size() != 1) {
             return false;
         }
-        if (!(instructions.get(0) instanceof Br br && !br.getHasCondition())) {
-            return false;
-        }
-        if (precursors.size() != 1 || successors.size() != 1) {
-            return false;
-        }
-        return true;
+        return instructions.get(0) instanceof Br br && !br.getHasCondition();
     }
 
     // ========================== Loop Info ==========================

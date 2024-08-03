@@ -4,8 +4,10 @@ import ir.*;
 import ir.Module;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
+import ir.instructions.binaryInstructions.Mul;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Store;
+import ir.types.DataType;
 import pass.Pass;
 import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
@@ -37,10 +39,11 @@ public class LoopMemset implements Pass {
             }
         }
         if (isMemsetableLoop(loop)) {
-            BasicBlock preHeader = loop.getEnterings().iterator().next();
-            Instruction br = preHeader.getTailInstruction();
+            BasicBlock entering = loop.getEnterings().iterator().next();
+            Instruction br = entering.getTailInstruction();
             Value gepPtr = gepInst.getBase();
-//            BinaryInstruction bi = irBuilder.buildMul(, loopSize.getValueType(), loopSize, new ConstInt(4));
+            Mul bi = irBuilder.buildMul((DataType) loopSize.getValueType(), loopSize, new ConstInt(4));
+            entering.insertBefore(bi, br);
         }
     }
 

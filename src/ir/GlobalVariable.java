@@ -13,7 +13,7 @@ public class GlobalVariable extends User{
      * @param initVal 是全局变量使用的唯一 value
      */
     public GlobalVariable(String name, Constant initVal, boolean isConst){
-        super("@" + name, new PointerType(initVal.getValueType()), Module.getModule(),new ArrayList<>()
+        super("@_g_" + name, new PointerType(initVal.getValueType()), Module.getModule(),new ArrayList<>()
         {{
             add(initVal);
         }});

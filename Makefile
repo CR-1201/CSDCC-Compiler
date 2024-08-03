@@ -3,8 +3,11 @@ build:
 	cd ./classes && jar cmvf ../MANIFEST.MF ../compiler.jar .
 	rm -rf ./classes
 
-test-all:
-	$(MAKE) -C ./tests test-all
+test-ir:
+	$(MAKE) -C ./tests test-ir
+
+test-asm:
+	$(MAKE) -C ./tests test-asm
 
 clean:
 	rm -rf compiler.jar output.txt llvm_ir.txt error.txt

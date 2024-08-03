@@ -431,4 +431,20 @@ public class Loop {
     public int getAluIdx() {
         return aluIdx;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("=========== Loop id : ").append(id).append(" ===========\n");
+        sb.append("Loop Header: ").append(header.getName()).append("\n");
+        sb.append("Loop Latches: ").append("\n");
+        for (BasicBlock block : latches) {
+            sb.append("\t").append(block.getName()).append("\n");
+        }
+        sb.append("Loop AllBlocks: ").append("\n");
+        for (BasicBlock block : allBlocks) {
+            sb.append("\t").append(block.getName()).append("\n");
+        }
+        return sb.toString();
+    }
 }

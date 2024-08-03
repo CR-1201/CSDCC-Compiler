@@ -28,6 +28,11 @@ jobs:
       with:
         version: "10.0"
 
+    - name: install arm env
+      run: |
+        sudo apt install -y gcc-arm-linux-gnueabihf
+        sudo apt install -y qemu-user-static
+
     - name: setup env
       run: |
         sudo apt install -y libtinfo5
@@ -39,7 +44,7 @@ jobs:
       run: |
         clang --version
 
-    - name: test all
+    - name: run test
       run: |
         set -e
-        make test-all
+        make test-ir

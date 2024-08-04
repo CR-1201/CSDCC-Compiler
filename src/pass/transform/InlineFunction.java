@@ -17,6 +17,7 @@ import pass.Pass;
 import pass.utiles.FunctionClone;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;

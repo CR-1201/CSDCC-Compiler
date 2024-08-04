@@ -48,7 +48,8 @@ public class PassManager {
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
-////        passes.add(new UselessReturnEmit());
+        passes.add(new UselessReturnEmit());
+        passes.add(new ADCE());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 ////
         GVNGCMPass();

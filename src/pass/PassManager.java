@@ -32,9 +32,6 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new Mem2reg());
-
-        passes.add(new UselessReturnEmit());
-
         passes.add(new LocalArrayLift());
         passes.add(new ConstArrayFold());
         passes.add(new SCCP());
@@ -47,6 +44,9 @@ public class PassManager {
         passes.add(new MathOptimize());
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
+
+        passes.add(new UselessReturnEmit());
+
         passes.add(new DeadCodeEmit());
         passes.add(new UselessStoreEmit());
         GVNGCMPass();

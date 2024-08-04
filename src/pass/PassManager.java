@@ -32,7 +32,9 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new Mem2reg());
-//        passes.add(new ADCE());
+
+        passes.add(new UselessReturnEmit());
+
         passes.add(new LocalArrayLift());
         passes.add(new ConstArrayFold());
         passes.add(new SCCP());
@@ -46,7 +48,7 @@ public class PassManager {
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
-        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+        passes.add(new UselessStoreEmit());
         GVNGCMPass();
         passes.add(new GepFuse());
         passes.add(new LICM());

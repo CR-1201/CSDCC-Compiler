@@ -46,6 +46,7 @@ public class PassManager {
         passes.add(new SideEffect());
 
         passes.add(new UselessReturnEmit());
+        passes.add(new ADCE());
 
         passes.add(new DeadCodeEmit());
         passes.add(new UselessStoreEmit());

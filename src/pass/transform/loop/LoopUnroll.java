@@ -35,7 +35,7 @@ public class LoopUnroll implements Pass {
 
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
-        IOFunc.log("checkir/loop.ll", Module.getModule().toString());
+//        IOFunc.log("checkir/loop.ll", Module.getModule().toString());
         for (Function func : Module.getModule().getFunctionsArray()) {
             if (!func.getIsBuiltIn()) {
                 clear();

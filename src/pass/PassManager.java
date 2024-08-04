@@ -32,7 +32,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new Mem2reg());
-        passes.add(new ADCE());
+//        passes.add(new ADCE());
         passes.add(new LocalArrayLift());
         passes.add(new ConstArrayFold());
         passes.add(new SCCP());

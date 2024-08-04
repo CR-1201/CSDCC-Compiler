@@ -5,7 +5,6 @@ import ir.Module;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.BinaryInstruction;
-import ir.instructions.binaryInstructions.Icmp;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import pass.Pass;
@@ -63,7 +62,7 @@ public class LoopFold implements Pass {
             if (entering.getTailInstruction() instanceof Br br) {
                 int idx = br.getOperators().indexOf(loop.getHeader());
                 br.setOperator(idx, exit);
-                for (Instruction inst : loop.getHeader().getInstructions()) {
+                for (Instruction inst : loop.getHeader().getInstructionsArray()) {
                     if (inst instanceof Phi phi) {
                         phi.removeUsedBlock(entering);
                     } else {
@@ -147,7 +146,7 @@ public class LoopFold implements Pass {
             }
         }
         for (BasicBlock block : loop.getAllBlocks()) {
-            for (Instruction inst : block.getInstructions()) {
+            for (Instruction inst : block.getInstructionsArray()) {
                 if (!idcInsts.contains(inst)) {
                     if (inst instanceof BinaryInstruction bi) {
                         alu = bi;

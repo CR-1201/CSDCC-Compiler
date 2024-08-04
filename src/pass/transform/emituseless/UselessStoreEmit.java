@@ -42,7 +42,7 @@ public class UselessStoreEmit implements Pass {
     private void emit(Function func) {
         HashMap<Value, Store> storeAddress = new HashMap<>();
         for (BasicBlock block : func.getBasicBlocksArray()) {
-            ArrayList<Instruction> insts = new ArrayList<>(block.getInstructions());
+            ArrayList<Instruction> insts = new ArrayList<>(block.getInstructionsArray());
             storeAddress.clear();
             for (Instruction inst : insts) {
                 if (inst instanceof Store si) {

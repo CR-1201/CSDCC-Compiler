@@ -51,6 +51,22 @@ public class LoopStrengthReduction implements Pass {
     }
 
     private void runOnLoop(Loop loop){
+        if (!loop.isSimpleLoop() || !loop.isInductorVarSet()) {
+            return;
+        }
+        if (loop.hasChildLoop()) {
+            return;
+        }
+        //只有head和latch的简单循环
+        for (BasicBlock bb: loop.getAllBlocks()) {
+            if (!bb.isLoopHeader() && !bb.isLoopLatch()) {
+                return;
+            }
+        }
+        //只有head和latch的简单循环
+        if (!loop.getHeader().isLoopExiting()) {
+            return;
+        }
         BasicBlock header = loop.getHeader();
         if( loop.getEnterings().size() != 1 || header.getPrecursors().size() != 2){
             return;
@@ -131,6 +147,7 @@ public class LoopStrengthReduction implements Pass {
                         Phi newPhi = builder.buildPhi(new IntType(32),phi.getParent(),1);
 
                         newPhi.addIncoming(newIncomingValue,preHeaderBasicBlock);
+
                         phiMap.put(instruction,newPhi);
                     }
                 }
@@ -143,6 +160,7 @@ public class LoopStrengthReduction implements Pass {
                 if( incrementBasicBlock != null ){
                     ArrayList<Instruction> instrs = incrementBasicBlock.getInstructionsArray();
                     for(Instruction instr : instrs){
+//                        System.out.println(incrementBasicBlock.getName());
                         if( instr instanceof BinaryInstruction binary ){
                             Value lhs = binary.getOp1(), rhs = binary.getOp2();
                             if( lhs == idcVarInfo.parent || rhs == idcVarInfo.parent ){
@@ -150,6 +168,7 @@ public class LoopStrengthReduction implements Pass {
                                 int newIncrement = incIdcVarInfo.additiveStep * idcVarInfo.multiplicativeStep;
 
                                 Phi phiVal = phiMap.get(key);
+
                                 Value newIncrementInstruction = builder.buildAddBeforeInstr(instr.getParent(),new IntType(32),phiVal,new ConstInt(newIncrement), instr);
 
                                 phiVal.addIncoming(newIncrementInstruction,incrementBasicBlock);

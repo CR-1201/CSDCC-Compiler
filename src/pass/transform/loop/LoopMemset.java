@@ -62,7 +62,7 @@ public class LoopMemset implements Pass {
         int gepCount = 0;
         int storeCount = 0;
         for (BasicBlock block : loop.getAllBlocks()) {
-            for (Instruction inst : block.getInstructions()) {
+            for (Instruction inst : block.getInstructionsArray()) {
                 if (inst instanceof GEP gep) {
                     gepCount++;
                     gepInst = gep;

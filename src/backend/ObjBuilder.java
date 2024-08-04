@@ -26,7 +26,6 @@ import ir.types.*;
 import utils.IOFunc;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ObjBuilder {
     private static final ObjBuilder builder = new ObjBuilder();
@@ -190,7 +189,7 @@ public class ObjBuilder {
     public ObjBlock buildBasicBlock(ObjFunction objFunction, BasicBlock basicBlock) {
         ObjBlock objBlock = new ObjBlock(basicBlock.getName());
         n2mbMap.put(objBlock.getName(), objBlock);
-        for (Instruction instruction : basicBlock.getInstructions()) {
+        for (Instruction instruction : basicBlock.getInstructionsArray()) {
             ObjInstruction objInstruction = buildInstruction(instruction, objBlock, objFunction);
             if (objInstruction != null)
                 objBlock.addInstruction(objInstruction);

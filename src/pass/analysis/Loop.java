@@ -274,7 +274,7 @@ public class Loop {
     public int computeLoopSize() {
         int loopSize = 0;
         for (BasicBlock block : this.getAllBlocks()) {
-            loopSize += block.getInstructions().size();
+            loopSize += block.getInstructionsArray().size();
         }
         return loopSize;
     }

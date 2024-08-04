@@ -26,7 +26,7 @@ public class CloneUtil {
      */
     private HashMap<Value, Value> cloneMap = new HashMap<>();
     public void cloneBlock(BasicBlock source, BasicBlock target) {
-        for (Instruction oldInst : source.getInstructions()) {
+        for (Instruction oldInst : source.getInstructionsArray()) {
             Instruction newInst = cloneInst(target, oldInst);
             cloneMap.put(oldInst, newInst);
         }

@@ -72,10 +72,6 @@ public class BasicBlock extends Value{
     // 支配边际,即刚好不被当前基本块支配的基本块
     private final HashSet<BasicBlock> dominanceFrontier = new HashSet<>();
 
-    public LinkedList<Instruction> getInstructions(){
-        return instructions;
-    }
-
     public ArrayList<Instruction> getInstructionsArray(){
         return new ArrayList<>(instructions);
     }
@@ -389,7 +385,7 @@ public class BasicBlock extends Value{
     }
 
     public Br getUselessBr() {
-        if (getInstructions().size() == 1 && getTailInstruction() instanceof Br br)
+        if (getInstructionsArray().size() == 1 && getTailInstruction() instanceof Br br)
             return br;
         else
             return null;

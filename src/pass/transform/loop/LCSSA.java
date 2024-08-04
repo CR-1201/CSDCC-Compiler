@@ -10,12 +10,10 @@ import pass.analysis.CFG;
 import pass.analysis.Dom;
 import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
-import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Stack;
 
 public class LCSSA implements Pass {
     HashMap<BasicBlock, Phi> exit2phi = new HashMap<>();
@@ -55,7 +53,7 @@ public class LCSSA implements Pass {
         }
         if (!loop.getExits().isEmpty()) {
             for (BasicBlock block : loop.getAllBlocks()) {
-                ArrayList<Instruction> insts = new ArrayList<>(block.getInstructions());
+                ArrayList<Instruction> insts = new ArrayList<>(block.getInstructionsArray());
                 for (Instruction inst : insts) {
                     if (inst.isUsedOutside(loop)) {
                         addPhiAtExit(inst, loop);

@@ -15,7 +15,6 @@ import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
 import pass.utility.BlockUtil;
 import pass.utility.CloneUtil;
-import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,7 +139,7 @@ public class LoopUnroll implements Pass {
         HashMap<Value, Value> beginToEnd = new HashMap<>();
         Function headerParent = header.getParent();
         HashSet<Phi> headerPhis = new HashSet<>();
-        for (Instruction inst : header.getInstructions()) {
+        for (Instruction inst : header.getInstructionsArray()) {
             if (inst instanceof Phi phi) {
                 headerPhis.add(phi);
             } else {

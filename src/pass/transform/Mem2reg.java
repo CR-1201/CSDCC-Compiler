@@ -13,7 +13,6 @@ import ir.types.DataType;
 import ir.types.FloatType;
 import ir.types.IntType;
 import pass.Pass;
-import utils.IOFunc;
 
 import java.util.*;
 
@@ -42,7 +41,7 @@ public class Mem2reg implements Pass {
     private void dealMem2Reg(Function function) {
         BasicBlock entry = function.getFirstBlock();
         // 在中端ir生成时，就将所有的alloca指令全部放在了entry基本块中
-        for (Instruction inst : entry.getInstructions()) {
+        for (Instruction inst : entry.getInstructionsArray()) {
             if (inst instanceof Alloca ai && ai.isPromotable()) {
                 promotableAllocaInsts.add(ai);
             }
@@ -212,7 +211,7 @@ public class Mem2reg implements Pass {
     }
 
     private boolean isPhiAlive(Alloca alloca, BasicBlock block) {
-        for (Instruction inst : block.getInstructions()) {
+        for (Instruction inst : block.getInstructionsArray()) {
             if (inst instanceof Load && inst.getOperator(0) == alloca) {
                 return true;
             }

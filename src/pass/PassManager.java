@@ -29,9 +29,8 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
         passes.add(new SimpleBlockEmit());
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new Mem2reg());
+        Mem2RegPass();
+        passes.add(new MemoryOptimize());
 ////
         passes.add(new LocalArrayLift());
 ////         LocalArrayLift只用一次
@@ -42,9 +41,7 @@ public class PassManager {
         passes.add(new MathOptimize());
         passes.add(new CFG());
         passes.add(new InlineFunction());
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new Mem2reg());
+        Mem2RegPass();
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
@@ -54,7 +51,7 @@ public class PassManager {
 ////        passes.add(new UselessReturnEmit());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 ////
-//        GVNGCMPass();
+        GVNGCMPass();
 //
 ////        passes.add(new CFG());
 ////        passes.add(new Dom());
@@ -107,5 +104,11 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GCMGVN());
+    }
+
+    private void Mem2RegPass() {
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new Mem2reg());
     }
 }

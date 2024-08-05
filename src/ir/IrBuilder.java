@@ -337,9 +337,16 @@ public class IrBuilder {
         parent.insertHead(phi);
         return phi;
     }
+
     public Phi buildPhi(DataType type, BasicBlock parent, int cnt){
         Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
         parent.insertHead(phi);
+        return phi;
+    }
+
+    public Phi buildPhiBeforeInstr(DataType type, BasicBlock parent, int cnt, Instruction before){
+        Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
+        parent.insertBefore(phi, before);
         return phi;
     }
 

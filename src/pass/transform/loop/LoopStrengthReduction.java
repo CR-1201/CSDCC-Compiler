@@ -155,7 +155,7 @@ public class LoopStrengthReduction implements Pass {
         for (Instruction instr : headInsts) {
             if( instr instanceof Phi phi ){
                 for(Value instruction : inductionMap.keySet()){
-                    if( inductionMap.get(instruction).multiplicativeStep != 1 ||
+                    if( inductionMap.get(instruction).multiplicativeStep != 1 &&
                         inductionMap.get(instruction).additiveStep != 0 ){
                         Value newIncomingValue = calculateNewIncomingValue(phi,inductionMap.get(instruction));
 
@@ -170,7 +170,7 @@ public class LoopStrengthReduction implements Pass {
 
         for(Value key : inductionMap.keySet()){
             InductionVarInfo idcVarInfo = inductionMap.get(key);
-            if( phiMap.containsKey(key) && (inductionMap.get(key).multiplicativeStep != 1 || inductionMap.get(key).additiveStep != 0 ) ){
+            if( phiMap.containsKey(key) && (inductionMap.get(key).multiplicativeStep != 1 && inductionMap.get(key).additiveStep != 0 ) ){
                 if( incrementBasicBlock != null ){
                     ArrayList<Instruction> instrs = incrementBasicBlock.getInstructionsArray();
                     for(Instruction instr : instrs){

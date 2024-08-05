@@ -89,6 +89,11 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
 
+        passes.add(new Peephole());
+        passes.add(new SimplifyInst());
+//        passes.add(new MathOptimize());
+        passes.add(new DeadCodeEmit());
+
         passes.add(new CFG());
         passes.add(new Dom());
 

@@ -91,7 +91,6 @@ public class PassManager {
 
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new GepFuse());
 
         for (Pass pass : passes) {
             pass.run();

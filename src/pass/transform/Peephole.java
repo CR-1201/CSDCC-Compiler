@@ -43,11 +43,11 @@ public class Peephole implements Pass {
         for (Function function : functions) {
             if( function.getIsBuiltIn() )continue;
             GEPMap.clear();
-            addr2store.clear();
             dom.buildDom(function);
             ArrayList<BasicBlock> blocks = dom.getDomTreePostOrder(function);
             Collections.reverse(blocks);
             for (BasicBlock block : blocks) {
+                addr2store.clear();
                 ArrayList<Instruction> instructions = block.getInstructionsArray();
                 for (Instruction instruction : instructions) {
                     if( instruction instanceof Store store ){

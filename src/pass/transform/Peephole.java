@@ -6,14 +6,11 @@ import ir.Module;
 import ir.Value;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
-import ir.instructions.binaryInstructions.BinaryInstruction;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
-import ir.instructions.otherInstructions.Conversion;
 import pass.Pass;
-import pass.analysis.Dom;
 import pass.analysis.PureFunction;
 
 import java.util.ArrayList;
@@ -41,38 +38,44 @@ public class Peephole implements Pass {
         ArrayList<Function> functions = module.getFunctionsArray();
         for (Function function : functions) {
             if( function.getIsBuiltIn() )continue;
-            GEPMap.clear();
-            ArrayList<BasicBlock> blocks = getBlocksRank(function);
-            Collections.reverse(blocks);
-            for (BasicBlock block : blocks) {
-                addr2store.clear();
-                ArrayList<Instruction> instructions = block.getInstructionsArray();
-                for (Instruction instruction : instructions) {
-                    if( instruction instanceof Store store ){
-                        if( mysteriousStore(store.getAddr()) ){
-                            addr2store.clear();
-                        } else addr2store.put(store.getAddr(), store);
-                    } else if( instruction instanceof Load load ){
-                        if( mysteriousStore(load.getAddr()) ){
-                            addr2store.clear();
-                        } else if( addr2store.containsKey(load.getAddr()) ){
-                            Store store = (Store) addr2store.get(load.getAddr());
-                            load.replaceAllUsesWith(store.getValue());
-                            load.removeSelf();
-                        }
-                    } else if( instruction instanceof Call call && !(is_pure.containsKey(call.getFunction()) && is_pure.get(call.getFunction()))){
-                        //保守起见 碰到call非纯函数就清空
-                        addr2store.clear();
-                    } else if( instruction instanceof GEP gep){
-                        String hash = setHashValue(gep);
-                        if( GEPMap.containsKey(hash) ){
-                            gep.replaceAllUsesWith(GEPMap.get(hash));
-                            gep.removeSelf();
-                        } else GEPMap.put(hash, gep);
-                    }
+            BasicBlock entry = function.getFirstBlock();
+            RPOSearch(entry);
+        }
+    }
+
+    private void RPOSearch(BasicBlock block) {
+        GEPMap.clear();
+        addr2store.clear();
+        ArrayList<Instruction> instructions = block.getInstructionsArray();
+        for (Instruction instruction : instructions) {
+            if( instruction instanceof Store store ){
+                if( mysteriousStore(store.getAddr()) ){
+                    addr2store.clear();
+                } else addr2store.put(store.getAddr(), store);
+            } else if( instruction instanceof Load load ){
+                if( mysteriousStore(load.getAddr()) ){
+                    addr2store.clear();
+                } else if( addr2store.containsKey(load.getAddr()) ){
+                    Store store = (Store) addr2store.get(load.getAddr());
+                    load.replaceAllUsesWith(store.getValue());
+                    load.removeSelf();
                 }
+            } else if( instruction instanceof Call call && !(is_pure.containsKey(call.getFunction()) && is_pure.get(call.getFunction()))){
+                //保守起见 碰到call非纯函数就清空
+                addr2store.clear();
+            } else if( instruction instanceof GEP gep){
+                String hash = setHashValue(gep);
+                if( GEPMap.containsKey(hash) ){
+                    gep.replaceAllUsesWith(GEPMap.get(hash));
+                    gep.removeSelf();
+                } else GEPMap.put(hash, gep);
             }
         }
+
+        for(BasicBlock idom : block.getIdoms()){
+            RPOSearch(idom);
+        }
+
     }
 
     private ArrayList<BasicBlock> getBlocksRank(Function function) {

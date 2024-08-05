@@ -28,7 +28,6 @@ public class Peephole implements Pass {
     private final HashMap<Value,Value> addr2store = new HashMap<>();
     private HashMap<String, GEP> GEPMap = new HashMap<>();
     private HashMap<Function, Boolean> is_pure = new HashMap<>();
-    private Dom dom = new Dom();
     @Override
     public void run() {
         PureFunction pureFunction = new PureFunction();
@@ -43,8 +42,7 @@ public class Peephole implements Pass {
         for (Function function : functions) {
             if( function.getIsBuiltIn() )continue;
             GEPMap.clear();
-            dom.buildDom(function);
-            ArrayList<BasicBlock> blocks = dom.getDomTreePostOrder(function);
+            ArrayList<BasicBlock> blocks = getBlocksRank(function);
             Collections.reverse(blocks);
             for (BasicBlock block : blocks) {
                 addr2store.clear();
@@ -75,6 +73,24 @@ public class Peephole implements Pass {
                 }
             }
         }
+    }
+
+    private ArrayList<BasicBlock> getBlocksRank(Function function) {
+        ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+        ArrayList<BasicBlock> blocksRank = new ArrayList<>();
+        for (BasicBlock block : blocks) {
+            if( block.getSuccessors().isEmpty() ){
+                blocksRank.add(block);
+            }
+        }
+        for( int i = 0; i < blocksRank.size(); i++ ){
+            for( BasicBlock pre : blocksRank.get(i).getPrecursors() ){
+                if( !blocksRank.contains(pre) ){
+                    blocksRank.add(pre);
+                }
+            }
+        }
+        return blocksRank;
     }
 
     private boolean mysteriousStore(Value pointer) {

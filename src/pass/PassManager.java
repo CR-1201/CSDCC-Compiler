@@ -3,6 +3,7 @@ package pass;
 import ir.Module;
 import pass.analysis.*;
 import pass.transform.*;
+import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
@@ -21,9 +22,8 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
-
-        passes.add(new Mem2reg());
-
+        passes.add(new SimpleBlockEmit());
+        Mem2RegPass();
 
 
         passes.add(new LocalArrayLift());
@@ -43,6 +43,8 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
 //        passes.add(new UselessReturnEmit());
+        passes.add(new UselessReturnEmit());
+        passes.add(new ADCE());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
         GVNGCMPass();
@@ -104,5 +106,11 @@ public class PassManager {
         passes.add(new LoopAnalysis());
         passes.add(new SideEffect());
         passes.add(new GCMGVN());
+    }
+
+    private void Mem2RegPass() {
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new Mem2reg());
     }
 }

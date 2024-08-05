@@ -1,9 +1,7 @@
 package pass.transform.loop;
 
-import ir.BasicBlock;
-import ir.Function;
+import ir.*;
 import ir.Module;
-import ir.Value;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.Add;
@@ -14,7 +12,9 @@ import ir.types.IntType;
 import pass.Pass;
 import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
+import pass.transform.emituseless.UselessPhiEmit;
 import utils.InductionVarInfo;
+import utils.Triple;
 
 import java.util.*;
 
@@ -54,7 +54,7 @@ public class LoopStrengthReduction implements Pass {
         if (!loop.isSimpleLoop() || !loop.isInductorVarSet()) {
             return;
         }
-        if (loop.hasChildLoop()) {
+        if ( loop.hasChildLoop() ){
             return;
         }
         //只有head和latch的简单循环
@@ -136,8 +136,7 @@ public class LoopStrengthReduction implements Pass {
                             newIdcVarInfo.multiplicativeStep = idcVarOld.multiplicativeStep;
 
                             if( variable instanceof Phi phi ){
-                                int idcVarOldNum = ((ConstInt)preHeaderValue.get(phi)).getValue();
-                                newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum);
+                                newIdcVarInfo.preheaderValue = preHeaderValue.get(phi);
                             } else {
                                 int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
                                 newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum + newFactor);
@@ -182,7 +181,7 @@ public class LoopStrengthReduction implements Pass {
                                 InductionVarInfo incIdcVarInfo = inductionMap.get(instr);
                                 int newIncrement = incIdcVarInfo.additiveStep * idcVarInfo.multiplicativeStep;
                                 Phi phiVal = phiMap.get(key);
-                                
+
 
                                 Value newIncrementInstruction = builder.buildAddBeforeInstr(instr.getParent(),new IntType(32),phiVal,new ConstInt(newIncrement), instr);
 
@@ -200,12 +199,43 @@ public class LoopStrengthReduction implements Pass {
         for (Value key : phiMap.keySet() ){
             key.replaceAllUsesWith(phiMap.get(key));
         }
+
+        UselessPhiEmit uselessPhiEmit = new UselessPhiEmit();
+        uselessPhiEmit.run();
+
+        ArrayList<Instruction> instructionsArray = header.getInstructionsArray();
+        ArrayList<Triple<Phi,Integer,Value>> triples = new ArrayList<>();
+        for (Instruction temp : instructionsArray ){
+            if( temp instanceof Phi phiVal ){
+                if( phiVal.getUsers().isEmpty() ){
+                    continue;
+                }
+                for(User user : phiVal.getUsers() ){
+                    if( user instanceof Phi phi ){
+                        if( phi.getPrecursorNum() != phiVal.getPrecursorNum() ){
+                            continue;
+                        }
+                        int index = phi.getOperators().indexOf(incrementBasicBlock) - phi.getPrecursorNum();
+//                        System.out.println(index);
+                        if( index < 0 ){
+                            continue;
+                        }
+                        triples.add(new Triple<>(phi,index,phiVal.getOperators().get(index)));
+                    }
+                }
+            }
+        }
+        for( Triple<Phi,Integer,Value> triple : triples ){
+            Phi phi = (Phi) triple.getFirst();
+            int index = (Integer) triple.getSecond();
+            Value value = (Value) triple.getThird();
+            phi.setOperator(index,value);
+        }
     }
 
     private Value calculateNewIncomingValue(Phi phi, InductionVarInfo inductionVarInfo){
         if( preHeaderValue.get(phi) instanceof ConstInt ){
-            int idcVarOldNum = ((ConstInt)inductionVarInfo.preheaderValue).getValue();
-            return new ConstInt(idcVarOldNum);
+            return inductionVarInfo.preheaderValue;
         }
         return preHeaderValue.get(phi);
     }

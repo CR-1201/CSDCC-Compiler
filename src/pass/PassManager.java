@@ -61,6 +61,7 @@ public class PassManager {
         passes.add(new LoopFold());
 
         passes.add(new LoopStrengthReduction());
+        passes.add(new UselessPhiEmit());
 
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());

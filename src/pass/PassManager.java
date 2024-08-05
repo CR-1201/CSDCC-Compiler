@@ -80,7 +80,10 @@ public class PassManager {
         passes.add(new SimplifyInst());
 //////
         passes.add(new MathOptimize());
-//        passes.add(new Peephole());
+        BasicPass();
+        passes.add(new Peephole());
+        BasicPass();
+
 
 //        GVNGCMPass();
 

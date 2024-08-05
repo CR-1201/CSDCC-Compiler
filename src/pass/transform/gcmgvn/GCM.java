@@ -3,7 +3,6 @@ package pass.transform.gcmgvn;
 import ir.*;
 import ir.Module;
 import ir.instructions.Instruction;
-import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
@@ -11,14 +10,11 @@ import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import pass.analysis.Dom;
-import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
-import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 
 public class GCM {
     private final Module module = Module.getModule();
@@ -50,7 +46,7 @@ public class GCM {
         Collections.reverse(reversePostOrder);
         ArrayList<Instruction> instructions = new ArrayList<>();
         for (BasicBlock basicBlock : reversePostOrder){
-            instructions.addAll(basicBlock.getInstructions());
+            instructions.addAll(basicBlock.getInstructionsArray());
         }
         for (Instruction instruction : instructions){
             if (isPinnedInst(instruction)){

@@ -9,7 +9,6 @@ import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import pass.Pass;
 import pass.analysis.CFG;
-import utils.Logger;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,7 +55,7 @@ public class SimpleBlockEmit implements Pass {
         for (BasicBlock prec : precs) {
             prec.replaceSuccessor(block, succ);
         }
-        for (Instruction inst : succ.getInstructions()) {
+        for (Instruction inst : succ.getInstructionsArray()) {
             if (inst instanceof Phi phi) {
                 Value value = phi.getIncomingFrom(block);
                 if (value != null) {
@@ -80,7 +79,7 @@ public class SimpleBlockEmit implements Pass {
         }
         HashSet<BasicBlock> precs = new HashSet<>(block.getPrecursors());
         BasicBlock target = block.getSuccessors().iterator().next();
-        for (Instruction inst : target.getInstructions()) {
+        for (Instruction inst : target.getInstructionsArray()) {
             if (inst instanceof Phi phi) {
                 Value incoming  = phi.getIncomingFrom(block);
                 // 替换前驱之后，要求不能有来自同一个块但是对应的 incoming 的值不一样

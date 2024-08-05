@@ -10,7 +10,7 @@ public class BlockUtil {
     public ArrayList<Phi> getAllPhisIn(ArrayList<BasicBlock> blocks) {
         ArrayList<Phi> phis = new ArrayList<>();
         for (BasicBlock block : blocks) {
-            for (Instruction inst : block.getInstructions()) {
+            for (Instruction inst : block.getInstructionsArray()) {
                 if (inst instanceof Phi phi) {
                     phis.add(phi);
                 }

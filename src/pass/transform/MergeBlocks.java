@@ -100,7 +100,7 @@ public class MergeBlocks implements Pass {
     private Boolean canMerge(BasicBlock block) {
         if (block.getSuccessors().size() != 1) {
             return false;
-        } else if (!block.getInstructions().isEmpty() && block.getTailInstruction() instanceof Br br && !br.getHasCondition()) {
+        } else if (!block.getInstructionsArray().isEmpty() && block.getTailInstruction() instanceof Br br && !br.getHasCondition()) {
             BasicBlock target = (BasicBlock) br.getOperator(0);
             return target.getPrecursors().size() == 1 && target.getPrecursors().iterator().next() == block;
         }

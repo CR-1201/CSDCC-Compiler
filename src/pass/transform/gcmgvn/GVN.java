@@ -7,14 +7,11 @@ import ir.Value;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.BinaryInstruction;
 import ir.instructions.memoryInstructions.GEP;
-import ir.instructions.memoryInstructions.Load;
 import ir.instructions.otherInstructions.BitCast;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.otherInstructions.Conversion;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
-import pass.transform.SimplifyInst;
-import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +40,7 @@ public class GVN {
 
     private void RPOSearch(BasicBlock entry) {
         HashSet<Instruction> numberedInsts = new HashSet<>();
-        ArrayList<Instruction> insts = new ArrayList<>(entry.getInstructions());
+        ArrayList<Instruction> insts = new ArrayList<>(entry.getInstructionsArray());
         for (int i = 0; i < insts.size() && insts.get(i) != null; i++) {
             Instruction curInst = insts.get(i);
             if (canGVN(curInst)) {

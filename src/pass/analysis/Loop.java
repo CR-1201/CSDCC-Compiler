@@ -70,6 +70,7 @@ public class Loop {
         this.header = header;
         this.latches.addAll(latches);
     }
+
     public void resetLoopIdCounter() {
         idCounter = 0;
     }
@@ -146,6 +147,10 @@ public class Loop {
         return children;
     }
 
+    public boolean hasChildLoop() {
+        return !children.isEmpty();
+    }
+
     public void setDepth(int depth) {
         this.depth = depth;
     }
@@ -174,8 +179,21 @@ public class Loop {
         return allBlocks;
     }
 
+    public ArrayList<BasicBlock> getCurrentLoopLevelBlocks(){
+        ArrayList<BasicBlock> blocks = new ArrayList<>();
+        for (BasicBlock block : allBlocks) {
+            if( block.getLoop() != null && block.getLoopDepth() == depth ){
+                blocks.add(block);
+            }
+        }
+        return blocks;
+    }
+
     public void removeBlock(BasicBlock block) {
         allBlocks.remove(block);
+        if( block == header ){
+            block.clearIsLoopHeader();
+        }
     }
 
     public void removeBlockInLoopChain(BasicBlock block) {
@@ -256,7 +274,7 @@ public class Loop {
     public int computeLoopSize() {
         int loopSize = 0;
         for (BasicBlock block : this.getAllBlocks()) {
-            loopSize += block.getInstructions().size();
+            loopSize += block.getInstructionsArray().size();
         }
         return loopSize;
     }

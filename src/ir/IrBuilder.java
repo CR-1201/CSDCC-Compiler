@@ -95,6 +95,12 @@ public class IrBuilder {
         return add;
     }
 
+    public Add buildAddBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before){
+        Add add = new Add(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBefore(add,before);
+        return add;
+    }
+
     public Sub buildSub(BasicBlock parent, DataType dataType, Value src1, Value src2){
         Sub sub = new Sub(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertTail(sub);
@@ -331,9 +337,16 @@ public class IrBuilder {
         parent.insertHead(phi);
         return phi;
     }
+
     public Phi buildPhi(DataType type, BasicBlock parent, int cnt){
         Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
         parent.insertHead(phi);
+        return phi;
+    }
+
+    public Phi buildPhiBeforeInstr(DataType type, BasicBlock parent, int cnt, Instruction before){
+        Phi phi = new Phi(phiNumCounter++, type, parent, cnt);
+        parent.insertBefore(phi, before);
         return phi;
     }
 

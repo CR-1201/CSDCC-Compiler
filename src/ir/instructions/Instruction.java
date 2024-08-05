@@ -71,6 +71,28 @@ public class Instruction extends User {
         return false;
     }
 
+    /* ========================== Array GVN GCM ========================== */
+    private BasicBlock earliestBlock = null;
+    private BasicBlock latestBlock = null;
+
+    private boolean arrayInit = false;
+
+    public void setEarliestBlock(BasicBlock earliestBB) {
+        this.earliestBlock = earliestBB;
+    }
+
+    public void setLatestBlock(BasicBlock latestBB) {
+        this.latestBlock = latestBB;
+    }
+
+    public BasicBlock getEarliestBlock() {
+        return earliestBlock;
+    }
+
+    public BasicBlock getLatestBlock() {
+        return latestBlock;
+    }
+
     @Override
     public BasicBlock getParent(){
         return (BasicBlock) super.getParent();

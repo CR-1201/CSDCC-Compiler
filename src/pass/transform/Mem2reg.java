@@ -12,9 +12,6 @@ import ir.instructions.otherInstructions.Phi;
 import ir.types.DataType;
 import ir.types.IntType;
 import pass.Pass;
-import pass.analysis.Dom;
-import utils.IOFunc;
-import utils.Pair;
 
 import java.util.*;
 
@@ -46,14 +43,14 @@ public class Mem2reg implements Pass {
     private void mem2reg(Function function) {
         clear();
         BasicBlock entry = function.getFirstBlock();
-        for (Instruction inst : entry.getInstructions()) {
+        for (Instruction inst : entry.getInstructionsArray()) {
             if (inst instanceof Alloca alloca && alloca.isPromotable()) {
                 promotableAllocaInsts.add(alloca);
                 alloca2DefBlocks.put(alloca, new ArrayList<>());
             }
         }
         for (BasicBlock block : function.getBasicBlocksArray()) {
-            for (Instruction inst : block.getInstructions()) {
+            for (Instruction inst : block.getInstructionsArray()) {
                 if (inst instanceof Store store && store.getAddr() instanceof Alloca alloca && alloca2DefBlocks.containsKey(alloca)) {
                     alloca2DefBlocks.get(alloca).add(block);
                 }
@@ -158,7 +155,7 @@ public class Mem2reg implements Pass {
     }
 
     private boolean isPhiAlive(Alloca alloca, BasicBlock block) {
-        for (Instruction inst : block.getInstructions()) {
+        for (Instruction inst : block.getInstructionsArray()) {
             if (inst instanceof Load load && load.getAddr() == alloca) {
                 return true;
             }

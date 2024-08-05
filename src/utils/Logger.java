@@ -39,4 +39,33 @@ public class Logger {
         }
         return sb.toString();
     }
+
+    public static void printDOM(Function curFunction)
+    {
+        for (BasicBlock basicBlock : curFunction.getBasicBlocksArray())
+        {
+            System.out.println("blockName: " + basicBlock.getName());
+            System.out.println("domers: ");
+            for (BasicBlock predecessor : basicBlock.getDomers())
+            {
+                System.out.println("\t" + predecessor.getName());
+            }
+            System.out.println("idomer: ");
+            if (basicBlock.getIDomer() != null) {
+                System.out.println("\t" + basicBlock.getIDomer().getName());
+            } else {
+                System.out.println("NULL");
+            }
+            System.out.println("idoms: ");
+            for (BasicBlock successor : basicBlock.getIdoms())
+            {
+                System.out.println("\t" + successor.getName());
+            }
+            System.out.println("DomLevel: " + basicBlock.getDomLevel());
+            System.out.println("DominanceFrontiers: ");
+            for (BasicBlock df : basicBlock.getDominanceFrontier()) {
+                System.out.println("\t" + df.getName());
+            }
+        }
+    }
 }

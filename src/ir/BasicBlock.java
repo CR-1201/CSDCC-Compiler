@@ -17,9 +17,13 @@ import java.util.*;
 public class BasicBlock extends Value{
     // 指令集合
     private final LinkedList<Instruction> instructions = new LinkedList<>();
+
+    // ========================== CFG Info ==========================
     // 前驱与后继基本块,不讲求顺序,因此不用链表
     private HashSet<BasicBlock> precursors = new HashSet<>();
     private HashSet<BasicBlock> successors = new HashSet<>();
+
+    // ========================== DOM Info ==========================
     // 当前基本块支配的基本块
     private HashSet<BasicBlock> doms = new HashSet<>();
     // 当前基本块的必经基本块，即当前基本块的支配者
@@ -31,6 +35,24 @@ public class BasicBlock extends Value{
     // 在支配树中的深度
     private int domLevel;
 
+    // ========================== RDOM Info ==========================
+    private HashSet<BasicBlock> rDoms = new HashSet<>();
+    private HashSet<BasicBlock> rDomers = new HashSet<>();
+    private HashSet<BasicBlock> irDoms = new HashSet<>();
+    private BasicBlock irDomer;
+    private int rDomLevel;
+    private HashSet<BasicBlock> rDominanceFrontier = new HashSet<>();
+
+    private HashSet<BasicBlock> controls = new HashSet<>();
+
+    public void addControl(BasicBlock block) {
+        this.controls.add(block);
+    }
+
+    public HashSet<BasicBlock> getControls() {
+        return this.controls;
+    }
+
     public Boolean isSimpleBlock() {
         if (instructions.size() != 1) {
             return false;
@@ -41,6 +63,7 @@ public class BasicBlock extends Value{
     // ========================== Loop Info ==========================
     // 当前 Basicblock 所在的循环，如果 loop 为 null，说明此BasicBlock不在任何循环中
     private Loop loop;
+
     private Boolean isLoopHeader = false;
 
 
@@ -84,6 +107,10 @@ public class BasicBlock extends Value{
         return successors;
     }
 
+    public HashSet<BasicBlock> getRPrecursors() {
+        return successors;
+    }
+
     public void clearCfgInfo() {
         precursors.clear();
         successors.clear();
@@ -91,60 +118,107 @@ public class BasicBlock extends Value{
 
     // ========================== Dom Info ==========================
 
+    public HashSet<BasicBlock> getRSuccessors() {
+        return precursors;
+    }
+
+    // ========================== Dom & rDom Info ==========================
     public void setDomLevel(int domLevel) {
         this.domLevel = domLevel;
+    }
+    public void setRDomLevel(int rDomLevel) {
+        this.rDomLevel = rDomLevel;
     }
 
     public HashSet<BasicBlock> getDoms() {
         return doms;
     }
+    public HashSet<BasicBlock> getRDoms(){
+        return rDoms;
+    }
 
     public void setDoms(HashSet<BasicBlock> doms){
         this.doms = doms;
+    }
+    public void setRDoms(HashSet<BasicBlock> rDoms){
+        this.rDoms = rDoms;
     }
 
     public HashSet<BasicBlock> getDomers() {
         return domers;
     }
+    public HashSet<BasicBlock> getRDomers() {
+        return rDomers;
+    }
 
     public void setDomers(HashSet<BasicBlock> domers) {
         this.domers = domers;
+    }
+    public void setRDomers(HashSet<BasicBlock> rDomers) {
+        this.rDomers = rDomers;
     }
 
     public void addDomer(BasicBlock domer){
         domers.add(domer);
     }
+    public void addRDomer(BasicBlock rDomer){
+        rDomers.add(rDomer);
+    }
 
     public HashSet<BasicBlock> getIdoms(){
         return idoms;
+    }
+    public HashSet<BasicBlock> getIRdoms(){
+        return irDoms;
     }
 
     public void setIdoms(HashSet<BasicBlock> idoms){
         this.idoms = idoms;
     }
+    public void setIRdoms(HashSet<BasicBlock> iRDoms){
+        this.irDoms = iRDoms;
+    }
 
     public void addIdom(BasicBlock idom){
         idoms.add(idom);
+    }
+    public void addIRdom(BasicBlock iRDom){
+        irDoms.add(iRDom);
     }
 
     public BasicBlock getIDomer(){
         return idomer;
     }
+    public BasicBlock getIRDomer(){
+        return irDomer;
+    }
 
     public void setIdomer(BasicBlock idomer){
         this.idomer = idomer;
+    }
+    public void setIRdomer(BasicBlock iRDomer){
+        this.irDomer = iRDomer;
     }
 
     public int getDomLevel() {
         return domLevel;
     }
+    public int getRDomLevel() {
+        return rDomLevel;
+    }
 
     public HashSet<BasicBlock> getDominanceFrontier(){
         return dominanceFrontier;
     }
+    public HashSet<BasicBlock> getRDominanceFrontier(){
+        return rDominanceFrontier;
+    }
 
     public void addDominanceFrontier(BasicBlock domFrontier){
         dominanceFrontier.add(domFrontier);
+    }
+    public void addRDominanceFrontier(BasicBlock rDomFrontier){
+        rDominanceFrontier.add(rDomFrontier);
     }
 
     /**
@@ -154,6 +228,9 @@ public class BasicBlock extends Value{
      */
     public boolean isDominator(BasicBlock other){
         return other.domers.contains(this);
+    }
+    public boolean isRDominator(BasicBlock other){
+        return other.rDomers.contains(this);
     }
 
     public void clearDomInfo() {
@@ -166,8 +243,8 @@ public class BasicBlock extends Value{
     }
 
     // =================================================================
-    // ========================== Loop Info ==========================
 
+    // ========================== Loop Info ==========================
     public Loop getLoop() {
         return loop;
     }

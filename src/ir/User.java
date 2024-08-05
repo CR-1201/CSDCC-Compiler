@@ -78,6 +78,9 @@ public abstract class User extends Value {
 
     // 解除当前 user 的所有 user <-> used_value 双向关系
     public void removeAllOperators() {
+        if (operators.isEmpty()) {
+            return;
+        }
         for (Value op : operators) {
             op.removeUser(this);
         }

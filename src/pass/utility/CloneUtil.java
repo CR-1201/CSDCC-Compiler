@@ -34,12 +34,7 @@ public class CloneUtil {
     public Instruction cloneInst(BasicBlock target, Instruction oldInst) {
         Instruction clonedInst = null;
         if (oldInst instanceof Alloca ai) {
-//            alloca 指令的情况可以先不管，因为指令一定是放在第一个块，而第一个块肯定是无法进行展开的
-//            if (ai.isArray()) {
-//
-//            } else {
-//
-//            }
+            clonedInst = irBuilder.buildALLOCA(((PointerType) ai.getValueType()).getPointeeType(), target);
         } else if (oldInst instanceof Load li) {
             clonedInst = irBuilder.buildLoad(target, findValue(li.getAddr()));
         } else if (oldInst instanceof Store si) {

@@ -1,13 +1,19 @@
 package pass;
 
 import ir.Module;
-import pass.analysis.*;
+import pass.analysis.CFG;
+import pass.analysis.Dom;
+import pass.analysis.LoopAnalysis;
+import pass.analysis.SideEffect;
 import pass.transform.*;
 import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
-import pass.transform.loop.*;
+import pass.transform.loop.LCSSA;
+import pass.transform.loop.LICM;
+import pass.transform.loop.LoopFold;
+import pass.transform.loop.LoopUnroll;
 
 import java.util.ArrayList;
 
@@ -24,70 +30,44 @@ public class PassManager {
         passes.add(new GlobalValueLocalize());
         passes.add(new SimpleBlockEmit());
         Mem2RegPass();
-
-
+        passes.add(new MemoryOptimize());
         passes.add(new LocalArrayLift());
-//         LocalArrayLift只用一次
-
         passes.add(new ConstArrayFold());
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
-
         passes.add(new CFG());
         passes.add(new InlineFunction());
+        Mem2RegPass();
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
-//        passes.add(new UselessReturnEmit());
         passes.add(new UselessReturnEmit());
         passes.add(new ADCE());
-        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-
-        GVNGCMPass();
-
+        passes.add(new UselessStoreEmit());
+        BasicPass();
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
-
         passes.add(new GepFuse());
-
         passes.add(new LICM());
-
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());
-
         passes.add(new LoopFold());
-
-        passes.add(new LoopStrengthReduction());
-        passes.add(new UselessPhiEmit());
-
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
-//
         passes.add(new GepSplit());
-
-//        passes.add(new CSE());
-
-        // SCCP后可能出现没有value的phi
+        BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
-//
         passes.add(new MathOptimize());
-
-        GVNGCMPass();
-
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new GAVN());  // GAVN前需要最新的CFG和Dom, 放在GVN GCM后面较好
-
-        passes.add(new InstructionCleanUp());
-
+        BasicPass();
         passes.add(new Peephole());
+        passes.add(new UselessArrayStoreEmit());
+        BasicPass();
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
         passes.add(new DeadCodeEmit());
@@ -117,5 +97,18 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new Mem2reg());
+    }
+
+    private void BasicPass() {
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new MergeBlocks());
+        passes.add(new SCCP());
+        passes.add(new DeadCodeEmit());
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
+        passes.add(new DeadCodeEmit());
+        GVNGCMPass();
+        passes.add(new MergeBlocks());
     }
 }

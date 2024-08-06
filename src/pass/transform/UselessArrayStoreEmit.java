@@ -1,0 +1,148 @@
+package pass.transform;
+
+import ir.BasicBlock;
+import ir.Function;
+import ir.Module;
+import ir.Value;
+import ir.constants.ConstInt;
+import ir.instructions.Instruction;
+import ir.instructions.memoryInstructions.Alloca;
+import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.memoryInstructions.Load;
+import ir.instructions.memoryInstructions.Store;
+import ir.instructions.otherInstructions.Call;
+import ir.types.ArrayType;
+import ir.types.PointerType;
+import pass.Pass;
+import pass.analysis.SideEffect;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+
+// FIXME 没有分数组考虑
+// FIXME 没有考虑全局数组和参数数组
+public class UselessArrayStoreEmit implements Pass {
+
+    private final Module irModule = Module.getModule();
+
+    private final HashSet<Integer> usefulPositions = new HashSet<>();
+
+    @Override
+    public void run() {
+        new SideEffect().run();
+        new GepFuse().run();
+
+        ArrayList<Function> functions = irModule.getFunctionsArray();
+        for (Function func : functions) {
+            if (!func.getIsBuiltIn()) {
+                usefulPositions.clear();
+
+                deleteUselessArrayStore(func);
+            }
+        }
+
+        new DeadCodeEmit().run();
+    }
+
+    private void deleteUselessArrayStore(Function function) {
+        if (hasVarGep(function) || hasNotLocalArray(function) || hasPutArray(function))
+            return;  // gep中有变量不分析 有参数数组不分析 有putarray不分析
+
+        // 保存数组相关的被load过的index
+        for (BasicBlock block : function.getBasicBlocksArray()) {
+            for (Instruction instruction : block.getInstructionsArray()) {
+                if (instruction instanceof Load loadInstr) {
+                    Value address = loadInstr.getAddr();
+                    if (address instanceof GEP gepInstr) {  // 只分析数组相关的io指令
+                        markIndex(gepInstr);
+                    }
+                }
+            }
+        }
+
+        HashSet<Store> toBeDeletedStores = new HashSet<>();
+        for (BasicBlock block : function.getBasicBlocksArray()) {
+            for (Instruction instruction : block.getInstructionsArray()) {
+                if (instruction instanceof Store storeInstr) {
+                    Value address = storeInstr.getAddr();
+                    if (address instanceof GEP gepInstr) {
+                        if (!isMarkedIndex(gepInstr)) {
+                            toBeDeletedStores.add(storeInstr);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Store storeInstr : toBeDeletedStores) {
+            storeInstr.removeSelf();
+        }
+    }
+
+    private void markIndex(GEP gepInstr) {
+        usefulPositions.add(getLocalArrayPosition(gepInstr));
+    }
+
+    private boolean isMarkedIndex(GEP gepInstr) {
+        return usefulPositions.contains(getLocalArrayPosition(gepInstr));
+    }
+
+    private boolean hasPutArray(Function function) {
+        for (BasicBlock block : function.getBasicBlocksArray()) {
+            for (Instruction instruction : block.getInstructionsArray()) {
+                if (instruction instanceof Call callInstr && callInstr.getFunction().getName().equals("@putarray")) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasNotLocalArray(Function function) {
+        for (BasicBlock block : function.getBasicBlocksArray()) {
+            for (Instruction instruction : block.getInstructionsArray()) {
+                if (instruction instanceof GEP gepInstr) {
+                    if (!(gepInstr.getBase() instanceof Alloca)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasVarGep(Function function) {
+        for (BasicBlock block : function.getBasicBlocksArray()) {
+            for (Instruction instruction : block.getInstructionsArray()) {
+                if (instruction instanceof GEP gepInstr) {
+                    for (Value value : gepInstr.getIndex()) {
+                        if (!(value instanceof ConstInt)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private int getLocalArrayPosition(GEP gepInstr) {
+        ArrayList<Integer> dimension = ((ArrayType) ((PointerType) gepInstr.getBase().getValueType()).getPointeeType()).getNumList();
+        ArrayList<Integer> index = new ArrayList<>();
+        for (Value value : gepInstr.getIndex()) {
+            index.add(Integer.parseInt(value.getName()));
+        }
+        index.remove(0);
+
+        int pos = 0;
+        for (int i = 0 ; i < dimension.size() ; i ++) {
+            int cur = index.get(i);
+            for (int j = i + 1 ; j < dimension.size() ; j ++) {
+                cur *= dimension.get(j);
+            }
+            pos += cur;
+        }
+        return pos;
+    }
+
+}

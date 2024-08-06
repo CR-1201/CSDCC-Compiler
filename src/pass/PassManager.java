@@ -37,6 +37,7 @@ public class PassManager {
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
         passes.add(new CFG());
+        passes.add(new TailRecursionElimination());
         passes.add(new InlineFunction());
         Mem2RegPass();
         passes.add(new SCCP());

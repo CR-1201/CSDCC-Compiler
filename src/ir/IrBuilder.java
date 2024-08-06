@@ -1,7 +1,6 @@
 package ir;
 
 import ast.CompUnit;
-import ir.Module;
 import ir.constants.ConstArray;
 import ir.constants.ConstStr;
 import ir.constants.Constant;
@@ -16,7 +15,6 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -83,7 +81,7 @@ public class IrBuilder {
         return block;
     }
 
-    public BasicBlock buildBasicBLockAfter(Function function, BasicBlock after) {
+    public BasicBlock buildBasicBlockAfter(Function function, BasicBlock after) {
         BasicBlock block = new BasicBlock(blockNumCounter++, function);
         function.insertAfter(block, after);
         return block;

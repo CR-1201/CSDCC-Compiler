@@ -54,6 +54,36 @@ public class Loop {
     private Icmp cond = null;
     private int loopTimes;
     private boolean isInductorVarSet = false;
+    // ========================= Array GVN GCM =========================
+    private boolean isArrayInit = false;
+    private int arrayInitDims = 0;
+    private Value initArray = null;
+    private Value initValue = null;
+    private HashSet<Instruction> extras = null;
+
+    public void setArrayInitInfo(int arrayInitDims, Value initArray, Value initValue, HashSet<Instruction> extras) {
+        this.isArrayInit = true;
+        this.arrayInitDims = arrayInitDims;
+        this.initArray = initArray;
+        this.initValue = initValue;
+        this.extras = extras;
+    }
+
+    public HashSet<Instruction> getExtras() {
+        return extras;
+    }
+
+    public Value getInitValue() {
+        return initValue;
+    }
+
+    public int getArrayInitDims() {
+        return arrayInitDims;
+    }
+
+    public Value getInitArray() {
+        return initArray;
+    }
 
 
     // ========================= Compute Var =========================

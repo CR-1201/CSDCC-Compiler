@@ -45,7 +45,6 @@ public class TailRecursionElimination implements Pass {
             ArrayList<Instruction> instructions = entry.getInstructionsArray();
 
             for( Instruction instruction : instructions ){
-//                System.out.println(instruction);
                 Instruction instr = cloneUtil.cloneInst(phiBlock,instruction);
                 instruction.replaceAllUsesWith(instr);
                 instruction.removeSelf();
@@ -104,7 +103,7 @@ public class TailRecursionElimination implements Pass {
             // 替换终止指令
             Br br = builder.buildBr(block, phiBlock);
             // FIXME ret存在user吗
-//            tail.replaceAllUsesWith(br);
+            tail.replaceAllUsesWith(br);
             tail.removeSelf();
             for( int i = 0 ; i < size ; i++ ){
                 Argument funcArgument = function.getArguments().get(i);

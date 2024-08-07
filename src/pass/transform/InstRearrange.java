@@ -1,5 +1,7 @@
 package pass.transform;
 
+import ir.Function;
+import ir.Module;
 import pass.Pass;
 
 /**
@@ -7,6 +9,14 @@ import pass.Pass;
  */
 public class InstRearrange implements Pass {
     public void run() {
+        for (Function function : Module.getModule().getFunctionsArray()) {
+            if (!function.getIsBuiltIn()) {
 
+            }
+        }
     }
+
+
+
+
 }

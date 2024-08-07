@@ -1,5 +1,6 @@
 package pass;
 
+import ir.BasicBlock;
 import ir.Module;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
@@ -37,6 +38,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
         passes.add(new InlineFunction());
+        passes.add(new GlobalValueLocalize());
 //
         Mem2RegPass();
         passes.add(new SCCP());
@@ -48,7 +50,7 @@ public class PassManager {
         passes.add(new UselessReturnEmit());
         passes.add(new ADCE());
         passes.add(new UselessStoreEmit());
-
+        EmitSimpleBrPass();
         BasicPass();
         passes.add(new CFG());
         passes.add(new Dom());
@@ -63,7 +65,7 @@ public class PassManager {
 
 //        passes.add(new LoopStrengthReduction());
         passes.add(new GepSplit());
-
+        EmitSimpleBrPass();
         BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
@@ -80,7 +82,14 @@ public class PassManager {
 
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-//
+        passes.add(new Peephole());
+
+
+
+        passes.add(new GepSplit());
+        BasicPass();
+        BasicPass();
+        EmitSimpleBrPass();
         passes.add(new CFG());
         passes.add(new Dom());
 
@@ -116,5 +125,11 @@ public class PassManager {
         passes.add(new DeadCodeEmit());
         GVNGCMPass();
         passes.add(new MergeBlocks());
+    }
+
+    private void EmitSimpleBrPass() {
+        passes.add(new SimpleBlockEmit());
+        // 由于消除简单的挑战块之后，可能会导致很多 cond 不会被使用，因此可以执行死代码删除
+        passes.add(new DeadCodeEmit());
     }
 }

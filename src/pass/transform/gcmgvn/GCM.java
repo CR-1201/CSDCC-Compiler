@@ -28,7 +28,7 @@ public class GCM {
     private boolean isPinnedInst(Instruction inst) {
         return inst instanceof Br || inst instanceof Phi
                 || inst instanceof Ret || inst instanceof Store
-                || inst instanceof Load || inst instanceof Call || inst instanceof Alloca;
+                || inst instanceof Load || inst instanceof Call;
     }
 
     public void run(){

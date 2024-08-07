@@ -53,9 +53,7 @@ public class Peephole implements Pass {
                     addr2store.clear();
                 } else addr2store.put(store.getAddr(), store);
             } else if( instruction instanceof Load load ){
-                if( mysteriousStore(load.getAddr()) ){
-                    addr2store.clear();
-                } else if( addr2store.containsKey(load.getAddr()) ){
+                if( addr2store.containsKey(load.getAddr()) ){
                     Store store = (Store) addr2store.get(load.getAddr());
                     load.replaceAllUsesWith(store.getValue());
                     load.removeSelf();

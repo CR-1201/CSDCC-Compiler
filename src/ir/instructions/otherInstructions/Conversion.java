@@ -41,4 +41,12 @@ public class Conversion extends Instruction {
             return this.getName() + " = sitofp i32 " + getOperator(0).getName() + " to float";
         }
     }
+
+    public String getHashNumbering(){
+        if(this.type.equals("fptosi")){
+            return "fptosi float " + getOperator(0).getName() + " to i32";
+        } else {
+            return "sitofp i32 " + getOperator(0).getName() + " to float";
+        }
+    }
 }

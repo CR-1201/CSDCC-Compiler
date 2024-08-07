@@ -10,10 +10,7 @@ import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
-import pass.transform.loop.LCSSA;
-import pass.transform.loop.LICM;
-import pass.transform.loop.LoopFold;
-import pass.transform.loop.LoopUnroll;
+import pass.transform.loop.*;
 
 import java.util.ArrayList;
 
@@ -61,6 +58,7 @@ public class PassManager {
         passes.add(new DeadCodeEmit());
 //        passes.add(new MemSetOptimize());
 
+        passes.add(new LoopStrengthReduction());
         passes.add(new GepSplit());
         BasicPass();
         passes.add(new SCCP());

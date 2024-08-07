@@ -249,9 +249,13 @@ public class Loop {
     }
 
     /**
-     * 删除循环本身，以及循环内的 Blocks
+     * 删除循环本身、子循环，以及循环内的 Blocks
      */
     public void removeSelf() {
+        ArrayList<Loop> childLoops = new ArrayList<>(children);
+        for (Loop child : childLoops) {
+            child.removeSelf();
+        }
         ArrayList<BasicBlock> blocks = new ArrayList<>(allBlocks);
         for (BasicBlock block : blocks) {
             removeBlockInLoopChain(block);
@@ -311,10 +315,15 @@ public class Loop {
 
     public int computeLoopTimes(int init, int end, int step, Instruction alu, Icmp.Condition cmp) {
         int loopTimes = -1;
+        if (cmp.equals(Icmp.Condition.EQ)) {
+            return (init == end) ? 1 : -1;
+        } else if ((cmp.equals(Icmp.Condition.GE) && init < end) || (cmp.equals(Icmp.Condition.LE) && init > end)) {
+            return -1;
+        } else if ((cmp.equals(Icmp.Condition.GT) & init <= end) || (cmp.equals(Icmp.Condition.LT) && init >= end)) {
+            return -1;
+        }
         if (alu instanceof Add) {
-            if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : -1;
-            } else if (cmp.equals(Icmp.Condition.NE)) {
+            if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = ((end - init) % step == 0) ? (end - init) / step : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
                 loopTimes = (end - init) / step + 1;
@@ -322,9 +331,7 @@ public class Loop {
                 loopTimes = ((end - init) % step == 0) ? (end - init) / step : (end - init) / step + 1;
             }
         } else if (alu instanceof Sub) {
-            if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : -1;
-            } else if (cmp.equals(Icmp.Condition.NE)) {
+            if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = ((init - end) % step == 0) ? (init - end) / step : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
                 loopTimes = (init - end) / step + 1;
@@ -334,9 +341,7 @@ public class Loop {
         } else if (alu instanceof Mul) {
             double val = Math.log(end / init) / Math.log(step);
             boolean tag = init * Math.pow(step, val) == end;
-            if (cmp.equals(Icmp.Condition.EQ)) {
-                loopTimes = (init == end) ? 1 : -1;
-            } else if (cmp.equals(Icmp.Condition.NE)) {
+            if (cmp.equals(Icmp.Condition.NE)) {
                 loopTimes = tag ? (int) val : -1;
             } else if (cmp.equals(Icmp.Condition.GE) || cmp.equals(Icmp.Condition.LE)) {
                 loopTimes = (int) val + 1;

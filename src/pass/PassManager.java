@@ -50,7 +50,7 @@ public class PassManager {
         passes.add(new UselessReturnEmit());
         passes.add(new ADCE());
         passes.add(new UselessStoreEmit());
-
+        EmitSimpleBrPass();
         BasicPass();
         passes.add(new CFG());
         passes.add(new Dom());
@@ -65,7 +65,7 @@ public class PassManager {
 
 //        passes.add(new LoopStrengthReduction());
         passes.add(new GepSplit());
-
+        EmitSimpleBrPass();
         BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
@@ -89,6 +89,7 @@ public class PassManager {
         passes.add(new GepSplit());
         BasicPass();
         BasicPass();
+        EmitSimpleBrPass();
         passes.add(new CFG());
         passes.add(new Dom());
 

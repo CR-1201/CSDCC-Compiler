@@ -1,6 +1,5 @@
 package pass.transform;
 
-import ast.CompUnit;
 import ir.*;
 import ir.Module;
 import ir.instructions.Instruction;
@@ -17,7 +16,6 @@ import pass.Pass;
 import pass.utiles.FunctionClone;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
-import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -186,7 +184,7 @@ public class InlineFunction implements Pass {
         Function calleeFunction = call.getFunction();
         ValueType retType = calleeFunction.getReturnType();
 
-        BasicBlock nextBlock = irBuilder.buildBasicBLockAfter(curFunction, curBasicBlock);
+        BasicBlock nextBlock = irBuilder.buildBasicBlockAfter(curFunction, curBasicBlock);
 
         boolean backInstr = false;
         for (Instruction instr : curBasicBlock.getInstructionsArray()) {

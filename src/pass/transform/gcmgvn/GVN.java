@@ -148,6 +148,8 @@ public class GVN {
         } else if(inst instanceof Conversion conversionInst) {
 //            System.out.println(conversionInst);
             return conversionInst.toString();
+        } else if (inst instanceof BitCast bitCast) {
+            return bitCast.toString();
         }
         return null;
     }

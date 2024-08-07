@@ -1,7 +1,6 @@
 package pass.transform;
 
 import ir.*;
-import ir.constants.ConstInt;
 import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Load;

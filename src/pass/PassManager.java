@@ -36,7 +36,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
         passes.add(new InlineFunction());
-
+//
         Mem2RegPass();
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
@@ -53,32 +53,34 @@ public class PassManager {
         passes.add(new GepFuse());
         passes.add(new LICM());
         passes.add(new LCSSA());
-        passes.add(new LoopUnroll());
-        passes.add(new LoopFold());
-        passes.add(new MergeBlocks());
-        passes.add(new DeadCodeEmit());
-//        passes.add(new MemSetOptimize());
-
-//        passes.add(new LoopStrengthReduction());
-        passes.add(new GepSplit());
-        BasicPass();
-        passes.add(new SCCP());
-        passes.add(new UselessPhiEmit());
-        passes.add(new SimplifyInst());
-        passes.add(new MathOptimize());
-        BasicPass();
-        passes.add(new Peephole());
-        passes.add(new UselessArrayStoreEmit());
-        BasicPass();
-        passes.add(new SimplifyInst());
-        passes.add(new MathOptimize());
-        passes.add(new DeadCodeEmit());
-
-        passes.add(new SideEffect());
-        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-
-        passes.add(new CFG());
-        passes.add(new Dom());
+//        passes.add(new LoopUnroll());
+//        passes.add(new LoopFold());
+//        passes.add(new MergeBlocks());
+//        passes.add(new DeadCodeEmit());
+////        passes.add(new MemSetOptimize());
+//
+////        passes.add(new LoopStrengthReduction());
+//        passes.add(new GepSplit());
+//
+//        BasicPass();
+//        passes.add(new SCCP());
+//        passes.add(new UselessPhiEmit());
+//        passes.add(new SimplifyInst());
+//        passes.add(new MathOptimize());
+//        BasicPass();
+//        passes.add(new Peephole());
+//        passes.add(new GepFuse());
+//        passes.add(new UselessArrayStoreEmit());
+//        BasicPass();
+//        passes.add(new SimplifyInst());
+//        passes.add(new MathOptimize());
+//        passes.add(new DeadCodeEmit());
+//
+//        passes.add(new SideEffect());
+//        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+//
+//        passes.add(new CFG());
+//        passes.add(new Dom());
 
         for (Pass pass : passes) {
             pass.run();

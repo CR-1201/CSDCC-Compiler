@@ -147,9 +147,9 @@ public class GVN {
             return hashBuilder.toString();
         } else if(inst instanceof Conversion conversionInst) {
 //            System.out.println(conversionInst);
-            return conversionInst.toString();
+            return conversionInst.getHashNumbering();
         } else if (inst instanceof BitCast bitCast) {
-            return bitCast.toString();
+            return bitCast.getHashNumbering();
         }
         return null;
     }

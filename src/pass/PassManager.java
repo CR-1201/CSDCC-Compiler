@@ -1,5 +1,6 @@
 package pass;
 
+import ir.BasicBlock;
 import ir.Module;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
@@ -37,6 +38,7 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
         passes.add(new InlineFunction());
+        passes.add(new GlobalValueLocalize());
 //
         Mem2RegPass();
         passes.add(new SCCP());
@@ -80,7 +82,13 @@ public class PassManager {
 
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-//
+        passes.add(new Peephole());
+
+
+
+        passes.add(new GepSplit());
+        BasicPass();
+        BasicPass();
         passes.add(new CFG());
         passes.add(new Dom());
 

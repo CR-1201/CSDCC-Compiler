@@ -58,7 +58,7 @@ public class PassManager {
         passes.add(new DeadCodeEmit());
 //        passes.add(new MemSetOptimize());
 
-        passes.add(new LoopStrengthReduction());
+//        passes.add(new LoopStrengthReduction());
         passes.add(new GepSplit());
         BasicPass();
         passes.add(new SCCP());

@@ -25,6 +25,7 @@ compiler.jar
 tests/lib/libsysy.so
 .idea/workspace.xml
 sylib.ll
+testcase.sy
 
 ### IntelliJ IDEA ###
 out/
@@ -55,3 +56,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+testcase.sy

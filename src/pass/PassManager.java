@@ -125,4 +125,10 @@ public class PassManager {
         GVNGCMPass();
         passes.add(new MergeBlocks());
     }
+
+    private void EmitSimpleBrPass() {
+        passes.add(new SimpleBlockEmit());
+        // 由于消除简单的挑战块之后，可能会导致很多 cond 不会被使用，因此可以执行死代码删除
+        passes.add(new DeadCodeEmit());
+    }
 }

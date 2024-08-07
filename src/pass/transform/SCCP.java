@@ -20,12 +20,6 @@ import pass.Pass;
 import utils.Pair;
 import utils.ValueStatus;
 
-/**
- @author Conroy
- 稀疏条件常量传播(Sparse Conditional Constant Propagation)
- 这种常数传播方法相对传统方法有两个主要的优点:它可以由条件推导出有关信息,并且也更为有效.
- */
-
 public class SCCP implements Pass {
 
     private final Module module = Module.getModule();

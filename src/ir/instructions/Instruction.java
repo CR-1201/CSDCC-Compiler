@@ -93,6 +93,14 @@ public class Instruction extends User {
         return latestBlock;
     }
 
+    public void setArrayInit(boolean arrayInit) {
+        this.arrayInit = arrayInit;
+    }
+
+    public boolean isArrayInit() {
+        return arrayInit;
+    }
+
     @Override
     public BasicBlock getParent(){
         return (BasicBlock) super.getParent();

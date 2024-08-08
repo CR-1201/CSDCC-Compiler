@@ -15,10 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-/**
- @author Conroy
- Global Array Value Numbering: 将数组的load进行GVN(其实不是GVN,实际作用LVN < this < SVN < GVN)
- */
 public class GAVN implements Pass {
     private final Module module = Module.getModule();
     // 记录指针与其loadInst的映射关系

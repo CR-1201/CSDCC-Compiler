@@ -10,7 +10,6 @@ import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
-import pass.transform.gcmgvn.GVN;
 import pass.transform.loop.*;
 
 import java.util.ArrayList;
@@ -20,6 +19,9 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
+
+        passes.add(new Pattern.Pattern1());
+        passes.add(new Pattern.Pattern2());
 
         passes.add(new CFG());
         passes.add(new Dom());
@@ -50,7 +52,7 @@ public class PassManager {
         passes.add(new UselessReturnEmit());
         passes.add(new ADCE());
         passes.add(new UselessStoreEmit());
-
+        EmitSimpleBrPass();
         BasicPass();
         passes.add(new CFG());
         passes.add(new Dom());
@@ -65,7 +67,7 @@ public class PassManager {
 
         passes.add(new LoopStrengthReduction());
         passes.add(new GepSplit());
-
+        EmitSimpleBrPass();
         BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
@@ -79,8 +81,8 @@ public class PassManager {
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
         passes.add(new DeadCodeEmit());
-
         passes.add(new SideEffect());
+
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
         passes.add(new Peephole());
@@ -89,6 +91,10 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
+        passes.add(new GepSplit());
+        BasicPass();
+        BasicPass();
+        EmitSimpleBrPass();
         passes.add(new CFG());
         passes.add(new Dom());
 
@@ -124,5 +130,11 @@ public class PassManager {
         passes.add(new DeadCodeEmit());
         GVNGCMPass();
         passes.add(new MergeBlocks());
+    }
+
+    private void EmitSimpleBrPass() {
+        passes.add(new SimpleBlockEmit());
+        // 由于消除简单的挑战块之后，可能会导致很多 cond 不会被使用，因此可以执行死代码删除
+        passes.add(new DeadCodeEmit());
     }
 }

@@ -51,7 +51,6 @@ public class MemSetOptimize implements Pass {
         }
     }
 
-    //优化mm,mv
     private void arrayFold() {
         for (Loop loop : initLoops) {
             Value initArray = loop.getInitArray();

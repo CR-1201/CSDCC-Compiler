@@ -34,6 +34,7 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
+        passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
         passes.add(new InlineFunction());
@@ -81,7 +82,9 @@ public class PassManager {
 
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-//
+
+        passes.add(new Peephole());
+
         passes.add(new CFG());
         passes.add(new Dom());
 

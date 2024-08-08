@@ -56,16 +56,18 @@ public class CSE implements Pass {
             do {
                 delete_list.clear();
                 ArrayList<Instruction> instructions = bb.getInstructionsArray();
-                for (int i = 0; i < instructions.size(); i++) {
-                    Instruction inst = instructions.get(i);
-                    if( !isOptimizable(inst) ){
+                ArrayList<Instruction> preInstructions = new ArrayList<>();
+                for (Instruction inst : instructions) {
+                    if (!isOptimizable(inst)) {
                         continue;
                     }
-                    Instruction preInst = isAppear(inst,instructions,i);
-                    if( preInst != null ){
+                    Instruction preInst = isAppear(inst, preInstructions, preInstructions.size());
+                    if (preInst != null) {
                         delete_list.add(inst);
                         // FIXME 后面会remove self
                         inst.replaceAllUsesWith(preInst);
+                    } else {
+                        preInstructions.add(inst);
                     }
                 }
                 deleteInstr();
@@ -80,18 +82,18 @@ public class CSE implements Pass {
             Expression expression1 = new Expression(inst);
             Expression expression2 = new Expression(inst2);
             if( expression1.equals(expression2) ){
-                return inst;
+                return inst2;
             }
         }
         return null;
     }
 
     private boolean isKill(Instruction inst1,Instruction inst2){
-        // inst1 must be load inst to be killed
+
         if( !(inst1 instanceof Load load) ){
             return false;
         }
-        // if store and not same index, return false
+
         if( isStoreWithDifferentIndex(inst1,inst2) ){
             return false;
         }
@@ -102,11 +104,11 @@ public class CSE implements Pass {
             if( inst2 instanceof Store store){
                 Value lval_store = store.getAddr();
                 Value target_store = findOrigin(lval_store);
-                // if both global
+
                 if( target_load instanceof GlobalVariable && target_store instanceof GlobalVariable ){
                     return target_store.equals(target_load);
                 }
-                // else any global/arg store erase load inst
+
                 return isArgOrGlobalArrayOp(lval_store,target_store);
             }
             if( inst2 instanceof Call call){
@@ -122,7 +124,7 @@ public class CSE implements Pass {
             return false;
         }
 
-        // local array or global variable
+
         if( inst2 instanceof Store store){
             return target_load.equals(findOrigin(store.getAddr()));
         }

@@ -84,6 +84,10 @@ public class PassManager {
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
         passes.add(new Peephole());
+        passes.add(new DeadCodeEmit());
+
+        passes.add(new SideEffect());
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
         passes.add(new CFG());
         passes.add(new Dom());

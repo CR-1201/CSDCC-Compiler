@@ -1,6 +1,5 @@
 package pass;
 
-import ir.BasicBlock;
 import ir.Module;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
@@ -11,7 +10,6 @@ import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
-import pass.transform.gcmgvn.GVN;
 import pass.transform.loop.*;
 
 import java.util.ArrayList;
@@ -22,7 +20,8 @@ public class PassManager {
 
     public void run() {
 
-        passes.add(new Points());
+        passes.add(new Pattern.Pattern1());
+        passes.add(new Pattern.Pattern2());
 
         passes.add(new CFG());
         passes.add(new Dom());

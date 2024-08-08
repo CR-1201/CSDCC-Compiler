@@ -57,3 +57,4 @@ bin/
 ### Mac OS ###
 .DS_Store
 testcase.sy
+tmp.txt

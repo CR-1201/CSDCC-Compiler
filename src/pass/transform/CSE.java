@@ -92,16 +92,26 @@ public class CSE implements Pass {
     }
 
     private boolean isKill(Instruction inst1,Instruction inst2){
+
+        if( inst1 instanceof Call call1 && inst2 instanceof Call call2 ){
+            if( !call1.getFunction().equals(call2.getFunction()) ){
+                return false;
+            }
+            if( call1.getFunction().getIsBuiltIn() ){
+                return true;
+            }
+            if( is_pure.containsKey(call1.getFunction()) ){
+                return !is_pure.get(call1.getFunction());
+            }
+        }
+
+
         if( !(inst1 instanceof Load load) ){
             return false;
         }
 
-        if( isStoreWithDifferentIndex(inst1,inst2) ){
+        if( inst2 instanceof Store && isStoreWithDifferentIndex(inst1,inst2) ){
             return false;
-        }
-
-        if( load.getName().equals("%v69") && inst2 instanceof Store){
-            System.out.println(inst2);
         }
 
         Value lval_load = load.getAddr();
@@ -197,8 +207,10 @@ public class CSE implements Pass {
                 }
             }
             return false;
+        } else if( lval_2.equals(lval_1) ){
+            return false;
         }
-        return true;
+        return false;
     }
 
     private boolean isOptimizable(Instruction instruction){

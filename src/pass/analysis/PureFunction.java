@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import static pass.analysis.AliasAnalysis.searchRoot;
+
 public class PureFunction {
 
     private final Module module = Module.getModule();
@@ -93,7 +95,7 @@ public class PureFunction {
             for(Instruction instruction : instructions){
                 // store 指令,且无法找到 alloca 作为左值, 说明非局部变量;
                 if( instruction instanceof Store store && store_to_alloca(store) == null ){
-                    if( store.getAddr() instanceof GlobalVariable globalVariable ){
+                    if( searchRoot(store.getAddr()) instanceof GlobalVariable globalVariable ){
                         if( global_var_store_effects.containsKey(function) ){
                             global_var_store_effects.get(function).add(globalVariable);
                         } else {
@@ -103,7 +105,7 @@ public class PureFunction {
                     }
                     pure = false; // 也可能是传入数组的store
                 } else if( instruction instanceof Load load && load_to_alloca(load) == null ){
-                    if( load.getAddr() instanceof GlobalVariable globalVariable ){
+                    if( searchRoot(load.getAddr()) instanceof GlobalVariable globalVariable ){
                         if( global_var_store_effects.containsKey(function) ){
                             global_var_store_effects.get(function).add(globalVariable);
                         } else {

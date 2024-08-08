@@ -286,5 +286,9 @@ if __name__ == '__main__':
     df = pd.DataFrame([{'file': file, **res} for file, res in results])
 #     df = df[df['my'] != 0]
     df = df.sort_values(by='my', ascending=False)
+
+    df['my/O1'] = df.apply(lambda row: row['my'] / row['O1'] if row['O1'] != 0 else float('inf'), axis=1)
+    df['my/O2'] = df.apply(lambda row: row['my'] / row['O2'] if row['O2'] != 0 else float('inf'), axis=1)
+
     print(df.to_string(index=False))
 

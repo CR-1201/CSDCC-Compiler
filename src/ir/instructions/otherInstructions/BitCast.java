@@ -36,4 +36,8 @@ public class BitCast extends Instruction {
     public String toString(){
         return this.getName() + " = bitcast "+ value.getValueType()+ " " + getOperator(0).getName() + " to " + getValueType();
     }
+
+    public String getHashNumbering() {
+        return "bitcast "+ value.getValueType()+ " " + getOperator(0).getName() + " to " + getValueType();
+    }
 }

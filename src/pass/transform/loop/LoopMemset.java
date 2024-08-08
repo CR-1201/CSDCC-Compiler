@@ -13,11 +13,20 @@ import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
 
 /**
+ * 单层循环
  * while (i < n) {
  *     arr[i] = const;
  *     i = i + 1;
  * }
- * 还未完成
+ * 双层循环
+ * while (i < a) {
+ *     int j = 0;
+ *     while (j < b) {
+ *         arr[i][j] = const;
+ *         j = j + 1;
+ *     }
+ *     i = i + 1;
+ * }
  */
 public class LoopMemset implements Pass {
     private LoopAnalysis loopAnalysis = new LoopAnalysis();

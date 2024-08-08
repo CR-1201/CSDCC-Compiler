@@ -1,6 +1,5 @@
 package pass;
 
-import ir.BasicBlock;
 import ir.Module;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
@@ -11,7 +10,6 @@ import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
-import pass.transform.gcmgvn.GVN;
 import pass.transform.loop.*;
 
 import java.util.ArrayList;
@@ -21,6 +19,9 @@ public class PassManager {
     private ArrayList<Pass> passes = new ArrayList<>();
 
     public void run() {
+
+        passes.add(new Pattern.Pattern1());
+        passes.add(new Pattern.Pattern2());
 
         passes.add(new CFG());
         passes.add(new Dom());
@@ -35,11 +36,12 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
+        passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
         passes.add(new InlineFunction());
         passes.add(new GlobalValueLocalize());
-//
+
         Mem2RegPass();
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
@@ -63,7 +65,7 @@ public class PassManager {
         passes.add(new DeadCodeEmit());
 //        passes.add(new MemSetOptimize());
 
-//        passes.add(new LoopStrengthReduction());
+        passes.add(new LoopStrengthReduction());
         passes.add(new GepSplit());
         EmitSimpleBrPass();
         BasicPass();
@@ -79,12 +81,15 @@ public class PassManager {
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
         passes.add(new DeadCodeEmit());
+        passes.add(new SideEffect());
+
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+
+        passes.add(new Peephole());
+        passes.add(new DeadCodeEmit());
 
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-        passes.add(new Peephole());
-
-
 
         passes.add(new GepSplit());
         BasicPass();

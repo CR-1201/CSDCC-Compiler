@@ -56,16 +56,20 @@ public class CSE implements Pass {
             do {
                 delete_list.clear();
                 ArrayList<Instruction> instructions = bb.getInstructionsArray();
-                for (int i = 0; i < instructions.size(); i++) {
-                    Instruction inst = instructions.get(i);
-                    if( !isOptimizable(inst) ){
+                ArrayList<Instruction> preInstructions = new ArrayList<>();
+                for (Instruction inst : instructions) {
+                    if (!isOptimizable(inst)) {
+                        preInstructions.add(inst);
                         continue;
                     }
-                    Instruction preInst = isAppear(inst,instructions,i);
-                    if( preInst != null ){
+
+                    Instruction preInst = isAppear(inst, preInstructions);
+                    if (preInst != null) {
                         delete_list.add(inst);
                         // FIXME 后面会remove self
                         inst.replaceAllUsesWith(preInst);
+                    } else {
+                        preInstructions.add(inst);
                     }
                 }
                 deleteInstr();
@@ -73,28 +77,43 @@ public class CSE implements Pass {
         }
     }
 
-    private Instruction isAppear(Instruction inst,ArrayList<Instruction> instructions,int index){
+    private Instruction isAppear(Instruction inst,ArrayList<Instruction> instructions){
+        int index = instructions.size();
         for (int i = index-1 ; i >= 0 ; i--) {
             Instruction inst2 = instructions.get(i);
             if( isKill(inst,inst2) ) return null;
             Expression expression1 = new Expression(inst);
             Expression expression2 = new Expression(inst2);
             if( expression1.equals(expression2) ){
-                return inst;
+                return inst2;
             }
         }
         return null;
     }
 
     private boolean isKill(Instruction inst1,Instruction inst2){
-        // inst1 must be load inst to be killed
+
+        if( inst1 instanceof Call call1 && inst2 instanceof Call call2 ){
+            if( !call1.getFunction().equals(call2.getFunction()) ){
+                return false;
+            }
+            if( call1.getFunction().getIsBuiltIn() ){
+                return true;
+            }
+            if( is_pure.containsKey(call1.getFunction()) ){
+                return !is_pure.get(call1.getFunction());
+            }
+        }
+
+
         if( !(inst1 instanceof Load load) ){
             return false;
         }
-        // if store and not same index, return false
-        if( isStoreWithDifferentIndex(inst1,inst2) ){
+
+        if( inst2 instanceof Store && isStoreWithDifferentIndex(inst1,inst2) ){
             return false;
         }
+
         Value lval_load = load.getAddr();
         Value target_load = findOrigin(lval_load);
 
@@ -102,11 +121,11 @@ public class CSE implements Pass {
             if( inst2 instanceof Store store){
                 Value lval_store = store.getAddr();
                 Value target_store = findOrigin(lval_store);
-                // if both global
+
                 if( target_load instanceof GlobalVariable && target_store instanceof GlobalVariable ){
                     return target_store.equals(target_load);
                 }
-                // else any global/arg store erase load inst
+
                 return isArgOrGlobalArrayOp(lval_store,target_store);
             }
             if( inst2 instanceof Call call){
@@ -122,7 +141,7 @@ public class CSE implements Pass {
             return false;
         }
 
-        // local array or global variable
+
         if( inst2 instanceof Store store){
             return target_load.equals(findOrigin(store.getAddr()));
         }
@@ -162,31 +181,34 @@ public class CSE implements Pass {
 
     private boolean isStoreWithDifferentIndex(Instruction inst1,Instruction inst2){
         if( !(inst2 instanceof Store store) ){
-            return false;
+            return true;
         }
         if( !(inst1 instanceof Load load) ){
-            return false;
+            return true;
         }
+
         Value lval_1 = load.getAddr();
         Value lval_2 = store.getAddr();
+
         if( lval_1 instanceof GEP gep_1 && lval_2 instanceof GEP gep_2 ){
             if( gep_1.getBase() != gep_2.getBase() ) {
-                return false;
+                return true;
             }
             if( gep_1.getIndex().size() != gep_2.getIndex().size() ){
-                return false;
+                return true;
             }
             for( int i = 0 ; i < gep_1.getIndex().size() ; i++ ){
                 Value index_1 = gep_1.getIndex().get(i);
                 Value index_2 = gep_2.getIndex().get(i);
                 if( index_1 instanceof ConstInt constInt1 && index_2 instanceof ConstInt constInt2 ){
-                    if( constInt1.getValue() == constInt2.getValue() ){
-                        continue;
+                    if( constInt1.getValue() != constInt2.getValue() ){
+                        return true;
                     }
                 }
-                return false;
             }
-            return true;
+            return false;
+        } else if( lval_2.equals(lval_1) ){
+            return false;
         }
         return false;
     }

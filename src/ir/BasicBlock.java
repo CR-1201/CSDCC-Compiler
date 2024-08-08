@@ -287,6 +287,14 @@ public class BasicBlock extends Value{
         instructions.add(instruction);
     }
 
+    public void insertBeforeTail(Instruction instruction) {
+        if (!(instructions.get(instructions.size() - 1) instanceof TerInstruction)) {
+            instructions.add(instruction);
+        } else {
+            instructions.add(instructions.size() - 1, instruction);
+        }
+    }
+
     public void addInst(Instruction inst) {
         if (inst instanceof TerInstruction) {
             if (getTailInstruction() instanceof TerInstruction) {

@@ -39,6 +39,7 @@ public class PassManager {
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
+        passes.add(new LoopMemset());
         passes.add(new InlineFunction());
         passes.add(new GlobalValueLocalize());
 

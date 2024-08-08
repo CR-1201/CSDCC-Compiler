@@ -111,8 +111,10 @@ public class IrBuilder {
         return mul;
     }
 
-    public Mul buildMul(DataType dataType, Value src1, Value src2) {
-        return new Mul(nameNumCounter++, dataType, null, src1, src2);
+    public Mul buildMulBeforeTail(BasicBlock parent, DataType dataType, Value src1, Value src2) {
+        Mul mul = new Mul(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBeforeTail(mul);
+        return mul;
     }
 
     public Mul buildMulBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before) {
@@ -289,6 +291,19 @@ public class IrBuilder {
         }else{
             call = new Call(nameNumCounter++, parent, function, args);
             parent.insertTail(call);
+        }
+        return call;
+    }
+
+    public Call buildCallBeforeTail(BasicBlock parent, Function function, ArrayList<Value> args){
+        Call call;
+        if (function.getReturnType() instanceof VoidType) {
+            // 没有返回值
+            call = new Call(parent, function, args);
+            parent.insertBeforeTail(call);
+        } else {
+            call = new Call(nameNumCounter++, parent, function, args);
+            parent.insertBeforeTail(call);
         }
         return call;
     }

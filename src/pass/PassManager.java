@@ -23,6 +23,8 @@ public class PassManager {
 
     public void run() {
 
+        passes.add(new Points());
+
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());

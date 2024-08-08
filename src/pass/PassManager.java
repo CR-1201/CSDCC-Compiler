@@ -113,4 +113,26 @@ public class PassManager {
         GVNGCMPass();
         passes.add(new MergeBlocks());
     }
+    public void run2() {
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new LoopAnalysis());
+        passes.add(new GlobalValueLocalize());
+        passes.add(new Mem2reg());
+        passes.add(new InlineFunction());
+        passes.add(new SCCP());
+        passes.add(new SimplifyInst());
+        passes.add(new MergeBlocks());
+        passes.add(new SideEffect());
+        passes.add(new UselessPhiEmit());
+        passes.add(new UselessStoreEmit());
+        passes.add(new MathOptimize());
+        passes.add(new InstructionCleanUp());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        for (Pass pass : passes) {
+            pass.run();
+        }
+    }
+
 }

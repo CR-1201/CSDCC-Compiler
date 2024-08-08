@@ -68,11 +68,11 @@ public class ObjGlobalVariable {
         StringBuilder sb = new StringBuilder();
         sb.append(".global\t").append(name).append("\n");
         if (!hasInit) {
-            sb.append("\n.bss\n");
+            sb.append("\n.section .bss\n");
         } else {
-            sb.append("\n.data\n");
+            sb.append("\n.section .data\n");
         }
-        sb.append(".align 4\n");
+        sb.append(".align 2\n");
         sb.append(name).append(":\n");
         if (hasInit) {
             int i = 0;

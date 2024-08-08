@@ -3,14 +3,11 @@ package backend.module;
 import backend.ObjBuilder;
 import backend.instruction.ObjInstruction;
 import backend.instruction.ObjMove;
-import ir.BasicBlock;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class ObjBlock {
-
-    public BasicBlock bb;
     private String name;
     private LinkedList<ObjInstruction> instructions = new LinkedList<>();
 

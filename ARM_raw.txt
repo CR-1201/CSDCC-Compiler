@@ -1,459 +1,7351 @@
 .arch armv7ve
 
-.global	_g_image
+.global	_g_a
 
 .bss
 .align 4
-_g_image:
-	.zero	4194304
-.global	_g_width
+_g_a:
+	.zero	4000000
+.global	_g_b
 
 .bss
 .align 4
-_g_width:
-	.zero	4
-.global	_g_height
+_g_b:
+	.zero	4000000
+.global	_g_c
 
 .bss
 .align 4
-_g_height:
-	.zero	4
+_g_c:
+	.zero	4000000
 .text
-.global	my_sin_impl
-my_sin_impl:
-b7:
-	vmov	vf0,	s0
-	vldr	vf1,	=0x0
-	vcmp.f32	vf0,	vf1
-	vmrs	APSR_nzcv, fpscr
-	bgt	b62
-	b	b63
-.ltorg
-b60:
-	vmov	vf2,	vf16
-	vldr	vf3,	=0x358637BD
-	vcmp.f32	vf2,	vf3
-	vmrs	APSR_nzcv, fpscr
-	ble	b8
-	b	b9
-.ltorg
-b8:
-	vmov	s0,	vf0
-	bx	lr
-.ltorg
-b9:
-	vldr	vf4,	=0x40400000
-	vdiv.f32	vf5,	vf0,	vf4
-	vmov	s0,	vf5
-	bl	my_sin_impl
-	vmov	vf6,	s0
-	vldr	vf7,	=0x40400000
-	vmul.f32	vf8,	vf6,	vf7
-	vldr	vf9,	=0x40800000
-	vmul.f32	vf10,	vf6,	vf9
-	vmul.f32	vf11,	vf10,	vf6
-	vmul.f32	vf12,	vf11,	vf6
-	vsub.f32	vf13,	vf8,	vf12
-	vmov	s0,	vf13
-	bx	lr
-.ltorg
-b62:
-	vmov	vf16,	vf0
-	b	b60
-.ltorg
-b63:
-	vldr	vf14,	=0x0
-	vsub.f32	vf15,	vf14,	vf0
-	vmov	vf16,	vf15
-	b	b60
-.ltorg
-.global	my_sin
-my_sin:
-b12:
-	vmov	vf17,	s0
-	vldr	vf18,	=0x40C90FDB
-	vcmp.f32	vf17,	vf18
-	vmrs	APSR_nzcv, fpscr
-	bgt	b13
-	b	b15
-.ltorg
-b13:
-	vldr	vf19,	=0x40C90FDB
-	vdiv.f32	vf20,	vf17,	vf19
-	vcvt.s32.f32	vf21,	vf20
-	vmov	v3,	vf21
-	vmov	vf22,	v3
-	vcvt.f32.s32	vf22,	vf22
-	vldr	vf23,	=0x40C90FDB
-	vmul.f32	vf24,	vf22,	vf23
-	vsub.f32	vf25,	vf17,	vf24
-	vmov	vf37,	vf25
-	b	b14
-.ltorg
-b14:
-	vmov	vf26,	vf37
-	vldr	vf27,	=0x40490FDB
-	vcmp.f32	vf26,	vf27
-	vmrs	APSR_nzcv, fpscr
-	vmov	vf38,	vf26
-	bgt	b16
-	b	b17
-.ltorg
-b16:
-	vldr	vf28,	=0x40C90FDB
-	vsub.f32	vf29,	vf26,	vf28
-	vmov	vf38,	vf29
-	b	b17
-.ltorg
-b17:
-	vmov	vf30,	vf38
-	vldr	vf31,	=0xC0490FDB
-	vcmp.f32	vf30,	vf31
-	vmrs	APSR_nzcv, fpscr
-	vmov	vf39,	vf30
-	blt	b18
-	b	b19
-.ltorg
-b18:
-	vldr	vf32,	=0x40C90FDB
-	vadd.f32	vf33,	vf30,	vf32
-	vmov	vf39,	vf33
-	b	b19
-.ltorg
-b19:
-	vmov	vf34,	vf39
-	vmov	s0,	vf34
-	bl	my_sin_impl
-	vmov	vf35,	s0
-	vmov	s0,	vf35
-	bx	lr
-.ltorg
-b15:
-	vldr	vf36,	=0xC0C90FDB
-	vcmp.f32	vf17,	vf36
-	vmrs	APSR_nzcv, fpscr
-	vmov	vf37,	vf17
-	blt	b13
-	b	b14
-.ltorg
-.global	my_cos
-my_cos:
-b21:
-	vmov	vf40,	s0
-	vldr	vf41,	=0x3FC90FDB
-	vadd.f32	vf42,	vf40,	vf41
-	vmov	s0,	vf42
-	bl	my_sin
-	vmov	vf43,	s0
-	vmov	s0,	vf43
-	bx	lr
-.ltorg
-.global	rotate
-rotate:
-b40:
-	mov	v15,	r1
-	mov	v11,	r0
-	vmov	vf44,	s0
-	vmov	s0,	vf44
-	bl	my_sin
-	vmov	vf45,	s0
-	vmov	s0,	vf44
-	bl	my_cos
-	vmov	vf46,	s0
-	movw	v7,	:lower16:_g_width
-	movt	v7,	:upper16:_g_width
-	ldr	v7,	[v7]
-	movw	v8,	:lower16:_g_height
-	movt	v8,	:upper16:_g_height
-	ldr	v8,	[v8]
-	mov	v9,	#2
-	sdiv	v10,	v7,	v9
-	sub	v12,	v11,	v10
-	vmov	vf47,	v12
-	vcvt.f32.s32	vf47,	vf47
-	vmul.f32	vf48,	vf47,	vf46
-	mov	v13,	#2
-	sdiv	v14,	v8,	v13
-	sub	v16,	v15,	v14
-	vmov	vf49,	v16
-	vcvt.f32.s32	vf49,	vf49
-	vmul.f32	vf50,	vf49,	vf45
-	vsub.f32	vf51,	vf48,	vf50
-	vmov	vf52,	v10
-	vcvt.f32.s32	vf52,	vf52
-	vadd.f32	vf53,	vf51,	vf52
-	vcvt.s32.f32	vf54,	vf53
-	vmov	v17,	vf54
-	mov	v18,	#0
-	cmp	v17,	v18
-	blt	b41
-	b	b45
-.ltorg
-b41:
-	mov	r0,	#0
-	bx	lr
-.ltorg
-b45:
-	cmp	v17,	v7
-	bge	b41
-	b	b44
-.ltorg
-b44:
-	vmov	vf55,	v12
-	vcvt.f32.s32	vf55,	vf55
-	vmul.f32	vf56,	vf55,	vf45
-	vmov	vf57,	v16
-	vcvt.f32.s32	vf57,	vf57
-	vmul.f32	vf58,	vf57,	vf46
-	vadd.f32	vf59,	vf56,	vf58
-	vmov	vf60,	v14
-	vcvt.f32.s32	vf60,	vf60
-	vadd.f32	vf61,	vf59,	vf60
-	vcvt.s32.f32	vf62,	vf61
-	vmov	v21,	vf62
-	mov	v22,	#0
-	cmp	v21,	v22
-	blt	b41
-	b	b43
-.ltorg
-b43:
-	movw	v24,	:lower16:_g_height
-	movt	v24,	:upper16:_g_height
-	ldr	v24,	[v24]
-	cmp	v21,	v24
-	bge	b41
-	b	b42
-.ltorg
-b42:
-	movw	v26,	:lower16:_g_width
-	movt	v26,	:upper16:_g_width
-	ldr	v26,	[v26]
-	mul	v27,	v21,	v26
-	add	v28,	v27,	v17
-	movw	v29,	:lower16:_g_image
-	movt	v29,	:upper16:_g_image
-	mov	v31,	#4
-	mla	v30,	v28,	v31,	v29
-	ldr	v32,	[v30]
-	mov	r0,	v32
-	bx	lr
-.ltorg
-.global	write_pgm
-write_pgm:
-b48:
-	vmov	vf63,	s0
-	mov	r0,	#80
-	bl	putch
-	mov	r0,	#50
-	bl	putch
-	mov	r0,	#10
-	bl	putch
-	movw	v33,	:lower16:_g_width
-	movt	v33,	:upper16:_g_width
-	ldr	v33,	[v33]
-	mov	r0,	v33
-	bl	putint
-	mov	r0,	#32
-	bl	putch
-	movw	v34,	:lower16:_g_height
-	movt	v34,	:upper16:_g_height
-	ldr	v34,	[v34]
-	mov	r0,	v34
-	bl	putint
-	mov	r0,	#32
-	bl	putch
-	mov	r0,	#255
-	bl	putint
-	mov	r0,	#10
-	bl	putch
-	movw	v35,	:lower16:_g_height
-	movt	v35,	:upper16:_g_height
-	ldr	v35,	[v35]
-	movw	v36,	:lower16:_g_width
-	movt	v36,	:upper16:_g_width
-	ldr	v36,	[v36]
-	mov	v46,	#0
-	b	b49
-.ltorg
-b49:
-	mov	v37,	v46
-	cmp	v37,	v35
-	blt	b50
-	b	b51
-.ltorg
-b50:
-	mov	v47,	#0
-	b	b52
-.ltorg
-b52:
-	mov	v39,	v47
-	cmp	v39,	v36
-	blt	b53
-	b	b54
-.ltorg
-b53:
-	mov	r0,	v39
-	mov	r1,	v37
-	vmov	s0,	vf63
-	bl	rotate
-	mov	v41,	r0
-	mov	r0,	v41
-	bl	putint
-	mov	r0,	#32
-	bl	putch
-	mov	v42,	#1
-	add	v43,	v39,	v42
-	mov	v47,	v43
-	b	b52
-.ltorg
-b54:
-	mov	r0,	#10
-	bl	putch
-	mov	v44,	#1
-	add	v45,	v37,	v44
-	mov	v46,	v45
-	b	b49
-.ltorg
-b51:
-	bx	lr
-.ltorg
 .global	main
 main:
 	push	{lr}
 	sub	sp,	sp,	#4
-b55:
-	bl	getfloat
-	vmov	vf64,	s0
-	bl	getch
-	mov	v48,	r0
-	bl	getch
-	mov	v49,	r0
-	mov	v50,	#80
-	cmp	v49,	v50
-	bne	b68
-	b	b69
+b0:
+	mov	v2104,	#0
+	b	b1
 .ltorg
-b66:
-	mov	v52,	v88
-	mov	v53,	#0
-	cmp	v52,	v53
-	blt	b56
-	b	b57
+b1:
+	mov	v0,	v2104
+	mov	v1,	#1000
+	cmp	v0,	v1
+	blt	b2
+	b	b3
 .ltorg
-b56:
-	mvn	r0,	#0
-	add	sp,	sp,	#4
-	pop	{pc}
-	bx	lr
+b2:
+	movw	v3,	:lower16:_g_a
+	movt	v3,	:upper16:_g_a
+	mov	v5,	#4000
+	mla	v4,	v0,	v5,	v3
+	mov	r0,	v4
+	bl	getarray
+	mov	v6,	r0
+	mov	v7,	#1000
+	cmp	v6,	v7
+	bne	b4
+	b	b5
 .ltorg
-b57:
-	vmov	s0,	vf64
-	bl	write_pgm
-	mov	r0,	#0
-	add	sp,	sp,	#4
-	pop	{pc}
-	bx	lr
+b4:
+	mov	v2122,	v6
+	b	b46
 .ltorg
-b68:
-	mvn	v88,	#0
-	b	b66
+b5:
+	mov	v9,	#1
+	add	v10,	v0,	v9
+	mov	v2104,	v10
+	b	b1
 .ltorg
-b69:
-	bl	getch
-	mov	v55,	r0
-	mov	v56,	#50
-	cmp	v55,	v56
-	bne	b68
-	b	b70
+b3:
+	bl	_sysy_starttime
+	mov	v2105,	#0
+	b	b7
 .ltorg
-b70:
-	bl	getint
-	mov	v58,	r0
-	movw	v59,	:lower16:_g_width
-	movt	v59,	:upper16:_g_width
-	str	v58,	[v59]
-	bl	getint
-	mov	v60,	r0
-	movw	v61,	:lower16:_g_height
-	movt	v61,	:upper16:_g_height
-	str	v60,	[v61]
-	movw	v62,	:lower16:_g_width
-	movt	v62,	:upper16:_g_width
-	ldr	v62,	[v62]
-	mov	v63,	#1024
-	cmp	v62,	v63
-	bgt	b73
-	b	b71
+b7:
+	mov	v11,	v2105
+	mov	v12,	#1000
+	cmp	v11,	v12
+	blt	b8
+	b	b9
 .ltorg
-b71:
-	movw	v65,	:lower16:_g_height
-	movt	v65,	:upper16:_g_height
-	ldr	v65,	[v65]
-	mov	v66,	#1024
-	cmp	v65,	v66
-	bgt	b73
-	b	b72
+b8:
+	mov	v2106,	#0
+	b	b10
 .ltorg
-b72:
-	bl	getint
-	mov	v68,	r0
-	mov	v69,	#255
-	cmp	v68,	v69
-	bne	b73
-	b	b74
+b10:
+	mov	v14,	v2106
+	mov	v15,	#1000
+	cmp	v14,	v15
+	blt	b11
+	b	b12
 .ltorg
-b74:
-	movw	v71,	:lower16:_g_height
-	movt	v71,	:upper16:_g_height
-	ldr	v71,	[v71]
-	movw	v72,	:lower16:_g_width
-	movt	v72,	:upper16:_g_width
-	ldr	v72,	[v72]
-	mov	v86,	#0
-	b	b75
+b11:
+	movw	v3,	:lower16:_g_a
+	movt	v3,	:upper16:_g_a
+	mov	v18,	#4000
+	mla	v17,	v14,	v18,	v3
+	mov	v18,	#4
+	mla	v17,	v11,	v18,	v17
+	ldr	v19,	[v17]
+	movw	v20,	:lower16:_g_b
+	movt	v20,	:upper16:_g_b
+	mov	v22,	#4000
+	mla	v21,	v11,	v22,	v20
+	mov	v22,	#4
+	mla	v21,	v14,	v22,	v21
+	str	v19,	[v21]
+	mov	v23,	#1
+	add	v24,	v14,	v23
+	mov	v2106,	v24
+	b	b10
 .ltorg
-b75:
-	mov	v73,	v86
-	cmp	v73,	v71
-	blt	b76
-	b	b80
+b12:
+	mov	v25,	#1
+	add	v26,	v11,	v25
+	mov	v2105,	v26
+	b	b7
 .ltorg
-b80:
-	mov	v88,	#0
-	b	b66
+b9:
+	mov	v2107,	#0
+	b	b13
 .ltorg
-b76:
-	mul	v75,	v73,	v72
-	mov	v87,	#0
-	b	b77
+b13:
+	mov	v27,	v2107
+	mov	v28,	#1000
+	cmp	v27,	v28
+	blt	b14
+	b	b15
 .ltorg
-b77:
-	mov	v76,	v87
-	cmp	v76,	v72
-	blt	b78
-	b	b79
+b14:
+	mov	v2108,	#0
+	b	b16
 .ltorg
-b78:
-	bl	getint
-	mov	v78,	r0
-	add	v79,	v75,	v76
-	movw	v29,	:lower16:_g_image
-	movt	v29,	:upper16:_g_image
+b16:
+	mov	v30,	v2108
+	mov	v31,	#1000
+	cmp	v30,	v31
+	blt	b17
+	b	b18
+.ltorg
+b17:
+	mov	v2109,	#0
+	mov	v2110,	#0
+	b	b19
+.ltorg
+b19:
+	mov	v43,	v2110
+	mov	v33,	v2109
+	mov	v34,	#1000
+	cmp	v33,	v34
+	blt	b20
+	b	b21
+.ltorg
+b20:
+	movw	v3,	:lower16:_g_a
+	movt	v3,	:upper16:_g_a
+	mov	v37,	#4000
+	mla	v36,	v27,	v37,	v3
+	mov	v37,	#4
+	mla	v36,	v33,	v37,	v36
+	ldr	v38,	[v36]
+	movw	v20,	:lower16:_g_b
+	movt	v20,	:upper16:_g_b
+	mov	v40,	#4000
+	mla	v39,	v33,	v40,	v20
+	mov	v40,	#4
+	mla	v39,	v30,	v40,	v39
+	ldr	v41,	[v39]
+	mul	v42,	v38,	v41
+	add	v44,	v43,	v42
+	mov	v45,	#1
+	add	v46,	v33,	v45
+	mov	v2109,	v46
+	mov	v2110,	v44
+	b	b19
+.ltorg
+b21:
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v49,	#4000
+	mla	v48,	v27,	v49,	v47
+	mov	v49,	#4
+	mla	v48,	v30,	v49,	v48
+	str	v43,	[v48]
+	mov	v50,	#1
+	add	v51,	v30,	v50
+	mov	v2108,	v51
+	b	b16
+.ltorg
+b18:
+	mov	v52,	#1
+	add	v53,	v27,	v52
+	mov	v2107,	v53
+	b	b13
+.ltorg
+b15:
+	mov	v2111,	#0
+	b	b22
+.ltorg
+b22:
+	mov	v54,	v2111
+	mov	v55,	#1000
+	cmp	v54,	v55
+	blt	b23
+	b	b24
+.ltorg
+b24:
+	mov	v2116,	#0
+	b	b33
+.ltorg
+b33:
+	mov	v57,	v2116
+	mov	v58,	#1000
+	cmp	v57,	v58
+	blt	b34
+	b	b35
+.ltorg
+b34:
+	mov	v2117,	#0
+	b	b36
+.ltorg
+b36:
+	mov	v60,	v2117
+	mov	v61,	#1000
+	cmp	v60,	v61
+	blt	b37
+	b	b38
+.ltorg
+b37:
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v64,	#4000
+	mla	v63,	v60,	v64,	v47
+	mov	v64,	#4
+	mla	v63,	v57,	v64,	v63
+	ldr	v65,	[v63]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v67,	#4000
+	mla	v66,	v57,	v67,	v47
+	mov	v67,	#4
+	mla	v66,	v60,	v67,	v66
+	mov	v68,	#0
+	sub	v69,	v68,	v65
+	str	v69,	[v66]
+	mov	v70,	#1
+	add	v71,	v60,	v70
+	mov	v2117,	v71
+	b	b36
+.ltorg
+b38:
+	mov	v72,	#1
+	add	v73,	v57,	v72
+	mov	v2116,	v73
+	b	b33
+.ltorg
+b35:
+	mov	v2118,	#0
+	mov	v2119,	#0
+	b	b39
+.ltorg
+b39:
+	mov	v89,	v2119
+	mov	v74,	v2118
+	mov	v75,	#1000
+	cmp	v74,	v75
+	blt	b40
+	b	b41
+.ltorg
+b40:
+	mov	v2120,	#0
+	mov	v2121,	v89
+	b	b42
+.ltorg
+b42:
+	mov	v83,	v2121
+	mov	v77,	v2120
+	mov	v78,	#1000
+	cmp	v77,	v78
+	blt	b43
+	b	b44
+.ltorg
+b43:
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v81,	#4000
+	mla	v80,	v74,	v81,	v47
 	mov	v81,	#4
-	mla	v80,	v79,	v81,	v29
-	str	v78,	[v80]
-	mov	v82,	#1
-	add	v83,	v76,	v82
-	mov	v87,	v83
-	b	b77
+	mla	v80,	v77,	v81,	v80
+	ldr	v82,	[v80]
+	add	v84,	v83,	v82
+	mov	v85,	#1
+	add	v86,	v77,	v85
+	mov	v2120,	v86
+	mov	v2121,	v84
+	b	b42
 .ltorg
-b79:
-	mov	v84,	#1
-	add	v85,	v73,	v84
-	mov	v86,	v85
-	b	b75
+b44:
+	mov	v87,	#1
+	add	v88,	v74,	v87
+	mov	v2118,	v88
+	mov	v2119,	v83
+	b	b39
 .ltorg
-b73:
-	mvn	v88,	#0
-	b	b66
+b41:
+	bl	_sysy_stoptime
+	mov	r0,	v89
+	bl	putint
+	mov	v2122,	#0
+	b	b46
+.ltorg
+b23:
+	mov	v2112,	#0
+	mvn	v2113,	#-2147483648
+	b	b25
+.ltorg
+b25:
+	mov	v96,	v2113
+	mov	v90,	v2112
+	mov	v91,	#1000
+	cmp	v90,	v91
+	blt	b26
+	b	b27
+.ltorg
+b26:
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v94,	#4000
+	mla	v93,	v54,	v94,	v47
+	mov	v94,	#4
+	mla	v93,	v90,	v94,	v93
+	ldr	v95,	[v93]
+	cmp	v95,	v96
+	mov	v2115,	v96
+	blt	b28
+	b	b29
+.ltorg
+b28:
+	ldr	v98,	[v93]
+	mov	v2115,	v98
+	b	b29
+.ltorg
+b29:
+	mov	v2114,	v2115
+	mov	v99,	#1
+	add	v100,	v90,	v99
+	mov	v2112,	v100
+	mov	v2113,	v2114
+	b	b25
+.ltorg
+b27:
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v102,	#4000
+	mla	v101,	v54,	v102,	v47
+	str	v96,	[v101]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v104,	#4000
+	mla	v103,	v54,	v104,	v47
+	mov	v104,	#4
+	add	v103,	v103,	v104
+	str	v96,	[v103]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v106,	#4000
+	mla	v105,	v54,	v106,	v47
+	mov	v106,	#8
+	add	v105,	v105,	v106
+	str	v96,	[v105]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v108,	#4000
+	mla	v107,	v54,	v108,	v47
+	mov	v108,	#12
+	add	v107,	v107,	v108
+	str	v96,	[v107]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v110,	#4000
+	mla	v109,	v54,	v110,	v47
+	mov	v110,	#16
+	add	v109,	v109,	v110
+	str	v96,	[v109]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v112,	#4000
+	mla	v111,	v54,	v112,	v47
+	mov	v112,	#20
+	add	v111,	v111,	v112
+	str	v96,	[v111]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v114,	#4000
+	mla	v113,	v54,	v114,	v47
+	mov	v114,	#24
+	add	v113,	v113,	v114
+	str	v96,	[v113]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v116,	#4000
+	mla	v115,	v54,	v116,	v47
+	mov	v116,	#28
+	add	v115,	v115,	v116
+	str	v96,	[v115]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v118,	#4000
+	mla	v117,	v54,	v118,	v47
+	mov	v118,	#32
+	add	v117,	v117,	v118
+	str	v96,	[v117]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v120,	#4000
+	mla	v119,	v54,	v120,	v47
+	mov	v120,	#36
+	add	v119,	v119,	v120
+	str	v96,	[v119]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v122,	#4000
+	mla	v121,	v54,	v122,	v47
+	mov	v122,	#40
+	add	v121,	v121,	v122
+	str	v96,	[v121]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v124,	#4000
+	mla	v123,	v54,	v124,	v47
+	mov	v124,	#44
+	add	v123,	v123,	v124
+	str	v96,	[v123]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v126,	#4000
+	mla	v125,	v54,	v126,	v47
+	mov	v126,	#48
+	add	v125,	v125,	v126
+	str	v96,	[v125]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v128,	#4000
+	mla	v127,	v54,	v128,	v47
+	mov	v128,	#52
+	add	v127,	v127,	v128
+	str	v96,	[v127]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v130,	#4000
+	mla	v129,	v54,	v130,	v47
+	mov	v130,	#56
+	add	v129,	v129,	v130
+	str	v96,	[v129]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v132,	#4000
+	mla	v131,	v54,	v132,	v47
+	mov	v132,	#60
+	add	v131,	v131,	v132
+	str	v96,	[v131]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v134,	#4000
+	mla	v133,	v54,	v134,	v47
+	mov	v134,	#64
+	add	v133,	v133,	v134
+	str	v96,	[v133]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v136,	#4000
+	mla	v135,	v54,	v136,	v47
+	mov	v136,	#68
+	add	v135,	v135,	v136
+	str	v96,	[v135]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v138,	#4000
+	mla	v137,	v54,	v138,	v47
+	mov	v138,	#72
+	add	v137,	v137,	v138
+	str	v96,	[v137]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v140,	#4000
+	mla	v139,	v54,	v140,	v47
+	mov	v140,	#76
+	add	v139,	v139,	v140
+	str	v96,	[v139]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v142,	#4000
+	mla	v141,	v54,	v142,	v47
+	mov	v142,	#80
+	add	v141,	v141,	v142
+	str	v96,	[v141]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v144,	#4000
+	mla	v143,	v54,	v144,	v47
+	mov	v144,	#84
+	add	v143,	v143,	v144
+	str	v96,	[v143]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v146,	#4000
+	mla	v145,	v54,	v146,	v47
+	mov	v146,	#88
+	add	v145,	v145,	v146
+	str	v96,	[v145]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v148,	#4000
+	mla	v147,	v54,	v148,	v47
+	mov	v148,	#92
+	add	v147,	v147,	v148
+	str	v96,	[v147]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v150,	#4000
+	mla	v149,	v54,	v150,	v47
+	mov	v150,	#96
+	add	v149,	v149,	v150
+	str	v96,	[v149]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v152,	#4000
+	mla	v151,	v54,	v152,	v47
+	mov	v152,	#100
+	add	v151,	v151,	v152
+	str	v96,	[v151]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v154,	#4000
+	mla	v153,	v54,	v154,	v47
+	mov	v154,	#104
+	add	v153,	v153,	v154
+	str	v96,	[v153]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v156,	#4000
+	mla	v155,	v54,	v156,	v47
+	mov	v156,	#108
+	add	v155,	v155,	v156
+	str	v96,	[v155]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v158,	#4000
+	mla	v157,	v54,	v158,	v47
+	mov	v158,	#112
+	add	v157,	v157,	v158
+	str	v96,	[v157]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v160,	#4000
+	mla	v159,	v54,	v160,	v47
+	mov	v160,	#116
+	add	v159,	v159,	v160
+	str	v96,	[v159]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v162,	#4000
+	mla	v161,	v54,	v162,	v47
+	mov	v162,	#120
+	add	v161,	v161,	v162
+	str	v96,	[v161]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v164,	#4000
+	mla	v163,	v54,	v164,	v47
+	mov	v164,	#124
+	add	v163,	v163,	v164
+	str	v96,	[v163]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v166,	#4000
+	mla	v165,	v54,	v166,	v47
+	mov	v166,	#128
+	add	v165,	v165,	v166
+	str	v96,	[v165]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v168,	#4000
+	mla	v167,	v54,	v168,	v47
+	mov	v168,	#132
+	add	v167,	v167,	v168
+	str	v96,	[v167]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v170,	#4000
+	mla	v169,	v54,	v170,	v47
+	mov	v170,	#136
+	add	v169,	v169,	v170
+	str	v96,	[v169]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v172,	#4000
+	mla	v171,	v54,	v172,	v47
+	mov	v172,	#140
+	add	v171,	v171,	v172
+	str	v96,	[v171]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v174,	#4000
+	mla	v173,	v54,	v174,	v47
+	mov	v174,	#144
+	add	v173,	v173,	v174
+	str	v96,	[v173]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v176,	#4000
+	mla	v175,	v54,	v176,	v47
+	mov	v176,	#148
+	add	v175,	v175,	v176
+	str	v96,	[v175]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v178,	#4000
+	mla	v177,	v54,	v178,	v47
+	mov	v178,	#152
+	add	v177,	v177,	v178
+	str	v96,	[v177]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v180,	#4000
+	mla	v179,	v54,	v180,	v47
+	mov	v180,	#156
+	add	v179,	v179,	v180
+	str	v96,	[v179]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v182,	#4000
+	mla	v181,	v54,	v182,	v47
+	mov	v182,	#160
+	add	v181,	v181,	v182
+	str	v96,	[v181]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v184,	#4000
+	mla	v183,	v54,	v184,	v47
+	mov	v184,	#164
+	add	v183,	v183,	v184
+	str	v96,	[v183]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v186,	#4000
+	mla	v185,	v54,	v186,	v47
+	mov	v186,	#168
+	add	v185,	v185,	v186
+	str	v96,	[v185]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v188,	#4000
+	mla	v187,	v54,	v188,	v47
+	mov	v188,	#172
+	add	v187,	v187,	v188
+	str	v96,	[v187]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v190,	#4000
+	mla	v189,	v54,	v190,	v47
+	mov	v190,	#176
+	add	v189,	v189,	v190
+	str	v96,	[v189]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v192,	#4000
+	mla	v191,	v54,	v192,	v47
+	mov	v192,	#180
+	add	v191,	v191,	v192
+	str	v96,	[v191]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v194,	#4000
+	mla	v193,	v54,	v194,	v47
+	mov	v194,	#184
+	add	v193,	v193,	v194
+	str	v96,	[v193]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v196,	#4000
+	mla	v195,	v54,	v196,	v47
+	mov	v196,	#188
+	add	v195,	v195,	v196
+	str	v96,	[v195]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v198,	#4000
+	mla	v197,	v54,	v198,	v47
+	mov	v198,	#192
+	add	v197,	v197,	v198
+	str	v96,	[v197]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v200,	#4000
+	mla	v199,	v54,	v200,	v47
+	mov	v200,	#196
+	add	v199,	v199,	v200
+	str	v96,	[v199]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v202,	#4000
+	mla	v201,	v54,	v202,	v47
+	mov	v202,	#200
+	add	v201,	v201,	v202
+	str	v96,	[v201]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v204,	#4000
+	mla	v203,	v54,	v204,	v47
+	mov	v204,	#204
+	add	v203,	v203,	v204
+	str	v96,	[v203]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v206,	#4000
+	mla	v205,	v54,	v206,	v47
+	mov	v206,	#208
+	add	v205,	v205,	v206
+	str	v96,	[v205]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v208,	#4000
+	mla	v207,	v54,	v208,	v47
+	mov	v208,	#212
+	add	v207,	v207,	v208
+	str	v96,	[v207]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v210,	#4000
+	mla	v209,	v54,	v210,	v47
+	mov	v210,	#216
+	add	v209,	v209,	v210
+	str	v96,	[v209]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v212,	#4000
+	mla	v211,	v54,	v212,	v47
+	mov	v212,	#220
+	add	v211,	v211,	v212
+	str	v96,	[v211]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v214,	#4000
+	mla	v213,	v54,	v214,	v47
+	mov	v214,	#224
+	add	v213,	v213,	v214
+	str	v96,	[v213]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v216,	#4000
+	mla	v215,	v54,	v216,	v47
+	mov	v216,	#228
+	add	v215,	v215,	v216
+	str	v96,	[v215]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v218,	#4000
+	mla	v217,	v54,	v218,	v47
+	mov	v218,	#232
+	add	v217,	v217,	v218
+	str	v96,	[v217]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v220,	#4000
+	mla	v219,	v54,	v220,	v47
+	mov	v220,	#236
+	add	v219,	v219,	v220
+	str	v96,	[v219]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v222,	#4000
+	mla	v221,	v54,	v222,	v47
+	mov	v222,	#240
+	add	v221,	v221,	v222
+	str	v96,	[v221]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v224,	#4000
+	mla	v223,	v54,	v224,	v47
+	mov	v224,	#244
+	add	v223,	v223,	v224
+	str	v96,	[v223]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v226,	#4000
+	mla	v225,	v54,	v226,	v47
+	mov	v226,	#248
+	add	v225,	v225,	v226
+	str	v96,	[v225]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v228,	#4000
+	mla	v227,	v54,	v228,	v47
+	mov	v228,	#252
+	add	v227,	v227,	v228
+	str	v96,	[v227]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v230,	#4000
+	mla	v229,	v54,	v230,	v47
+	mov	v230,	#256
+	add	v229,	v229,	v230
+	str	v96,	[v229]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v232,	#4000
+	mla	v231,	v54,	v232,	v47
+	mov	v232,	#260
+	add	v231,	v231,	v232
+	str	v96,	[v231]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v234,	#4000
+	mla	v233,	v54,	v234,	v47
+	mov	v234,	#264
+	add	v233,	v233,	v234
+	str	v96,	[v233]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v236,	#4000
+	mla	v235,	v54,	v236,	v47
+	mov	v236,	#268
+	add	v235,	v235,	v236
+	str	v96,	[v235]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v238,	#4000
+	mla	v237,	v54,	v238,	v47
+	mov	v238,	#272
+	add	v237,	v237,	v238
+	str	v96,	[v237]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v240,	#4000
+	mla	v239,	v54,	v240,	v47
+	mov	v240,	#276
+	add	v239,	v239,	v240
+	str	v96,	[v239]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v242,	#4000
+	mla	v241,	v54,	v242,	v47
+	mov	v242,	#280
+	add	v241,	v241,	v242
+	str	v96,	[v241]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v244,	#4000
+	mla	v243,	v54,	v244,	v47
+	mov	v244,	#284
+	add	v243,	v243,	v244
+	str	v96,	[v243]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v246,	#4000
+	mla	v245,	v54,	v246,	v47
+	mov	v246,	#288
+	add	v245,	v245,	v246
+	str	v96,	[v245]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v248,	#4000
+	mla	v247,	v54,	v248,	v47
+	mov	v248,	#292
+	add	v247,	v247,	v248
+	str	v96,	[v247]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v250,	#4000
+	mla	v249,	v54,	v250,	v47
+	mov	v250,	#296
+	add	v249,	v249,	v250
+	str	v96,	[v249]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v252,	#4000
+	mla	v251,	v54,	v252,	v47
+	mov	v252,	#300
+	add	v251,	v251,	v252
+	str	v96,	[v251]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v254,	#4000
+	mla	v253,	v54,	v254,	v47
+	mov	v254,	#304
+	add	v253,	v253,	v254
+	str	v96,	[v253]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v256,	#4000
+	mla	v255,	v54,	v256,	v47
+	mov	v256,	#308
+	add	v255,	v255,	v256
+	str	v96,	[v255]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v258,	#4000
+	mla	v257,	v54,	v258,	v47
+	mov	v258,	#312
+	add	v257,	v257,	v258
+	str	v96,	[v257]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v260,	#4000
+	mla	v259,	v54,	v260,	v47
+	mov	v260,	#316
+	add	v259,	v259,	v260
+	str	v96,	[v259]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v262,	#4000
+	mla	v261,	v54,	v262,	v47
+	mov	v262,	#320
+	add	v261,	v261,	v262
+	str	v96,	[v261]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v264,	#4000
+	mla	v263,	v54,	v264,	v47
+	mov	v264,	#324
+	add	v263,	v263,	v264
+	str	v96,	[v263]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v266,	#4000
+	mla	v265,	v54,	v266,	v47
+	mov	v266,	#328
+	add	v265,	v265,	v266
+	str	v96,	[v265]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v268,	#4000
+	mla	v267,	v54,	v268,	v47
+	mov	v268,	#332
+	add	v267,	v267,	v268
+	str	v96,	[v267]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v270,	#4000
+	mla	v269,	v54,	v270,	v47
+	mov	v270,	#336
+	add	v269,	v269,	v270
+	str	v96,	[v269]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v272,	#4000
+	mla	v271,	v54,	v272,	v47
+	mov	v272,	#340
+	add	v271,	v271,	v272
+	str	v96,	[v271]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v274,	#4000
+	mla	v273,	v54,	v274,	v47
+	mov	v274,	#344
+	add	v273,	v273,	v274
+	str	v96,	[v273]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v276,	#4000
+	mla	v275,	v54,	v276,	v47
+	mov	v276,	#348
+	add	v275,	v275,	v276
+	str	v96,	[v275]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v278,	#4000
+	mla	v277,	v54,	v278,	v47
+	mov	v278,	#352
+	add	v277,	v277,	v278
+	str	v96,	[v277]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v280,	#4000
+	mla	v279,	v54,	v280,	v47
+	mov	v280,	#356
+	add	v279,	v279,	v280
+	str	v96,	[v279]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v282,	#4000
+	mla	v281,	v54,	v282,	v47
+	mov	v282,	#360
+	add	v281,	v281,	v282
+	str	v96,	[v281]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v284,	#4000
+	mla	v283,	v54,	v284,	v47
+	mov	v284,	#364
+	add	v283,	v283,	v284
+	str	v96,	[v283]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v286,	#4000
+	mla	v285,	v54,	v286,	v47
+	mov	v286,	#368
+	add	v285,	v285,	v286
+	str	v96,	[v285]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v288,	#4000
+	mla	v287,	v54,	v288,	v47
+	mov	v288,	#372
+	add	v287,	v287,	v288
+	str	v96,	[v287]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v290,	#4000
+	mla	v289,	v54,	v290,	v47
+	mov	v290,	#376
+	add	v289,	v289,	v290
+	str	v96,	[v289]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v292,	#4000
+	mla	v291,	v54,	v292,	v47
+	mov	v292,	#380
+	add	v291,	v291,	v292
+	str	v96,	[v291]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v294,	#4000
+	mla	v293,	v54,	v294,	v47
+	mov	v294,	#384
+	add	v293,	v293,	v294
+	str	v96,	[v293]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v296,	#4000
+	mla	v295,	v54,	v296,	v47
+	mov	v296,	#388
+	add	v295,	v295,	v296
+	str	v96,	[v295]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v298,	#4000
+	mla	v297,	v54,	v298,	v47
+	mov	v298,	#392
+	add	v297,	v297,	v298
+	str	v96,	[v297]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v300,	#4000
+	mla	v299,	v54,	v300,	v47
+	mov	v300,	#396
+	add	v299,	v299,	v300
+	str	v96,	[v299]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v302,	#4000
+	mla	v301,	v54,	v302,	v47
+	mov	v302,	#400
+	add	v301,	v301,	v302
+	str	v96,	[v301]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v304,	#4000
+	mla	v303,	v54,	v304,	v47
+	mov	v304,	#404
+	add	v303,	v303,	v304
+	str	v96,	[v303]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v306,	#4000
+	mla	v305,	v54,	v306,	v47
+	mov	v306,	#408
+	add	v305,	v305,	v306
+	str	v96,	[v305]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v308,	#4000
+	mla	v307,	v54,	v308,	v47
+	mov	v308,	#412
+	add	v307,	v307,	v308
+	str	v96,	[v307]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v310,	#4000
+	mla	v309,	v54,	v310,	v47
+	mov	v310,	#416
+	add	v309,	v309,	v310
+	str	v96,	[v309]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v312,	#4000
+	mla	v311,	v54,	v312,	v47
+	mov	v312,	#420
+	add	v311,	v311,	v312
+	str	v96,	[v311]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v314,	#4000
+	mla	v313,	v54,	v314,	v47
+	mov	v314,	#424
+	add	v313,	v313,	v314
+	str	v96,	[v313]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v316,	#4000
+	mla	v315,	v54,	v316,	v47
+	mov	v316,	#428
+	add	v315,	v315,	v316
+	str	v96,	[v315]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v318,	#4000
+	mla	v317,	v54,	v318,	v47
+	mov	v318,	#432
+	add	v317,	v317,	v318
+	str	v96,	[v317]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v320,	#4000
+	mla	v319,	v54,	v320,	v47
+	mov	v320,	#436
+	add	v319,	v319,	v320
+	str	v96,	[v319]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v322,	#4000
+	mla	v321,	v54,	v322,	v47
+	mov	v322,	#440
+	add	v321,	v321,	v322
+	str	v96,	[v321]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v324,	#4000
+	mla	v323,	v54,	v324,	v47
+	mov	v324,	#444
+	add	v323,	v323,	v324
+	str	v96,	[v323]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v326,	#4000
+	mla	v325,	v54,	v326,	v47
+	mov	v326,	#448
+	add	v325,	v325,	v326
+	str	v96,	[v325]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v328,	#4000
+	mla	v327,	v54,	v328,	v47
+	mov	v328,	#452
+	add	v327,	v327,	v328
+	str	v96,	[v327]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v330,	#4000
+	mla	v329,	v54,	v330,	v47
+	mov	v330,	#456
+	add	v329,	v329,	v330
+	str	v96,	[v329]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v332,	#4000
+	mla	v331,	v54,	v332,	v47
+	mov	v332,	#460
+	add	v331,	v331,	v332
+	str	v96,	[v331]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v334,	#4000
+	mla	v333,	v54,	v334,	v47
+	mov	v334,	#464
+	add	v333,	v333,	v334
+	str	v96,	[v333]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v336,	#4000
+	mla	v335,	v54,	v336,	v47
+	mov	v336,	#468
+	add	v335,	v335,	v336
+	str	v96,	[v335]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v338,	#4000
+	mla	v337,	v54,	v338,	v47
+	mov	v338,	#472
+	add	v337,	v337,	v338
+	str	v96,	[v337]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v340,	#4000
+	mla	v339,	v54,	v340,	v47
+	mov	v340,	#476
+	add	v339,	v339,	v340
+	str	v96,	[v339]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v342,	#4000
+	mla	v341,	v54,	v342,	v47
+	mov	v342,	#480
+	add	v341,	v341,	v342
+	str	v96,	[v341]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v344,	#4000
+	mla	v343,	v54,	v344,	v47
+	mov	v344,	#484
+	add	v343,	v343,	v344
+	str	v96,	[v343]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v346,	#4000
+	mla	v345,	v54,	v346,	v47
+	mov	v346,	#488
+	add	v345,	v345,	v346
+	str	v96,	[v345]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v348,	#4000
+	mla	v347,	v54,	v348,	v47
+	mov	v348,	#492
+	add	v347,	v347,	v348
+	str	v96,	[v347]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v350,	#4000
+	mla	v349,	v54,	v350,	v47
+	mov	v350,	#496
+	add	v349,	v349,	v350
+	str	v96,	[v349]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v352,	#4000
+	mla	v351,	v54,	v352,	v47
+	mov	v352,	#500
+	add	v351,	v351,	v352
+	str	v96,	[v351]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v354,	#4000
+	mla	v353,	v54,	v354,	v47
+	mov	v354,	#504
+	add	v353,	v353,	v354
+	str	v96,	[v353]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v356,	#4000
+	mla	v355,	v54,	v356,	v47
+	mov	v356,	#508
+	add	v355,	v355,	v356
+	str	v96,	[v355]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v358,	#4000
+	mla	v357,	v54,	v358,	v47
+	mov	v358,	#512
+	add	v357,	v357,	v358
+	str	v96,	[v357]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v360,	#4000
+	mla	v359,	v54,	v360,	v47
+	mov	v360,	#516
+	add	v359,	v359,	v360
+	str	v96,	[v359]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v362,	#4000
+	mla	v361,	v54,	v362,	v47
+	mov	v362,	#520
+	add	v361,	v361,	v362
+	str	v96,	[v361]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v364,	#4000
+	mla	v363,	v54,	v364,	v47
+	mov	v364,	#524
+	add	v363,	v363,	v364
+	str	v96,	[v363]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v366,	#4000
+	mla	v365,	v54,	v366,	v47
+	mov	v366,	#528
+	add	v365,	v365,	v366
+	str	v96,	[v365]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v368,	#4000
+	mla	v367,	v54,	v368,	v47
+	mov	v368,	#532
+	add	v367,	v367,	v368
+	str	v96,	[v367]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v370,	#4000
+	mla	v369,	v54,	v370,	v47
+	mov	v370,	#536
+	add	v369,	v369,	v370
+	str	v96,	[v369]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v372,	#4000
+	mla	v371,	v54,	v372,	v47
+	mov	v372,	#540
+	add	v371,	v371,	v372
+	str	v96,	[v371]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v374,	#4000
+	mla	v373,	v54,	v374,	v47
+	mov	v374,	#544
+	add	v373,	v373,	v374
+	str	v96,	[v373]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v376,	#4000
+	mla	v375,	v54,	v376,	v47
+	mov	v376,	#548
+	add	v375,	v375,	v376
+	str	v96,	[v375]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v378,	#4000
+	mla	v377,	v54,	v378,	v47
+	mov	v378,	#552
+	add	v377,	v377,	v378
+	str	v96,	[v377]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v380,	#4000
+	mla	v379,	v54,	v380,	v47
+	mov	v380,	#556
+	add	v379,	v379,	v380
+	str	v96,	[v379]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v382,	#4000
+	mla	v381,	v54,	v382,	v47
+	mov	v382,	#560
+	add	v381,	v381,	v382
+	str	v96,	[v381]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v384,	#4000
+	mla	v383,	v54,	v384,	v47
+	mov	v384,	#564
+	add	v383,	v383,	v384
+	str	v96,	[v383]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v386,	#4000
+	mla	v385,	v54,	v386,	v47
+	mov	v386,	#568
+	add	v385,	v385,	v386
+	str	v96,	[v385]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v388,	#4000
+	mla	v387,	v54,	v388,	v47
+	mov	v388,	#572
+	add	v387,	v387,	v388
+	str	v96,	[v387]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v390,	#4000
+	mla	v389,	v54,	v390,	v47
+	mov	v390,	#576
+	add	v389,	v389,	v390
+	str	v96,	[v389]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v392,	#4000
+	mla	v391,	v54,	v392,	v47
+	mov	v392,	#580
+	add	v391,	v391,	v392
+	str	v96,	[v391]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v394,	#4000
+	mla	v393,	v54,	v394,	v47
+	mov	v394,	#584
+	add	v393,	v393,	v394
+	str	v96,	[v393]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v396,	#4000
+	mla	v395,	v54,	v396,	v47
+	mov	v396,	#588
+	add	v395,	v395,	v396
+	str	v96,	[v395]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v398,	#4000
+	mla	v397,	v54,	v398,	v47
+	mov	v398,	#592
+	add	v397,	v397,	v398
+	str	v96,	[v397]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v400,	#4000
+	mla	v399,	v54,	v400,	v47
+	mov	v400,	#596
+	add	v399,	v399,	v400
+	str	v96,	[v399]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v402,	#4000
+	mla	v401,	v54,	v402,	v47
+	mov	v402,	#600
+	add	v401,	v401,	v402
+	str	v96,	[v401]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v404,	#4000
+	mla	v403,	v54,	v404,	v47
+	mov	v404,	#604
+	add	v403,	v403,	v404
+	str	v96,	[v403]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v406,	#4000
+	mla	v405,	v54,	v406,	v47
+	mov	v406,	#608
+	add	v405,	v405,	v406
+	str	v96,	[v405]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v408,	#4000
+	mla	v407,	v54,	v408,	v47
+	mov	v408,	#612
+	add	v407,	v407,	v408
+	str	v96,	[v407]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v410,	#4000
+	mla	v409,	v54,	v410,	v47
+	mov	v410,	#616
+	add	v409,	v409,	v410
+	str	v96,	[v409]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v412,	#4000
+	mla	v411,	v54,	v412,	v47
+	mov	v412,	#620
+	add	v411,	v411,	v412
+	str	v96,	[v411]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v414,	#4000
+	mla	v413,	v54,	v414,	v47
+	mov	v414,	#624
+	add	v413,	v413,	v414
+	str	v96,	[v413]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v416,	#4000
+	mla	v415,	v54,	v416,	v47
+	mov	v416,	#628
+	add	v415,	v415,	v416
+	str	v96,	[v415]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v418,	#4000
+	mla	v417,	v54,	v418,	v47
+	mov	v418,	#632
+	add	v417,	v417,	v418
+	str	v96,	[v417]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v420,	#4000
+	mla	v419,	v54,	v420,	v47
+	mov	v420,	#636
+	add	v419,	v419,	v420
+	str	v96,	[v419]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v422,	#4000
+	mla	v421,	v54,	v422,	v47
+	mov	v422,	#640
+	add	v421,	v421,	v422
+	str	v96,	[v421]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v424,	#4000
+	mla	v423,	v54,	v424,	v47
+	mov	v424,	#644
+	add	v423,	v423,	v424
+	str	v96,	[v423]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v426,	#4000
+	mla	v425,	v54,	v426,	v47
+	mov	v426,	#648
+	add	v425,	v425,	v426
+	str	v96,	[v425]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v428,	#4000
+	mla	v427,	v54,	v428,	v47
+	mov	v428,	#652
+	add	v427,	v427,	v428
+	str	v96,	[v427]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v430,	#4000
+	mla	v429,	v54,	v430,	v47
+	mov	v430,	#656
+	add	v429,	v429,	v430
+	str	v96,	[v429]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v432,	#4000
+	mla	v431,	v54,	v432,	v47
+	mov	v432,	#660
+	add	v431,	v431,	v432
+	str	v96,	[v431]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v434,	#4000
+	mla	v433,	v54,	v434,	v47
+	mov	v434,	#664
+	add	v433,	v433,	v434
+	str	v96,	[v433]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v436,	#4000
+	mla	v435,	v54,	v436,	v47
+	mov	v436,	#668
+	add	v435,	v435,	v436
+	str	v96,	[v435]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v438,	#4000
+	mla	v437,	v54,	v438,	v47
+	mov	v438,	#672
+	add	v437,	v437,	v438
+	str	v96,	[v437]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v440,	#4000
+	mla	v439,	v54,	v440,	v47
+	mov	v440,	#676
+	add	v439,	v439,	v440
+	str	v96,	[v439]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v442,	#4000
+	mla	v441,	v54,	v442,	v47
+	mov	v442,	#680
+	add	v441,	v441,	v442
+	str	v96,	[v441]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v444,	#4000
+	mla	v443,	v54,	v444,	v47
+	mov	v444,	#684
+	add	v443,	v443,	v444
+	str	v96,	[v443]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v446,	#4000
+	mla	v445,	v54,	v446,	v47
+	mov	v446,	#688
+	add	v445,	v445,	v446
+	str	v96,	[v445]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v448,	#4000
+	mla	v447,	v54,	v448,	v47
+	mov	v448,	#692
+	add	v447,	v447,	v448
+	str	v96,	[v447]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v450,	#4000
+	mla	v449,	v54,	v450,	v47
+	mov	v450,	#696
+	add	v449,	v449,	v450
+	str	v96,	[v449]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v452,	#4000
+	mla	v451,	v54,	v452,	v47
+	mov	v452,	#700
+	add	v451,	v451,	v452
+	str	v96,	[v451]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v454,	#4000
+	mla	v453,	v54,	v454,	v47
+	mov	v454,	#704
+	add	v453,	v453,	v454
+	str	v96,	[v453]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v456,	#4000
+	mla	v455,	v54,	v456,	v47
+	mov	v456,	#708
+	add	v455,	v455,	v456
+	str	v96,	[v455]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v458,	#4000
+	mla	v457,	v54,	v458,	v47
+	mov	v458,	#712
+	add	v457,	v457,	v458
+	str	v96,	[v457]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v460,	#4000
+	mla	v459,	v54,	v460,	v47
+	mov	v460,	#716
+	add	v459,	v459,	v460
+	str	v96,	[v459]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v462,	#4000
+	mla	v461,	v54,	v462,	v47
+	mov	v462,	#720
+	add	v461,	v461,	v462
+	str	v96,	[v461]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v464,	#4000
+	mla	v463,	v54,	v464,	v47
+	mov	v464,	#724
+	add	v463,	v463,	v464
+	str	v96,	[v463]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v466,	#4000
+	mla	v465,	v54,	v466,	v47
+	mov	v466,	#728
+	add	v465,	v465,	v466
+	str	v96,	[v465]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v468,	#4000
+	mla	v467,	v54,	v468,	v47
+	mov	v468,	#732
+	add	v467,	v467,	v468
+	str	v96,	[v467]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v470,	#4000
+	mla	v469,	v54,	v470,	v47
+	mov	v470,	#736
+	add	v469,	v469,	v470
+	str	v96,	[v469]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v472,	#4000
+	mla	v471,	v54,	v472,	v47
+	mov	v472,	#740
+	add	v471,	v471,	v472
+	str	v96,	[v471]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v474,	#4000
+	mla	v473,	v54,	v474,	v47
+	mov	v474,	#744
+	add	v473,	v473,	v474
+	str	v96,	[v473]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v476,	#4000
+	mla	v475,	v54,	v476,	v47
+	mov	v476,	#748
+	add	v475,	v475,	v476
+	str	v96,	[v475]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v478,	#4000
+	mla	v477,	v54,	v478,	v47
+	mov	v478,	#752
+	add	v477,	v477,	v478
+	str	v96,	[v477]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v480,	#4000
+	mla	v479,	v54,	v480,	v47
+	mov	v480,	#756
+	add	v479,	v479,	v480
+	str	v96,	[v479]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v482,	#4000
+	mla	v481,	v54,	v482,	v47
+	mov	v482,	#760
+	add	v481,	v481,	v482
+	str	v96,	[v481]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v484,	#4000
+	mla	v483,	v54,	v484,	v47
+	mov	v484,	#764
+	add	v483,	v483,	v484
+	str	v96,	[v483]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v486,	#4000
+	mla	v485,	v54,	v486,	v47
+	mov	v486,	#768
+	add	v485,	v485,	v486
+	str	v96,	[v485]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v488,	#4000
+	mla	v487,	v54,	v488,	v47
+	mov	v488,	#772
+	add	v487,	v487,	v488
+	str	v96,	[v487]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v490,	#4000
+	mla	v489,	v54,	v490,	v47
+	mov	v490,	#776
+	add	v489,	v489,	v490
+	str	v96,	[v489]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v492,	#4000
+	mla	v491,	v54,	v492,	v47
+	mov	v492,	#780
+	add	v491,	v491,	v492
+	str	v96,	[v491]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v494,	#4000
+	mla	v493,	v54,	v494,	v47
+	mov	v494,	#784
+	add	v493,	v493,	v494
+	str	v96,	[v493]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v496,	#4000
+	mla	v495,	v54,	v496,	v47
+	mov	v496,	#788
+	add	v495,	v495,	v496
+	str	v96,	[v495]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v498,	#4000
+	mla	v497,	v54,	v498,	v47
+	mov	v498,	#792
+	add	v497,	v497,	v498
+	str	v96,	[v497]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v500,	#4000
+	mla	v499,	v54,	v500,	v47
+	mov	v500,	#796
+	add	v499,	v499,	v500
+	str	v96,	[v499]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v502,	#4000
+	mla	v501,	v54,	v502,	v47
+	mov	v502,	#800
+	add	v501,	v501,	v502
+	str	v96,	[v501]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v504,	#4000
+	mla	v503,	v54,	v504,	v47
+	mov	v504,	#804
+	add	v503,	v503,	v504
+	str	v96,	[v503]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v506,	#4000
+	mla	v505,	v54,	v506,	v47
+	mov	v506,	#808
+	add	v505,	v505,	v506
+	str	v96,	[v505]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v508,	#4000
+	mla	v507,	v54,	v508,	v47
+	mov	v508,	#812
+	add	v507,	v507,	v508
+	str	v96,	[v507]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v510,	#4000
+	mla	v509,	v54,	v510,	v47
+	mov	v510,	#816
+	add	v509,	v509,	v510
+	str	v96,	[v509]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v512,	#4000
+	mla	v511,	v54,	v512,	v47
+	mov	v512,	#820
+	add	v511,	v511,	v512
+	str	v96,	[v511]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v514,	#4000
+	mla	v513,	v54,	v514,	v47
+	mov	v514,	#824
+	add	v513,	v513,	v514
+	str	v96,	[v513]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v516,	#4000
+	mla	v515,	v54,	v516,	v47
+	mov	v516,	#828
+	add	v515,	v515,	v516
+	str	v96,	[v515]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v518,	#4000
+	mla	v517,	v54,	v518,	v47
+	mov	v518,	#832
+	add	v517,	v517,	v518
+	str	v96,	[v517]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v520,	#4000
+	mla	v519,	v54,	v520,	v47
+	mov	v520,	#836
+	add	v519,	v519,	v520
+	str	v96,	[v519]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v522,	#4000
+	mla	v521,	v54,	v522,	v47
+	mov	v522,	#840
+	add	v521,	v521,	v522
+	str	v96,	[v521]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v524,	#4000
+	mla	v523,	v54,	v524,	v47
+	mov	v524,	#844
+	add	v523,	v523,	v524
+	str	v96,	[v523]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v526,	#4000
+	mla	v525,	v54,	v526,	v47
+	mov	v526,	#848
+	add	v525,	v525,	v526
+	str	v96,	[v525]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v528,	#4000
+	mla	v527,	v54,	v528,	v47
+	mov	v528,	#852
+	add	v527,	v527,	v528
+	str	v96,	[v527]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v530,	#4000
+	mla	v529,	v54,	v530,	v47
+	mov	v530,	#856
+	add	v529,	v529,	v530
+	str	v96,	[v529]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v532,	#4000
+	mla	v531,	v54,	v532,	v47
+	mov	v532,	#860
+	add	v531,	v531,	v532
+	str	v96,	[v531]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v534,	#4000
+	mla	v533,	v54,	v534,	v47
+	mov	v534,	#864
+	add	v533,	v533,	v534
+	str	v96,	[v533]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v536,	#4000
+	mla	v535,	v54,	v536,	v47
+	mov	v536,	#868
+	add	v535,	v535,	v536
+	str	v96,	[v535]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v538,	#4000
+	mla	v537,	v54,	v538,	v47
+	mov	v538,	#872
+	add	v537,	v537,	v538
+	str	v96,	[v537]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v540,	#4000
+	mla	v539,	v54,	v540,	v47
+	mov	v540,	#876
+	add	v539,	v539,	v540
+	str	v96,	[v539]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v542,	#4000
+	mla	v541,	v54,	v542,	v47
+	mov	v542,	#880
+	add	v541,	v541,	v542
+	str	v96,	[v541]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v544,	#4000
+	mla	v543,	v54,	v544,	v47
+	mov	v544,	#884
+	add	v543,	v543,	v544
+	str	v96,	[v543]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v546,	#4000
+	mla	v545,	v54,	v546,	v47
+	mov	v546,	#888
+	add	v545,	v545,	v546
+	str	v96,	[v545]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v548,	#4000
+	mla	v547,	v54,	v548,	v47
+	mov	v548,	#892
+	add	v547,	v547,	v548
+	str	v96,	[v547]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v550,	#4000
+	mla	v549,	v54,	v550,	v47
+	mov	v550,	#896
+	add	v549,	v549,	v550
+	str	v96,	[v549]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v552,	#4000
+	mla	v551,	v54,	v552,	v47
+	mov	v552,	#900
+	add	v551,	v551,	v552
+	str	v96,	[v551]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v554,	#4000
+	mla	v553,	v54,	v554,	v47
+	mov	v554,	#904
+	add	v553,	v553,	v554
+	str	v96,	[v553]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v556,	#4000
+	mla	v555,	v54,	v556,	v47
+	mov	v556,	#908
+	add	v555,	v555,	v556
+	str	v96,	[v555]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v558,	#4000
+	mla	v557,	v54,	v558,	v47
+	mov	v558,	#912
+	add	v557,	v557,	v558
+	str	v96,	[v557]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v560,	#4000
+	mla	v559,	v54,	v560,	v47
+	mov	v560,	#916
+	add	v559,	v559,	v560
+	str	v96,	[v559]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v562,	#4000
+	mla	v561,	v54,	v562,	v47
+	mov	v562,	#920
+	add	v561,	v561,	v562
+	str	v96,	[v561]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v564,	#4000
+	mla	v563,	v54,	v564,	v47
+	mov	v564,	#924
+	add	v563,	v563,	v564
+	str	v96,	[v563]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v566,	#4000
+	mla	v565,	v54,	v566,	v47
+	mov	v566,	#928
+	add	v565,	v565,	v566
+	str	v96,	[v565]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v568,	#4000
+	mla	v567,	v54,	v568,	v47
+	mov	v568,	#932
+	add	v567,	v567,	v568
+	str	v96,	[v567]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v570,	#4000
+	mla	v569,	v54,	v570,	v47
+	mov	v570,	#936
+	add	v569,	v569,	v570
+	str	v96,	[v569]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v572,	#4000
+	mla	v571,	v54,	v572,	v47
+	mov	v572,	#940
+	add	v571,	v571,	v572
+	str	v96,	[v571]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v574,	#4000
+	mla	v573,	v54,	v574,	v47
+	mov	v574,	#944
+	add	v573,	v573,	v574
+	str	v96,	[v573]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v576,	#4000
+	mla	v575,	v54,	v576,	v47
+	mov	v576,	#948
+	add	v575,	v575,	v576
+	str	v96,	[v575]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v578,	#4000
+	mla	v577,	v54,	v578,	v47
+	mov	v578,	#952
+	add	v577,	v577,	v578
+	str	v96,	[v577]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v580,	#4000
+	mla	v579,	v54,	v580,	v47
+	mov	v580,	#956
+	add	v579,	v579,	v580
+	str	v96,	[v579]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v582,	#4000
+	mla	v581,	v54,	v582,	v47
+	mov	v582,	#960
+	add	v581,	v581,	v582
+	str	v96,	[v581]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v584,	#4000
+	mla	v583,	v54,	v584,	v47
+	mov	v584,	#964
+	add	v583,	v583,	v584
+	str	v96,	[v583]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v586,	#4000
+	mla	v585,	v54,	v586,	v47
+	mov	v586,	#968
+	add	v585,	v585,	v586
+	str	v96,	[v585]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v588,	#4000
+	mla	v587,	v54,	v588,	v47
+	mov	v588,	#972
+	add	v587,	v587,	v588
+	str	v96,	[v587]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v590,	#4000
+	mla	v589,	v54,	v590,	v47
+	mov	v590,	#976
+	add	v589,	v589,	v590
+	str	v96,	[v589]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v592,	#4000
+	mla	v591,	v54,	v592,	v47
+	mov	v592,	#980
+	add	v591,	v591,	v592
+	str	v96,	[v591]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v594,	#4000
+	mla	v593,	v54,	v594,	v47
+	mov	v594,	#984
+	add	v593,	v593,	v594
+	str	v96,	[v593]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v596,	#4000
+	mla	v595,	v54,	v596,	v47
+	mov	v596,	#988
+	add	v595,	v595,	v596
+	str	v96,	[v595]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v598,	#4000
+	mla	v597,	v54,	v598,	v47
+	mov	v598,	#992
+	add	v597,	v597,	v598
+	str	v96,	[v597]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v600,	#4000
+	mla	v599,	v54,	v600,	v47
+	mov	v600,	#996
+	add	v599,	v599,	v600
+	str	v96,	[v599]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v602,	#4000
+	mla	v601,	v54,	v602,	v47
+	mov	v602,	#1000
+	add	v601,	v601,	v602
+	str	v96,	[v601]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v604,	#4000
+	mla	v603,	v54,	v604,	v47
+	mov	v604,	#1004
+	add	v603,	v603,	v604
+	str	v96,	[v603]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v606,	#4000
+	mla	v605,	v54,	v606,	v47
+	mov	v606,	#1008
+	add	v605,	v605,	v606
+	str	v96,	[v605]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v608,	#4000
+	mla	v607,	v54,	v608,	v47
+	mov	v608,	#1012
+	add	v607,	v607,	v608
+	str	v96,	[v607]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v610,	#4000
+	mla	v609,	v54,	v610,	v47
+	mov	v610,	#1016
+	add	v609,	v609,	v610
+	str	v96,	[v609]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v612,	#4000
+	mla	v611,	v54,	v612,	v47
+	mov	v612,	#1020
+	add	v611,	v611,	v612
+	str	v96,	[v611]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v614,	#4000
+	mla	v613,	v54,	v614,	v47
+	mov	v614,	#1024
+	add	v613,	v613,	v614
+	str	v96,	[v613]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v616,	#4000
+	mla	v615,	v54,	v616,	v47
+	movw	v616,	#1028
+	add	v615,	v615,	v616
+	str	v96,	[v615]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v618,	#4000
+	mla	v617,	v54,	v618,	v47
+	movw	v618,	#1032
+	add	v617,	v617,	v618
+	str	v96,	[v617]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v620,	#4000
+	mla	v619,	v54,	v620,	v47
+	movw	v620,	#1036
+	add	v619,	v619,	v620
+	str	v96,	[v619]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v622,	#4000
+	mla	v621,	v54,	v622,	v47
+	mov	v622,	#1040
+	add	v621,	v621,	v622
+	str	v96,	[v621]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v624,	#4000
+	mla	v623,	v54,	v624,	v47
+	movw	v624,	#1044
+	add	v623,	v623,	v624
+	str	v96,	[v623]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v626,	#4000
+	mla	v625,	v54,	v626,	v47
+	movw	v626,	#1048
+	add	v625,	v625,	v626
+	str	v96,	[v625]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v628,	#4000
+	mla	v627,	v54,	v628,	v47
+	movw	v628,	#1052
+	add	v627,	v627,	v628
+	str	v96,	[v627]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v630,	#4000
+	mla	v629,	v54,	v630,	v47
+	mov	v630,	#1056
+	add	v629,	v629,	v630
+	str	v96,	[v629]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v632,	#4000
+	mla	v631,	v54,	v632,	v47
+	movw	v632,	#1060
+	add	v631,	v631,	v632
+	str	v96,	[v631]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v634,	#4000
+	mla	v633,	v54,	v634,	v47
+	movw	v634,	#1064
+	add	v633,	v633,	v634
+	str	v96,	[v633]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v636,	#4000
+	mla	v635,	v54,	v636,	v47
+	movw	v636,	#1068
+	add	v635,	v635,	v636
+	str	v96,	[v635]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v638,	#4000
+	mla	v637,	v54,	v638,	v47
+	mov	v638,	#1072
+	add	v637,	v637,	v638
+	str	v96,	[v637]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v640,	#4000
+	mla	v639,	v54,	v640,	v47
+	movw	v640,	#1076
+	add	v639,	v639,	v640
+	str	v96,	[v639]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v642,	#4000
+	mla	v641,	v54,	v642,	v47
+	movw	v642,	#1080
+	add	v641,	v641,	v642
+	str	v96,	[v641]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v644,	#4000
+	mla	v643,	v54,	v644,	v47
+	movw	v644,	#1084
+	add	v643,	v643,	v644
+	str	v96,	[v643]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v646,	#4000
+	mla	v645,	v54,	v646,	v47
+	mov	v646,	#1088
+	add	v645,	v645,	v646
+	str	v96,	[v645]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v648,	#4000
+	mla	v647,	v54,	v648,	v47
+	movw	v648,	#1092
+	add	v647,	v647,	v648
+	str	v96,	[v647]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v650,	#4000
+	mla	v649,	v54,	v650,	v47
+	movw	v650,	#1096
+	add	v649,	v649,	v650
+	str	v96,	[v649]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v652,	#4000
+	mla	v651,	v54,	v652,	v47
+	movw	v652,	#1100
+	add	v651,	v651,	v652
+	str	v96,	[v651]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v654,	#4000
+	mla	v653,	v54,	v654,	v47
+	mov	v654,	#1104
+	add	v653,	v653,	v654
+	str	v96,	[v653]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v656,	#4000
+	mla	v655,	v54,	v656,	v47
+	movw	v656,	#1108
+	add	v655,	v655,	v656
+	str	v96,	[v655]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v658,	#4000
+	mla	v657,	v54,	v658,	v47
+	movw	v658,	#1112
+	add	v657,	v657,	v658
+	str	v96,	[v657]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v660,	#4000
+	mla	v659,	v54,	v660,	v47
+	movw	v660,	#1116
+	add	v659,	v659,	v660
+	str	v96,	[v659]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v662,	#4000
+	mla	v661,	v54,	v662,	v47
+	mov	v662,	#1120
+	add	v661,	v661,	v662
+	str	v96,	[v661]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v664,	#4000
+	mla	v663,	v54,	v664,	v47
+	movw	v664,	#1124
+	add	v663,	v663,	v664
+	str	v96,	[v663]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v666,	#4000
+	mla	v665,	v54,	v666,	v47
+	movw	v666,	#1128
+	add	v665,	v665,	v666
+	str	v96,	[v665]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v668,	#4000
+	mla	v667,	v54,	v668,	v47
+	movw	v668,	#1132
+	add	v667,	v667,	v668
+	str	v96,	[v667]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v670,	#4000
+	mla	v669,	v54,	v670,	v47
+	mov	v670,	#1136
+	add	v669,	v669,	v670
+	str	v96,	[v669]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v672,	#4000
+	mla	v671,	v54,	v672,	v47
+	movw	v672,	#1140
+	add	v671,	v671,	v672
+	str	v96,	[v671]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v674,	#4000
+	mla	v673,	v54,	v674,	v47
+	movw	v674,	#1144
+	add	v673,	v673,	v674
+	str	v96,	[v673]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v676,	#4000
+	mla	v675,	v54,	v676,	v47
+	movw	v676,	#1148
+	add	v675,	v675,	v676
+	str	v96,	[v675]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v678,	#4000
+	mla	v677,	v54,	v678,	v47
+	mov	v678,	#1152
+	add	v677,	v677,	v678
+	str	v96,	[v677]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v680,	#4000
+	mla	v679,	v54,	v680,	v47
+	movw	v680,	#1156
+	add	v679,	v679,	v680
+	str	v96,	[v679]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v682,	#4000
+	mla	v681,	v54,	v682,	v47
+	movw	v682,	#1160
+	add	v681,	v681,	v682
+	str	v96,	[v681]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v684,	#4000
+	mla	v683,	v54,	v684,	v47
+	movw	v684,	#1164
+	add	v683,	v683,	v684
+	str	v96,	[v683]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v686,	#4000
+	mla	v685,	v54,	v686,	v47
+	mov	v686,	#1168
+	add	v685,	v685,	v686
+	str	v96,	[v685]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v688,	#4000
+	mla	v687,	v54,	v688,	v47
+	movw	v688,	#1172
+	add	v687,	v687,	v688
+	str	v96,	[v687]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v690,	#4000
+	mla	v689,	v54,	v690,	v47
+	movw	v690,	#1176
+	add	v689,	v689,	v690
+	str	v96,	[v689]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v692,	#4000
+	mla	v691,	v54,	v692,	v47
+	movw	v692,	#1180
+	add	v691,	v691,	v692
+	str	v96,	[v691]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v694,	#4000
+	mla	v693,	v54,	v694,	v47
+	mov	v694,	#1184
+	add	v693,	v693,	v694
+	str	v96,	[v693]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v696,	#4000
+	mla	v695,	v54,	v696,	v47
+	movw	v696,	#1188
+	add	v695,	v695,	v696
+	str	v96,	[v695]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v698,	#4000
+	mla	v697,	v54,	v698,	v47
+	movw	v698,	#1192
+	add	v697,	v697,	v698
+	str	v96,	[v697]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v700,	#4000
+	mla	v699,	v54,	v700,	v47
+	movw	v700,	#1196
+	add	v699,	v699,	v700
+	str	v96,	[v699]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v702,	#4000
+	mla	v701,	v54,	v702,	v47
+	mov	v702,	#1200
+	add	v701,	v701,	v702
+	str	v96,	[v701]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v704,	#4000
+	mla	v703,	v54,	v704,	v47
+	movw	v704,	#1204
+	add	v703,	v703,	v704
+	str	v96,	[v703]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v706,	#4000
+	mla	v705,	v54,	v706,	v47
+	movw	v706,	#1208
+	add	v705,	v705,	v706
+	str	v96,	[v705]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v708,	#4000
+	mla	v707,	v54,	v708,	v47
+	movw	v708,	#1212
+	add	v707,	v707,	v708
+	str	v96,	[v707]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v710,	#4000
+	mla	v709,	v54,	v710,	v47
+	mov	v710,	#1216
+	add	v709,	v709,	v710
+	str	v96,	[v709]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v712,	#4000
+	mla	v711,	v54,	v712,	v47
+	movw	v712,	#1220
+	add	v711,	v711,	v712
+	str	v96,	[v711]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v714,	#4000
+	mla	v713,	v54,	v714,	v47
+	movw	v714,	#1224
+	add	v713,	v713,	v714
+	str	v96,	[v713]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v716,	#4000
+	mla	v715,	v54,	v716,	v47
+	movw	v716,	#1228
+	add	v715,	v715,	v716
+	str	v96,	[v715]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v718,	#4000
+	mla	v717,	v54,	v718,	v47
+	mov	v718,	#1232
+	add	v717,	v717,	v718
+	str	v96,	[v717]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v720,	#4000
+	mla	v719,	v54,	v720,	v47
+	movw	v720,	#1236
+	add	v719,	v719,	v720
+	str	v96,	[v719]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v722,	#4000
+	mla	v721,	v54,	v722,	v47
+	movw	v722,	#1240
+	add	v721,	v721,	v722
+	str	v96,	[v721]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v724,	#4000
+	mla	v723,	v54,	v724,	v47
+	movw	v724,	#1244
+	add	v723,	v723,	v724
+	str	v96,	[v723]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v726,	#4000
+	mla	v725,	v54,	v726,	v47
+	mov	v726,	#1248
+	add	v725,	v725,	v726
+	str	v96,	[v725]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v728,	#4000
+	mla	v727,	v54,	v728,	v47
+	movw	v728,	#1252
+	add	v727,	v727,	v728
+	str	v96,	[v727]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v730,	#4000
+	mla	v729,	v54,	v730,	v47
+	movw	v730,	#1256
+	add	v729,	v729,	v730
+	str	v96,	[v729]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v732,	#4000
+	mla	v731,	v54,	v732,	v47
+	movw	v732,	#1260
+	add	v731,	v731,	v732
+	str	v96,	[v731]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v734,	#4000
+	mla	v733,	v54,	v734,	v47
+	mov	v734,	#1264
+	add	v733,	v733,	v734
+	str	v96,	[v733]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v736,	#4000
+	mla	v735,	v54,	v736,	v47
+	movw	v736,	#1268
+	add	v735,	v735,	v736
+	str	v96,	[v735]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v738,	#4000
+	mla	v737,	v54,	v738,	v47
+	movw	v738,	#1272
+	add	v737,	v737,	v738
+	str	v96,	[v737]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v740,	#4000
+	mla	v739,	v54,	v740,	v47
+	movw	v740,	#1276
+	add	v739,	v739,	v740
+	str	v96,	[v739]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v742,	#4000
+	mla	v741,	v54,	v742,	v47
+	mov	v742,	#1280
+	add	v741,	v741,	v742
+	str	v96,	[v741]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v744,	#4000
+	mla	v743,	v54,	v744,	v47
+	movw	v744,	#1284
+	add	v743,	v743,	v744
+	str	v96,	[v743]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v746,	#4000
+	mla	v745,	v54,	v746,	v47
+	movw	v746,	#1288
+	add	v745,	v745,	v746
+	str	v96,	[v745]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v748,	#4000
+	mla	v747,	v54,	v748,	v47
+	movw	v748,	#1292
+	add	v747,	v747,	v748
+	str	v96,	[v747]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v750,	#4000
+	mla	v749,	v54,	v750,	v47
+	mov	v750,	#1296
+	add	v749,	v749,	v750
+	str	v96,	[v749]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v752,	#4000
+	mla	v751,	v54,	v752,	v47
+	movw	v752,	#1300
+	add	v751,	v751,	v752
+	str	v96,	[v751]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v754,	#4000
+	mla	v753,	v54,	v754,	v47
+	movw	v754,	#1304
+	add	v753,	v753,	v754
+	str	v96,	[v753]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v756,	#4000
+	mla	v755,	v54,	v756,	v47
+	movw	v756,	#1308
+	add	v755,	v755,	v756
+	str	v96,	[v755]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v758,	#4000
+	mla	v757,	v54,	v758,	v47
+	mov	v758,	#1312
+	add	v757,	v757,	v758
+	str	v96,	[v757]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v760,	#4000
+	mla	v759,	v54,	v760,	v47
+	movw	v760,	#1316
+	add	v759,	v759,	v760
+	str	v96,	[v759]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v762,	#4000
+	mla	v761,	v54,	v762,	v47
+	movw	v762,	#1320
+	add	v761,	v761,	v762
+	str	v96,	[v761]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v764,	#4000
+	mla	v763,	v54,	v764,	v47
+	movw	v764,	#1324
+	add	v763,	v763,	v764
+	str	v96,	[v763]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v766,	#4000
+	mla	v765,	v54,	v766,	v47
+	mov	v766,	#1328
+	add	v765,	v765,	v766
+	str	v96,	[v765]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v768,	#4000
+	mla	v767,	v54,	v768,	v47
+	movw	v768,	#1332
+	add	v767,	v767,	v768
+	str	v96,	[v767]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v770,	#4000
+	mla	v769,	v54,	v770,	v47
+	movw	v770,	#1336
+	add	v769,	v769,	v770
+	str	v96,	[v769]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v772,	#4000
+	mla	v771,	v54,	v772,	v47
+	movw	v772,	#1340
+	add	v771,	v771,	v772
+	str	v96,	[v771]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v774,	#4000
+	mla	v773,	v54,	v774,	v47
+	mov	v774,	#1344
+	add	v773,	v773,	v774
+	str	v96,	[v773]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v776,	#4000
+	mla	v775,	v54,	v776,	v47
+	movw	v776,	#1348
+	add	v775,	v775,	v776
+	str	v96,	[v775]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v778,	#4000
+	mla	v777,	v54,	v778,	v47
+	movw	v778,	#1352
+	add	v777,	v777,	v778
+	str	v96,	[v777]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v780,	#4000
+	mla	v779,	v54,	v780,	v47
+	movw	v780,	#1356
+	add	v779,	v779,	v780
+	str	v96,	[v779]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v782,	#4000
+	mla	v781,	v54,	v782,	v47
+	mov	v782,	#1360
+	add	v781,	v781,	v782
+	str	v96,	[v781]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v784,	#4000
+	mla	v783,	v54,	v784,	v47
+	movw	v784,	#1364
+	add	v783,	v783,	v784
+	str	v96,	[v783]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v786,	#4000
+	mla	v785,	v54,	v786,	v47
+	movw	v786,	#1368
+	add	v785,	v785,	v786
+	str	v96,	[v785]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v788,	#4000
+	mla	v787,	v54,	v788,	v47
+	movw	v788,	#1372
+	add	v787,	v787,	v788
+	str	v96,	[v787]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v790,	#4000
+	mla	v789,	v54,	v790,	v47
+	mov	v790,	#1376
+	add	v789,	v789,	v790
+	str	v96,	[v789]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v792,	#4000
+	mla	v791,	v54,	v792,	v47
+	movw	v792,	#1380
+	add	v791,	v791,	v792
+	str	v96,	[v791]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v794,	#4000
+	mla	v793,	v54,	v794,	v47
+	movw	v794,	#1384
+	add	v793,	v793,	v794
+	str	v96,	[v793]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v796,	#4000
+	mla	v795,	v54,	v796,	v47
+	movw	v796,	#1388
+	add	v795,	v795,	v796
+	str	v96,	[v795]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v798,	#4000
+	mla	v797,	v54,	v798,	v47
+	mov	v798,	#1392
+	add	v797,	v797,	v798
+	str	v96,	[v797]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v800,	#4000
+	mla	v799,	v54,	v800,	v47
+	movw	v800,	#1396
+	add	v799,	v799,	v800
+	str	v96,	[v799]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v802,	#4000
+	mla	v801,	v54,	v802,	v47
+	movw	v802,	#1400
+	add	v801,	v801,	v802
+	str	v96,	[v801]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v804,	#4000
+	mla	v803,	v54,	v804,	v47
+	movw	v804,	#1404
+	add	v803,	v803,	v804
+	str	v96,	[v803]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v806,	#4000
+	mla	v805,	v54,	v806,	v47
+	mov	v806,	#1408
+	add	v805,	v805,	v806
+	str	v96,	[v805]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v808,	#4000
+	mla	v807,	v54,	v808,	v47
+	movw	v808,	#1412
+	add	v807,	v807,	v808
+	str	v96,	[v807]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v810,	#4000
+	mla	v809,	v54,	v810,	v47
+	movw	v810,	#1416
+	add	v809,	v809,	v810
+	str	v96,	[v809]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v812,	#4000
+	mla	v811,	v54,	v812,	v47
+	movw	v812,	#1420
+	add	v811,	v811,	v812
+	str	v96,	[v811]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v814,	#4000
+	mla	v813,	v54,	v814,	v47
+	mov	v814,	#1424
+	add	v813,	v813,	v814
+	str	v96,	[v813]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v816,	#4000
+	mla	v815,	v54,	v816,	v47
+	movw	v816,	#1428
+	add	v815,	v815,	v816
+	str	v96,	[v815]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v818,	#4000
+	mla	v817,	v54,	v818,	v47
+	movw	v818,	#1432
+	add	v817,	v817,	v818
+	str	v96,	[v817]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v820,	#4000
+	mla	v819,	v54,	v820,	v47
+	movw	v820,	#1436
+	add	v819,	v819,	v820
+	str	v96,	[v819]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v822,	#4000
+	mla	v821,	v54,	v822,	v47
+	mov	v822,	#1440
+	add	v821,	v821,	v822
+	str	v96,	[v821]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v824,	#4000
+	mla	v823,	v54,	v824,	v47
+	movw	v824,	#1444
+	add	v823,	v823,	v824
+	str	v96,	[v823]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v826,	#4000
+	mla	v825,	v54,	v826,	v47
+	movw	v826,	#1448
+	add	v825,	v825,	v826
+	str	v96,	[v825]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v828,	#4000
+	mla	v827,	v54,	v828,	v47
+	movw	v828,	#1452
+	add	v827,	v827,	v828
+	str	v96,	[v827]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v830,	#4000
+	mla	v829,	v54,	v830,	v47
+	mov	v830,	#1456
+	add	v829,	v829,	v830
+	str	v96,	[v829]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v832,	#4000
+	mla	v831,	v54,	v832,	v47
+	movw	v832,	#1460
+	add	v831,	v831,	v832
+	str	v96,	[v831]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v834,	#4000
+	mla	v833,	v54,	v834,	v47
+	movw	v834,	#1464
+	add	v833,	v833,	v834
+	str	v96,	[v833]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v836,	#4000
+	mla	v835,	v54,	v836,	v47
+	movw	v836,	#1468
+	add	v835,	v835,	v836
+	str	v96,	[v835]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v838,	#4000
+	mla	v837,	v54,	v838,	v47
+	mov	v838,	#1472
+	add	v837,	v837,	v838
+	str	v96,	[v837]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v840,	#4000
+	mla	v839,	v54,	v840,	v47
+	movw	v840,	#1476
+	add	v839,	v839,	v840
+	str	v96,	[v839]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v842,	#4000
+	mla	v841,	v54,	v842,	v47
+	movw	v842,	#1480
+	add	v841,	v841,	v842
+	str	v96,	[v841]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v844,	#4000
+	mla	v843,	v54,	v844,	v47
+	movw	v844,	#1484
+	add	v843,	v843,	v844
+	str	v96,	[v843]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v846,	#4000
+	mla	v845,	v54,	v846,	v47
+	mov	v846,	#1488
+	add	v845,	v845,	v846
+	str	v96,	[v845]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v848,	#4000
+	mla	v847,	v54,	v848,	v47
+	movw	v848,	#1492
+	add	v847,	v847,	v848
+	str	v96,	[v847]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v850,	#4000
+	mla	v849,	v54,	v850,	v47
+	movw	v850,	#1496
+	add	v849,	v849,	v850
+	str	v96,	[v849]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v852,	#4000
+	mla	v851,	v54,	v852,	v47
+	movw	v852,	#1500
+	add	v851,	v851,	v852
+	str	v96,	[v851]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v854,	#4000
+	mla	v853,	v54,	v854,	v47
+	mov	v854,	#1504
+	add	v853,	v853,	v854
+	str	v96,	[v853]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v856,	#4000
+	mla	v855,	v54,	v856,	v47
+	movw	v856,	#1508
+	add	v855,	v855,	v856
+	str	v96,	[v855]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v858,	#4000
+	mla	v857,	v54,	v858,	v47
+	movw	v858,	#1512
+	add	v857,	v857,	v858
+	str	v96,	[v857]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v860,	#4000
+	mla	v859,	v54,	v860,	v47
+	movw	v860,	#1516
+	add	v859,	v859,	v860
+	str	v96,	[v859]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v862,	#4000
+	mla	v861,	v54,	v862,	v47
+	mov	v862,	#1520
+	add	v861,	v861,	v862
+	str	v96,	[v861]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v864,	#4000
+	mla	v863,	v54,	v864,	v47
+	movw	v864,	#1524
+	add	v863,	v863,	v864
+	str	v96,	[v863]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v866,	#4000
+	mla	v865,	v54,	v866,	v47
+	movw	v866,	#1528
+	add	v865,	v865,	v866
+	str	v96,	[v865]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v868,	#4000
+	mla	v867,	v54,	v868,	v47
+	movw	v868,	#1532
+	add	v867,	v867,	v868
+	str	v96,	[v867]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v870,	#4000
+	mla	v869,	v54,	v870,	v47
+	mov	v870,	#1536
+	add	v869,	v869,	v870
+	str	v96,	[v869]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v872,	#4000
+	mla	v871,	v54,	v872,	v47
+	movw	v872,	#1540
+	add	v871,	v871,	v872
+	str	v96,	[v871]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v874,	#4000
+	mla	v873,	v54,	v874,	v47
+	movw	v874,	#1544
+	add	v873,	v873,	v874
+	str	v96,	[v873]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v876,	#4000
+	mla	v875,	v54,	v876,	v47
+	movw	v876,	#1548
+	add	v875,	v875,	v876
+	str	v96,	[v875]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v878,	#4000
+	mla	v877,	v54,	v878,	v47
+	mov	v878,	#1552
+	add	v877,	v877,	v878
+	str	v96,	[v877]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v880,	#4000
+	mla	v879,	v54,	v880,	v47
+	movw	v880,	#1556
+	add	v879,	v879,	v880
+	str	v96,	[v879]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v882,	#4000
+	mla	v881,	v54,	v882,	v47
+	movw	v882,	#1560
+	add	v881,	v881,	v882
+	str	v96,	[v881]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v884,	#4000
+	mla	v883,	v54,	v884,	v47
+	movw	v884,	#1564
+	add	v883,	v883,	v884
+	str	v96,	[v883]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v886,	#4000
+	mla	v885,	v54,	v886,	v47
+	mov	v886,	#1568
+	add	v885,	v885,	v886
+	str	v96,	[v885]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v888,	#4000
+	mla	v887,	v54,	v888,	v47
+	movw	v888,	#1572
+	add	v887,	v887,	v888
+	str	v96,	[v887]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v890,	#4000
+	mla	v889,	v54,	v890,	v47
+	movw	v890,	#1576
+	add	v889,	v889,	v890
+	str	v96,	[v889]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v892,	#4000
+	mla	v891,	v54,	v892,	v47
+	movw	v892,	#1580
+	add	v891,	v891,	v892
+	str	v96,	[v891]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v894,	#4000
+	mla	v893,	v54,	v894,	v47
+	mov	v894,	#1584
+	add	v893,	v893,	v894
+	str	v96,	[v893]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v896,	#4000
+	mla	v895,	v54,	v896,	v47
+	movw	v896,	#1588
+	add	v895,	v895,	v896
+	str	v96,	[v895]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v898,	#4000
+	mla	v897,	v54,	v898,	v47
+	movw	v898,	#1592
+	add	v897,	v897,	v898
+	str	v96,	[v897]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v900,	#4000
+	mla	v899,	v54,	v900,	v47
+	movw	v900,	#1596
+	add	v899,	v899,	v900
+	str	v96,	[v899]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v902,	#4000
+	mla	v901,	v54,	v902,	v47
+	mov	v902,	#1600
+	add	v901,	v901,	v902
+	str	v96,	[v901]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v904,	#4000
+	mla	v903,	v54,	v904,	v47
+	movw	v904,	#1604
+	add	v903,	v903,	v904
+	str	v96,	[v903]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v906,	#4000
+	mla	v905,	v54,	v906,	v47
+	movw	v906,	#1608
+	add	v905,	v905,	v906
+	str	v96,	[v905]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v908,	#4000
+	mla	v907,	v54,	v908,	v47
+	movw	v908,	#1612
+	add	v907,	v907,	v908
+	str	v96,	[v907]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v910,	#4000
+	mla	v909,	v54,	v910,	v47
+	mov	v910,	#1616
+	add	v909,	v909,	v910
+	str	v96,	[v909]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v912,	#4000
+	mla	v911,	v54,	v912,	v47
+	movw	v912,	#1620
+	add	v911,	v911,	v912
+	str	v96,	[v911]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v914,	#4000
+	mla	v913,	v54,	v914,	v47
+	movw	v914,	#1624
+	add	v913,	v913,	v914
+	str	v96,	[v913]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v916,	#4000
+	mla	v915,	v54,	v916,	v47
+	movw	v916,	#1628
+	add	v915,	v915,	v916
+	str	v96,	[v915]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v918,	#4000
+	mla	v917,	v54,	v918,	v47
+	mov	v918,	#1632
+	add	v917,	v917,	v918
+	str	v96,	[v917]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v920,	#4000
+	mla	v919,	v54,	v920,	v47
+	movw	v920,	#1636
+	add	v919,	v919,	v920
+	str	v96,	[v919]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v922,	#4000
+	mla	v921,	v54,	v922,	v47
+	movw	v922,	#1640
+	add	v921,	v921,	v922
+	str	v96,	[v921]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v924,	#4000
+	mla	v923,	v54,	v924,	v47
+	movw	v924,	#1644
+	add	v923,	v923,	v924
+	str	v96,	[v923]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v926,	#4000
+	mla	v925,	v54,	v926,	v47
+	mov	v926,	#1648
+	add	v925,	v925,	v926
+	str	v96,	[v925]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v928,	#4000
+	mla	v927,	v54,	v928,	v47
+	movw	v928,	#1652
+	add	v927,	v927,	v928
+	str	v96,	[v927]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v930,	#4000
+	mla	v929,	v54,	v930,	v47
+	movw	v930,	#1656
+	add	v929,	v929,	v930
+	str	v96,	[v929]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v932,	#4000
+	mla	v931,	v54,	v932,	v47
+	movw	v932,	#1660
+	add	v931,	v931,	v932
+	str	v96,	[v931]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v934,	#4000
+	mla	v933,	v54,	v934,	v47
+	mov	v934,	#1664
+	add	v933,	v933,	v934
+	str	v96,	[v933]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v936,	#4000
+	mla	v935,	v54,	v936,	v47
+	movw	v936,	#1668
+	add	v935,	v935,	v936
+	str	v96,	[v935]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v938,	#4000
+	mla	v937,	v54,	v938,	v47
+	movw	v938,	#1672
+	add	v937,	v937,	v938
+	str	v96,	[v937]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v940,	#4000
+	mla	v939,	v54,	v940,	v47
+	movw	v940,	#1676
+	add	v939,	v939,	v940
+	str	v96,	[v939]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v942,	#4000
+	mla	v941,	v54,	v942,	v47
+	mov	v942,	#1680
+	add	v941,	v941,	v942
+	str	v96,	[v941]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v944,	#4000
+	mla	v943,	v54,	v944,	v47
+	movw	v944,	#1684
+	add	v943,	v943,	v944
+	str	v96,	[v943]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v946,	#4000
+	mla	v945,	v54,	v946,	v47
+	movw	v946,	#1688
+	add	v945,	v945,	v946
+	str	v96,	[v945]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v948,	#4000
+	mla	v947,	v54,	v948,	v47
+	movw	v948,	#1692
+	add	v947,	v947,	v948
+	str	v96,	[v947]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v950,	#4000
+	mla	v949,	v54,	v950,	v47
+	mov	v950,	#1696
+	add	v949,	v949,	v950
+	str	v96,	[v949]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v952,	#4000
+	mla	v951,	v54,	v952,	v47
+	movw	v952,	#1700
+	add	v951,	v951,	v952
+	str	v96,	[v951]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v954,	#4000
+	mla	v953,	v54,	v954,	v47
+	movw	v954,	#1704
+	add	v953,	v953,	v954
+	str	v96,	[v953]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v956,	#4000
+	mla	v955,	v54,	v956,	v47
+	movw	v956,	#1708
+	add	v955,	v955,	v956
+	str	v96,	[v955]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v958,	#4000
+	mla	v957,	v54,	v958,	v47
+	mov	v958,	#1712
+	add	v957,	v957,	v958
+	str	v96,	[v957]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v960,	#4000
+	mla	v959,	v54,	v960,	v47
+	movw	v960,	#1716
+	add	v959,	v959,	v960
+	str	v96,	[v959]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v962,	#4000
+	mla	v961,	v54,	v962,	v47
+	movw	v962,	#1720
+	add	v961,	v961,	v962
+	str	v96,	[v961]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v964,	#4000
+	mla	v963,	v54,	v964,	v47
+	movw	v964,	#1724
+	add	v963,	v963,	v964
+	str	v96,	[v963]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v966,	#4000
+	mla	v965,	v54,	v966,	v47
+	mov	v966,	#1728
+	add	v965,	v965,	v966
+	str	v96,	[v965]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v968,	#4000
+	mla	v967,	v54,	v968,	v47
+	movw	v968,	#1732
+	add	v967,	v967,	v968
+	str	v96,	[v967]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v970,	#4000
+	mla	v969,	v54,	v970,	v47
+	movw	v970,	#1736
+	add	v969,	v969,	v970
+	str	v96,	[v969]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v972,	#4000
+	mla	v971,	v54,	v972,	v47
+	movw	v972,	#1740
+	add	v971,	v971,	v972
+	str	v96,	[v971]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v974,	#4000
+	mla	v973,	v54,	v974,	v47
+	mov	v974,	#1744
+	add	v973,	v973,	v974
+	str	v96,	[v973]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v976,	#4000
+	mla	v975,	v54,	v976,	v47
+	movw	v976,	#1748
+	add	v975,	v975,	v976
+	str	v96,	[v975]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v978,	#4000
+	mla	v977,	v54,	v978,	v47
+	movw	v978,	#1752
+	add	v977,	v977,	v978
+	str	v96,	[v977]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v980,	#4000
+	mla	v979,	v54,	v980,	v47
+	movw	v980,	#1756
+	add	v979,	v979,	v980
+	str	v96,	[v979]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v982,	#4000
+	mla	v981,	v54,	v982,	v47
+	mov	v982,	#1760
+	add	v981,	v981,	v982
+	str	v96,	[v981]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v984,	#4000
+	mla	v983,	v54,	v984,	v47
+	movw	v984,	#1764
+	add	v983,	v983,	v984
+	str	v96,	[v983]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v986,	#4000
+	mla	v985,	v54,	v986,	v47
+	movw	v986,	#1768
+	add	v985,	v985,	v986
+	str	v96,	[v985]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v988,	#4000
+	mla	v987,	v54,	v988,	v47
+	movw	v988,	#1772
+	add	v987,	v987,	v988
+	str	v96,	[v987]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v990,	#4000
+	mla	v989,	v54,	v990,	v47
+	mov	v990,	#1776
+	add	v989,	v989,	v990
+	str	v96,	[v989]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v992,	#4000
+	mla	v991,	v54,	v992,	v47
+	movw	v992,	#1780
+	add	v991,	v991,	v992
+	str	v96,	[v991]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v994,	#4000
+	mla	v993,	v54,	v994,	v47
+	movw	v994,	#1784
+	add	v993,	v993,	v994
+	str	v96,	[v993]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v996,	#4000
+	mla	v995,	v54,	v996,	v47
+	movw	v996,	#1788
+	add	v995,	v995,	v996
+	str	v96,	[v995]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v998,	#4000
+	mla	v997,	v54,	v998,	v47
+	mov	v998,	#1792
+	add	v997,	v997,	v998
+	str	v96,	[v997]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1000,	#4000
+	mla	v999,	v54,	v1000,	v47
+	movw	v1000,	#1796
+	add	v999,	v999,	v1000
+	str	v96,	[v999]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1002,	#4000
+	mla	v1001,	v54,	v1002,	v47
+	movw	v1002,	#1800
+	add	v1001,	v1001,	v1002
+	str	v96,	[v1001]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1004,	#4000
+	mla	v1003,	v54,	v1004,	v47
+	movw	v1004,	#1804
+	add	v1003,	v1003,	v1004
+	str	v96,	[v1003]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1006,	#4000
+	mla	v1005,	v54,	v1006,	v47
+	mov	v1006,	#1808
+	add	v1005,	v1005,	v1006
+	str	v96,	[v1005]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1008,	#4000
+	mla	v1007,	v54,	v1008,	v47
+	movw	v1008,	#1812
+	add	v1007,	v1007,	v1008
+	str	v96,	[v1007]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1010,	#4000
+	mla	v1009,	v54,	v1010,	v47
+	movw	v1010,	#1816
+	add	v1009,	v1009,	v1010
+	str	v96,	[v1009]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1012,	#4000
+	mla	v1011,	v54,	v1012,	v47
+	movw	v1012,	#1820
+	add	v1011,	v1011,	v1012
+	str	v96,	[v1011]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1014,	#4000
+	mla	v1013,	v54,	v1014,	v47
+	mov	v1014,	#1824
+	add	v1013,	v1013,	v1014
+	str	v96,	[v1013]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1016,	#4000
+	mla	v1015,	v54,	v1016,	v47
+	movw	v1016,	#1828
+	add	v1015,	v1015,	v1016
+	str	v96,	[v1015]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1018,	#4000
+	mla	v1017,	v54,	v1018,	v47
+	movw	v1018,	#1832
+	add	v1017,	v1017,	v1018
+	str	v96,	[v1017]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1020,	#4000
+	mla	v1019,	v54,	v1020,	v47
+	movw	v1020,	#1836
+	add	v1019,	v1019,	v1020
+	str	v96,	[v1019]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1022,	#4000
+	mla	v1021,	v54,	v1022,	v47
+	mov	v1022,	#1840
+	add	v1021,	v1021,	v1022
+	str	v96,	[v1021]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1024,	#4000
+	mla	v1023,	v54,	v1024,	v47
+	movw	v1024,	#1844
+	add	v1023,	v1023,	v1024
+	str	v96,	[v1023]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1026,	#4000
+	mla	v1025,	v54,	v1026,	v47
+	movw	v1026,	#1848
+	add	v1025,	v1025,	v1026
+	str	v96,	[v1025]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1028,	#4000
+	mla	v1027,	v54,	v1028,	v47
+	movw	v1028,	#1852
+	add	v1027,	v1027,	v1028
+	str	v96,	[v1027]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1030,	#4000
+	mla	v1029,	v54,	v1030,	v47
+	mov	v1030,	#1856
+	add	v1029,	v1029,	v1030
+	str	v96,	[v1029]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1032,	#4000
+	mla	v1031,	v54,	v1032,	v47
+	movw	v1032,	#1860
+	add	v1031,	v1031,	v1032
+	str	v96,	[v1031]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1034,	#4000
+	mla	v1033,	v54,	v1034,	v47
+	movw	v1034,	#1864
+	add	v1033,	v1033,	v1034
+	str	v96,	[v1033]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1036,	#4000
+	mla	v1035,	v54,	v1036,	v47
+	movw	v1036,	#1868
+	add	v1035,	v1035,	v1036
+	str	v96,	[v1035]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1038,	#4000
+	mla	v1037,	v54,	v1038,	v47
+	mov	v1038,	#1872
+	add	v1037,	v1037,	v1038
+	str	v96,	[v1037]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1040,	#4000
+	mla	v1039,	v54,	v1040,	v47
+	movw	v1040,	#1876
+	add	v1039,	v1039,	v1040
+	str	v96,	[v1039]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1042,	#4000
+	mla	v1041,	v54,	v1042,	v47
+	movw	v1042,	#1880
+	add	v1041,	v1041,	v1042
+	str	v96,	[v1041]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1044,	#4000
+	mla	v1043,	v54,	v1044,	v47
+	movw	v1044,	#1884
+	add	v1043,	v1043,	v1044
+	str	v96,	[v1043]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1046,	#4000
+	mla	v1045,	v54,	v1046,	v47
+	mov	v1046,	#1888
+	add	v1045,	v1045,	v1046
+	str	v96,	[v1045]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1048,	#4000
+	mla	v1047,	v54,	v1048,	v47
+	movw	v1048,	#1892
+	add	v1047,	v1047,	v1048
+	str	v96,	[v1047]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1050,	#4000
+	mla	v1049,	v54,	v1050,	v47
+	movw	v1050,	#1896
+	add	v1049,	v1049,	v1050
+	str	v96,	[v1049]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1052,	#4000
+	mla	v1051,	v54,	v1052,	v47
+	movw	v1052,	#1900
+	add	v1051,	v1051,	v1052
+	str	v96,	[v1051]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1054,	#4000
+	mla	v1053,	v54,	v1054,	v47
+	mov	v1054,	#1904
+	add	v1053,	v1053,	v1054
+	str	v96,	[v1053]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1056,	#4000
+	mla	v1055,	v54,	v1056,	v47
+	movw	v1056,	#1908
+	add	v1055,	v1055,	v1056
+	str	v96,	[v1055]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1058,	#4000
+	mla	v1057,	v54,	v1058,	v47
+	movw	v1058,	#1912
+	add	v1057,	v1057,	v1058
+	str	v96,	[v1057]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1060,	#4000
+	mla	v1059,	v54,	v1060,	v47
+	movw	v1060,	#1916
+	add	v1059,	v1059,	v1060
+	str	v96,	[v1059]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1062,	#4000
+	mla	v1061,	v54,	v1062,	v47
+	mov	v1062,	#1920
+	add	v1061,	v1061,	v1062
+	str	v96,	[v1061]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1064,	#4000
+	mla	v1063,	v54,	v1064,	v47
+	movw	v1064,	#1924
+	add	v1063,	v1063,	v1064
+	str	v96,	[v1063]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1066,	#4000
+	mla	v1065,	v54,	v1066,	v47
+	movw	v1066,	#1928
+	add	v1065,	v1065,	v1066
+	str	v96,	[v1065]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1068,	#4000
+	mla	v1067,	v54,	v1068,	v47
+	movw	v1068,	#1932
+	add	v1067,	v1067,	v1068
+	str	v96,	[v1067]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1070,	#4000
+	mla	v1069,	v54,	v1070,	v47
+	mov	v1070,	#1936
+	add	v1069,	v1069,	v1070
+	str	v96,	[v1069]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1072,	#4000
+	mla	v1071,	v54,	v1072,	v47
+	movw	v1072,	#1940
+	add	v1071,	v1071,	v1072
+	str	v96,	[v1071]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1074,	#4000
+	mla	v1073,	v54,	v1074,	v47
+	movw	v1074,	#1944
+	add	v1073,	v1073,	v1074
+	str	v96,	[v1073]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1076,	#4000
+	mla	v1075,	v54,	v1076,	v47
+	movw	v1076,	#1948
+	add	v1075,	v1075,	v1076
+	str	v96,	[v1075]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1078,	#4000
+	mla	v1077,	v54,	v1078,	v47
+	mov	v1078,	#1952
+	add	v1077,	v1077,	v1078
+	str	v96,	[v1077]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1080,	#4000
+	mla	v1079,	v54,	v1080,	v47
+	movw	v1080,	#1956
+	add	v1079,	v1079,	v1080
+	str	v96,	[v1079]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1082,	#4000
+	mla	v1081,	v54,	v1082,	v47
+	movw	v1082,	#1960
+	add	v1081,	v1081,	v1082
+	str	v96,	[v1081]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1084,	#4000
+	mla	v1083,	v54,	v1084,	v47
+	movw	v1084,	#1964
+	add	v1083,	v1083,	v1084
+	str	v96,	[v1083]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1086,	#4000
+	mla	v1085,	v54,	v1086,	v47
+	mov	v1086,	#1968
+	add	v1085,	v1085,	v1086
+	str	v96,	[v1085]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1088,	#4000
+	mla	v1087,	v54,	v1088,	v47
+	movw	v1088,	#1972
+	add	v1087,	v1087,	v1088
+	str	v96,	[v1087]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1090,	#4000
+	mla	v1089,	v54,	v1090,	v47
+	movw	v1090,	#1976
+	add	v1089,	v1089,	v1090
+	str	v96,	[v1089]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1092,	#4000
+	mla	v1091,	v54,	v1092,	v47
+	movw	v1092,	#1980
+	add	v1091,	v1091,	v1092
+	str	v96,	[v1091]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1094,	#4000
+	mla	v1093,	v54,	v1094,	v47
+	mov	v1094,	#1984
+	add	v1093,	v1093,	v1094
+	str	v96,	[v1093]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1096,	#4000
+	mla	v1095,	v54,	v1096,	v47
+	movw	v1096,	#1988
+	add	v1095,	v1095,	v1096
+	str	v96,	[v1095]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1098,	#4000
+	mla	v1097,	v54,	v1098,	v47
+	movw	v1098,	#1992
+	add	v1097,	v1097,	v1098
+	str	v96,	[v1097]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1100,	#4000
+	mla	v1099,	v54,	v1100,	v47
+	movw	v1100,	#1996
+	add	v1099,	v1099,	v1100
+	str	v96,	[v1099]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1102,	#4000
+	mla	v1101,	v54,	v1102,	v47
+	mov	v1102,	#2000
+	add	v1101,	v1101,	v1102
+	str	v96,	[v1101]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1104,	#4000
+	mla	v1103,	v54,	v1104,	v47
+	movw	v1104,	#2004
+	add	v1103,	v1103,	v1104
+	str	v96,	[v1103]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1106,	#4000
+	mla	v1105,	v54,	v1106,	v47
+	movw	v1106,	#2008
+	add	v1105,	v1105,	v1106
+	str	v96,	[v1105]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1108,	#4000
+	mla	v1107,	v54,	v1108,	v47
+	movw	v1108,	#2012
+	add	v1107,	v1107,	v1108
+	str	v96,	[v1107]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1110,	#4000
+	mla	v1109,	v54,	v1110,	v47
+	mov	v1110,	#2016
+	add	v1109,	v1109,	v1110
+	str	v96,	[v1109]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1112,	#4000
+	mla	v1111,	v54,	v1112,	v47
+	movw	v1112,	#2020
+	add	v1111,	v1111,	v1112
+	str	v96,	[v1111]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1114,	#4000
+	mla	v1113,	v54,	v1114,	v47
+	movw	v1114,	#2024
+	add	v1113,	v1113,	v1114
+	str	v96,	[v1113]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1116,	#4000
+	mla	v1115,	v54,	v1116,	v47
+	movw	v1116,	#2028
+	add	v1115,	v1115,	v1116
+	str	v96,	[v1115]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1118,	#4000
+	mla	v1117,	v54,	v1118,	v47
+	mov	v1118,	#2032
+	add	v1117,	v1117,	v1118
+	str	v96,	[v1117]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1120,	#4000
+	mla	v1119,	v54,	v1120,	v47
+	movw	v1120,	#2036
+	add	v1119,	v1119,	v1120
+	str	v96,	[v1119]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1122,	#4000
+	mla	v1121,	v54,	v1122,	v47
+	movw	v1122,	#2040
+	add	v1121,	v1121,	v1122
+	str	v96,	[v1121]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1124,	#4000
+	mla	v1123,	v54,	v1124,	v47
+	movw	v1124,	#2044
+	add	v1123,	v1123,	v1124
+	str	v96,	[v1123]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1126,	#4000
+	mla	v1125,	v54,	v1126,	v47
+	mov	v1126,	#2048
+	add	v1125,	v1125,	v1126
+	str	v96,	[v1125]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1128,	#4000
+	mla	v1127,	v54,	v1128,	v47
+	movw	v1128,	#2052
+	add	v1127,	v1127,	v1128
+	str	v96,	[v1127]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1130,	#4000
+	mla	v1129,	v54,	v1130,	v47
+	movw	v1130,	#2056
+	add	v1129,	v1129,	v1130
+	str	v96,	[v1129]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1132,	#4000
+	mla	v1131,	v54,	v1132,	v47
+	movw	v1132,	#2060
+	add	v1131,	v1131,	v1132
+	str	v96,	[v1131]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1134,	#4000
+	mla	v1133,	v54,	v1134,	v47
+	mov	v1134,	#2064
+	add	v1133,	v1133,	v1134
+	str	v96,	[v1133]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1136,	#4000
+	mla	v1135,	v54,	v1136,	v47
+	movw	v1136,	#2068
+	add	v1135,	v1135,	v1136
+	str	v96,	[v1135]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1138,	#4000
+	mla	v1137,	v54,	v1138,	v47
+	movw	v1138,	#2072
+	add	v1137,	v1137,	v1138
+	str	v96,	[v1137]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1140,	#4000
+	mla	v1139,	v54,	v1140,	v47
+	movw	v1140,	#2076
+	add	v1139,	v1139,	v1140
+	str	v96,	[v1139]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1142,	#4000
+	mla	v1141,	v54,	v1142,	v47
+	mov	v1142,	#2080
+	add	v1141,	v1141,	v1142
+	str	v96,	[v1141]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1144,	#4000
+	mla	v1143,	v54,	v1144,	v47
+	movw	v1144,	#2084
+	add	v1143,	v1143,	v1144
+	str	v96,	[v1143]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1146,	#4000
+	mla	v1145,	v54,	v1146,	v47
+	movw	v1146,	#2088
+	add	v1145,	v1145,	v1146
+	str	v96,	[v1145]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1148,	#4000
+	mla	v1147,	v54,	v1148,	v47
+	movw	v1148,	#2092
+	add	v1147,	v1147,	v1148
+	str	v96,	[v1147]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1150,	#4000
+	mla	v1149,	v54,	v1150,	v47
+	mov	v1150,	#2096
+	add	v1149,	v1149,	v1150
+	str	v96,	[v1149]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1152,	#4000
+	mla	v1151,	v54,	v1152,	v47
+	movw	v1152,	#2100
+	add	v1151,	v1151,	v1152
+	str	v96,	[v1151]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1154,	#4000
+	mla	v1153,	v54,	v1154,	v47
+	movw	v1154,	#2104
+	add	v1153,	v1153,	v1154
+	str	v96,	[v1153]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1156,	#4000
+	mla	v1155,	v54,	v1156,	v47
+	movw	v1156,	#2108
+	add	v1155,	v1155,	v1156
+	str	v96,	[v1155]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1158,	#4000
+	mla	v1157,	v54,	v1158,	v47
+	mov	v1158,	#2112
+	add	v1157,	v1157,	v1158
+	str	v96,	[v1157]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1160,	#4000
+	mla	v1159,	v54,	v1160,	v47
+	movw	v1160,	#2116
+	add	v1159,	v1159,	v1160
+	str	v96,	[v1159]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1162,	#4000
+	mla	v1161,	v54,	v1162,	v47
+	movw	v1162,	#2120
+	add	v1161,	v1161,	v1162
+	str	v96,	[v1161]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1164,	#4000
+	mla	v1163,	v54,	v1164,	v47
+	movw	v1164,	#2124
+	add	v1163,	v1163,	v1164
+	str	v96,	[v1163]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1166,	#4000
+	mla	v1165,	v54,	v1166,	v47
+	mov	v1166,	#2128
+	add	v1165,	v1165,	v1166
+	str	v96,	[v1165]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1168,	#4000
+	mla	v1167,	v54,	v1168,	v47
+	movw	v1168,	#2132
+	add	v1167,	v1167,	v1168
+	str	v96,	[v1167]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1170,	#4000
+	mla	v1169,	v54,	v1170,	v47
+	movw	v1170,	#2136
+	add	v1169,	v1169,	v1170
+	str	v96,	[v1169]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1172,	#4000
+	mla	v1171,	v54,	v1172,	v47
+	movw	v1172,	#2140
+	add	v1171,	v1171,	v1172
+	str	v96,	[v1171]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1174,	#4000
+	mla	v1173,	v54,	v1174,	v47
+	mov	v1174,	#2144
+	add	v1173,	v1173,	v1174
+	str	v96,	[v1173]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1176,	#4000
+	mla	v1175,	v54,	v1176,	v47
+	movw	v1176,	#2148
+	add	v1175,	v1175,	v1176
+	str	v96,	[v1175]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1178,	#4000
+	mla	v1177,	v54,	v1178,	v47
+	movw	v1178,	#2152
+	add	v1177,	v1177,	v1178
+	str	v96,	[v1177]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1180,	#4000
+	mla	v1179,	v54,	v1180,	v47
+	movw	v1180,	#2156
+	add	v1179,	v1179,	v1180
+	str	v96,	[v1179]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1182,	#4000
+	mla	v1181,	v54,	v1182,	v47
+	mov	v1182,	#2160
+	add	v1181,	v1181,	v1182
+	str	v96,	[v1181]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1184,	#4000
+	mla	v1183,	v54,	v1184,	v47
+	movw	v1184,	#2164
+	add	v1183,	v1183,	v1184
+	str	v96,	[v1183]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1186,	#4000
+	mla	v1185,	v54,	v1186,	v47
+	movw	v1186,	#2168
+	add	v1185,	v1185,	v1186
+	str	v96,	[v1185]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1188,	#4000
+	mla	v1187,	v54,	v1188,	v47
+	movw	v1188,	#2172
+	add	v1187,	v1187,	v1188
+	str	v96,	[v1187]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1190,	#4000
+	mla	v1189,	v54,	v1190,	v47
+	mov	v1190,	#2176
+	add	v1189,	v1189,	v1190
+	str	v96,	[v1189]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1192,	#4000
+	mla	v1191,	v54,	v1192,	v47
+	movw	v1192,	#2180
+	add	v1191,	v1191,	v1192
+	str	v96,	[v1191]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1194,	#4000
+	mla	v1193,	v54,	v1194,	v47
+	movw	v1194,	#2184
+	add	v1193,	v1193,	v1194
+	str	v96,	[v1193]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1196,	#4000
+	mla	v1195,	v54,	v1196,	v47
+	movw	v1196,	#2188
+	add	v1195,	v1195,	v1196
+	str	v96,	[v1195]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1198,	#4000
+	mla	v1197,	v54,	v1198,	v47
+	mov	v1198,	#2192
+	add	v1197,	v1197,	v1198
+	str	v96,	[v1197]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1200,	#4000
+	mla	v1199,	v54,	v1200,	v47
+	movw	v1200,	#2196
+	add	v1199,	v1199,	v1200
+	str	v96,	[v1199]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1202,	#4000
+	mla	v1201,	v54,	v1202,	v47
+	movw	v1202,	#2200
+	add	v1201,	v1201,	v1202
+	str	v96,	[v1201]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1204,	#4000
+	mla	v1203,	v54,	v1204,	v47
+	movw	v1204,	#2204
+	add	v1203,	v1203,	v1204
+	str	v96,	[v1203]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1206,	#4000
+	mla	v1205,	v54,	v1206,	v47
+	mov	v1206,	#2208
+	add	v1205,	v1205,	v1206
+	str	v96,	[v1205]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1208,	#4000
+	mla	v1207,	v54,	v1208,	v47
+	movw	v1208,	#2212
+	add	v1207,	v1207,	v1208
+	str	v96,	[v1207]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1210,	#4000
+	mla	v1209,	v54,	v1210,	v47
+	movw	v1210,	#2216
+	add	v1209,	v1209,	v1210
+	str	v96,	[v1209]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1212,	#4000
+	mla	v1211,	v54,	v1212,	v47
+	movw	v1212,	#2220
+	add	v1211,	v1211,	v1212
+	str	v96,	[v1211]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1214,	#4000
+	mla	v1213,	v54,	v1214,	v47
+	mov	v1214,	#2224
+	add	v1213,	v1213,	v1214
+	str	v96,	[v1213]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1216,	#4000
+	mla	v1215,	v54,	v1216,	v47
+	movw	v1216,	#2228
+	add	v1215,	v1215,	v1216
+	str	v96,	[v1215]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1218,	#4000
+	mla	v1217,	v54,	v1218,	v47
+	movw	v1218,	#2232
+	add	v1217,	v1217,	v1218
+	str	v96,	[v1217]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1220,	#4000
+	mla	v1219,	v54,	v1220,	v47
+	movw	v1220,	#2236
+	add	v1219,	v1219,	v1220
+	str	v96,	[v1219]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1222,	#4000
+	mla	v1221,	v54,	v1222,	v47
+	mov	v1222,	#2240
+	add	v1221,	v1221,	v1222
+	str	v96,	[v1221]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1224,	#4000
+	mla	v1223,	v54,	v1224,	v47
+	movw	v1224,	#2244
+	add	v1223,	v1223,	v1224
+	str	v96,	[v1223]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1226,	#4000
+	mla	v1225,	v54,	v1226,	v47
+	movw	v1226,	#2248
+	add	v1225,	v1225,	v1226
+	str	v96,	[v1225]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1228,	#4000
+	mla	v1227,	v54,	v1228,	v47
+	movw	v1228,	#2252
+	add	v1227,	v1227,	v1228
+	str	v96,	[v1227]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1230,	#4000
+	mla	v1229,	v54,	v1230,	v47
+	mov	v1230,	#2256
+	add	v1229,	v1229,	v1230
+	str	v96,	[v1229]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1232,	#4000
+	mla	v1231,	v54,	v1232,	v47
+	movw	v1232,	#2260
+	add	v1231,	v1231,	v1232
+	str	v96,	[v1231]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1234,	#4000
+	mla	v1233,	v54,	v1234,	v47
+	movw	v1234,	#2264
+	add	v1233,	v1233,	v1234
+	str	v96,	[v1233]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1236,	#4000
+	mla	v1235,	v54,	v1236,	v47
+	movw	v1236,	#2268
+	add	v1235,	v1235,	v1236
+	str	v96,	[v1235]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1238,	#4000
+	mla	v1237,	v54,	v1238,	v47
+	mov	v1238,	#2272
+	add	v1237,	v1237,	v1238
+	str	v96,	[v1237]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1240,	#4000
+	mla	v1239,	v54,	v1240,	v47
+	movw	v1240,	#2276
+	add	v1239,	v1239,	v1240
+	str	v96,	[v1239]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1242,	#4000
+	mla	v1241,	v54,	v1242,	v47
+	movw	v1242,	#2280
+	add	v1241,	v1241,	v1242
+	str	v96,	[v1241]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1244,	#4000
+	mla	v1243,	v54,	v1244,	v47
+	movw	v1244,	#2284
+	add	v1243,	v1243,	v1244
+	str	v96,	[v1243]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1246,	#4000
+	mla	v1245,	v54,	v1246,	v47
+	mov	v1246,	#2288
+	add	v1245,	v1245,	v1246
+	str	v96,	[v1245]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1248,	#4000
+	mla	v1247,	v54,	v1248,	v47
+	movw	v1248,	#2292
+	add	v1247,	v1247,	v1248
+	str	v96,	[v1247]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1250,	#4000
+	mla	v1249,	v54,	v1250,	v47
+	movw	v1250,	#2296
+	add	v1249,	v1249,	v1250
+	str	v96,	[v1249]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1252,	#4000
+	mla	v1251,	v54,	v1252,	v47
+	movw	v1252,	#2300
+	add	v1251,	v1251,	v1252
+	str	v96,	[v1251]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1254,	#4000
+	mla	v1253,	v54,	v1254,	v47
+	mov	v1254,	#2304
+	add	v1253,	v1253,	v1254
+	str	v96,	[v1253]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1256,	#4000
+	mla	v1255,	v54,	v1256,	v47
+	movw	v1256,	#2308
+	add	v1255,	v1255,	v1256
+	str	v96,	[v1255]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1258,	#4000
+	mla	v1257,	v54,	v1258,	v47
+	movw	v1258,	#2312
+	add	v1257,	v1257,	v1258
+	str	v96,	[v1257]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1260,	#4000
+	mla	v1259,	v54,	v1260,	v47
+	movw	v1260,	#2316
+	add	v1259,	v1259,	v1260
+	str	v96,	[v1259]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1262,	#4000
+	mla	v1261,	v54,	v1262,	v47
+	mov	v1262,	#2320
+	add	v1261,	v1261,	v1262
+	str	v96,	[v1261]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1264,	#4000
+	mla	v1263,	v54,	v1264,	v47
+	movw	v1264,	#2324
+	add	v1263,	v1263,	v1264
+	str	v96,	[v1263]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1266,	#4000
+	mla	v1265,	v54,	v1266,	v47
+	movw	v1266,	#2328
+	add	v1265,	v1265,	v1266
+	str	v96,	[v1265]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1268,	#4000
+	mla	v1267,	v54,	v1268,	v47
+	movw	v1268,	#2332
+	add	v1267,	v1267,	v1268
+	str	v96,	[v1267]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1270,	#4000
+	mla	v1269,	v54,	v1270,	v47
+	mov	v1270,	#2336
+	add	v1269,	v1269,	v1270
+	str	v96,	[v1269]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1272,	#4000
+	mla	v1271,	v54,	v1272,	v47
+	movw	v1272,	#2340
+	add	v1271,	v1271,	v1272
+	str	v96,	[v1271]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1274,	#4000
+	mla	v1273,	v54,	v1274,	v47
+	movw	v1274,	#2344
+	add	v1273,	v1273,	v1274
+	str	v96,	[v1273]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1276,	#4000
+	mla	v1275,	v54,	v1276,	v47
+	movw	v1276,	#2348
+	add	v1275,	v1275,	v1276
+	str	v96,	[v1275]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1278,	#4000
+	mla	v1277,	v54,	v1278,	v47
+	mov	v1278,	#2352
+	add	v1277,	v1277,	v1278
+	str	v96,	[v1277]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1280,	#4000
+	mla	v1279,	v54,	v1280,	v47
+	movw	v1280,	#2356
+	add	v1279,	v1279,	v1280
+	str	v96,	[v1279]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1282,	#4000
+	mla	v1281,	v54,	v1282,	v47
+	movw	v1282,	#2360
+	add	v1281,	v1281,	v1282
+	str	v96,	[v1281]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1284,	#4000
+	mla	v1283,	v54,	v1284,	v47
+	movw	v1284,	#2364
+	add	v1283,	v1283,	v1284
+	str	v96,	[v1283]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1286,	#4000
+	mla	v1285,	v54,	v1286,	v47
+	mov	v1286,	#2368
+	add	v1285,	v1285,	v1286
+	str	v96,	[v1285]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1288,	#4000
+	mla	v1287,	v54,	v1288,	v47
+	movw	v1288,	#2372
+	add	v1287,	v1287,	v1288
+	str	v96,	[v1287]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1290,	#4000
+	mla	v1289,	v54,	v1290,	v47
+	movw	v1290,	#2376
+	add	v1289,	v1289,	v1290
+	str	v96,	[v1289]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1292,	#4000
+	mla	v1291,	v54,	v1292,	v47
+	movw	v1292,	#2380
+	add	v1291,	v1291,	v1292
+	str	v96,	[v1291]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1294,	#4000
+	mla	v1293,	v54,	v1294,	v47
+	mov	v1294,	#2384
+	add	v1293,	v1293,	v1294
+	str	v96,	[v1293]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1296,	#4000
+	mla	v1295,	v54,	v1296,	v47
+	movw	v1296,	#2388
+	add	v1295,	v1295,	v1296
+	str	v96,	[v1295]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1298,	#4000
+	mla	v1297,	v54,	v1298,	v47
+	movw	v1298,	#2392
+	add	v1297,	v1297,	v1298
+	str	v96,	[v1297]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1300,	#4000
+	mla	v1299,	v54,	v1300,	v47
+	movw	v1300,	#2396
+	add	v1299,	v1299,	v1300
+	str	v96,	[v1299]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1302,	#4000
+	mla	v1301,	v54,	v1302,	v47
+	mov	v1302,	#2400
+	add	v1301,	v1301,	v1302
+	str	v96,	[v1301]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1304,	#4000
+	mla	v1303,	v54,	v1304,	v47
+	movw	v1304,	#2404
+	add	v1303,	v1303,	v1304
+	str	v96,	[v1303]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1306,	#4000
+	mla	v1305,	v54,	v1306,	v47
+	movw	v1306,	#2408
+	add	v1305,	v1305,	v1306
+	str	v96,	[v1305]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1308,	#4000
+	mla	v1307,	v54,	v1308,	v47
+	movw	v1308,	#2412
+	add	v1307,	v1307,	v1308
+	str	v96,	[v1307]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1310,	#4000
+	mla	v1309,	v54,	v1310,	v47
+	mov	v1310,	#2416
+	add	v1309,	v1309,	v1310
+	str	v96,	[v1309]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1312,	#4000
+	mla	v1311,	v54,	v1312,	v47
+	movw	v1312,	#2420
+	add	v1311,	v1311,	v1312
+	str	v96,	[v1311]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1314,	#4000
+	mla	v1313,	v54,	v1314,	v47
+	movw	v1314,	#2424
+	add	v1313,	v1313,	v1314
+	str	v96,	[v1313]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1316,	#4000
+	mla	v1315,	v54,	v1316,	v47
+	movw	v1316,	#2428
+	add	v1315,	v1315,	v1316
+	str	v96,	[v1315]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1318,	#4000
+	mla	v1317,	v54,	v1318,	v47
+	mov	v1318,	#2432
+	add	v1317,	v1317,	v1318
+	str	v96,	[v1317]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1320,	#4000
+	mla	v1319,	v54,	v1320,	v47
+	movw	v1320,	#2436
+	add	v1319,	v1319,	v1320
+	str	v96,	[v1319]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1322,	#4000
+	mla	v1321,	v54,	v1322,	v47
+	movw	v1322,	#2440
+	add	v1321,	v1321,	v1322
+	str	v96,	[v1321]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1324,	#4000
+	mla	v1323,	v54,	v1324,	v47
+	movw	v1324,	#2444
+	add	v1323,	v1323,	v1324
+	str	v96,	[v1323]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1326,	#4000
+	mla	v1325,	v54,	v1326,	v47
+	mov	v1326,	#2448
+	add	v1325,	v1325,	v1326
+	str	v96,	[v1325]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1328,	#4000
+	mla	v1327,	v54,	v1328,	v47
+	movw	v1328,	#2452
+	add	v1327,	v1327,	v1328
+	str	v96,	[v1327]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1330,	#4000
+	mla	v1329,	v54,	v1330,	v47
+	movw	v1330,	#2456
+	add	v1329,	v1329,	v1330
+	str	v96,	[v1329]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1332,	#4000
+	mla	v1331,	v54,	v1332,	v47
+	movw	v1332,	#2460
+	add	v1331,	v1331,	v1332
+	str	v96,	[v1331]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1334,	#4000
+	mla	v1333,	v54,	v1334,	v47
+	mov	v1334,	#2464
+	add	v1333,	v1333,	v1334
+	str	v96,	[v1333]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1336,	#4000
+	mla	v1335,	v54,	v1336,	v47
+	movw	v1336,	#2468
+	add	v1335,	v1335,	v1336
+	str	v96,	[v1335]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1338,	#4000
+	mla	v1337,	v54,	v1338,	v47
+	movw	v1338,	#2472
+	add	v1337,	v1337,	v1338
+	str	v96,	[v1337]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1340,	#4000
+	mla	v1339,	v54,	v1340,	v47
+	movw	v1340,	#2476
+	add	v1339,	v1339,	v1340
+	str	v96,	[v1339]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1342,	#4000
+	mla	v1341,	v54,	v1342,	v47
+	mov	v1342,	#2480
+	add	v1341,	v1341,	v1342
+	str	v96,	[v1341]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1344,	#4000
+	mla	v1343,	v54,	v1344,	v47
+	movw	v1344,	#2484
+	add	v1343,	v1343,	v1344
+	str	v96,	[v1343]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1346,	#4000
+	mla	v1345,	v54,	v1346,	v47
+	movw	v1346,	#2488
+	add	v1345,	v1345,	v1346
+	str	v96,	[v1345]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1348,	#4000
+	mla	v1347,	v54,	v1348,	v47
+	movw	v1348,	#2492
+	add	v1347,	v1347,	v1348
+	str	v96,	[v1347]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1350,	#4000
+	mla	v1349,	v54,	v1350,	v47
+	mov	v1350,	#2496
+	add	v1349,	v1349,	v1350
+	str	v96,	[v1349]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1352,	#4000
+	mla	v1351,	v54,	v1352,	v47
+	movw	v1352,	#2500
+	add	v1351,	v1351,	v1352
+	str	v96,	[v1351]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1354,	#4000
+	mla	v1353,	v54,	v1354,	v47
+	movw	v1354,	#2504
+	add	v1353,	v1353,	v1354
+	str	v96,	[v1353]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1356,	#4000
+	mla	v1355,	v54,	v1356,	v47
+	movw	v1356,	#2508
+	add	v1355,	v1355,	v1356
+	str	v96,	[v1355]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1358,	#4000
+	mla	v1357,	v54,	v1358,	v47
+	mov	v1358,	#2512
+	add	v1357,	v1357,	v1358
+	str	v96,	[v1357]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1360,	#4000
+	mla	v1359,	v54,	v1360,	v47
+	movw	v1360,	#2516
+	add	v1359,	v1359,	v1360
+	str	v96,	[v1359]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1362,	#4000
+	mla	v1361,	v54,	v1362,	v47
+	movw	v1362,	#2520
+	add	v1361,	v1361,	v1362
+	str	v96,	[v1361]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1364,	#4000
+	mla	v1363,	v54,	v1364,	v47
+	movw	v1364,	#2524
+	add	v1363,	v1363,	v1364
+	str	v96,	[v1363]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1366,	#4000
+	mla	v1365,	v54,	v1366,	v47
+	mov	v1366,	#2528
+	add	v1365,	v1365,	v1366
+	str	v96,	[v1365]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1368,	#4000
+	mla	v1367,	v54,	v1368,	v47
+	movw	v1368,	#2532
+	add	v1367,	v1367,	v1368
+	str	v96,	[v1367]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1370,	#4000
+	mla	v1369,	v54,	v1370,	v47
+	movw	v1370,	#2536
+	add	v1369,	v1369,	v1370
+	str	v96,	[v1369]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1372,	#4000
+	mla	v1371,	v54,	v1372,	v47
+	movw	v1372,	#2540
+	add	v1371,	v1371,	v1372
+	str	v96,	[v1371]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1374,	#4000
+	mla	v1373,	v54,	v1374,	v47
+	mov	v1374,	#2544
+	add	v1373,	v1373,	v1374
+	str	v96,	[v1373]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1376,	#4000
+	mla	v1375,	v54,	v1376,	v47
+	movw	v1376,	#2548
+	add	v1375,	v1375,	v1376
+	str	v96,	[v1375]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1378,	#4000
+	mla	v1377,	v54,	v1378,	v47
+	movw	v1378,	#2552
+	add	v1377,	v1377,	v1378
+	str	v96,	[v1377]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1380,	#4000
+	mla	v1379,	v54,	v1380,	v47
+	movw	v1380,	#2556
+	add	v1379,	v1379,	v1380
+	str	v96,	[v1379]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1382,	#4000
+	mla	v1381,	v54,	v1382,	v47
+	mov	v1382,	#2560
+	add	v1381,	v1381,	v1382
+	str	v96,	[v1381]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1384,	#4000
+	mla	v1383,	v54,	v1384,	v47
+	movw	v1384,	#2564
+	add	v1383,	v1383,	v1384
+	str	v96,	[v1383]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1386,	#4000
+	mla	v1385,	v54,	v1386,	v47
+	movw	v1386,	#2568
+	add	v1385,	v1385,	v1386
+	str	v96,	[v1385]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1388,	#4000
+	mla	v1387,	v54,	v1388,	v47
+	movw	v1388,	#2572
+	add	v1387,	v1387,	v1388
+	str	v96,	[v1387]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1390,	#4000
+	mla	v1389,	v54,	v1390,	v47
+	mov	v1390,	#2576
+	add	v1389,	v1389,	v1390
+	str	v96,	[v1389]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1392,	#4000
+	mla	v1391,	v54,	v1392,	v47
+	movw	v1392,	#2580
+	add	v1391,	v1391,	v1392
+	str	v96,	[v1391]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1394,	#4000
+	mla	v1393,	v54,	v1394,	v47
+	movw	v1394,	#2584
+	add	v1393,	v1393,	v1394
+	str	v96,	[v1393]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1396,	#4000
+	mla	v1395,	v54,	v1396,	v47
+	movw	v1396,	#2588
+	add	v1395,	v1395,	v1396
+	str	v96,	[v1395]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1398,	#4000
+	mla	v1397,	v54,	v1398,	v47
+	mov	v1398,	#2592
+	add	v1397,	v1397,	v1398
+	str	v96,	[v1397]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1400,	#4000
+	mla	v1399,	v54,	v1400,	v47
+	movw	v1400,	#2596
+	add	v1399,	v1399,	v1400
+	str	v96,	[v1399]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1402,	#4000
+	mla	v1401,	v54,	v1402,	v47
+	movw	v1402,	#2600
+	add	v1401,	v1401,	v1402
+	str	v96,	[v1401]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1404,	#4000
+	mla	v1403,	v54,	v1404,	v47
+	movw	v1404,	#2604
+	add	v1403,	v1403,	v1404
+	str	v96,	[v1403]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1406,	#4000
+	mla	v1405,	v54,	v1406,	v47
+	mov	v1406,	#2608
+	add	v1405,	v1405,	v1406
+	str	v96,	[v1405]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1408,	#4000
+	mla	v1407,	v54,	v1408,	v47
+	movw	v1408,	#2612
+	add	v1407,	v1407,	v1408
+	str	v96,	[v1407]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1410,	#4000
+	mla	v1409,	v54,	v1410,	v47
+	movw	v1410,	#2616
+	add	v1409,	v1409,	v1410
+	str	v96,	[v1409]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1412,	#4000
+	mla	v1411,	v54,	v1412,	v47
+	movw	v1412,	#2620
+	add	v1411,	v1411,	v1412
+	str	v96,	[v1411]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1414,	#4000
+	mla	v1413,	v54,	v1414,	v47
+	mov	v1414,	#2624
+	add	v1413,	v1413,	v1414
+	str	v96,	[v1413]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1416,	#4000
+	mla	v1415,	v54,	v1416,	v47
+	movw	v1416,	#2628
+	add	v1415,	v1415,	v1416
+	str	v96,	[v1415]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1418,	#4000
+	mla	v1417,	v54,	v1418,	v47
+	movw	v1418,	#2632
+	add	v1417,	v1417,	v1418
+	str	v96,	[v1417]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1420,	#4000
+	mla	v1419,	v54,	v1420,	v47
+	movw	v1420,	#2636
+	add	v1419,	v1419,	v1420
+	str	v96,	[v1419]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1422,	#4000
+	mla	v1421,	v54,	v1422,	v47
+	mov	v1422,	#2640
+	add	v1421,	v1421,	v1422
+	str	v96,	[v1421]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1424,	#4000
+	mla	v1423,	v54,	v1424,	v47
+	movw	v1424,	#2644
+	add	v1423,	v1423,	v1424
+	str	v96,	[v1423]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1426,	#4000
+	mla	v1425,	v54,	v1426,	v47
+	movw	v1426,	#2648
+	add	v1425,	v1425,	v1426
+	str	v96,	[v1425]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1428,	#4000
+	mla	v1427,	v54,	v1428,	v47
+	movw	v1428,	#2652
+	add	v1427,	v1427,	v1428
+	str	v96,	[v1427]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1430,	#4000
+	mla	v1429,	v54,	v1430,	v47
+	mov	v1430,	#2656
+	add	v1429,	v1429,	v1430
+	str	v96,	[v1429]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1432,	#4000
+	mla	v1431,	v54,	v1432,	v47
+	movw	v1432,	#2660
+	add	v1431,	v1431,	v1432
+	str	v96,	[v1431]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1434,	#4000
+	mla	v1433,	v54,	v1434,	v47
+	movw	v1434,	#2664
+	add	v1433,	v1433,	v1434
+	str	v96,	[v1433]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1436,	#4000
+	mla	v1435,	v54,	v1436,	v47
+	movw	v1436,	#2668
+	add	v1435,	v1435,	v1436
+	str	v96,	[v1435]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1438,	#4000
+	mla	v1437,	v54,	v1438,	v47
+	mov	v1438,	#2672
+	add	v1437,	v1437,	v1438
+	str	v96,	[v1437]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1440,	#4000
+	mla	v1439,	v54,	v1440,	v47
+	movw	v1440,	#2676
+	add	v1439,	v1439,	v1440
+	str	v96,	[v1439]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1442,	#4000
+	mla	v1441,	v54,	v1442,	v47
+	movw	v1442,	#2680
+	add	v1441,	v1441,	v1442
+	str	v96,	[v1441]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1444,	#4000
+	mla	v1443,	v54,	v1444,	v47
+	movw	v1444,	#2684
+	add	v1443,	v1443,	v1444
+	str	v96,	[v1443]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1446,	#4000
+	mla	v1445,	v54,	v1446,	v47
+	mov	v1446,	#2688
+	add	v1445,	v1445,	v1446
+	str	v96,	[v1445]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1448,	#4000
+	mla	v1447,	v54,	v1448,	v47
+	movw	v1448,	#2692
+	add	v1447,	v1447,	v1448
+	str	v96,	[v1447]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1450,	#4000
+	mla	v1449,	v54,	v1450,	v47
+	movw	v1450,	#2696
+	add	v1449,	v1449,	v1450
+	str	v96,	[v1449]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1452,	#4000
+	mla	v1451,	v54,	v1452,	v47
+	movw	v1452,	#2700
+	add	v1451,	v1451,	v1452
+	str	v96,	[v1451]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1454,	#4000
+	mla	v1453,	v54,	v1454,	v47
+	mov	v1454,	#2704
+	add	v1453,	v1453,	v1454
+	str	v96,	[v1453]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1456,	#4000
+	mla	v1455,	v54,	v1456,	v47
+	movw	v1456,	#2708
+	add	v1455,	v1455,	v1456
+	str	v96,	[v1455]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1458,	#4000
+	mla	v1457,	v54,	v1458,	v47
+	movw	v1458,	#2712
+	add	v1457,	v1457,	v1458
+	str	v96,	[v1457]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1460,	#4000
+	mla	v1459,	v54,	v1460,	v47
+	movw	v1460,	#2716
+	add	v1459,	v1459,	v1460
+	str	v96,	[v1459]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1462,	#4000
+	mla	v1461,	v54,	v1462,	v47
+	mov	v1462,	#2720
+	add	v1461,	v1461,	v1462
+	str	v96,	[v1461]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1464,	#4000
+	mla	v1463,	v54,	v1464,	v47
+	movw	v1464,	#2724
+	add	v1463,	v1463,	v1464
+	str	v96,	[v1463]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1466,	#4000
+	mla	v1465,	v54,	v1466,	v47
+	movw	v1466,	#2728
+	add	v1465,	v1465,	v1466
+	str	v96,	[v1465]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1468,	#4000
+	mla	v1467,	v54,	v1468,	v47
+	movw	v1468,	#2732
+	add	v1467,	v1467,	v1468
+	str	v96,	[v1467]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1470,	#4000
+	mla	v1469,	v54,	v1470,	v47
+	mov	v1470,	#2736
+	add	v1469,	v1469,	v1470
+	str	v96,	[v1469]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1472,	#4000
+	mla	v1471,	v54,	v1472,	v47
+	movw	v1472,	#2740
+	add	v1471,	v1471,	v1472
+	str	v96,	[v1471]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1474,	#4000
+	mla	v1473,	v54,	v1474,	v47
+	movw	v1474,	#2744
+	add	v1473,	v1473,	v1474
+	str	v96,	[v1473]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1476,	#4000
+	mla	v1475,	v54,	v1476,	v47
+	movw	v1476,	#2748
+	add	v1475,	v1475,	v1476
+	str	v96,	[v1475]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1478,	#4000
+	mla	v1477,	v54,	v1478,	v47
+	mov	v1478,	#2752
+	add	v1477,	v1477,	v1478
+	str	v96,	[v1477]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1480,	#4000
+	mla	v1479,	v54,	v1480,	v47
+	movw	v1480,	#2756
+	add	v1479,	v1479,	v1480
+	str	v96,	[v1479]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1482,	#4000
+	mla	v1481,	v54,	v1482,	v47
+	movw	v1482,	#2760
+	add	v1481,	v1481,	v1482
+	str	v96,	[v1481]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1484,	#4000
+	mla	v1483,	v54,	v1484,	v47
+	movw	v1484,	#2764
+	add	v1483,	v1483,	v1484
+	str	v96,	[v1483]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1486,	#4000
+	mla	v1485,	v54,	v1486,	v47
+	mov	v1486,	#2768
+	add	v1485,	v1485,	v1486
+	str	v96,	[v1485]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1488,	#4000
+	mla	v1487,	v54,	v1488,	v47
+	movw	v1488,	#2772
+	add	v1487,	v1487,	v1488
+	str	v96,	[v1487]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1490,	#4000
+	mla	v1489,	v54,	v1490,	v47
+	movw	v1490,	#2776
+	add	v1489,	v1489,	v1490
+	str	v96,	[v1489]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1492,	#4000
+	mla	v1491,	v54,	v1492,	v47
+	movw	v1492,	#2780
+	add	v1491,	v1491,	v1492
+	str	v96,	[v1491]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1494,	#4000
+	mla	v1493,	v54,	v1494,	v47
+	mov	v1494,	#2784
+	add	v1493,	v1493,	v1494
+	str	v96,	[v1493]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1496,	#4000
+	mla	v1495,	v54,	v1496,	v47
+	movw	v1496,	#2788
+	add	v1495,	v1495,	v1496
+	str	v96,	[v1495]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1498,	#4000
+	mla	v1497,	v54,	v1498,	v47
+	movw	v1498,	#2792
+	add	v1497,	v1497,	v1498
+	str	v96,	[v1497]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1500,	#4000
+	mla	v1499,	v54,	v1500,	v47
+	movw	v1500,	#2796
+	add	v1499,	v1499,	v1500
+	str	v96,	[v1499]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1502,	#4000
+	mla	v1501,	v54,	v1502,	v47
+	mov	v1502,	#2800
+	add	v1501,	v1501,	v1502
+	str	v96,	[v1501]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1504,	#4000
+	mla	v1503,	v54,	v1504,	v47
+	movw	v1504,	#2804
+	add	v1503,	v1503,	v1504
+	str	v96,	[v1503]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1506,	#4000
+	mla	v1505,	v54,	v1506,	v47
+	movw	v1506,	#2808
+	add	v1505,	v1505,	v1506
+	str	v96,	[v1505]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1508,	#4000
+	mla	v1507,	v54,	v1508,	v47
+	movw	v1508,	#2812
+	add	v1507,	v1507,	v1508
+	str	v96,	[v1507]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1510,	#4000
+	mla	v1509,	v54,	v1510,	v47
+	mov	v1510,	#2816
+	add	v1509,	v1509,	v1510
+	str	v96,	[v1509]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1512,	#4000
+	mla	v1511,	v54,	v1512,	v47
+	movw	v1512,	#2820
+	add	v1511,	v1511,	v1512
+	str	v96,	[v1511]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1514,	#4000
+	mla	v1513,	v54,	v1514,	v47
+	movw	v1514,	#2824
+	add	v1513,	v1513,	v1514
+	str	v96,	[v1513]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1516,	#4000
+	mla	v1515,	v54,	v1516,	v47
+	movw	v1516,	#2828
+	add	v1515,	v1515,	v1516
+	str	v96,	[v1515]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1518,	#4000
+	mla	v1517,	v54,	v1518,	v47
+	mov	v1518,	#2832
+	add	v1517,	v1517,	v1518
+	str	v96,	[v1517]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1520,	#4000
+	mla	v1519,	v54,	v1520,	v47
+	movw	v1520,	#2836
+	add	v1519,	v1519,	v1520
+	str	v96,	[v1519]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1522,	#4000
+	mla	v1521,	v54,	v1522,	v47
+	movw	v1522,	#2840
+	add	v1521,	v1521,	v1522
+	str	v96,	[v1521]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1524,	#4000
+	mla	v1523,	v54,	v1524,	v47
+	movw	v1524,	#2844
+	add	v1523,	v1523,	v1524
+	str	v96,	[v1523]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1526,	#4000
+	mla	v1525,	v54,	v1526,	v47
+	mov	v1526,	#2848
+	add	v1525,	v1525,	v1526
+	str	v96,	[v1525]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1528,	#4000
+	mla	v1527,	v54,	v1528,	v47
+	movw	v1528,	#2852
+	add	v1527,	v1527,	v1528
+	str	v96,	[v1527]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1530,	#4000
+	mla	v1529,	v54,	v1530,	v47
+	movw	v1530,	#2856
+	add	v1529,	v1529,	v1530
+	str	v96,	[v1529]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1532,	#4000
+	mla	v1531,	v54,	v1532,	v47
+	movw	v1532,	#2860
+	add	v1531,	v1531,	v1532
+	str	v96,	[v1531]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1534,	#4000
+	mla	v1533,	v54,	v1534,	v47
+	mov	v1534,	#2864
+	add	v1533,	v1533,	v1534
+	str	v96,	[v1533]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1536,	#4000
+	mla	v1535,	v54,	v1536,	v47
+	movw	v1536,	#2868
+	add	v1535,	v1535,	v1536
+	str	v96,	[v1535]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1538,	#4000
+	mla	v1537,	v54,	v1538,	v47
+	movw	v1538,	#2872
+	add	v1537,	v1537,	v1538
+	str	v96,	[v1537]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1540,	#4000
+	mla	v1539,	v54,	v1540,	v47
+	movw	v1540,	#2876
+	add	v1539,	v1539,	v1540
+	str	v96,	[v1539]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1542,	#4000
+	mla	v1541,	v54,	v1542,	v47
+	mov	v1542,	#2880
+	add	v1541,	v1541,	v1542
+	str	v96,	[v1541]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1544,	#4000
+	mla	v1543,	v54,	v1544,	v47
+	movw	v1544,	#2884
+	add	v1543,	v1543,	v1544
+	str	v96,	[v1543]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1546,	#4000
+	mla	v1545,	v54,	v1546,	v47
+	movw	v1546,	#2888
+	add	v1545,	v1545,	v1546
+	str	v96,	[v1545]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1548,	#4000
+	mla	v1547,	v54,	v1548,	v47
+	movw	v1548,	#2892
+	add	v1547,	v1547,	v1548
+	str	v96,	[v1547]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1550,	#4000
+	mla	v1549,	v54,	v1550,	v47
+	mov	v1550,	#2896
+	add	v1549,	v1549,	v1550
+	str	v96,	[v1549]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1552,	#4000
+	mla	v1551,	v54,	v1552,	v47
+	movw	v1552,	#2900
+	add	v1551,	v1551,	v1552
+	str	v96,	[v1551]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1554,	#4000
+	mla	v1553,	v54,	v1554,	v47
+	movw	v1554,	#2904
+	add	v1553,	v1553,	v1554
+	str	v96,	[v1553]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1556,	#4000
+	mla	v1555,	v54,	v1556,	v47
+	movw	v1556,	#2908
+	add	v1555,	v1555,	v1556
+	str	v96,	[v1555]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1558,	#4000
+	mla	v1557,	v54,	v1558,	v47
+	mov	v1558,	#2912
+	add	v1557,	v1557,	v1558
+	str	v96,	[v1557]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1560,	#4000
+	mla	v1559,	v54,	v1560,	v47
+	movw	v1560,	#2916
+	add	v1559,	v1559,	v1560
+	str	v96,	[v1559]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1562,	#4000
+	mla	v1561,	v54,	v1562,	v47
+	movw	v1562,	#2920
+	add	v1561,	v1561,	v1562
+	str	v96,	[v1561]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1564,	#4000
+	mla	v1563,	v54,	v1564,	v47
+	movw	v1564,	#2924
+	add	v1563,	v1563,	v1564
+	str	v96,	[v1563]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1566,	#4000
+	mla	v1565,	v54,	v1566,	v47
+	mov	v1566,	#2928
+	add	v1565,	v1565,	v1566
+	str	v96,	[v1565]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1568,	#4000
+	mla	v1567,	v54,	v1568,	v47
+	movw	v1568,	#2932
+	add	v1567,	v1567,	v1568
+	str	v96,	[v1567]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1570,	#4000
+	mla	v1569,	v54,	v1570,	v47
+	movw	v1570,	#2936
+	add	v1569,	v1569,	v1570
+	str	v96,	[v1569]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1572,	#4000
+	mla	v1571,	v54,	v1572,	v47
+	movw	v1572,	#2940
+	add	v1571,	v1571,	v1572
+	str	v96,	[v1571]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1574,	#4000
+	mla	v1573,	v54,	v1574,	v47
+	mov	v1574,	#2944
+	add	v1573,	v1573,	v1574
+	str	v96,	[v1573]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1576,	#4000
+	mla	v1575,	v54,	v1576,	v47
+	movw	v1576,	#2948
+	add	v1575,	v1575,	v1576
+	str	v96,	[v1575]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1578,	#4000
+	mla	v1577,	v54,	v1578,	v47
+	movw	v1578,	#2952
+	add	v1577,	v1577,	v1578
+	str	v96,	[v1577]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1580,	#4000
+	mla	v1579,	v54,	v1580,	v47
+	movw	v1580,	#2956
+	add	v1579,	v1579,	v1580
+	str	v96,	[v1579]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1582,	#4000
+	mla	v1581,	v54,	v1582,	v47
+	mov	v1582,	#2960
+	add	v1581,	v1581,	v1582
+	str	v96,	[v1581]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1584,	#4000
+	mla	v1583,	v54,	v1584,	v47
+	movw	v1584,	#2964
+	add	v1583,	v1583,	v1584
+	str	v96,	[v1583]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1586,	#4000
+	mla	v1585,	v54,	v1586,	v47
+	movw	v1586,	#2968
+	add	v1585,	v1585,	v1586
+	str	v96,	[v1585]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1588,	#4000
+	mla	v1587,	v54,	v1588,	v47
+	movw	v1588,	#2972
+	add	v1587,	v1587,	v1588
+	str	v96,	[v1587]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1590,	#4000
+	mla	v1589,	v54,	v1590,	v47
+	mov	v1590,	#2976
+	add	v1589,	v1589,	v1590
+	str	v96,	[v1589]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1592,	#4000
+	mla	v1591,	v54,	v1592,	v47
+	movw	v1592,	#2980
+	add	v1591,	v1591,	v1592
+	str	v96,	[v1591]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1594,	#4000
+	mla	v1593,	v54,	v1594,	v47
+	movw	v1594,	#2984
+	add	v1593,	v1593,	v1594
+	str	v96,	[v1593]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1596,	#4000
+	mla	v1595,	v54,	v1596,	v47
+	movw	v1596,	#2988
+	add	v1595,	v1595,	v1596
+	str	v96,	[v1595]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1598,	#4000
+	mla	v1597,	v54,	v1598,	v47
+	mov	v1598,	#2992
+	add	v1597,	v1597,	v1598
+	str	v96,	[v1597]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1600,	#4000
+	mla	v1599,	v54,	v1600,	v47
+	movw	v1600,	#2996
+	add	v1599,	v1599,	v1600
+	str	v96,	[v1599]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1602,	#4000
+	mla	v1601,	v54,	v1602,	v47
+	movw	v1602,	#3000
+	add	v1601,	v1601,	v1602
+	str	v96,	[v1601]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1604,	#4000
+	mla	v1603,	v54,	v1604,	v47
+	movw	v1604,	#3004
+	add	v1603,	v1603,	v1604
+	str	v96,	[v1603]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1606,	#4000
+	mla	v1605,	v54,	v1606,	v47
+	mov	v1606,	#3008
+	add	v1605,	v1605,	v1606
+	str	v96,	[v1605]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1608,	#4000
+	mla	v1607,	v54,	v1608,	v47
+	movw	v1608,	#3012
+	add	v1607,	v1607,	v1608
+	str	v96,	[v1607]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1610,	#4000
+	mla	v1609,	v54,	v1610,	v47
+	movw	v1610,	#3016
+	add	v1609,	v1609,	v1610
+	str	v96,	[v1609]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1612,	#4000
+	mla	v1611,	v54,	v1612,	v47
+	movw	v1612,	#3020
+	add	v1611,	v1611,	v1612
+	str	v96,	[v1611]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1614,	#4000
+	mla	v1613,	v54,	v1614,	v47
+	mov	v1614,	#3024
+	add	v1613,	v1613,	v1614
+	str	v96,	[v1613]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1616,	#4000
+	mla	v1615,	v54,	v1616,	v47
+	movw	v1616,	#3028
+	add	v1615,	v1615,	v1616
+	str	v96,	[v1615]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1618,	#4000
+	mla	v1617,	v54,	v1618,	v47
+	movw	v1618,	#3032
+	add	v1617,	v1617,	v1618
+	str	v96,	[v1617]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1620,	#4000
+	mla	v1619,	v54,	v1620,	v47
+	movw	v1620,	#3036
+	add	v1619,	v1619,	v1620
+	str	v96,	[v1619]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1622,	#4000
+	mla	v1621,	v54,	v1622,	v47
+	mov	v1622,	#3040
+	add	v1621,	v1621,	v1622
+	str	v96,	[v1621]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1624,	#4000
+	mla	v1623,	v54,	v1624,	v47
+	movw	v1624,	#3044
+	add	v1623,	v1623,	v1624
+	str	v96,	[v1623]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1626,	#4000
+	mla	v1625,	v54,	v1626,	v47
+	movw	v1626,	#3048
+	add	v1625,	v1625,	v1626
+	str	v96,	[v1625]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1628,	#4000
+	mla	v1627,	v54,	v1628,	v47
+	movw	v1628,	#3052
+	add	v1627,	v1627,	v1628
+	str	v96,	[v1627]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1630,	#4000
+	mla	v1629,	v54,	v1630,	v47
+	mov	v1630,	#3056
+	add	v1629,	v1629,	v1630
+	str	v96,	[v1629]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1632,	#4000
+	mla	v1631,	v54,	v1632,	v47
+	movw	v1632,	#3060
+	add	v1631,	v1631,	v1632
+	str	v96,	[v1631]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1634,	#4000
+	mla	v1633,	v54,	v1634,	v47
+	movw	v1634,	#3064
+	add	v1633,	v1633,	v1634
+	str	v96,	[v1633]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1636,	#4000
+	mla	v1635,	v54,	v1636,	v47
+	movw	v1636,	#3068
+	add	v1635,	v1635,	v1636
+	str	v96,	[v1635]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1638,	#4000
+	mla	v1637,	v54,	v1638,	v47
+	mov	v1638,	#3072
+	add	v1637,	v1637,	v1638
+	str	v96,	[v1637]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1640,	#4000
+	mla	v1639,	v54,	v1640,	v47
+	movw	v1640,	#3076
+	add	v1639,	v1639,	v1640
+	str	v96,	[v1639]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1642,	#4000
+	mla	v1641,	v54,	v1642,	v47
+	movw	v1642,	#3080
+	add	v1641,	v1641,	v1642
+	str	v96,	[v1641]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1644,	#4000
+	mla	v1643,	v54,	v1644,	v47
+	movw	v1644,	#3084
+	add	v1643,	v1643,	v1644
+	str	v96,	[v1643]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1646,	#4000
+	mla	v1645,	v54,	v1646,	v47
+	mov	v1646,	#3088
+	add	v1645,	v1645,	v1646
+	str	v96,	[v1645]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1648,	#4000
+	mla	v1647,	v54,	v1648,	v47
+	movw	v1648,	#3092
+	add	v1647,	v1647,	v1648
+	str	v96,	[v1647]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1650,	#4000
+	mla	v1649,	v54,	v1650,	v47
+	movw	v1650,	#3096
+	add	v1649,	v1649,	v1650
+	str	v96,	[v1649]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1652,	#4000
+	mla	v1651,	v54,	v1652,	v47
+	movw	v1652,	#3100
+	add	v1651,	v1651,	v1652
+	str	v96,	[v1651]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1654,	#4000
+	mla	v1653,	v54,	v1654,	v47
+	mov	v1654,	#3104
+	add	v1653,	v1653,	v1654
+	str	v96,	[v1653]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1656,	#4000
+	mla	v1655,	v54,	v1656,	v47
+	movw	v1656,	#3108
+	add	v1655,	v1655,	v1656
+	str	v96,	[v1655]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1658,	#4000
+	mla	v1657,	v54,	v1658,	v47
+	movw	v1658,	#3112
+	add	v1657,	v1657,	v1658
+	str	v96,	[v1657]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1660,	#4000
+	mla	v1659,	v54,	v1660,	v47
+	movw	v1660,	#3116
+	add	v1659,	v1659,	v1660
+	str	v96,	[v1659]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1662,	#4000
+	mla	v1661,	v54,	v1662,	v47
+	mov	v1662,	#3120
+	add	v1661,	v1661,	v1662
+	str	v96,	[v1661]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1664,	#4000
+	mla	v1663,	v54,	v1664,	v47
+	movw	v1664,	#3124
+	add	v1663,	v1663,	v1664
+	str	v96,	[v1663]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1666,	#4000
+	mla	v1665,	v54,	v1666,	v47
+	movw	v1666,	#3128
+	add	v1665,	v1665,	v1666
+	str	v96,	[v1665]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1668,	#4000
+	mla	v1667,	v54,	v1668,	v47
+	movw	v1668,	#3132
+	add	v1667,	v1667,	v1668
+	str	v96,	[v1667]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1670,	#4000
+	mla	v1669,	v54,	v1670,	v47
+	mov	v1670,	#3136
+	add	v1669,	v1669,	v1670
+	str	v96,	[v1669]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1672,	#4000
+	mla	v1671,	v54,	v1672,	v47
+	movw	v1672,	#3140
+	add	v1671,	v1671,	v1672
+	str	v96,	[v1671]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1674,	#4000
+	mla	v1673,	v54,	v1674,	v47
+	movw	v1674,	#3144
+	add	v1673,	v1673,	v1674
+	str	v96,	[v1673]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1676,	#4000
+	mla	v1675,	v54,	v1676,	v47
+	movw	v1676,	#3148
+	add	v1675,	v1675,	v1676
+	str	v96,	[v1675]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1678,	#4000
+	mla	v1677,	v54,	v1678,	v47
+	mov	v1678,	#3152
+	add	v1677,	v1677,	v1678
+	str	v96,	[v1677]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1680,	#4000
+	mla	v1679,	v54,	v1680,	v47
+	movw	v1680,	#3156
+	add	v1679,	v1679,	v1680
+	str	v96,	[v1679]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1682,	#4000
+	mla	v1681,	v54,	v1682,	v47
+	movw	v1682,	#3160
+	add	v1681,	v1681,	v1682
+	str	v96,	[v1681]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1684,	#4000
+	mla	v1683,	v54,	v1684,	v47
+	movw	v1684,	#3164
+	add	v1683,	v1683,	v1684
+	str	v96,	[v1683]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1686,	#4000
+	mla	v1685,	v54,	v1686,	v47
+	mov	v1686,	#3168
+	add	v1685,	v1685,	v1686
+	str	v96,	[v1685]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1688,	#4000
+	mla	v1687,	v54,	v1688,	v47
+	movw	v1688,	#3172
+	add	v1687,	v1687,	v1688
+	str	v96,	[v1687]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1690,	#4000
+	mla	v1689,	v54,	v1690,	v47
+	movw	v1690,	#3176
+	add	v1689,	v1689,	v1690
+	str	v96,	[v1689]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1692,	#4000
+	mla	v1691,	v54,	v1692,	v47
+	movw	v1692,	#3180
+	add	v1691,	v1691,	v1692
+	str	v96,	[v1691]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1694,	#4000
+	mla	v1693,	v54,	v1694,	v47
+	mov	v1694,	#3184
+	add	v1693,	v1693,	v1694
+	str	v96,	[v1693]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1696,	#4000
+	mla	v1695,	v54,	v1696,	v47
+	movw	v1696,	#3188
+	add	v1695,	v1695,	v1696
+	str	v96,	[v1695]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1698,	#4000
+	mla	v1697,	v54,	v1698,	v47
+	movw	v1698,	#3192
+	add	v1697,	v1697,	v1698
+	str	v96,	[v1697]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1700,	#4000
+	mla	v1699,	v54,	v1700,	v47
+	movw	v1700,	#3196
+	add	v1699,	v1699,	v1700
+	str	v96,	[v1699]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1702,	#4000
+	mla	v1701,	v54,	v1702,	v47
+	mov	v1702,	#3200
+	add	v1701,	v1701,	v1702
+	str	v96,	[v1701]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1704,	#4000
+	mla	v1703,	v54,	v1704,	v47
+	movw	v1704,	#3204
+	add	v1703,	v1703,	v1704
+	str	v96,	[v1703]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1706,	#4000
+	mla	v1705,	v54,	v1706,	v47
+	movw	v1706,	#3208
+	add	v1705,	v1705,	v1706
+	str	v96,	[v1705]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1708,	#4000
+	mla	v1707,	v54,	v1708,	v47
+	movw	v1708,	#3212
+	add	v1707,	v1707,	v1708
+	str	v96,	[v1707]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1710,	#4000
+	mla	v1709,	v54,	v1710,	v47
+	mov	v1710,	#3216
+	add	v1709,	v1709,	v1710
+	str	v96,	[v1709]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1712,	#4000
+	mla	v1711,	v54,	v1712,	v47
+	movw	v1712,	#3220
+	add	v1711,	v1711,	v1712
+	str	v96,	[v1711]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1714,	#4000
+	mla	v1713,	v54,	v1714,	v47
+	movw	v1714,	#3224
+	add	v1713,	v1713,	v1714
+	str	v96,	[v1713]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1716,	#4000
+	mla	v1715,	v54,	v1716,	v47
+	movw	v1716,	#3228
+	add	v1715,	v1715,	v1716
+	str	v96,	[v1715]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1718,	#4000
+	mla	v1717,	v54,	v1718,	v47
+	mov	v1718,	#3232
+	add	v1717,	v1717,	v1718
+	str	v96,	[v1717]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1720,	#4000
+	mla	v1719,	v54,	v1720,	v47
+	movw	v1720,	#3236
+	add	v1719,	v1719,	v1720
+	str	v96,	[v1719]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1722,	#4000
+	mla	v1721,	v54,	v1722,	v47
+	movw	v1722,	#3240
+	add	v1721,	v1721,	v1722
+	str	v96,	[v1721]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1724,	#4000
+	mla	v1723,	v54,	v1724,	v47
+	movw	v1724,	#3244
+	add	v1723,	v1723,	v1724
+	str	v96,	[v1723]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1726,	#4000
+	mla	v1725,	v54,	v1726,	v47
+	mov	v1726,	#3248
+	add	v1725,	v1725,	v1726
+	str	v96,	[v1725]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1728,	#4000
+	mla	v1727,	v54,	v1728,	v47
+	movw	v1728,	#3252
+	add	v1727,	v1727,	v1728
+	str	v96,	[v1727]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1730,	#4000
+	mla	v1729,	v54,	v1730,	v47
+	movw	v1730,	#3256
+	add	v1729,	v1729,	v1730
+	str	v96,	[v1729]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1732,	#4000
+	mla	v1731,	v54,	v1732,	v47
+	movw	v1732,	#3260
+	add	v1731,	v1731,	v1732
+	str	v96,	[v1731]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1734,	#4000
+	mla	v1733,	v54,	v1734,	v47
+	mov	v1734,	#3264
+	add	v1733,	v1733,	v1734
+	str	v96,	[v1733]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1736,	#4000
+	mla	v1735,	v54,	v1736,	v47
+	movw	v1736,	#3268
+	add	v1735,	v1735,	v1736
+	str	v96,	[v1735]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1738,	#4000
+	mla	v1737,	v54,	v1738,	v47
+	movw	v1738,	#3272
+	add	v1737,	v1737,	v1738
+	str	v96,	[v1737]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1740,	#4000
+	mla	v1739,	v54,	v1740,	v47
+	movw	v1740,	#3276
+	add	v1739,	v1739,	v1740
+	str	v96,	[v1739]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1742,	#4000
+	mla	v1741,	v54,	v1742,	v47
+	mov	v1742,	#3280
+	add	v1741,	v1741,	v1742
+	str	v96,	[v1741]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1744,	#4000
+	mla	v1743,	v54,	v1744,	v47
+	movw	v1744,	#3284
+	add	v1743,	v1743,	v1744
+	str	v96,	[v1743]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1746,	#4000
+	mla	v1745,	v54,	v1746,	v47
+	movw	v1746,	#3288
+	add	v1745,	v1745,	v1746
+	str	v96,	[v1745]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1748,	#4000
+	mla	v1747,	v54,	v1748,	v47
+	movw	v1748,	#3292
+	add	v1747,	v1747,	v1748
+	str	v96,	[v1747]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1750,	#4000
+	mla	v1749,	v54,	v1750,	v47
+	mov	v1750,	#3296
+	add	v1749,	v1749,	v1750
+	str	v96,	[v1749]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1752,	#4000
+	mla	v1751,	v54,	v1752,	v47
+	movw	v1752,	#3300
+	add	v1751,	v1751,	v1752
+	str	v96,	[v1751]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1754,	#4000
+	mla	v1753,	v54,	v1754,	v47
+	movw	v1754,	#3304
+	add	v1753,	v1753,	v1754
+	str	v96,	[v1753]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1756,	#4000
+	mla	v1755,	v54,	v1756,	v47
+	movw	v1756,	#3308
+	add	v1755,	v1755,	v1756
+	str	v96,	[v1755]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1758,	#4000
+	mla	v1757,	v54,	v1758,	v47
+	mov	v1758,	#3312
+	add	v1757,	v1757,	v1758
+	str	v96,	[v1757]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1760,	#4000
+	mla	v1759,	v54,	v1760,	v47
+	movw	v1760,	#3316
+	add	v1759,	v1759,	v1760
+	str	v96,	[v1759]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1762,	#4000
+	mla	v1761,	v54,	v1762,	v47
+	movw	v1762,	#3320
+	add	v1761,	v1761,	v1762
+	str	v96,	[v1761]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1764,	#4000
+	mla	v1763,	v54,	v1764,	v47
+	movw	v1764,	#3324
+	add	v1763,	v1763,	v1764
+	str	v96,	[v1763]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1766,	#4000
+	mla	v1765,	v54,	v1766,	v47
+	mov	v1766,	#3328
+	add	v1765,	v1765,	v1766
+	str	v96,	[v1765]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1768,	#4000
+	mla	v1767,	v54,	v1768,	v47
+	movw	v1768,	#3332
+	add	v1767,	v1767,	v1768
+	str	v96,	[v1767]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1770,	#4000
+	mla	v1769,	v54,	v1770,	v47
+	movw	v1770,	#3336
+	add	v1769,	v1769,	v1770
+	str	v96,	[v1769]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1772,	#4000
+	mla	v1771,	v54,	v1772,	v47
+	movw	v1772,	#3340
+	add	v1771,	v1771,	v1772
+	str	v96,	[v1771]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1774,	#4000
+	mla	v1773,	v54,	v1774,	v47
+	mov	v1774,	#3344
+	add	v1773,	v1773,	v1774
+	str	v96,	[v1773]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1776,	#4000
+	mla	v1775,	v54,	v1776,	v47
+	movw	v1776,	#3348
+	add	v1775,	v1775,	v1776
+	str	v96,	[v1775]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1778,	#4000
+	mla	v1777,	v54,	v1778,	v47
+	movw	v1778,	#3352
+	add	v1777,	v1777,	v1778
+	str	v96,	[v1777]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1780,	#4000
+	mla	v1779,	v54,	v1780,	v47
+	movw	v1780,	#3356
+	add	v1779,	v1779,	v1780
+	str	v96,	[v1779]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1782,	#4000
+	mla	v1781,	v54,	v1782,	v47
+	mov	v1782,	#3360
+	add	v1781,	v1781,	v1782
+	str	v96,	[v1781]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1784,	#4000
+	mla	v1783,	v54,	v1784,	v47
+	movw	v1784,	#3364
+	add	v1783,	v1783,	v1784
+	str	v96,	[v1783]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1786,	#4000
+	mla	v1785,	v54,	v1786,	v47
+	movw	v1786,	#3368
+	add	v1785,	v1785,	v1786
+	str	v96,	[v1785]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1788,	#4000
+	mla	v1787,	v54,	v1788,	v47
+	movw	v1788,	#3372
+	add	v1787,	v1787,	v1788
+	str	v96,	[v1787]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1790,	#4000
+	mla	v1789,	v54,	v1790,	v47
+	mov	v1790,	#3376
+	add	v1789,	v1789,	v1790
+	str	v96,	[v1789]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1792,	#4000
+	mla	v1791,	v54,	v1792,	v47
+	movw	v1792,	#3380
+	add	v1791,	v1791,	v1792
+	str	v96,	[v1791]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1794,	#4000
+	mla	v1793,	v54,	v1794,	v47
+	movw	v1794,	#3384
+	add	v1793,	v1793,	v1794
+	str	v96,	[v1793]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1796,	#4000
+	mla	v1795,	v54,	v1796,	v47
+	movw	v1796,	#3388
+	add	v1795,	v1795,	v1796
+	str	v96,	[v1795]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1798,	#4000
+	mla	v1797,	v54,	v1798,	v47
+	mov	v1798,	#3392
+	add	v1797,	v1797,	v1798
+	str	v96,	[v1797]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1800,	#4000
+	mla	v1799,	v54,	v1800,	v47
+	movw	v1800,	#3396
+	add	v1799,	v1799,	v1800
+	str	v96,	[v1799]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1802,	#4000
+	mla	v1801,	v54,	v1802,	v47
+	movw	v1802,	#3400
+	add	v1801,	v1801,	v1802
+	str	v96,	[v1801]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1804,	#4000
+	mla	v1803,	v54,	v1804,	v47
+	movw	v1804,	#3404
+	add	v1803,	v1803,	v1804
+	str	v96,	[v1803]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1806,	#4000
+	mla	v1805,	v54,	v1806,	v47
+	mov	v1806,	#3408
+	add	v1805,	v1805,	v1806
+	str	v96,	[v1805]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1808,	#4000
+	mla	v1807,	v54,	v1808,	v47
+	movw	v1808,	#3412
+	add	v1807,	v1807,	v1808
+	str	v96,	[v1807]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1810,	#4000
+	mla	v1809,	v54,	v1810,	v47
+	movw	v1810,	#3416
+	add	v1809,	v1809,	v1810
+	str	v96,	[v1809]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1812,	#4000
+	mla	v1811,	v54,	v1812,	v47
+	movw	v1812,	#3420
+	add	v1811,	v1811,	v1812
+	str	v96,	[v1811]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1814,	#4000
+	mla	v1813,	v54,	v1814,	v47
+	mov	v1814,	#3424
+	add	v1813,	v1813,	v1814
+	str	v96,	[v1813]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1816,	#4000
+	mla	v1815,	v54,	v1816,	v47
+	movw	v1816,	#3428
+	add	v1815,	v1815,	v1816
+	str	v96,	[v1815]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1818,	#4000
+	mla	v1817,	v54,	v1818,	v47
+	movw	v1818,	#3432
+	add	v1817,	v1817,	v1818
+	str	v96,	[v1817]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1820,	#4000
+	mla	v1819,	v54,	v1820,	v47
+	movw	v1820,	#3436
+	add	v1819,	v1819,	v1820
+	str	v96,	[v1819]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1822,	#4000
+	mla	v1821,	v54,	v1822,	v47
+	mov	v1822,	#3440
+	add	v1821,	v1821,	v1822
+	str	v96,	[v1821]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1824,	#4000
+	mla	v1823,	v54,	v1824,	v47
+	movw	v1824,	#3444
+	add	v1823,	v1823,	v1824
+	str	v96,	[v1823]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1826,	#4000
+	mla	v1825,	v54,	v1826,	v47
+	movw	v1826,	#3448
+	add	v1825,	v1825,	v1826
+	str	v96,	[v1825]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1828,	#4000
+	mla	v1827,	v54,	v1828,	v47
+	movw	v1828,	#3452
+	add	v1827,	v1827,	v1828
+	str	v96,	[v1827]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1830,	#4000
+	mla	v1829,	v54,	v1830,	v47
+	mov	v1830,	#3456
+	add	v1829,	v1829,	v1830
+	str	v96,	[v1829]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1832,	#4000
+	mla	v1831,	v54,	v1832,	v47
+	movw	v1832,	#3460
+	add	v1831,	v1831,	v1832
+	str	v96,	[v1831]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1834,	#4000
+	mla	v1833,	v54,	v1834,	v47
+	movw	v1834,	#3464
+	add	v1833,	v1833,	v1834
+	str	v96,	[v1833]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1836,	#4000
+	mla	v1835,	v54,	v1836,	v47
+	movw	v1836,	#3468
+	add	v1835,	v1835,	v1836
+	str	v96,	[v1835]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1838,	#4000
+	mla	v1837,	v54,	v1838,	v47
+	mov	v1838,	#3472
+	add	v1837,	v1837,	v1838
+	str	v96,	[v1837]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1840,	#4000
+	mla	v1839,	v54,	v1840,	v47
+	movw	v1840,	#3476
+	add	v1839,	v1839,	v1840
+	str	v96,	[v1839]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1842,	#4000
+	mla	v1841,	v54,	v1842,	v47
+	movw	v1842,	#3480
+	add	v1841,	v1841,	v1842
+	str	v96,	[v1841]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1844,	#4000
+	mla	v1843,	v54,	v1844,	v47
+	movw	v1844,	#3484
+	add	v1843,	v1843,	v1844
+	str	v96,	[v1843]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1846,	#4000
+	mla	v1845,	v54,	v1846,	v47
+	mov	v1846,	#3488
+	add	v1845,	v1845,	v1846
+	str	v96,	[v1845]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1848,	#4000
+	mla	v1847,	v54,	v1848,	v47
+	movw	v1848,	#3492
+	add	v1847,	v1847,	v1848
+	str	v96,	[v1847]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1850,	#4000
+	mla	v1849,	v54,	v1850,	v47
+	movw	v1850,	#3496
+	add	v1849,	v1849,	v1850
+	str	v96,	[v1849]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1852,	#4000
+	mla	v1851,	v54,	v1852,	v47
+	movw	v1852,	#3500
+	add	v1851,	v1851,	v1852
+	str	v96,	[v1851]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1854,	#4000
+	mla	v1853,	v54,	v1854,	v47
+	mov	v1854,	#3504
+	add	v1853,	v1853,	v1854
+	str	v96,	[v1853]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1856,	#4000
+	mla	v1855,	v54,	v1856,	v47
+	movw	v1856,	#3508
+	add	v1855,	v1855,	v1856
+	str	v96,	[v1855]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1858,	#4000
+	mla	v1857,	v54,	v1858,	v47
+	movw	v1858,	#3512
+	add	v1857,	v1857,	v1858
+	str	v96,	[v1857]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1860,	#4000
+	mla	v1859,	v54,	v1860,	v47
+	movw	v1860,	#3516
+	add	v1859,	v1859,	v1860
+	str	v96,	[v1859]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1862,	#4000
+	mla	v1861,	v54,	v1862,	v47
+	mov	v1862,	#3520
+	add	v1861,	v1861,	v1862
+	str	v96,	[v1861]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1864,	#4000
+	mla	v1863,	v54,	v1864,	v47
+	movw	v1864,	#3524
+	add	v1863,	v1863,	v1864
+	str	v96,	[v1863]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1866,	#4000
+	mla	v1865,	v54,	v1866,	v47
+	movw	v1866,	#3528
+	add	v1865,	v1865,	v1866
+	str	v96,	[v1865]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1868,	#4000
+	mla	v1867,	v54,	v1868,	v47
+	movw	v1868,	#3532
+	add	v1867,	v1867,	v1868
+	str	v96,	[v1867]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1870,	#4000
+	mla	v1869,	v54,	v1870,	v47
+	mov	v1870,	#3536
+	add	v1869,	v1869,	v1870
+	str	v96,	[v1869]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1872,	#4000
+	mla	v1871,	v54,	v1872,	v47
+	movw	v1872,	#3540
+	add	v1871,	v1871,	v1872
+	str	v96,	[v1871]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1874,	#4000
+	mla	v1873,	v54,	v1874,	v47
+	movw	v1874,	#3544
+	add	v1873,	v1873,	v1874
+	str	v96,	[v1873]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1876,	#4000
+	mla	v1875,	v54,	v1876,	v47
+	movw	v1876,	#3548
+	add	v1875,	v1875,	v1876
+	str	v96,	[v1875]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1878,	#4000
+	mla	v1877,	v54,	v1878,	v47
+	mov	v1878,	#3552
+	add	v1877,	v1877,	v1878
+	str	v96,	[v1877]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1880,	#4000
+	mla	v1879,	v54,	v1880,	v47
+	movw	v1880,	#3556
+	add	v1879,	v1879,	v1880
+	str	v96,	[v1879]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1882,	#4000
+	mla	v1881,	v54,	v1882,	v47
+	movw	v1882,	#3560
+	add	v1881,	v1881,	v1882
+	str	v96,	[v1881]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1884,	#4000
+	mla	v1883,	v54,	v1884,	v47
+	movw	v1884,	#3564
+	add	v1883,	v1883,	v1884
+	str	v96,	[v1883]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1886,	#4000
+	mla	v1885,	v54,	v1886,	v47
+	mov	v1886,	#3568
+	add	v1885,	v1885,	v1886
+	str	v96,	[v1885]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1888,	#4000
+	mla	v1887,	v54,	v1888,	v47
+	movw	v1888,	#3572
+	add	v1887,	v1887,	v1888
+	str	v96,	[v1887]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1890,	#4000
+	mla	v1889,	v54,	v1890,	v47
+	movw	v1890,	#3576
+	add	v1889,	v1889,	v1890
+	str	v96,	[v1889]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1892,	#4000
+	mla	v1891,	v54,	v1892,	v47
+	movw	v1892,	#3580
+	add	v1891,	v1891,	v1892
+	str	v96,	[v1891]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1894,	#4000
+	mla	v1893,	v54,	v1894,	v47
+	mov	v1894,	#3584
+	add	v1893,	v1893,	v1894
+	str	v96,	[v1893]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1896,	#4000
+	mla	v1895,	v54,	v1896,	v47
+	movw	v1896,	#3588
+	add	v1895,	v1895,	v1896
+	str	v96,	[v1895]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1898,	#4000
+	mla	v1897,	v54,	v1898,	v47
+	movw	v1898,	#3592
+	add	v1897,	v1897,	v1898
+	str	v96,	[v1897]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1900,	#4000
+	mla	v1899,	v54,	v1900,	v47
+	movw	v1900,	#3596
+	add	v1899,	v1899,	v1900
+	str	v96,	[v1899]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1902,	#4000
+	mla	v1901,	v54,	v1902,	v47
+	mov	v1902,	#3600
+	add	v1901,	v1901,	v1902
+	str	v96,	[v1901]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1904,	#4000
+	mla	v1903,	v54,	v1904,	v47
+	movw	v1904,	#3604
+	add	v1903,	v1903,	v1904
+	str	v96,	[v1903]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1906,	#4000
+	mla	v1905,	v54,	v1906,	v47
+	movw	v1906,	#3608
+	add	v1905,	v1905,	v1906
+	str	v96,	[v1905]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1908,	#4000
+	mla	v1907,	v54,	v1908,	v47
+	movw	v1908,	#3612
+	add	v1907,	v1907,	v1908
+	str	v96,	[v1907]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1910,	#4000
+	mla	v1909,	v54,	v1910,	v47
+	mov	v1910,	#3616
+	add	v1909,	v1909,	v1910
+	str	v96,	[v1909]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1912,	#4000
+	mla	v1911,	v54,	v1912,	v47
+	movw	v1912,	#3620
+	add	v1911,	v1911,	v1912
+	str	v96,	[v1911]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1914,	#4000
+	mla	v1913,	v54,	v1914,	v47
+	movw	v1914,	#3624
+	add	v1913,	v1913,	v1914
+	str	v96,	[v1913]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1916,	#4000
+	mla	v1915,	v54,	v1916,	v47
+	movw	v1916,	#3628
+	add	v1915,	v1915,	v1916
+	str	v96,	[v1915]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1918,	#4000
+	mla	v1917,	v54,	v1918,	v47
+	mov	v1918,	#3632
+	add	v1917,	v1917,	v1918
+	str	v96,	[v1917]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1920,	#4000
+	mla	v1919,	v54,	v1920,	v47
+	movw	v1920,	#3636
+	add	v1919,	v1919,	v1920
+	str	v96,	[v1919]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1922,	#4000
+	mla	v1921,	v54,	v1922,	v47
+	movw	v1922,	#3640
+	add	v1921,	v1921,	v1922
+	str	v96,	[v1921]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1924,	#4000
+	mla	v1923,	v54,	v1924,	v47
+	movw	v1924,	#3644
+	add	v1923,	v1923,	v1924
+	str	v96,	[v1923]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1926,	#4000
+	mla	v1925,	v54,	v1926,	v47
+	mov	v1926,	#3648
+	add	v1925,	v1925,	v1926
+	str	v96,	[v1925]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1928,	#4000
+	mla	v1927,	v54,	v1928,	v47
+	movw	v1928,	#3652
+	add	v1927,	v1927,	v1928
+	str	v96,	[v1927]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1930,	#4000
+	mla	v1929,	v54,	v1930,	v47
+	movw	v1930,	#3656
+	add	v1929,	v1929,	v1930
+	str	v96,	[v1929]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1932,	#4000
+	mla	v1931,	v54,	v1932,	v47
+	movw	v1932,	#3660
+	add	v1931,	v1931,	v1932
+	str	v96,	[v1931]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1934,	#4000
+	mla	v1933,	v54,	v1934,	v47
+	mov	v1934,	#3664
+	add	v1933,	v1933,	v1934
+	str	v96,	[v1933]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1936,	#4000
+	mla	v1935,	v54,	v1936,	v47
+	movw	v1936,	#3668
+	add	v1935,	v1935,	v1936
+	str	v96,	[v1935]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1938,	#4000
+	mla	v1937,	v54,	v1938,	v47
+	movw	v1938,	#3672
+	add	v1937,	v1937,	v1938
+	str	v96,	[v1937]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1940,	#4000
+	mla	v1939,	v54,	v1940,	v47
+	movw	v1940,	#3676
+	add	v1939,	v1939,	v1940
+	str	v96,	[v1939]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1942,	#4000
+	mla	v1941,	v54,	v1942,	v47
+	mov	v1942,	#3680
+	add	v1941,	v1941,	v1942
+	str	v96,	[v1941]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1944,	#4000
+	mla	v1943,	v54,	v1944,	v47
+	movw	v1944,	#3684
+	add	v1943,	v1943,	v1944
+	str	v96,	[v1943]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1946,	#4000
+	mla	v1945,	v54,	v1946,	v47
+	movw	v1946,	#3688
+	add	v1945,	v1945,	v1946
+	str	v96,	[v1945]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1948,	#4000
+	mla	v1947,	v54,	v1948,	v47
+	movw	v1948,	#3692
+	add	v1947,	v1947,	v1948
+	str	v96,	[v1947]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1950,	#4000
+	mla	v1949,	v54,	v1950,	v47
+	mov	v1950,	#3696
+	add	v1949,	v1949,	v1950
+	str	v96,	[v1949]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1952,	#4000
+	mla	v1951,	v54,	v1952,	v47
+	movw	v1952,	#3700
+	add	v1951,	v1951,	v1952
+	str	v96,	[v1951]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1954,	#4000
+	mla	v1953,	v54,	v1954,	v47
+	movw	v1954,	#3704
+	add	v1953,	v1953,	v1954
+	str	v96,	[v1953]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1956,	#4000
+	mla	v1955,	v54,	v1956,	v47
+	movw	v1956,	#3708
+	add	v1955,	v1955,	v1956
+	str	v96,	[v1955]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1958,	#4000
+	mla	v1957,	v54,	v1958,	v47
+	mov	v1958,	#3712
+	add	v1957,	v1957,	v1958
+	str	v96,	[v1957]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1960,	#4000
+	mla	v1959,	v54,	v1960,	v47
+	movw	v1960,	#3716
+	add	v1959,	v1959,	v1960
+	str	v96,	[v1959]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1962,	#4000
+	mla	v1961,	v54,	v1962,	v47
+	movw	v1962,	#3720
+	add	v1961,	v1961,	v1962
+	str	v96,	[v1961]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1964,	#4000
+	mla	v1963,	v54,	v1964,	v47
+	movw	v1964,	#3724
+	add	v1963,	v1963,	v1964
+	str	v96,	[v1963]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1966,	#4000
+	mla	v1965,	v54,	v1966,	v47
+	mov	v1966,	#3728
+	add	v1965,	v1965,	v1966
+	str	v96,	[v1965]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1968,	#4000
+	mla	v1967,	v54,	v1968,	v47
+	movw	v1968,	#3732
+	add	v1967,	v1967,	v1968
+	str	v96,	[v1967]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1970,	#4000
+	mla	v1969,	v54,	v1970,	v47
+	movw	v1970,	#3736
+	add	v1969,	v1969,	v1970
+	str	v96,	[v1969]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1972,	#4000
+	mla	v1971,	v54,	v1972,	v47
+	movw	v1972,	#3740
+	add	v1971,	v1971,	v1972
+	str	v96,	[v1971]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1974,	#4000
+	mla	v1973,	v54,	v1974,	v47
+	mov	v1974,	#3744
+	add	v1973,	v1973,	v1974
+	str	v96,	[v1973]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1976,	#4000
+	mla	v1975,	v54,	v1976,	v47
+	movw	v1976,	#3748
+	add	v1975,	v1975,	v1976
+	str	v96,	[v1975]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1978,	#4000
+	mla	v1977,	v54,	v1978,	v47
+	movw	v1978,	#3752
+	add	v1977,	v1977,	v1978
+	str	v96,	[v1977]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1980,	#4000
+	mla	v1979,	v54,	v1980,	v47
+	movw	v1980,	#3756
+	add	v1979,	v1979,	v1980
+	str	v96,	[v1979]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1982,	#4000
+	mla	v1981,	v54,	v1982,	v47
+	mov	v1982,	#3760
+	add	v1981,	v1981,	v1982
+	str	v96,	[v1981]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1984,	#4000
+	mla	v1983,	v54,	v1984,	v47
+	movw	v1984,	#3764
+	add	v1983,	v1983,	v1984
+	str	v96,	[v1983]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1986,	#4000
+	mla	v1985,	v54,	v1986,	v47
+	movw	v1986,	#3768
+	add	v1985,	v1985,	v1986
+	str	v96,	[v1985]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1988,	#4000
+	mla	v1987,	v54,	v1988,	v47
+	movw	v1988,	#3772
+	add	v1987,	v1987,	v1988
+	str	v96,	[v1987]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1990,	#4000
+	mla	v1989,	v54,	v1990,	v47
+	mov	v1990,	#3776
+	add	v1989,	v1989,	v1990
+	str	v96,	[v1989]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1992,	#4000
+	mla	v1991,	v54,	v1992,	v47
+	movw	v1992,	#3780
+	add	v1991,	v1991,	v1992
+	str	v96,	[v1991]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1994,	#4000
+	mla	v1993,	v54,	v1994,	v47
+	movw	v1994,	#3784
+	add	v1993,	v1993,	v1994
+	str	v96,	[v1993]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1996,	#4000
+	mla	v1995,	v54,	v1996,	v47
+	movw	v1996,	#3788
+	add	v1995,	v1995,	v1996
+	str	v96,	[v1995]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v1998,	#4000
+	mla	v1997,	v54,	v1998,	v47
+	mov	v1998,	#3792
+	add	v1997,	v1997,	v1998
+	str	v96,	[v1997]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2000,	#4000
+	mla	v1999,	v54,	v2000,	v47
+	movw	v2000,	#3796
+	add	v1999,	v1999,	v2000
+	str	v96,	[v1999]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2002,	#4000
+	mla	v2001,	v54,	v2002,	v47
+	movw	v2002,	#3800
+	add	v2001,	v2001,	v2002
+	str	v96,	[v2001]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2004,	#4000
+	mla	v2003,	v54,	v2004,	v47
+	movw	v2004,	#3804
+	add	v2003,	v2003,	v2004
+	str	v96,	[v2003]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2006,	#4000
+	mla	v2005,	v54,	v2006,	v47
+	mov	v2006,	#3808
+	add	v2005,	v2005,	v2006
+	str	v96,	[v2005]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2008,	#4000
+	mla	v2007,	v54,	v2008,	v47
+	movw	v2008,	#3812
+	add	v2007,	v2007,	v2008
+	str	v96,	[v2007]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2010,	#4000
+	mla	v2009,	v54,	v2010,	v47
+	movw	v2010,	#3816
+	add	v2009,	v2009,	v2010
+	str	v96,	[v2009]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2012,	#4000
+	mla	v2011,	v54,	v2012,	v47
+	movw	v2012,	#3820
+	add	v2011,	v2011,	v2012
+	str	v96,	[v2011]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2014,	#4000
+	mla	v2013,	v54,	v2014,	v47
+	mov	v2014,	#3824
+	add	v2013,	v2013,	v2014
+	str	v96,	[v2013]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2016,	#4000
+	mla	v2015,	v54,	v2016,	v47
+	movw	v2016,	#3828
+	add	v2015,	v2015,	v2016
+	str	v96,	[v2015]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2018,	#4000
+	mla	v2017,	v54,	v2018,	v47
+	movw	v2018,	#3832
+	add	v2017,	v2017,	v2018
+	str	v96,	[v2017]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2020,	#4000
+	mla	v2019,	v54,	v2020,	v47
+	movw	v2020,	#3836
+	add	v2019,	v2019,	v2020
+	str	v96,	[v2019]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2022,	#4000
+	mla	v2021,	v54,	v2022,	v47
+	mov	v2022,	#3840
+	add	v2021,	v2021,	v2022
+	str	v96,	[v2021]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2024,	#4000
+	mla	v2023,	v54,	v2024,	v47
+	movw	v2024,	#3844
+	add	v2023,	v2023,	v2024
+	str	v96,	[v2023]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2026,	#4000
+	mla	v2025,	v54,	v2026,	v47
+	movw	v2026,	#3848
+	add	v2025,	v2025,	v2026
+	str	v96,	[v2025]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2028,	#4000
+	mla	v2027,	v54,	v2028,	v47
+	movw	v2028,	#3852
+	add	v2027,	v2027,	v2028
+	str	v96,	[v2027]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2030,	#4000
+	mla	v2029,	v54,	v2030,	v47
+	mov	v2030,	#3856
+	add	v2029,	v2029,	v2030
+	str	v96,	[v2029]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2032,	#4000
+	mla	v2031,	v54,	v2032,	v47
+	movw	v2032,	#3860
+	add	v2031,	v2031,	v2032
+	str	v96,	[v2031]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2034,	#4000
+	mla	v2033,	v54,	v2034,	v47
+	movw	v2034,	#3864
+	add	v2033,	v2033,	v2034
+	str	v96,	[v2033]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2036,	#4000
+	mla	v2035,	v54,	v2036,	v47
+	movw	v2036,	#3868
+	add	v2035,	v2035,	v2036
+	str	v96,	[v2035]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2038,	#4000
+	mla	v2037,	v54,	v2038,	v47
+	mov	v2038,	#3872
+	add	v2037,	v2037,	v2038
+	str	v96,	[v2037]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2040,	#4000
+	mla	v2039,	v54,	v2040,	v47
+	movw	v2040,	#3876
+	add	v2039,	v2039,	v2040
+	str	v96,	[v2039]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2042,	#4000
+	mla	v2041,	v54,	v2042,	v47
+	movw	v2042,	#3880
+	add	v2041,	v2041,	v2042
+	str	v96,	[v2041]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2044,	#4000
+	mla	v2043,	v54,	v2044,	v47
+	movw	v2044,	#3884
+	add	v2043,	v2043,	v2044
+	str	v96,	[v2043]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2046,	#4000
+	mla	v2045,	v54,	v2046,	v47
+	mov	v2046,	#3888
+	add	v2045,	v2045,	v2046
+	str	v96,	[v2045]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2048,	#4000
+	mla	v2047,	v54,	v2048,	v47
+	movw	v2048,	#3892
+	add	v2047,	v2047,	v2048
+	str	v96,	[v2047]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2050,	#4000
+	mla	v2049,	v54,	v2050,	v47
+	movw	v2050,	#3896
+	add	v2049,	v2049,	v2050
+	str	v96,	[v2049]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2052,	#4000
+	mla	v2051,	v54,	v2052,	v47
+	movw	v2052,	#3900
+	add	v2051,	v2051,	v2052
+	str	v96,	[v2051]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2054,	#4000
+	mla	v2053,	v54,	v2054,	v47
+	mov	v2054,	#3904
+	add	v2053,	v2053,	v2054
+	str	v96,	[v2053]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2056,	#4000
+	mla	v2055,	v54,	v2056,	v47
+	movw	v2056,	#3908
+	add	v2055,	v2055,	v2056
+	str	v96,	[v2055]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2058,	#4000
+	mla	v2057,	v54,	v2058,	v47
+	movw	v2058,	#3912
+	add	v2057,	v2057,	v2058
+	str	v96,	[v2057]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2060,	#4000
+	mla	v2059,	v54,	v2060,	v47
+	movw	v2060,	#3916
+	add	v2059,	v2059,	v2060
+	str	v96,	[v2059]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2062,	#4000
+	mla	v2061,	v54,	v2062,	v47
+	mov	v2062,	#3920
+	add	v2061,	v2061,	v2062
+	str	v96,	[v2061]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2064,	#4000
+	mla	v2063,	v54,	v2064,	v47
+	movw	v2064,	#3924
+	add	v2063,	v2063,	v2064
+	str	v96,	[v2063]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2066,	#4000
+	mla	v2065,	v54,	v2066,	v47
+	movw	v2066,	#3928
+	add	v2065,	v2065,	v2066
+	str	v96,	[v2065]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2068,	#4000
+	mla	v2067,	v54,	v2068,	v47
+	movw	v2068,	#3932
+	add	v2067,	v2067,	v2068
+	str	v96,	[v2067]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2070,	#4000
+	mla	v2069,	v54,	v2070,	v47
+	mov	v2070,	#3936
+	add	v2069,	v2069,	v2070
+	str	v96,	[v2069]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2072,	#4000
+	mla	v2071,	v54,	v2072,	v47
+	movw	v2072,	#3940
+	add	v2071,	v2071,	v2072
+	str	v96,	[v2071]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2074,	#4000
+	mla	v2073,	v54,	v2074,	v47
+	movw	v2074,	#3944
+	add	v2073,	v2073,	v2074
+	str	v96,	[v2073]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2076,	#4000
+	mla	v2075,	v54,	v2076,	v47
+	movw	v2076,	#3948
+	add	v2075,	v2075,	v2076
+	str	v96,	[v2075]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2078,	#4000
+	mla	v2077,	v54,	v2078,	v47
+	mov	v2078,	#3952
+	add	v2077,	v2077,	v2078
+	str	v96,	[v2077]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2080,	#4000
+	mla	v2079,	v54,	v2080,	v47
+	movw	v2080,	#3956
+	add	v2079,	v2079,	v2080
+	str	v96,	[v2079]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2082,	#4000
+	mla	v2081,	v54,	v2082,	v47
+	movw	v2082,	#3960
+	add	v2081,	v2081,	v2082
+	str	v96,	[v2081]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2084,	#4000
+	mla	v2083,	v54,	v2084,	v47
+	movw	v2084,	#3964
+	add	v2083,	v2083,	v2084
+	str	v96,	[v2083]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2086,	#4000
+	mla	v2085,	v54,	v2086,	v47
+	mov	v2086,	#3968
+	add	v2085,	v2085,	v2086
+	str	v96,	[v2085]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2088,	#4000
+	mla	v2087,	v54,	v2088,	v47
+	movw	v2088,	#3972
+	add	v2087,	v2087,	v2088
+	str	v96,	[v2087]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2090,	#4000
+	mla	v2089,	v54,	v2090,	v47
+	movw	v2090,	#3976
+	add	v2089,	v2089,	v2090
+	str	v96,	[v2089]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2092,	#4000
+	mla	v2091,	v54,	v2092,	v47
+	movw	v2092,	#3980
+	add	v2091,	v2091,	v2092
+	str	v96,	[v2091]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2094,	#4000
+	mla	v2093,	v54,	v2094,	v47
+	mov	v2094,	#3984
+	add	v2093,	v2093,	v2094
+	str	v96,	[v2093]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2096,	#4000
+	mla	v2095,	v54,	v2096,	v47
+	movw	v2096,	#3988
+	add	v2095,	v2095,	v2096
+	str	v96,	[v2095]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2098,	#4000
+	mla	v2097,	v54,	v2098,	v47
+	movw	v2098,	#3992
+	add	v2097,	v2097,	v2098
+	str	v96,	[v2097]
+	movw	v47,	:lower16:_g_c
+	movt	v47,	:upper16:_g_c
+	mov	v2100,	#4000
+	mla	v2099,	v54,	v2100,	v47
+	movw	v2100,	#3996
+	add	v2099,	v2099,	v2100
+	str	v96,	[v2099]
+	mov	v2101,	#1
+	add	v2102,	v54,	v2101
+	mov	v2111,	v2102
+	b	b22
+.ltorg
+b46:
+	mov	v2103,	v2122
+	mov	r0,	v2103
+	add	sp,	sp,	#4
+	pop	{pc}
+	bx	lr
 .ltorg

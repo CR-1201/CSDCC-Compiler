@@ -26,6 +26,7 @@ import ir.types.*;
 import utils.IOFunc;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ObjBuilder {
     private static final ObjBuilder builder = new ObjBuilder();
@@ -55,7 +56,6 @@ public class ObjBuilder {
     private static HashMap<String, ArrayList<String>> preMap = new HashMap<>();
     private static HashMap<String, String[]> succMap = new HashMap<>();
 
-
     private void firstPass() {
         for (Value function : module.getFunctions()) {
             for (Value block : ((Function) function).getBasicBlocks()) {
@@ -79,15 +79,14 @@ public class ObjBuilder {
                 ObjFunction objFunction = buildObjFunc((Function) function);
                 objModule.addFunction(objFunction);
                 buildPhi((Function) function, objFunction);
+
             }
         }
         IOFunc.clear("ARM_raw.txt");
         IOFunc.output(objModule.toString(), "ARM_raw.txt");
-
         RegisterAllocer rar = new RegisterAllocer(objModule);
-        rar.alloc(false);
-        rar = new RegisterAllocer(objModule);
         rar.alloc(true);
+        rar.alloc(false);
         for (ObjFunction function : objModule.getFunctions()) {
             placeLiteralPool(function);
         }
@@ -178,9 +177,7 @@ public class ObjBuilder {
     public ObjFunction buildObjFunc(Function function) {
         ObjFunction objFunction = new ObjFunction(function.getName());
         for (BasicBlock basicBlock : function.getBlocksFromDom()) {
-            ObjBlock b = buildBasicBlock(objFunction, basicBlock);
-            objFunction.addObjBlock(b);
-            b.bb = basicBlock;
+            objFunction.addObjBlock(buildBasicBlock(objFunction, basicBlock));
         }
 
         return objFunction;
@@ -212,6 +209,8 @@ public class ObjBuilder {
             return buildRet((Ret) instruction, objBlock, objFunction);
         } else if (instruction instanceof Call) {
             return buildCall((Call) instruction, objBlock, objFunction);
+        } else if (instruction instanceof Icmp) {
+            return null;
         } else if (instruction instanceof BinaryInstruction) {
             return buildBinary((BinaryInstruction) instruction, objBlock, objFunction);
         } else if (instruction instanceof GEP) {
@@ -219,7 +218,7 @@ public class ObjBuilder {
         } else if (instruction instanceof Zext) {
             Value con = ((Zext) instruction).getConversionValue();
             if (con instanceof Icmp cond) {
-//                objBlock.addInstruction(buildBinary(cond, objBlock, objFunction));
+                objBlock.addInstruction(buildBinary(cond, objBlock, objFunction));
                 ObjRegister rd = createVirRegister(instruction);
                 ObjMove tmove = new ObjMove(rd, new ObjImmediate(1), false, true);
                 tmove.setCond(ObjInstruction.ObjCond.switchIr2Obj(cond.getCondition()));
@@ -556,7 +555,7 @@ public class ObjBuilder {
             return new ObjJump(new ObjBlock(ops.get(0).getName()));
         } else {
             Icmp condition = (Icmp) ops.get(0);
-//            objBlock.addInstruction(buildBinary(condition, objBlock, objFunction));
+            objBlock.addInstruction(buildBinary(condition, objBlock, objFunction));
             objBlock.addInstruction(new ObjJump(ObjInstruction.ObjCond.switchIr2Obj(condition.getCondition()), new ObjBlock(ops.get(1).getName())));
             succMap.get(objBlock.getName())[0] = ops.get(1).getName().substring(1);
             succMap.get(objBlock.getName())[1] = ops.get(2).getName().substring(1);

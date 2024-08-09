@@ -15,19 +15,10 @@ public class IrSymbolTable {
         this.preEnter = false;
     }
     
-    /**
-     * 返回栈顶符号域
-     * @return 栈顶符号域
-     */
     public HashMap<String, Value> getTopLayer() {
         return symbolTable.get(symbolTable.size() - 1);
     }
 
-    /**
-     * 从栈顶到栈底根据 name 查找 value
-     * @param ident 标识符
-     * @return value，如果没有找到，则返回 null
-     */
     public Value searchValue(String ident){
         for (int i = symbolTable.size() - 1; i >= 0; i--){
             if (symbolTable.get(i).containsKey(ident)){
@@ -37,11 +28,6 @@ public class IrSymbolTable {
         return null;
     }
 
-    /**
-     * 在符号表中登记 Value
-     * @param ident 标识符
-     * @param value irValue
-     */
     public void addValue(String ident, Value value){
         getTopLayer().put(ident, value);
     }
@@ -70,10 +56,6 @@ public class IrSymbolTable {
         }
     }
 
-    /**
-     * 第一个 layer 就是 global, 所以可以借此判断 layer 的状态
-     * @return true 则 global
-     */
     public boolean isGlobalLayer(){
         return symbolTable.size() == 1;
     }

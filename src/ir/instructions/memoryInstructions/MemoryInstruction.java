@@ -9,8 +9,6 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- 内存访问与寻址
- 包括 load, store, alloca, GEP
  */
 public class MemoryInstruction extends Instruction {
     MemoryInstruction(String name, DataType dataType, BasicBlock parent, ArrayList<Value> ops){

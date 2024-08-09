@@ -41,14 +41,6 @@ public class IrBuilder {
         root.buildIrTree();
     }
 
-    /**
-     * 全局变量初始化的时候,一定是用常量初始化的
-     * 建造一个全局变量,并将其加入 module
-     * @param ident 标识符
-     * @param initValue 初始值
-     * @param isConst 是否是常量
-     * @return 全局变量
-     */
     public GlobalVariable buildGlobalVariable(String ident, Constant initValue, boolean isConst){
         GlobalVariable globalVariable = new GlobalVariable(ident, initValue, isConst);
         module.addGlobalVariable(globalVariable);

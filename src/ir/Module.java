@@ -5,9 +5,6 @@ import java.util.LinkedList;
 
 /**
  @author Conroy
- 编译单元 单例模式
- 一个编译单元由若干个函数与全局变量组成
- parent->null,name->"Module",valueType->null
  */
 public class Module extends Value{
     private static final Module module = new Module();

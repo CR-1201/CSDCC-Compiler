@@ -2,7 +2,6 @@ package ir.types;
 
 /**
  @author Conroy
- 标签,用于 BasicBlock
  */
 public class LabelType extends ValueType{
     @Override

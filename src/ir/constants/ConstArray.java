@@ -8,16 +8,10 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- 一个数组,包含该 ConstArray 中的所有元素
  */
 public class ConstArray extends Constant {
     private final ArrayList<Constant> elements = new ArrayList<>();
 
-    /**
-     * elements 是常量数组,里面有一堆常量,可能是 ConstInt, ConstFloat,也可能是 ConstArray
-     * 构造它的类型的时候,需要元素的信息,这里选择了第一个元素
-     * @param elements 常量数组
-     */
     public ConstArray(ArrayList<Constant> elements){
         super(new ArrayType(elements.get(0).getValueType(), elements.size()),new ArrayList<>(elements));
         this.elements.addAll(elements);

@@ -14,14 +14,8 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- <result> = alloca <ty>
  */
 public class Alloca extends MemoryInstruction{
-    /*
-    * 参考 GlobalVariable 的设计,主要是为了局部常量数组准备的, 记录着局部常量数组的值
-    * TODO 如果一个常量数组只被当成常量使用,也就是没有 const[var] 这种状况
-    * 可以在后续的优化中将所有的 store 删掉
-    */
     private final ConstArray initVal;
 
     ArrayList<Value> initValues = null;
@@ -29,12 +23,6 @@ public class Alloca extends MemoryInstruction{
     public ArrayList<Instruction> initInstructions = null;
     public BasicBlock parentBlock = null;
 
-    /**
-    * 新建一个 alloca 指令,其类型是分配空间类型的指针
-    * @param nameNum 对于指令而言,其名称中带有数字,指令名称中的数字,eg: 名称为 %1 的指令的 nameNum 为 1
-    * @param allocatedType 分配空间的类型,可能为 PointerType, IntType, FloatType, ArrayType
-    * @param parent 基本块
-    */
     public Alloca(int nameNum, ValueType allocatedType, BasicBlock parent){
         // 指针 没有初始化
         super("%v" + nameNum, new PointerType(allocatedType), parent,new ArrayList<>());

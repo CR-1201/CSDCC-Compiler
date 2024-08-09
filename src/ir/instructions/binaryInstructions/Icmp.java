@@ -7,14 +7,9 @@ import ir.types.IntType;
 
 /**
  @author Conroy
- <result> = icmp <cond> <ty> <op1>, <op2>
  */
 public class Icmp extends BinaryInstruction {
-    /**
-     * @param condition 判断类型
-     * @param op1       第一个操作数
-     * @param op2       第二个操作数
-     */
+
     public Icmp(int nameNum, BasicBlock parent, Condition condition, Value op1, Value op2){
         super(nameNum, new IntType(1), parent, op1, op2);
         this.condition = condition;

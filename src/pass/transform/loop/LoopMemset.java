@@ -5,10 +5,14 @@ import ir.Module;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.Mul;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
+import ir.types.ArrayType;
 import ir.types.DataType;
+import ir.types.IntType;
+import ir.types.PointerType;
 import pass.Pass;
 import pass.analysis.*;
 import utils.HandlePrintf;
@@ -67,7 +71,15 @@ public class LoopMemset implements Pass {
             Instruction br = entering.getTailInstruction();
             Value gepPtr = gepInst.getBase();
             ArrayList<Value> argList = new ArrayList<>();
-            argList.add(gepPtr);
+            if (gepPtr instanceof Alloca alloca) {
+                ArrayList<Value> values = new ArrayList<>();
+                values.add(ConstInt.ZERO);
+                values.add(ConstInt.ZERO);
+                GEP basePtr = irBuilder.buildGEPBeforeInst(entering, alloca, values, entering.getTailInstruction());
+                argList.add(basePtr);
+            } else {
+                argList.add(gepPtr);
+            }
             argList.add(storeInst.getValue());
             if (loopSize instanceof ConstInt) {
                 argList.add(new ConstInt(((ConstInt) loopSize).getValue() * 4));
@@ -92,8 +104,6 @@ public class LoopMemset implements Pass {
         if (loop.getAllBlocks().size() != 2) {
             return false;
         }
-        BasicBlock header = loop.getHeader();
-        BasicBlock latch = loop.getLatches().iterator().next();
         int gepCount = 0;
         int storeCount = 0;
         for (BasicBlock block : loop.getAllBlocks()) {
@@ -110,7 +120,7 @@ public class LoopMemset implements Pass {
         if (gepCount * storeCount != 1) {
             return false;
         }
-        if (!(storeInst.getValue() instanceof ConstInt storeValue)) {
+        if (!(storeInst.getValue() instanceof ConstInt storeValue && storeValue.getValue() == 0)) {
             return false;
         }
         if (storeInst.getAddr() != gepInst) {

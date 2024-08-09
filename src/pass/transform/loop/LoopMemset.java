@@ -5,49 +5,96 @@ import ir.Module;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.Mul;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Store;
+import ir.instructions.otherInstructions.Call;
+import ir.types.ArrayType;
 import ir.types.DataType;
+import ir.types.IntType;
+import ir.types.PointerType;
 import pass.Pass;
-import pass.analysis.Loop;
-import pass.analysis.LoopAnalysis;
+import pass.analysis.*;
+import utils.HandlePrintf;
+
+import java.util.ArrayList;
 
 /**
+ * 单层循环
  * while (i < n) {
  *     arr[i] = const;
  *     i = i + 1;
  * }
- * 还未完成
+ * 双层循环
+ * while (i < a) {
+ *     int j = 0;
+ *     while (j < b) {
+ *         arr[i][j] = const;
+ *         j = j + 1;
+ *     }
+ *     i = i + 1;
+ * }
  */
 public class LoopMemset implements Pass {
-    private LoopAnalysis loopAnalysis = new LoopAnalysis();
-    private IrBuilder irBuilder = new IrBuilder();
+    private final CFG cfg = new CFG();
+    private final Dom dom = new Dom();
+    private final LoopAnalysis loopAnalysis = new LoopAnalysis();
+    private final LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
+    private final IrBuilder irBuilder = new IrBuilder();
     private GEP gepInst = null;
     private Store storeInst = null;
     private Value loopSize;
+    private boolean changed = false;
     public void run() {
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
-                loopAnalysis.analyzeLoopInfo(function);
+                changed = true;
+                while (changed) {
+                    changed = false;
+                    cfg.buildCFG(function);
+                    dom.buildDom(function);
+                    loopAnalysis.analyzeLoopInfo(function);
+                    loopVarAnalysis.loopVarAnalysis(function);
+                    for (Loop loop : function.getAllLoops()) {
+                        runLoopMemset(loop);
+                        if (changed) {
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
     private void runLoopMemset(Loop loop) {
-        if (!loop.getChildren().isEmpty()) {
-            for (Loop child : loop.getChildren()) {
-                runLoopMemset(child);
-            }
-        }
-        if (isMemsetableLoop(loop)) {
+        if (isMemsetableSingleLoop(loop)) {
             BasicBlock entering = loop.getEnterings().iterator().next();
             Instruction br = entering.getTailInstruction();
             Value gepPtr = gepInst.getBase();
-            Mul bi = irBuilder.buildMul((DataType) loopSize.getValueType(), loopSize, new ConstInt(4));
-            entering.insertBefore(bi, br);
+            ArrayList<Value> argList = new ArrayList<>();
+            if (gepPtr instanceof Argument) {
+                argList.add(gepPtr);
+            } else {
+                ArrayList<Value> values = new ArrayList<>();
+                values.add(ConstInt.ZERO);
+                values.add(ConstInt.ZERO);
+                GEP basePtr = irBuilder.buildGEPBeforeInst(entering, gepPtr, values, entering.getTailInstruction());
+                argList.add(basePtr);
+            }
+            argList.add(storeInst.getValue());
+            if (loopSize instanceof ConstInt) {
+                argList.add(new ConstInt(((ConstInt) loopSize).getValue() * 4));
+            } else {
+                Mul mi = irBuilder.buildMulBeforeTail(entering, (DataType) loopSize.getValueType(), loopSize, new ConstInt(4));
+                argList.add(mi);
+            }
+            irBuilder.buildCallBeforeTail(entering, Function.memset, argList);
+            br.setOperator(br.getOperators().indexOf(loop.getHeader()), loop.getExits().iterator().next());
+            loop.getHeader().replaceAllUsesWith(entering);
+            changed = true;
         }
     }
 
-    private Boolean isMemsetableLoop(Loop loop) {
+    private Boolean isMemsetableSingleLoop(Loop loop) {
         if (!(loop.isSimpleLoop() && loop.isInductorVarSet())) {
             return false;
         }
@@ -57,8 +104,6 @@ public class LoopMemset implements Pass {
         if (loop.getAllBlocks().size() != 2) {
             return false;
         }
-        BasicBlock header = loop.getHeader();
-        BasicBlock latch = loop.getLatches().iterator().next();
         int gepCount = 0;
         int storeCount = 0;
         for (BasicBlock block : loop.getAllBlocks()) {
@@ -75,7 +120,7 @@ public class LoopMemset implements Pass {
         if (gepCount * storeCount != 1) {
             return false;
         }
-        if (!(storeInst.getValue() instanceof ConstInt storeValue)) {
+        if (!(storeInst.getValue() instanceof ConstInt storeValue && storeValue.getValue() == 0)) {
             return false;
         }
         if (storeInst.getAddr() != gepInst) {

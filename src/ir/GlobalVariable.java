@@ -7,11 +7,7 @@ import java.util.ArrayList;
 
 public class GlobalVariable extends User{
     private final boolean isConst;
-    /**
-     * 初始化
-     * 此时全局变量既可以为常量,也可以不是常量
-     * @param initVal 是全局变量使用的唯一 value
-     */
+
     public GlobalVariable(String name, Constant initVal, boolean isConst){
         super("@_g_" + name, new PointerType(initVal.getValueType()), Module.getModule(),new ArrayList<>()
         {{

@@ -28,7 +28,7 @@ public class Peephole implements Pass {
     public void run() {
         PureFunction pureFunction = new PureFunction();
         pureFunction.markPure();
-        this.is_pure = pureFunction.is_pure;
+        this.is_pure = pureFunction.isPure;
         // store后紧接着的load,可以消掉load
         Peephole1();
     }

@@ -10,8 +10,6 @@ import ir.types.ValueType;
 import java.util.ArrayList;
 /**
  @author Conroy
- 常量包括 ConstInt, ConstArray, ConstStr, ConstFloat
- 常量没有名字 也没有 parent
  */
 public class Constant extends User {
     public Constant(ValueType valueType){
@@ -21,10 +19,7 @@ public class Constant extends User {
     public Constant(ValueType valueType, ArrayList<Value> values){
         super(null, valueType, null, values);
     }
-    /**
-     * @param constantType Constant种类
-     * @return 元素全0 的 ConstInt ConstFloat 或 ConstArray
-     */
+
     public static Constant getZeroConstant(ValueType constantType) {
         if (constantType instanceof IntType){
             return ConstInt.ZERO;

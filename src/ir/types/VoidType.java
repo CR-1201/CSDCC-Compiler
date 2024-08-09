@@ -1,7 +1,6 @@
 package ir.types;
 /**
  @author Conroy
- 起占位作用，不然只能用 null
  */
 public class VoidType extends DataType{
     @Override

@@ -7,7 +7,6 @@ import ir.types.FloatType;
 
 /**
  @author Conroy
- <result> = sdiv <ty> <op1>, <op2>
  */
 public class Sdiv extends BinaryInstruction {
     // 只有 op1 && op2 都为 IntType 时, Sdiv 的 dataType 为 IntType;

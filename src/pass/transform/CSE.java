@@ -43,8 +43,8 @@ public class CSE implements Pass {
     public void run() {
         PureFunction pureFunction = new PureFunction();
         pureFunction.markPure();
-        this.is_pure = pureFunction.is_pure;
-        this.global_var_store_effects = pureFunction.global_var_store_effects;
+        this.is_pure = pureFunction.isPure;
+        this.global_var_store_effects = pureFunction.globalVarStoreEffects;
 
         ArrayList<Function> functions = module.getFunctionsArray();
         for (Function function : functions) {

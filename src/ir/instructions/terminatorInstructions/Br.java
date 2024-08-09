@@ -10,10 +10,6 @@ public class Br extends TerInstruction{
     // 有条件跳转还是无条件跳转
     private boolean hasCondition;
 
-    /**
-     * 无条件跳转
-     * @param target 唯一的操作数,目标基本块
-     */
     public Br(BasicBlock parent, BasicBlock target){
         super(new VoidType(), parent, new ArrayList<>(){{
             add(target);
@@ -25,12 +21,6 @@ public class Br extends TerInstruction{
         }
     }
 
-    /**
-     * 有条件跳转
-     * @param condition  第一个操作数,条件
-     * @param trueBlock  第二个操作数,条件成立目标
-     * @param falseBlock 第三个操作数,条件不成立目标
-     */
     public Br(BasicBlock parent, Value condition, BasicBlock trueBlock, BasicBlock falseBlock){
         super(new VoidType(), parent, new ArrayList<>(){{
             add(condition);add(trueBlock);add(falseBlock);

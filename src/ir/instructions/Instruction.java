@@ -101,6 +101,18 @@ public class Instruction extends User {
         return arrayInit;
     }
 
+
+    /* ========================== CSE ========================== */
+    private int cseIndex = -1;
+
+    public int getCSEIndex() {
+        return cseIndex;
+    }
+
+    public void setCSEIndex(int index) {
+        this.cseIndex = index;
+    }
+
     @Override
     public BasicBlock getParent(){
         return (BasicBlock) super.getParent();

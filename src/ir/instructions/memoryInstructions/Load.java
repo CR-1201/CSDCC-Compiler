@@ -34,4 +34,8 @@ public class Load extends MemoryInstruction{
     public String toString(){
         return getName() + " = load " + getValueType() + ", " + getOperator(0).getValueType() + " " + getOperator(0).getName();
     }
+
+    public String getHashNumbering(){
+        return "load " + getValueType() + ", " + getOperator(0).getValueType() + " " + getOperator(0).getName();
+    }
 }

@@ -17,13 +17,6 @@ import java.util.HashMap;
 /**
  @author Conroy
  this pass used after pure function mark
- 该pass思想:找到所有的critical inst,然后根据def和use反推所有有用的指令,没有用的指令全部删除
- 什么是critical inst?
- (1) 输入输出算critical inst,这里也就是call lib function
- (2) 函数 return
- (3) mem store,该mem值的是外界mem,既非本函数栈帧的空间,比如全局变量,全局数组,数组函数参数
- (4) 对于call 方法,如果该函数不是pure,则算effective inst
- (5) Branch指令,Jump指令
 */
 
 public class InstructionCleanUp implements Pass {
@@ -39,8 +32,7 @@ public class InstructionCleanUp implements Pass {
         cleanUp();
     }
 
-    // 对于内存修改, 因为删除不仅影响函数内部, 还影响外部函数
-    // 比如a在内存写了一个1, b函数load出来然后输出了, 所以内存写入都不能删除
+
     private void cleanUp() {
         ArrayList<Function> functions = module.getFunctionsArray();
         for (Function function : functions) {

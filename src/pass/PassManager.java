@@ -36,6 +36,7 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
+        passes.add(new CFG());
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());

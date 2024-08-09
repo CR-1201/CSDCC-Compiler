@@ -4,11 +4,14 @@ import ir.*;
 import ir.Module;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
+
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
+
 import ir.instructions.otherInstructions.Call;
+
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.VoidType;
@@ -19,17 +22,20 @@ import utils.Expression;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+
+// TODO global CSE
 
 public class CSE implements Pass {
     private final Module module = Module.getModule();
 
-    private HashMap<BasicBlock,ArrayList<Boolean>> Gen;
-    private HashMap<BasicBlock,ArrayList<Boolean>> KILL;
-    private HashMap<BasicBlock,ArrayList<Boolean>> IN;
-    private HashMap<BasicBlock,ArrayList<Boolean>> OUT;
+    private final HashMap<BasicBlock,ArrayList<Boolean>> GEN = new HashMap<>();
+    private final HashMap<BasicBlock,ArrayList<Boolean>> KILL = new HashMap<>();
+    private final HashMap<BasicBlock,ArrayList<Boolean>> IN = new HashMap<>();
+    private final HashMap<BasicBlock,ArrayList<Boolean>> OUT = new HashMap<>();
 
-    private ArrayList<Expression> available = new ArrayList<>();
-    private ArrayList<Instruction> delete_list = new ArrayList<>();
+    private final ArrayList<Expression> available = new ArrayList<>();
+    private final ArrayList<Instruction> delete_list = new ArrayList<>();
 
     private HashMap<Function, Boolean> is_pure = new HashMap<>();
     private HashMap<Function, HashSet<Value>> global_var_store_effects = new HashMap<>();
@@ -45,20 +51,251 @@ public class CSE implements Pass {
             if( !function.getIsBuiltIn() ){
                 do{
                     localCSE(function);
+//                    globalCSE(function);
                 }while(!delete_list.isEmpty());
             }
         }
     }
 
+    private void globalCSE(Function function) {
+        delete_list.clear();
+        calcGenKill(function);
+
+        calcInOut(function);
+
+        findSource(function);
+
+        replaceSubExpr(function);
+    }
+
+    private void calcGenKill(Function function) {
+        calcAvailable(function);
+        calcGen(function);
+        calcKill(function);
+    }
+
+    private void calcAvailable(Function function) {
+        available.clear();
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
+        for (BasicBlock block : blocks) {
+            ArrayList<Instruction> instructions = block.getInstructionsArray();
+            for (Instruction instruction : instructions) {
+                if(notOptimizable(instruction)) {
+                    continue;
+                }
+                Expression expression = new Expression(instruction);
+                if( getExpression(instruction) == null ) {
+                    available.add(expression);
+                    instruction.setCSEIndex(available.size() - 1);
+                }
+            }
+        }
+    }
+
+    private void calcGen(Function function) {
+        GEN.clear();
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
+        for (BasicBlock block : blocks) {
+            ArrayList<Boolean> gen = new ArrayList<>();
+            for (int i = 0; i < available.size(); i++) {
+                gen.add(false);
+            }
+            ArrayList<Instruction> instructions = block.getInstructionsArray();
+            for (Instruction instruction : instructions) {
+                if(notOptimizable(instruction)) {
+                    continue;
+                }
+                if( instruction instanceof Load && isKill(instruction,instructions) ){
+                    continue;
+                }
+                Expression expression = getExpression(instruction);
+                if( expression != null ) {
+                    System.out.println(instruction);
+                    int index = available.indexOf(expression);
+                    gen.set(index,true);
+                }
+
+            }
+            GEN.put(block,gen);
+        }
+    }
+
+    private void calcKill(Function function) {
+        KILL.clear();
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
+        for (BasicBlock block : blocks) {
+            ArrayList<Boolean> kill = new ArrayList<>();
+            for (int i = 0; i < available.size(); i++) {
+                kill.add(false);
+            }
+            ArrayList<Instruction> instructions = block.getInstructionsArray();
+            for (Instruction instruction : instructions) {
+                if( instruction instanceof Ret || (instruction instanceof Br br) ){
+                    continue;
+                }
+
+                Expression exp = new Expression(instruction);
+                for( int i = 0; i < available.size() ; i++ ){
+                    Expression expression = available.get(i);
+                    if( expression.instruction instanceof Load load && isKill(load,instruction) ){
+                        kill.set(i,true);
+                    }
+
+
+                    if( exp.hash != null && exp.hash.equals(expression.hash) ){
+                        GEN.get(block).set(i,false);
+                    }
+
+                    ArrayList<Value> operands = expression.operands;
+                    if( operands.contains(instruction) ){
+                        kill.set(i,true);
+                    }
+                }
+            }
+            KILL.put(block,kill);
+        }
+    }
+
+    private void calcInOut(Function function) {
+        ArrayList<Boolean> phi = new ArrayList<>();
+        ArrayList<Boolean> U = new ArrayList<>();
+        for (int i = 0; i < available.size(); i++) {
+            phi.add(false);
+            U.add(true);
+        }
+
+        IN.clear();
+        OUT.clear();
+        IN.put(function.getFirstBlock(),phi);
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
+        for (BasicBlock block : blocks) {
+            if( block.equals(function.getFirstBlock()) ){
+                OUT.put(block,phi);
+            } else OUT.put(block,U);
+        }
+
+        boolean changed = true;
+        int count = 0;
+        while (changed) {
+            System.out.println(count++);
+            changed = false;
+            for (BasicBlock block : getBlocksRank(function)) {
+                if( block != function.getFirstBlock() ){
+                    // calculate IN
+                    ArrayList<Boolean> in = new ArrayList<>(U);
+                    for( BasicBlock pre : block.getPrecursors() ){
+                        for( int i = 0 ; i < available.size() ; i++ ){
+                            boolean flag = in.get(i) && OUT.get(pre).get(i);
+                            in.set(i,flag);
+                        }
+                    }
+                    IN.put(block,in);
+
+                    // calculate OUT
+                    ArrayList<Boolean> preOut = new ArrayList<>(OUT.get(block));
+                    for( int i = 0 ; i < available.size() ; i++ ){
+                        boolean flag = GEN.get(block).get(i) || (IN.get(block).get(i) && !KILL.get(block).get(i));
+                        OUT.get(block).set(i,flag);
+                    }
+                    if( !preOut.equals(OUT.get(block)) ){
+                        changed = true;
+                    }
+                }
+            }
+        }
+    }
+
+    private void findSource(Function function) {
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
+        for (BasicBlock block : blocks) {
+            ArrayList<Instruction> instructions = block.getInstructionsArray();
+            for( Instruction instruction : instructions ){
+                if(notOptimizable(instruction)) {
+                    continue;
+                }
+                Expression expression = getExpression(instruction);
+                if( expression != null ) {
+                    int index = available.indexOf(expression);
+                    expression = available.get(index);
+                    if(instruction instanceof Load load && isKill(load,instructions) ){
+                        expression.source.remove(load);
+                    } else if( (!IN.get(block).get(index) || KILL.get(block).get(index)) && GEN.get(block).get(index) ){
+                        expression.source.add(instruction);
+                    }
+                }
+            }
+        }
+    }
+
+    private void replaceSubExpr(Function function){
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
+        for (BasicBlock block : blocks){
+            ArrayList<Instruction> instructions = block.getInstructionsArray();
+            for (Instruction instruction : instructions){
+                if(notOptimizable(instruction)){
+                    continue;
+                }
+                Expression expression = getExpression(instruction);;
+                if( expression != null ) {
+                    int index = available.indexOf(expression);
+                    expression = available.get(index);
+                    if( !IN.get(block).get(index) || KILL.get(block).get(index) || expression.source.contains(instruction)){
+                        continue;
+                    }
+                    Instruction repInst = findReplacement(block,expression.source);
+                    if( repInst != null ){
+                        delete_list.add(instruction);
+                        instruction.replaceAllUsesWith(repInst);
+                    }
+                }
+            }
+        }
+    }
+
+    private Instruction findReplacement(BasicBlock block, HashSet<Instruction> source) {
+        HashMap<BasicBlock,Instruction> sourceMap = new HashMap<>();
+        for( Instruction instruction : source ){
+            BasicBlock basicBlock = instruction.getParent();
+            sourceMap.put(basicBlock,instruction);
+        }
+
+        HashSet<BasicBlock> arrived = new HashSet<>();
+        for (Map.Entry<BasicBlock, Instruction> entry : sourceMap.entrySet()) {
+            BasicBlock sourceBlock = entry.getKey();
+
+            ArrayList<BasicBlock> workList = new ArrayList<>();
+            ArrayList<BasicBlock> visited = new ArrayList<>();
+            workList.add(sourceBlock);
+            for( BasicBlock cur_bb : workList ){
+                if( visited.contains(cur_bb) ){
+                    continue;
+                }
+                visited.add(cur_bb);
+                if( cur_bb.equals(block) ){
+                    arrived.add(sourceBlock);
+                    break;
+                }
+                for( BasicBlock successor : cur_bb.getSuccessors() ){
+                    if( sourceMap.containsKey(successor) ){
+                        continue;
+                    }
+                    workList.add(successor);
+                }
+            }
+        }
+
+        return arrived.size() == 1 ? sourceMap.get(arrived.iterator().next()) : null;
+    }
+
     private void localCSE(Function function){
-        ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
         for (BasicBlock bb : blocks) {
             do {
                 delete_list.clear();
                 ArrayList<Instruction> instructions = bb.getInstructionsArray();
                 ArrayList<Instruction> preInstructions = new ArrayList<>();
                 for (Instruction inst : instructions) {
-                    if (!isOptimizable(inst)) {
+                    if (notOptimizable(inst)) {
                         preInstructions.add(inst);
                         continue;
                     }
@@ -75,6 +312,17 @@ public class CSE implements Pass {
                 deleteInstr();
             } while (!delete_list.isEmpty());
         }
+    }
+
+    private boolean isKill(Instruction instruction, ArrayList<Instruction> instructions) {
+        int index = instructions.indexOf(instruction);
+        for ( int i = index + 1; i < instructions.size(); i++ ) {
+            Instruction instr = instructions.get(i);
+            if( isKill(instruction,instr) ){
+                return true;
+            }
+        }
+        return false;
     }
 
     private Instruction isAppear(Instruction inst,ArrayList<Instruction> instructions){
@@ -213,17 +461,17 @@ public class CSE implements Pass {
         return false;
     }
 
-    private boolean isOptimizable(Instruction instruction){
+    private boolean notOptimizable(Instruction instruction){
         if( instruction instanceof Ret || instruction instanceof Br || instruction instanceof Store
           || (instruction instanceof Call call && call.getFunction().getReturnType() instanceof VoidType)
            || instruction instanceof Alloca ){
-            return false;
+            return true;
         }
         if( instruction instanceof Call call ){
             Function function = call.getFunction();
-            return is_pure.containsKey(function);
+            return !is_pure.containsKey(function);
         }
-        return true;
+        return false;
     }
 
     void deleteInstr(){
@@ -231,4 +479,34 @@ public class CSE implements Pass {
             instruction.removeSelf();
         }
     }
+
+    private ArrayList<BasicBlock> getBlocksRank(Function function) {
+        ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+        ArrayList<BasicBlock> blocksRank = new ArrayList<>();
+        for (BasicBlock block : blocks) {
+            if( block.getSuccessors().isEmpty() ){
+                blocksRank.add(block);
+            }
+        }
+        for( int i = 0; i < blocksRank.size(); i++ ){
+            for( BasicBlock pre : blocksRank.get(i).getPrecursors() ){
+                if( !blocksRank.contains(pre) ){
+                    blocksRank.add(pre);
+                }
+            }
+        }
+        return blocksRank;
+    }
+
+    private Expression getExpression(Instruction instruction){
+        Expression exp = new Expression(instruction);
+        for( Expression expression : available ){
+            if( expression.equals(exp) ){
+                return expression;
+            }
+        }
+        return null;
+    }
+
+
 }

@@ -71,9 +71,12 @@ public class Compiler {
         // 生成目标代码
         ObjBuilder.getObjBuilder().build();
 
+        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
+
+
         ObjPassManager objPassManager = new ObjPassManager();
         objPassManager.run();
 
-        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
+//        IOFunc.output(ObjModule.getModule().toString(), "peephole.s");
     }
 }

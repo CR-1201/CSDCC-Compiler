@@ -403,7 +403,7 @@ public class ObjBuilder {
             return new ObjLoad(rd, rd, ((PointerType) addr.getValueType()).getPointeeType().isFloat());
         }
         ObjOperand rs = v2mMap.containsKey(addr) ? v2mMap.get(addr) : putNewVGtoMap(addr, objFunction, objBlock);
-        return new ObjLoad(rd, rs, null, ((PointerType) addr.getValueType()).getPointeeType().isFloat());
+        return new ObjLoad(rd, rs, new ObjImmediate(0), ((PointerType) addr.getValueType()).getPointeeType().isFloat());
     }
 
     private ObjInstruction buildStore(Store store, ObjBlock objBlock, ObjFunction objFunction) {

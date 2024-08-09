@@ -1,585 +1,216 @@
 .arch armv7ve
 .arm
-.global	_g_state
-
-.section .data
-.align 2
-_g_state:
-	.word	19260817
-
-.global	_g_buffer
-
-.section .bss
-.align 2
-_g_buffer:
-	.zero	131072
 .section .text
 .global	main
 main:
 	push	{lr}
-	sub	sp,	sp,	#364
-b43:
+	movw	r5,	#28860
+	sub	sp,	sp,	r5
+b8:
 	add	v0,	sp,	#0
-	add	v1,	sp,	#320
-	add	v2,	sp,	#340
-	mov	r0,	v2
+	movw	v2,	#12508
+	add	v1,	sp,	v2
+	mov	r0,	v1
 	mov	r1,	#0
-	mov	r2,	#20
+	movw	r2,	#16348
 	bl	memset
-	mov	v7,	#0
-	str	v7,	[v2]
-	mov	v9,	#4
-	add	v8,	v2,	v9
-	mov	v10,	#0
-	str	v10,	[v8]
-	mov	v12,	#8
-	add	v11,	v2,	v12
-	mov	v13,	#0
-	str	v13,	[v11]
-	mov	v15,	#12
-	add	v14,	v2,	v15
-	mov	v16,	#0
-	str	v16,	[v14]
-	mov	v18,	#16
-	add	v17,	v2,	v18
-	mov	v19,	#0
-	str	v19,	[v17]
-	bl	getint
-	mov	v20,	r0
-	movw	v21,	:lower16:_g_state
-	movt	v21,	:upper16:_g_state
-	str	v20,	[v21]
-	bl	getint
-	mov	v22,	r0
-	bl	_sysy_starttime
-	mov	v25,	#0
-	str	v25,	[v1]
-	mov	v27,	#4
-	add	v26,	v1,	v27
-	mov	v28,	#0
-	str	v28,	[v26]
-	mov	v30,	#8
-	add	v29,	v1,	v30
-	mov	v31,	#0
-	str	v31,	[v29]
-	mov	v33,	#12
-	add	v32,	v1,	v33
-	mov	v34,	#0
-	str	v34,	[v32]
-	mov	v36,	#16
-	add	v35,	v1,	v36
-	mov	v37,	#0
-	str	v37,	[v35]
-	mov	v307,	v22
-	b	b44
-.ltorg
-b44:
-	mov	v39,	v307
-	mov	v40,	#0
-	cmp	v39,	v40
-	bgt	b45
-	b	b46
-.ltorg
-b45:
-	mov	v308,	#0
-	b	b47
-.ltorg
-b47:
-	mov	v42,	v308
-	mov	v43,	#32000
-	cmp	v42,	v43
-	blt	b48
-	b	b49
-.ltorg
-b48:
-	movw	v44,	:lower16:_g_buffer
-	movt	v44,	:upper16:_g_buffer
-	mov	v46,	v42, lsl #2
-	add	v45,	v46,	v44
-	movw	v47,	:lower16:_g_state
-	movt	v47,	:upper16:_g_state
-	ldr	v47,	[v47]
-	movw	v48,	:lower16:_g_state
-	movt	v48,	:upper16:_g_state
-	ldr	v48,	[v48]
-	mov	v49,	v48, lsl #13
-	add	v50,	v47,	v49
-	movw	v21,	:lower16:_g_state
-	movt	v21,	:upper16:_g_state
-	str	v50,	[v21]
-	movw	v51,	:lower16:_g_state
-	movt	v51,	:upper16:_g_state
-	ldr	v51,	[v51]
-	movw	v52,	:lower16:_g_state
-	movt	v52,	:upper16:_g_state
-	ldr	v52,	[v52]
-	mov	v54,	v52, asr #31
-	add	v55,	v52,	v54, lsr #15
-	mov	v53,	v55, asr #17
-	add	v56,	v51,	v53
-	movw	v21,	:lower16:_g_state
-	movt	v21,	:upper16:_g_state
-	str	v56,	[v21]
-	movw	v57,	:lower16:_g_state
-	movt	v57,	:upper16:_g_state
-	ldr	v57,	[v57]
-	movw	v58,	:lower16:_g_state
-	movt	v58,	:upper16:_g_state
-	ldr	v58,	[v58]
-	mov	v59,	v58, lsl #5
-	add	v60,	v57,	v59
-	movw	v21,	:lower16:_g_state
-	movt	v21,	:upper16:_g_state
-	str	v60,	[v21]
-	movw	v61,	:lower16:_g_state
-	movt	v61,	:upper16:_g_state
-	ldr	v61,	[v61]
-	mov	v63,	v61, asr #31
-	ands	v62,	v61,	#255
-	orrne	v62,	v62,	v63, lsl #8
-	str	v62,	[v45]
-	mov	v65,	#1
-	add	v64,	v42,	v65
-	mov	v308,	v64
-	b	b47
-.ltorg
-b49:
-	movw	v44,	:lower16:_g_buffer
-	movt	v44,	:upper16:_g_buffer
-	mov	v71,	#128000
-	add	v70,	v44,	v71
-	mov	v72,	#128
-	str	v72,	[v70]
-	movw	v309,	#32001
-	b	b190
-.ltorg
-b190:
-	mov	v74,	v309
-	mov	v75,	v74, asr #31
-	ands	v73,	v74,	#63
-	orrne	v73,	v73,	v75, lsl #6
-	mov	v77,	#60
-	cmp	v73,	v77
-	bne	b191
-	b	b192
-.ltorg
-b191:
-	mov	v79,	v74, lsl #2
-	add	v78,	v79,	v44
-	mov	v80,	#0
-	str	v80,	[v78]
-	mov	v82,	#1
-	add	v81,	v74,	v82
-	mov	v309,	v81
-	b	b190
-.ltorg
-b192:
-	mov	v84,	v74, lsl #2
-	add	v83,	v84,	v44
-	mov	v85,	#0
-	str	v85,	[v83]
-	mov	v87,	#1
-	add	v86,	v74,	v87
-	mov	v89,	v86, lsl #2
-	add	v88,	v89,	v44
-	mov	v90,	#0
-	str	v90,	[v88]
-	mov	v92,	#2
-	add	v91,	v74,	v92
-	mov	v94,	v91, lsl #2
-	add	v93,	v94,	v44
-	mov	v95,	#125
-	str	v95,	[v93]
-	mov	v97,	#3
-	add	v96,	v74,	v97
-	mov	v99,	v96, lsl #2
-	add	v98,	v99,	v44
-	mov	v100,	#0
-	str	v100,	[v98]
-	mov	v102,	#4
-	add	v101,	v74,	v102
 	mov	r0,	v0
 	mov	r1,	#0
-	mov	r2,	#320
+	movw	r2,	#12508
 	bl	memset
-	mov	v107,	#0
-	str	v107,	[v0]
-	mov	v310,	#0
-	mov	v311,	#0
-	mov	v314,	#0
-	movw	v317,	#57840
-	movt	v317,	#50130
-	movw	v318,	#21622
-	movt	v318,	#4146
-	movw	v319,	#56574
-	movt	v319,	#39098
-	movw	v320,	#43913
-	movt	v320,	#61389
-	movw	v321,	#8961
-	movt	v321,	#26437
-	b	b193
+	movw	v12,	#4556
+	add	v11,	v1,	v12
+	mov	v14,	#4
+	add	v13,	v11,	v14
+	mov	v15,	#6
+	str	v15,	[v13]
+	movw	v17,	#4556
+	add	v16,	v1,	v17
+	mov	v19,	#12
+	add	v18,	v16,	v19
+	mov	v20,	#7
+	str	v20,	[v18]
+	movw	v22,	#4556
+	add	v21,	v1,	v22
+	mov	v24,	#16
+	add	v23,	v21,	v24
+	mov	v25,	#4
+	str	v25,	[v23]
+	movw	v27,	#4556
+	add	v26,	v1,	v27
+	mov	v29,	#28
+	add	v28,	v26,	v29
+	mov	v30,	#9
+	str	v30,	[v28]
+	movw	v32,	#4556
+	add	v31,	v1,	v32
+	mov	v34,	#44
+	add	v33,	v31,	v34
+	mov	v35,	#11
+	str	v35,	[v33]
+	movw	v37,	#1416
+	add	v36,	v0,	v37
+	mov	v39,	#4
+	add	v38,	v36,	v39
+	mov	v40,	#1
+	str	v40,	[v38]
+	movw	v42,	#1416
+	add	v41,	v0,	v42
+	mov	v44,	#8
+	add	v43,	v41,	v44
+	mov	v45,	#2
+	str	v45,	[v43]
+	movw	v47,	#1416
+	add	v46,	v0,	v47
+	mov	v49,	#12
+	add	v48,	v46,	v49
+	mov	v50,	#3
+	str	v50,	[v48]
+	movw	v52,	#1416
+	add	v51,	v0,	v52
+	mov	v54,	#36
+	add	v53,	v51,	v54
+	mov	v55,	#9
+	str	v55,	[v53]
+	movw	v57,	#4556
+	add	v56,	v1,	v57
+	mov	v59,	#4
+	add	v58,	v56,	v59
+	ldr	v60,	[v58]
+	movw	v64,	#4556
+	add	v63,	v1,	v64
+	mov	v66,	#12
+	add	v65,	v63,	v66
+	ldr	v67,	[v65]
+	movw	v69,	#4556
+	add	v68,	v1,	v69
+	movw	v73,	#1416
+	add	v72,	v0,	v73
+	mov	v75,	#12
+	add	v74,	v72,	v75
+	ldr	v76,	[v74]
+	movw	v78,	#1416
+	add	v77,	v0,	v78
+	ldr	v81,	[v77]
+	movw	v83,	#1416
+	add	v82,	v0,	v83
+	movw	v87,	#8024
+	add	v86,	v0,	v87
+	mov	v89,	#16
+	add	v88,	v86,	v89
+	ldr	v90,	[v88]
+	movw	v92,	#12036
+	add	v91,	v0,	v92
+	mov	v94,	#72
+	add	v93,	v91,	v94
+	ldr	v95,	[v93]
+	mov	v140,	#0
+	b	b15
 .ltorg
-b193:
-	mov	v193,	v321
-	mov	v196,	v320
-	mov	v199,	v319
-	mov	v202,	v318
-	mov	v205,	v317
-	mov	v315,	v314
-	mov	v312,	v311
-	mov	v109,	v310
-	cmp	v109,	v101
-	blt	b194
-	b	b323
+b15:
+	mov	v97,	v140
+	mov	v98,	#10
+	cmp	v97,	v98
+	blt	b16
+	b	b17
 .ltorg
-b194:
-	mov	v322,	#0
-	b	b195
+b16:
+	mov	v100,	#236
+	mla	v99,	v60,	v100,	v0
+	mov	v104,	v97, lsl #2
+	add	v103,	v104,	v99
+	ldr	v105,	[v103]
+	mov	r0,	v105
+	bl	putint
+	mov	v107,	#1
+	add	v106,	v97,	v107
+	mov	v140,	v106
+	b	b15
 .ltorg
-b195:
-	mov	v111,	v322
-	mov	v112,	#16
-	cmp	v111,	v112
-	blt	b196
-	b	b197
+b17:
+	mov	r0,	#10
+	bl	putch
+	mov	v109,	v67, lsl #2
+	add	v108,	v109,	v68
+	ldr	v110,	[v108]
+	mov	r0,	v110
+	bl	putint
+	mov	r0,	#10
+	bl	putch
+	mov	v141,	v95
+	mov	v142,	v90
+	b	b18
 .ltorg
-b196:
-	mov	v114,	v111, lsl #2
-	add	v113,	v114,	v0
-	mov	v115,	v111, lsl #2
-	add	v116,	v109,	v115
-	mov	v118,	v116, lsl #2
-	add	v117,	v118,	v44
-	ldr	v119,	[v117]
-	mov	v120,	v119, lsl #24
-	mov	v121,	v111, lsl #2
-	add	v122,	v109,	v121
+b18:
+	mov	v117,	v142
+	mov	v112,	v141
+	mov	v113,	#10
+	cmp	v112,	v113
+	blt	b19
+	b	b20
+.ltorg
+b19:
+	mov	v115,	v112, lsl #2
+	add	v114,	v115,	v82
+	movw	v116,	#63339
+	movt	v116,	#1
+	mul	v116,	v117,	v116
+	movw	v119,	#18373
+	movt	v119,	#36041
+	smmul	v119,	v116,	v119
+	add	v119,	v119,	v116
+	mov	v120,	#2048
+	and	v120,	v120,	v119, asr #31
+	add	v119,	v119,	v120
+	mov	v119,	v119, asr #11
+	mov	v118,	v119
+	movw	v121,	#3724
+	mul	v121,	v118,	v121
+	sub	v122,	v116,	v121
+	str	v122,	[v114]
 	mov	v124,	#1
-	add	v123,	v122,	v124
-	mov	v126,	v123, lsl #2
-	add	v125,	v126,	v44
-	ldr	v127,	[v125]
-	mov	v128,	v127, lsl #16
-	add	v129,	v120,	v128
-	mov	v130,	v111, lsl #2
-	add	v131,	v109,	v130
-	mov	v133,	#2
-	add	v132,	v131,	v133
-	mov	v135,	v132, lsl #2
-	add	v134,	v135,	v44
-	ldr	v136,	[v134]
-	mov	v137,	v136, lsl #8
-	add	v138,	v129,	v137
-	mov	v139,	v111, lsl #2
-	add	v140,	v109,	v139
-	mov	v142,	#3
-	add	v141,	v140,	v142
-	mov	v144,	v141, lsl #2
-	add	v143,	v144,	v44
-	ldr	v145,	[v143]
-	add	v146,	v138,	v145
-	str	v146,	[v113]
-	mov	v148,	#1
-	add	v147,	v111,	v148
-	mov	v322,	v147
-	b	b195
+	add	v123,	v112,	v124
+	mov	v126,	#7
+	add	v125,	v117,	v126
+	mov	v141,	v123
+	mov	v142,	v125
+	b	b18
 .ltorg
-b197:
-	mov	v323,	v111
-	b	b198
+b20:
+	add	v127,	v76,	v81
+	mov	v129,	v127, lsl #1
+	add	v128,	v129,	v127
+	mov	v143,	v128
+	b	b9
 .ltorg
-b198:
-	mov	v150,	v323
-	mov	v151,	#80
-	cmp	v150,	v151
-	blt	b199
-	b	b220
+b9:
+	mov	v131,	v143
+	mov	v132,	#0
+	cmp	v131,	v132
+	bge	b10
+	b	b11
 .ltorg
-b199:
-	mov	v153,	v150, lsl #2
-	add	v152,	v153,	v0
-	mov	v155,	#3
-	sub	v154,	v150,	v155
-	mov	v157,	v154, lsl #2
-	add	v156,	v157,	v0
-	ldr	v158,	[v156]
-	mov	v160,	#8
-	sub	v159,	v150,	v160
-	mov	v162,	v159, lsl #2
-	add	v161,	v162,	v0
-	ldr	v163,	[v161]
-	add	v164,	v158,	v163
-	mov	v166,	#0
-	sub	v165,	v166,	v164
-	mov	v168,	#14
-	sub	v167,	v150,	v168
-	mov	v170,	v167, lsl #2
-	add	v169,	v170,	v0
-	ldr	v171,	[v169]
-	add	v172,	v165,	v171
-	mov	v174,	#0
-	sub	v173,	v174,	v172
-	mov	v176,	#16
-	sub	v175,	v150,	v176
-	mov	v178,	v175, lsl #2
-	add	v177,	v178,	v0
-	ldr	v179,	[v177]
-	add	v180,	v173,	v179
-	mov	v182,	#0
-	sub	v181,	v182,	v180
-	mov	v183,	v181, lsl #1
-	mov	v185,	v181, asr #31
-	ands	v184,	v181,	#1
-	orrne	v184,	v184,	v185, lsl #1
-	add	v186,	v183,	v184
-	str	v186,	[v152]
-	mov	v188,	#1
-	add	v187,	v150,	v188
-	mov	v323,	v187
-	b	b198
+b10:
+	movw	v134,	#1416
+	add	v133,	v0,	v134
+	mov	v136,	v131, lsl #2
+	add	v135,	v136,	v133
+	ldr	v137,	[v135]
+	mov	r0,	v137
+	bl	putint
+	mov	r0,	#32
+	bl	putch
+	mov	v139,	#1
+	sub	v138,	v131,	v139
+	mov	v143,	v138
+	b	b9
 .ltorg
-b220:
-	mov	v324,	#0
-	mov	v325,	v312
-	mov	v326,	v315
-	mov	v327,	v205
-	mov	v328,	v202
-	mov	v329,	v199
-	mov	v330,	v196
-	mov	v331,	v193
-	b	b221
-.ltorg
-b221:
-	mov	v194,	v331
-	mov	v197,	v330
-	mov	v200,	v329
-	mov	v203,	v328
-	mov	v206,	v327
-	mov	v316,	v326
-	mov	v313,	v325
-	mov	v190,	v324
-	mov	v191,	#80
-	cmp	v190,	v191
-	blt	b222
-	b	b322
-.ltorg
-b322:
-	add	v192,	v193,	v194
-	add	v195,	v196,	v197
-	add	v198,	v199,	v200
-	add	v201,	v202,	v203
-	add	v204,	v205,	v206
-	mov	v208,	#64
-	add	v207,	v109,	v208
-	mov	v310,	v207
-	mov	v311,	v313
-	mov	v314,	v316
-	mov	v317,	v204
-	mov	v318,	v201
-	mov	v319,	v198
-	mov	v320,	v195
-	mov	v321,	v192
-	b	b193
-.ltorg
-b222:
-	mov	v210,	#20
-	cmp	v190,	v210
-	blt	b223
-	b	b251
-.ltorg
-b223:
-	add	v211,	v197,	v200
-	mvn	v213,	#0
-	sub	v212,	v213,	v197
-	add	v214,	v212,	v203
-	add	v215,	v211,	v214
-	mov	v217,	#0
-	sub	v216,	v217,	v215
-	add	v218,	v211,	v214
-	add	v219,	v216,	v218
-	mov	v221,	#0
-	sub	v220,	v221,	v219
-	movw	v332,	#31129
-	movt	v332,	#23170
-	mov	v334,	v220
-	b	b246
-.ltorg
-b246:
-	mov	v227,	v334
-	mov	v230,	v332
-	mov	v222,	v194, lsl #5
-	mov	v224,	v194, asr #31
-	ands	v223,	v194,	#31
-	orrne	v223,	v223,	v224, lsl #5
-	add	v225,	v222,	v223
-	add	v226,	v225,	v227
-	add	v228,	v226,	v206
-	add	v229,	v228,	v230
-	mov	v232,	v190, lsl #2
-	add	v231,	v232,	v0
-	ldr	v233,	[v231]
-	add	v234,	v229,	v233
-	mov	v235,	v197, lsl #30
-	mov	v237,	v197, asr #31
-	mvn	v238,	#-1073741824
-	ands	v236,	v197,	v238
-	orrne	v236,	v236,	v237, lsl #30
-	add	v239,	v235,	v236
-	mov	v241,	#1
-	add	v240,	v190,	v241
-	mov	v324,	v240
-	mov	v325,	v230
-	mov	v326,	v227
-	mov	v327,	v203
-	mov	v328,	v200
-	mov	v329,	v239
-	mov	v330,	v194
-	mov	v331,	v234
-	b	b221
-.ltorg
-b251:
-	mov	v243,	#40
-	cmp	v190,	v243
-	blt	b252
-	b	b266
-.ltorg
-b265:
-	mov	v335,	v338
-	mov	v333,	v336
-	mov	v332,	v333
-	mov	v334,	v335
-	b	b246
-.ltorg
-b266:
-	mov	v245,	#60
-	cmp	v190,	v245
-	blt	b267
-	b	b307
-.ltorg
-b306:
-	mov	v339,	v342
-	mov	v337,	v340
-	mov	v336,	v337
-	mov	v338,	v339
-	b	b265
-.ltorg
-b307:
-	mov	v247,	#80
-	cmp	v190,	v247
-	mov	v344,	v313
-	mov	v345,	v316
-	blt	b308
-	b	b321
-.ltorg
-b321:
-	mov	v343,	v345
-	mov	v341,	v344
-	mov	v340,	v341
-	mov	v342,	v343
-	b	b306
-.ltorg
-b308:
-	add	v248,	v197,	v200
-	mov	v250,	#0
-	sub	v249,	v250,	v248
-	add	v251,	v249,	v203
-	mov	v253,	#0
-	sub	v252,	v253,	v251
-	movw	v344,	#49414
-	movt	v344,	#51810
-	mov	v345,	v252
-	b	b321
-.ltorg
-b267:
-	add	v254,	v197,	v200
-	add	v255,	v197,	v203
-	add	v256,	v254,	v255
-	mov	v258,	#0
-	sub	v257,	v258,	v256
-	add	v259,	v254,	v255
-	add	v260,	v257,	v259
-	mov	v262,	#0
-	sub	v261,	v262,	v260
-	add	v263,	v200,	v203
-	add	v264,	v261,	v263
-	mov	v266,	#0
-	sub	v265,	v266,	v264
-	add	v267,	v261,	v263
-	add	v268,	v265,	v267
-	mov	v270,	#0
-	sub	v269,	v270,	v268
-	movw	v340,	#48348
-	movt	v340,	#36635
-	mov	v342,	v269
-	b	b306
-.ltorg
-b252:
-	add	v271,	v197,	v200
-	mov	v273,	#0
-	sub	v272,	v273,	v271
-	add	v274,	v272,	v203
-	mov	v276,	#0
-	sub	v275,	v276,	v274
-	movw	v336,	#60289
-	movt	v336,	#28377
-	mov	v338,	v275
-	b	b265
-.ltorg
-b323:
-	str	v193,	[v2]
-	mov	v280,	#4
-	add	v279,	v2,	v280
-	str	v196,	[v279]
-	mov	v282,	#8
-	add	v281,	v2,	v282
-	str	v199,	[v281]
-	mov	v284,	#12
-	add	v283,	v2,	v284
-	str	v202,	[v283]
-	mov	v286,	#16
-	add	v285,	v2,	v286
-	str	v205,	[v285]
-	mov	v346,	#0
-	b	b50
-.ltorg
-b50:
-	mov	v288,	v346
-	mov	v289,	#5
-	cmp	v288,	v289
-	blt	b51
-	b	b52
-.ltorg
-b52:
-	mov	v291,	#1
-	sub	v290,	v39,	v291
-	mov	v307,	v290
-	b	b44
-.ltorg
-b51:
-	mov	v293,	v288, lsl #2
-	add	v292,	v293,	v1
-	mov	v295,	v288, lsl #2
-	add	v294,	v295,	v1
-	ldr	v296,	[v294]
-	mov	v298,	v288, lsl #2
-	add	v297,	v298,	v2
-	ldr	v299,	[v297]
-	add	v300,	v296,	v299
-	mov	v302,	#0
-	sub	v301,	v302,	v300
-	str	v301,	[v292]
-	mov	v304,	#1
-	add	v303,	v288,	v304
-	mov	v346,	v303
-	b	b50
-.ltorg
-b46:
-	bl	_sysy_stoptime
-	mov	r0,	#5
-	mov	r1,	v1
-	bl	putarray
+b11:
+	mov	r0,	#10
+	bl	putch
 	mov	r0,	#0
-	add	sp,	sp,	#364
+	movw	r5,	#28860
+	add	sp,	sp,	r5
 	pop	{pc}
 	bx	lr
 .ltorg

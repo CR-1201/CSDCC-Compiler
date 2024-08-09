@@ -71,14 +71,14 @@ public class LoopMemset implements Pass {
             Instruction br = entering.getTailInstruction();
             Value gepPtr = gepInst.getBase();
             ArrayList<Value> argList = new ArrayList<>();
-            if (gepPtr instanceof Alloca alloca) {
+            if (gepPtr instanceof Argument) {
+                argList.add(gepPtr);
+            } else {
                 ArrayList<Value> values = new ArrayList<>();
                 values.add(ConstInt.ZERO);
                 values.add(ConstInt.ZERO);
-                GEP basePtr = irBuilder.buildGEPBeforeInst(entering, alloca, values, entering.getTailInstruction());
+                GEP basePtr = irBuilder.buildGEPBeforeInst(entering, gepPtr, values, entering.getTailInstruction());
                 argList.add(basePtr);
-            } else {
-                argList.add(gepPtr);
             }
             argList.add(storeInst.getValue());
             if (loopSize instanceof ConstInt) {

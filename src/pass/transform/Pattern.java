@@ -27,7 +27,23 @@ public class Pattern {
 
     private static final IrBuilder irBuilder = IrBuilder.getIrBuilder();
 
-    public static class Pattern2 implements Pass {  // transpose 将continue改为break
+    public static class Pattern3 implements Pass{
+        public void run() {
+            new LoopAnalysis().run();
+
+            for (Function function : irModule.getFunctionsArray()) {
+                if( !function.getIsBuiltIn() ){
+                    search(function);
+                }
+            }
+        }
+
+        private void search(Function function) {
+
+        }
+    }
+
+    public static class Pattern2 implements Pass {
 
         Loop loop = null;
         BasicBlock loopHeaderBlock = null;
@@ -140,7 +156,7 @@ public class Pattern {
 
     }
 
-    public static class Pattern1 implements Pass { // floyd.sy 删除无用的分支
+    public static class Pattern1 implements Pass {
 
         @Override
         public void run() {

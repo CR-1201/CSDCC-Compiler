@@ -153,7 +153,7 @@ public class RegisterAllocer {
             HashSet<ObjRegister> live = new HashSet<>(livenessMap.get(b).getOut());
             for (int i = b.getInstructions().size() - 1; i >= 0; i--) {
                 ObjInstruction I = b.getInstructions().get(i);
-                if (I instanceof ObjMove move && !((ObjMove) I).isHasImm() && !((ObjMove) I).hasLabel()) {
+                if (I instanceof ObjMove move && !((ObjMove) I).isHasImm() && !((ObjMove) I).hasLabel() && "".equals(I.getShift())) {
                     ObjRegister dst = (ObjRegister) move.getDst();
                     ObjRegister rhs = (ObjRegister) move.getRhs();
                     if ((!type && dst.isFloat() && rhs.isFloat()) || (type && !dst.isFloat() && !rhs.isFloat())) {

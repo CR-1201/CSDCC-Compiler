@@ -4,11 +4,14 @@ import backend.operand.ObjOperand;
 import ir.instructions.binaryInstructions.*;
 
 public class Binary extends ObjInstruction {
+    public boolean setCSPR;
+
     public enum BinaryType {
         add("add"),
         sub("sub"),
         rsb("rsb"),
         mul("mul"),
+        lmul("smmul"),
         sdiv("sdiv"),
         and("and"),
         or("orr"),
@@ -104,7 +107,7 @@ public class Binary extends ObjInstruction {
 
     @Override
     public String toString() {
-        return "\t" + getType().toString() + getCond() + "\t" + dst + ",\t" +
+        return "\t" + getType().toString() + (setCSPR ? "s" : "") + getCond() + "\t" + dst + ",\t" +
                 lhs + ",\t" + rhs + getShift() + "\n";
     }
 }

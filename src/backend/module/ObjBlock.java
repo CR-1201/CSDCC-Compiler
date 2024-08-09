@@ -20,7 +20,8 @@ public class ObjBlock {
     }
 
     public void addInstruction(ObjInstruction instruction) {
-        instructions.add(instruction);
+        if (instruction != null)
+            instructions.add(instruction);
     }
 
     public void addInstructionToHead(ObjInstruction instruction) {

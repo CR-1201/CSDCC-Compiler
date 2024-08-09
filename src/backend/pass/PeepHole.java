@@ -24,7 +24,7 @@ public class PeepHole implements ObjPass {
                 LinkedList<ObjInstruction> instructions = new LinkedList<>(block.getInstructions());
                 for (ObjInstruction instruction : instructions) {
                     if (instruction instanceof ObjMove move) {
-                        if (move.getRhs().equals(move.getDst())) {
+                        if (move.getRhs().equals(move.getDst()) && "".equals(move.getShift())) {
                             block.removeInstruction(move);
                         }
                     }

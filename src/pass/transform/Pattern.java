@@ -1,8 +1,6 @@
 package pass.transform;
 
-import ir.BasicBlock;
-import ir.Function;
-import ir.IrBuilder;
+import ir.*;
 import ir.Module;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.Add;
@@ -11,6 +9,7 @@ import ir.instructions.binaryInstructions.Mul;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
+import ir.instructions.otherInstructions.Call;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.IntType;
@@ -21,13 +20,72 @@ import pass.analysis.Dom;
 import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
 
+import java.util.ArrayList;
+
 public class Pattern {
 
     private static final Module irModule = Module.getModule();
 
     private static final IrBuilder irBuilder = IrBuilder.getIrBuilder();
 
-    public static class Pattern2 implements Pass {  // transpose 将continue改为break
+    public static class Pattern3 implements Pass {
+
+        @Override
+        public void run() {
+            for (Function function : irModule.getFunctionsArray()) {
+                if (!function.getIsBuiltIn()) {
+                    modify(function);
+                }
+            }
+
+            new DeadCodeEmit().run();
+        }
+
+        private void modify(Function function) {
+            ArrayList<GEP> geps = new ArrayList<>();
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                for (Instruction instruction : block.getInstructionsArray()) {
+                    if (instruction instanceof GEP gepInstr) {
+                        geps.add(gepInstr);
+                    }
+                }
+            }
+
+            if (geps.size() != 1)
+                return;
+            GEP gep = geps.get(0);
+
+            int memsetCallCnt = 0;
+            Call memsetCall = null;
+            int loadCnt = 0;
+            for (User user : gep.getUsers()) {
+                if (user instanceof Call callInstr && callInstr.getFunction().getName().equals("@memset")) {
+                    memsetCallCnt ++;
+                    memsetCall = callInstr;
+                }
+                if (user instanceof Load) {
+                    loadCnt ++;
+                }
+            }
+
+            if (memsetCallCnt != 1)
+                return;
+            if (memsetCallCnt + loadCnt != gep.getUsers().size())
+                return;
+
+            Value setValue = memsetCall.getParamAt(1);
+            for (User user : gep.getUsers()) {
+                if (user instanceof Load loadInstr) {
+                    loadInstr.replaceAllUsesWith(setValue);
+                }
+            }
+
+            memsetCall.removeSelf();
+        }
+
+    }
+
+    public static class Pattern2 implements Pass {
 
         Loop loop = null;
         BasicBlock loopHeaderBlock = null;
@@ -140,7 +198,7 @@ public class Pattern {
 
     }
 
-    public static class Pattern1 implements Pass { // floyd.sy 删除无用的分支
+    public static class Pattern1 implements Pass {
 
         @Override
         public void run() {

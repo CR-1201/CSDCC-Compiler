@@ -27,7 +27,7 @@ public class GAVN implements Pass {
 
         PureFunction pureFunction = new PureFunction();
         pureFunction.markPure();
-        this.is_pure = pureFunction.is_pure;
+        this.is_pure = pureFunction.isPure;
 
         for(Function function :  functions){
             if( !function.getIsBuiltIn() ){

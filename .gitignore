@@ -25,6 +25,7 @@ tests/lib/libsysy.so
 .idea/workspace.xml
 sylib.ll
 out.ll
+main.ll
 testcase.sy
 
 ### IntelliJ IDEA ###

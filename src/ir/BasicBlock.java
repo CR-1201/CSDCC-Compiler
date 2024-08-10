@@ -1,25 +1,21 @@
 package ir;
 
 import ir.instructions.Instruction;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
+import ir.instructions.terminatorInstructions.Ret;
+import ir.instructions.terminatorInstructions.TerInstruction;
 import ir.types.LabelType;
 import pass.analysis.Loop;
 
 import java.util.*;
 
-/**
- @author Conroy
- 一个基本块由若干 instruction 组成,且最后一条指令一定为终结指令 ( ret / br )
- 支持 3 种插入指令的方式(插在末尾,插在某个指令之前,插在头部)
- Attention : BasicBlock 不是 user,它并不使用 Instruction
- */
 public class BasicBlock extends Value{
     // 指令集合
     private final LinkedList<Instruction> instructions = new LinkedList<>();
 
     // ========================== CFG Info ==========================
-    // 前驱与后继基本块,不讲求顺序,因此不用链表
     private HashSet<BasicBlock> precursors = new HashSet<>();
     private HashSet<BasicBlock> successors = new HashSet<>();
 
@@ -97,6 +93,17 @@ public class BasicBlock extends Value{
 
     public ArrayList<Instruction> getInstructionsArray(){
         return new ArrayList<>(instructions);
+    }
+
+    public ArrayList<Instruction> getMainInstsArray(){
+        ArrayList<Instruction> result = new ArrayList<>();
+        for (Instruction inst : instructions) {
+            if (inst instanceof Alloca || inst instanceof Phi || inst instanceof Ret || inst instanceof Br) {
+                continue;
+            }
+            result.add(inst);
+        }
+        return result;
     }
 
     public HashSet<BasicBlock> getPrecursors(){
@@ -278,6 +285,26 @@ public class BasicBlock extends Value{
 
     public void insertTail(Instruction instruction){
         instructions.add(instruction);
+    }
+
+    public void insertBeforeTail(Instruction instruction) {
+        if (!(instructions.get(instructions.size() - 1) instanceof TerInstruction)) {
+            instructions.add(instruction);
+        } else {
+            instructions.add(instructions.size() - 1, instruction);
+        }
+    }
+
+    public void addInst(Instruction inst) {
+        if (inst instanceof TerInstruction) {
+            if (getTailInstruction() instanceof TerInstruction) {
+                instructions.set(instructions.size() - 1, inst);
+            } else {
+                instructions.add(inst);
+            }
+        } else {
+            instructions.add(instructions.size() - 1, inst);
+        }
     }
 
     // 将 instruction 插入到 target 指令的前面

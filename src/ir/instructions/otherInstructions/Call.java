@@ -10,26 +10,15 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- <result> = call [ret attrs] <ty> <fnptrval>(<function args>)
  */
 public class Call extends Instruction {
 
-    /**
-     * 有返回值的call
-     * @param function 第一个操作数,被调用的函数,返回值一定不是void
-     * @param args     从第二个操作数开始排列,函数参数
-     */
     public Call(int nameNum, BasicBlock parent, Function function, ArrayList<Value> args){
         super("%v" + nameNum, function.getReturnType(), parent, new ArrayList<>(){{
             add(function);addAll(args);
         }});
     }
 
-    /**
-     * 没有返回值的call
-     * @param function 同上,一定是void返回值
-     * @param args     同上
-     */
     public Call( BasicBlock parent, Function function, ArrayList<Value> args){
         super("", function.getReturnType(), parent, new ArrayList<>(){{
             add(function);addAll(args);

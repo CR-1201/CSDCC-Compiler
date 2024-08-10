@@ -9,14 +9,9 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- <result> = zext <ty> <value> to <ty2>
- %7 = zext i1 %6 to i32
  */
 public class Zext extends Instruction {
-    /**
-     * @param parent 基本块
-     * @param value  被转变的值
-     */
+
     public Zext(int nameNum, BasicBlock parent, Value value){
         super("%v" + nameNum, new IntType(32), parent, new ArrayList<>(){{
             add(value);

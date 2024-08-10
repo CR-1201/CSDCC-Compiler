@@ -7,8 +7,6 @@ import java.util.Objects;
 
 /**
  @author Conroy
- 最 basic 的类,llvm ir 的一切元素均是 value
- value id 唯一
  */
 public abstract class Value {
    // 唯一标识
@@ -58,20 +56,12 @@ public abstract class Value {
         this.name = "%" + num;
     }
 
-    /**
-     * value 登记 selfUser
-     * @param selfUser 当前 value 的使用者
-     */
     public void addUser(User selfUser){
         if( !users.contains(selfUser) ){
             users.add(selfUser);
         }
     }
 
-    /**
-     * 移除 user,即不再被 user 使用
-     * @param user 使用者
-     */
     public void removeUser(User user) {
 //        if( !users.contains(user) )
 //            throw new AssertionError("value-" + getId() + " try to remove nonexistent user: " + user + " " + user.getId());
@@ -79,10 +69,6 @@ public abstract class Value {
         users.remove(user);
     }
 
-    /**
-     * 调用者作为一个被使用者,告诉它的 users,它要被替换成 replacement
-     * @param replacement 替代品
-     */
     public void replaceAllUsesWith(Value replacement){
         ArrayList<User> usersClone = new ArrayList<>(users);
         for (User user : usersClone){

@@ -2,16 +2,19 @@ package pass.transform;
 
 import ir.*;
 import ir.Module;
+import ir.constants.ConstFloat;
+import ir.constants.ConstInt;
 import ir.instructions.Instruction;
-import ir.instructions.binaryInstructions.Add;
-import ir.instructions.binaryInstructions.Icmp;
-import ir.instructions.binaryInstructions.Mul;
+import ir.instructions.binaryInstructions.*;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
+import ir.instructions.otherInstructions.Conversion;
+import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
+import ir.types.FloatType;
 import ir.types.IntType;
 import ir.types.PointerType;
 import pass.Pass;
@@ -21,12 +24,108 @@ import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
 
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 
 public class Pattern {
 
     private static final Module irModule = Module.getModule();
 
     private static final IrBuilder irBuilder = IrBuilder.getIrBuilder();
+
+    public static class Pattern4 implements Pass {
+
+        @Override
+        public void run() {
+            boolean changed = false;
+
+            for (Function function : irModule.getFunctionsArray()) {
+                if (!function.getIsBuiltIn()) {
+                    if (check(function)) {
+                        modify(function);
+                        changed = true;
+                    }
+                }
+            }
+
+            if (changed) {
+                new InlineFunction().run();
+                new MergeBlocks().run();
+            }
+        }
+
+        private boolean check(Function function) {
+            if (function.getArguments().size() != 2)
+                return false;
+            if (function.getBasicBlocksArray().size() != 4)
+                return false;
+
+            BasicBlock funcHeadBlock = function.getFirstBlock();
+            if (funcHeadBlock.getInstructionsArray().size() != 2 ||
+                    !(funcHeadBlock.getInstructionsArray().get(0) instanceof Icmp icmpInstr) ||
+                    !(funcHeadBlock.getInstructionsArray().get(1) instanceof Br brInstr1))
+                return false;
+            if (icmpInstr.getOperator(0) != function.getArguments().get(1) ||
+                    !(icmpInstr.getOperator(1) instanceof ConstInt constIntOp1) ||
+                    constIntOp1.getValue() != 0)
+                return false;
+
+            if (brInstr1.getTrueBlock().getInstructionsArray().size() != 1 ||
+                    !(brInstr1.getTrueBlock().getInstructionsArray().get(0) instanceof Br brInstr3) ||
+                    brInstr3.getHasCondition())
+                return false;
+
+            BasicBlock ifTrueBlock = (BasicBlock) brInstr3.getOperator(0);
+            BasicBlock ifFalseBlock = brInstr1.getFalseBlock();
+            if (ifTrueBlock.getInstructionsArray().size() != 2 ||
+                    !(ifTrueBlock.getInstructionsArray().get(0) instanceof Phi) ||
+                    !(ifTrueBlock.getInstructionsArray().get(1) instanceof Ret))
+                return false;
+            if (ifFalseBlock.getInstructionsArray().size() != 6 ||
+                    !(ifFalseBlock.getInstructionsArray().get(0) instanceof Sub subInstr1) ||
+                    !(ifFalseBlock.getInstructionsArray().get(1) instanceof Call callInstr1) ||
+                    !(ifFalseBlock.getInstructionsArray().get(2) instanceof Add addInstr) ||
+                    !(ifFalseBlock.getInstructionsArray().get(3) instanceof Call callInstr2) ||
+                    !(ifFalseBlock.getInstructionsArray().get(4) instanceof Sub subInstr2) ||
+                    !(ifFalseBlock.getInstructionsArray().get(5) instanceof Br brInstr2))
+                return false;
+
+            if (subInstr1.getOperator(0) != function.getArguments().get(1) ||
+                    !(subInstr1.getOperator(1) instanceof ConstInt constIntOp2) ||
+                    constIntOp2.getValue() != 1)
+                return false;
+            if (callInstr1.getFunction() != function ||
+                    callInstr1.getOperator(1) != function.getArguments().get(0) ||
+                    callInstr1.getOperator(2) != subInstr1)
+                return false;
+            if (addInstr.getOperator(0) != function.getArguments().get(0) ||
+                    addInstr.getOperator(1) != callInstr1)
+                return false;
+            if (callInstr2.getFunction() != function ||
+                    callInstr2.getOperator(1) != addInstr ||
+                    callInstr2.getOperator(2) != subInstr1)
+                return false;
+            if (subInstr2.getOperator(0) != addInstr ||
+                    subInstr2.getOperator(1) != callInstr2)
+                return false;
+
+            return true;
+        }
+
+        private void modify(Function function) {
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                block.removeSelf();
+            }
+
+            BasicBlock onlyBlock = irBuilder.buildBasicBlock(function);
+
+            Add add = irBuilder.buildAdd(onlyBlock, new IntType(32), function.getArguments().get(1), new ConstInt(1));
+            Srem srem = irBuilder.buildSrem(onlyBlock, new IntType(32), add, new ConstInt(2));
+            Conversion conversion = irBuilder.buildConversion(onlyBlock, "sitofp", new FloatType(), srem);
+            Mul mul = irBuilder.buildMul(onlyBlock, new FloatType(), function.getArguments().get(0), conversion);
+            irBuilder.buildRet(onlyBlock, mul);
+        }
+
+    }
 
     public static class Pattern3 implements Pass {
 

@@ -92,6 +92,7 @@ public class PassManager {
         passes.add(new Dom());
         passes.add(new Pattern.Pattern3());
         BasicPass();
+        passes.add(new Pattern.Pattern4());
 
         for (Pass pass : passes) {
             pass.run();

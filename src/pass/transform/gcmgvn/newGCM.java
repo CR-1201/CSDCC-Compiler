@@ -134,6 +134,8 @@ public class newGCM{
     }
 
     private void scheduleLate(Instruction instruction) {
+        if( instruction.getUsers().isEmpty() )return;
+
         if( visited.contains(instruction) ){
             return;
         }

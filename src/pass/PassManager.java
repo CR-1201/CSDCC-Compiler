@@ -69,19 +69,6 @@ public class PassManager {
         EmitSimpleBrPass();
 
         passes.add(new GepSplit());
-
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new MergeBlocks());
-        passes.add(new SCCP());
-        passes.add(new DeadCodeEmit());
-        passes.add(new SimplifyInst());
-        passes.add(new MathOptimize());
-        passes.add(new DeadCodeEmit());
-
-        GVNGCMPass();
-        passes.add(new MergeBlocks());
-
         BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());

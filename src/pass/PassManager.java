@@ -64,33 +64,21 @@ public class PassManager {
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
 //        passes.add(new MemSetOptimize());
-
         passes.add(new LoopStrengthReduction());
         EmitSimpleBrPass();
-
-        passes.add(new GepSplit());
-
-        passes.add(new CFG());
-        passes.add(new Dom());
-        passes.add(new MergeBlocks());
-        passes.add(new SCCP());
-        passes.add(new DeadCodeEmit());
-        passes.add(new SimplifyInst());
-        passes.add(new MathOptimize());
-        passes.add(new DeadCodeEmit());
-
-        GVNGCMPass();
-        passes.add(new MergeBlocks());
 
         BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
+
         BasicPass();
         passes.add(new Peephole());
-        passes.add(new GepFuse());
         passes.add(new UselessArrayStoreEmit());
+
+        passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP
+
         BasicPass();
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
@@ -104,6 +92,8 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
         EmitSimpleBrPass();
+
+        passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP
 
         passes.add(new InstructionCleanUp());
 

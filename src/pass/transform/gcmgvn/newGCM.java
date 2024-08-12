@@ -143,6 +143,7 @@ public class newGCM{
         BasicBlock LCA = null;
         for( Value user : instruction.getUsers() ){
             if( user instanceof Instruction instr ){
+
                 scheduleLate(instr);
                 BasicBlock use = instr.getLatestBlock();
                 if( instr instanceof Phi phi ){

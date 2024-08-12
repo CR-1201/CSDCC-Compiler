@@ -2,7 +2,6 @@ package pass.transform;
 
 import ir.*;
 import ir.Module;
-import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
@@ -17,14 +16,12 @@ import ir.instructions.terminatorInstructions.Ret;
 import ir.types.FloatType;
 import ir.types.IntType;
 import ir.types.PointerType;
+import java.util.ArrayList;
 import pass.Pass;
 import pass.analysis.CFG;
 import pass.analysis.Dom;
 import pass.analysis.Loop;
 import pass.analysis.LoopAnalysis;
-
-import java.util.ArrayList;
-import java.util.InputMismatchException;
 
 public class Pattern {
 

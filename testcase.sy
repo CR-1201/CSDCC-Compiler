@@ -1,35 +1,97 @@
-float myabs(float num) {
-    if(num>0){
-    return num;
-   }
-   if(num<0){
-   return -num;
-   }
-}
+int a[10][10];
+int b[10][10];
+int c[10][10];
+const int MAX = 2147483647;
 
-float func(float data, int num) {
-    if (num < 0) {
-        return 0;
+int main(){
+    int n;
+    int i;
+    int j;
+    int k;
+    int sum = 0;
+
+    i = 0;
+    while(i<10)
+    {
+        n = getarray(a[i]);
+        if(n!=10){
+            return n;
+        }
+        i = i + 1;
     }
-    num=num-1;
-    data = data + func(data, num);
-    data = data - func(data, num);
-    return data;
-}
 
-int main() {
     starttime();
-    float a = 1.001;
-    int num = getint();
-    float res;
-    float expect = 0.0;
 
+    i = 0;
+    while(i<10){
+        j = 0;
+        while(j<10){
+            b[i][j] = a[j][i];
+            j = j+1;
+        }
+        i = i+1;
+    }
 
-    res = func(a, num);
+    i = 0;
+    while(i<10){
+        j = 0;
+        while(j<10){
+            k = 0;
+            int temp = 0;
+            while(k<10){
+                temp = temp + a[i][k]*b[k][j];
+                k = k+1;
+            }
+            c[i][j] = temp;
+            j = j+1;
+        }
+        i = i+1;
+    }
 
-    if (res - expect==0)
-        putch(112);
-   stoptime();
-   return 0;
+    i = 0;
+    while(i<10){
+        j = 0;
+        int temp = MAX;
+        while(j<10){
+            if(c[i][j]<temp)
+            {
+                temp = c[i][j];
+            }
+            j = j+1;
+        }
+        j = 0;
+        while(j<10){
+            c[i][j] = temp;
+            j = j+1;
+        }
+        i = i+1;
+    }
+
+    i = 0;
+    while(i<10){
+        j = 0;
+        int temp = MAX;
+        while(j<10){
+            c[i][j] = -c[j][i];
+            j = j+1;
+        }
+        i = i+1;
+    }
+
+    i = 0;
+    while(i<10){
+        j = 0;
+        int temp = MAX;
+        while(j<10){
+            sum = sum + c[i][j];
+            j = j+1;
+        }
+        i = i+1;
+    }
+
+    stoptime();
+
+    putint(sum);
+    return 0;
 }
 

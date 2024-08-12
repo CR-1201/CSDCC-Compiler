@@ -9,24 +9,22 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import pass.Pass;
 import pass.analysis.CFG;
 import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
 import pass.utility.BlockUtil;
 import pass.utility.CloneUtil;
-import utils.IOFunc;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class LoopUnroll implements Pass {
     private final CFG cfg = new CFG();
     private final BlockUtil blockUtil = new BlockUtil();
     private final CloneUtil cloneUtil = new CloneUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 15000;
+    private final int LOOP_MAX_LINE = 8000;
 
     private BasicBlock header;
     private BasicBlock next;

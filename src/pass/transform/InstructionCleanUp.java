@@ -14,6 +14,8 @@ import pass.analysis.PureFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static pass.analysis.AliasAnalysis.searchRoot;
+
 /**
  @author Conroy
  this pass used after pure function mark
@@ -23,6 +25,10 @@ public class InstructionCleanUp implements Pass {
     private final Module module = Module.getModule();
 
     private HashMap<Function, Boolean> is_pure = new HashMap<>();
+
+    private HashMap<Function, Boolean> funcUsedFlag = new HashMap<>();
+    private HashMap<GlobalVariable,Boolean> globalUsedFlag = new HashMap<>();
+    private Function mainFunction = null;
     @Override
     public void run() {
         PureFunction pureFunction = new PureFunction();
@@ -30,6 +36,45 @@ public class InstructionCleanUp implements Pass {
         this.is_pure = pureFunction.isPure;
 
         cleanUp();
+
+        globalCleanUp(); // 没有被使用过的函数 可以被删除
+    }
+
+    private void globalCleanUp() {
+        ArrayList<Function> functions = module.getFunctionsArray();
+        for (Function function : functions) {
+            funcUsedFlag.put(function, false);
+            if( function.getName().equals("@main") ){
+                mainFunction = function;
+                funcUsedFlag.put(function, true);
+            }
+        }
+
+        ArrayList<Function> work_list = new ArrayList<>();
+        work_list.add(mainFunction);
+        int i = 0;
+        while( i < work_list.size() ){
+            Function function = work_list.get(i++);
+            ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+            for (BasicBlock basicBlock : blocks) {
+                ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
+                for (Instruction instruction : instructions) {
+                    if( instruction instanceof Call call ){
+                        Function callFunction = call.getFunction();
+                        if( !funcUsedFlag.get(callFunction) ){ // 避免递归 出现死循环
+                            funcUsedFlag.put(callFunction, true);
+                            work_list.add(callFunction);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Function function : functions) {
+            if( !funcUsedFlag.get(function) ){
+                function.removeSelf();
+            }
+        }
     }
 
 

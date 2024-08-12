@@ -46,7 +46,7 @@ public class GepSplit implements Pass {
         preIndexes.add(gep.getIndex().get(0));
         preIndexes.add(gep.getIndex().get(1));
 
-        Instruction preOffset = builder.buildGEPBeforeInst(pos.getParent(),ptr,preIndexes,pos);
+        Instruction preOffset = builder.buildGEPAfterInst(pos.getParent(),ptr,preIndexes,pos);
 
         pos = preOffset;
         ptr = preOffset;

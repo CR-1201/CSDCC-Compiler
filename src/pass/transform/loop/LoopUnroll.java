@@ -26,7 +26,7 @@ public class LoopUnroll implements Pass {
     private final BlockUtil blockUtil = new BlockUtil();
     private final CloneUtil cloneUtil = new CloneUtil();
     private boolean isUnrolled = false;
-    private final int LOOP_MAX_LINE = 15000;
+    private final int LOOP_MAX_LINE = 8000;
 
     private BasicBlock header;
     private BasicBlock next;

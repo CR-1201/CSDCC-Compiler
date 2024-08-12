@@ -10,6 +10,7 @@ import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
+import pass.transform.gcmgvn.GVN;
 import pass.transform.loop.*;
 
 import java.util.ArrayList;
@@ -36,11 +37,9 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
-        passes.add(new CFG());
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
-        passes.add(new LoopMemset());
         passes.add(new InlineFunction());
         passes.add(new GlobalValueLocalize());
 
@@ -68,8 +67,22 @@ public class PassManager {
 //        passes.add(new MemSetOptimize());
 
         passes.add(new LoopStrengthReduction());
-        passes.add(new GepSplit());
         EmitSimpleBrPass();
+
+        passes.add(new GepSplit());
+
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new MergeBlocks());
+        passes.add(new SCCP());
+        passes.add(new DeadCodeEmit());
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
+        passes.add(new DeadCodeEmit());
+
+        GVNGCMPass();
+        passes.add(new MergeBlocks());
+
         BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
@@ -84,7 +97,6 @@ public class PassManager {
         passes.add(new MathOptimize());
         passes.add(new DeadCodeEmit());
         passes.add(new SideEffect());
-
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
 
         passes.add(new Peephole());
@@ -92,11 +104,10 @@ public class PassManager {
 
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-
-        passes.add(new GepSplit());
-        BasicPass();
-        BasicPass();
         EmitSimpleBrPass();
+
+        passes.add(new InstructionCleanUp());
+
         passes.add(new CFG());
         passes.add(new Dom());
 
@@ -104,6 +115,7 @@ public class PassManager {
             pass.run();
         }
     }
+
 
     /**
      * 这个是专门用来处理 GVN 和 GCM 的 Pass
@@ -139,4 +151,5 @@ public class PassManager {
         // 由于消除简单的挑战块之后，可能会导致很多 cond 不会被使用，因此可以执行死代码删除
         passes.add(new DeadCodeEmit());
     }
+
 }

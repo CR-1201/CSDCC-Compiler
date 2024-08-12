@@ -3,7 +3,6 @@ package utils;
 import ir.Value;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
-import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.memoryInstructions.Alloca;
@@ -23,11 +22,13 @@ public class Expression {
     public HashSet<Instruction> source = new HashSet<>();
     public Instruction instruction;
     public ArrayList<Value> operands = new ArrayList<>();
+    public String hash;
 
     public Expression(Instruction instruction) {
         this.instruction = instruction;
         this.operands.addAll(instruction.getOperators());
         source.add(instruction);
+        this.hash = setHashValue(instruction);
     }
 
     public boolean isSameType(Instruction instr1, Instruction instr2){
@@ -96,5 +97,47 @@ public class Expression {
             if( !op1.equals(op2) )return false;
         }
         return true;
+    }
+
+    private String setHashValue(Instruction inst){
+        if(inst instanceof BinaryInstruction binaryInst){
+            String leftName = binaryInst.getOp1().getName();
+            String op = binaryInst.getOpString();
+            String rightName = binaryInst.getOp2().getName();
+//            System.out.println(leftName + op + rightName);
+            return leftName + op + rightName;
+        } else if(inst instanceof Call callInst){
+            StringBuilder hashBuilder = new StringBuilder(callInst.getFunction().getName() + "(");
+            ArrayList<Value> params = callInst.getArgs();
+            for (int i = 0; i < params.size(); i++) {
+                hashBuilder.append(params.get(i).getName());
+                if (i < params.size() - 1) {
+                    hashBuilder.append(", ");
+                }
+            }
+            hashBuilder.append(")");
+//            System.out.println(hashBuilder);
+            return hashBuilder.toString();
+        } else if(inst instanceof GEP gepInst){
+            StringBuilder hashBuilder = new StringBuilder(gepInst.getBase().getName());
+            ArrayList<Value> indexs = gepInst.getIndex();
+            for (Value index : indexs) {
+                hashBuilder.append("[").append(index.getName()).append("]");
+            }
+            return hashBuilder.toString();
+        } else if(inst instanceof Conversion conversionInst) {
+            return conversionInst.getHashNumbering();
+        } else if (inst instanceof BitCast bitCast) {
+            return bitCast.getHashNumbering();
+        } else if( inst instanceof Zext zext ){
+            return zext.getHashNumbering();
+        } else if( inst instanceof Phi phi){
+            return phi.getHashNumbering();
+        } else if( inst instanceof Load load){
+            return load.getHashNumbering();
+        } else if( inst instanceof Alloca alloca ){
+            return alloca.toString();
+        }
+        return null;
     }
 }

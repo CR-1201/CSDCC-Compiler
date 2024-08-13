@@ -238,11 +238,14 @@ public class ObjBuilder {
     private ObjInstruction buildGEP(GEP gep, ObjBlock objBlock, ObjFunction objFunction) {
         Value base = gep.getBase();
         ValueType type = gep.getBaseType();
-        ObjOperand rs = v2mMap.containsKey(base) ? v2mMap.get(base) : putNewVGtoMap(base, objFunction, objBlock);
+        ObjOperand rs;
         ObjOperand rd = createVirRegister(gep);
         if (base instanceof GlobalVariable) {
+            rs = new ObjVirRegister();
             objBlock.addInstruction(new ObjMove(rs, new ObjLabel(base.getName().substring(1), true), false, false));
 //            objBlock.addInstruction(new ObjLoad(rs, rs, base.getValueType().isFloat()));
+        } else {
+            rs = v2mMap.containsKey(base) ? v2mMap.get(base) : putNewVGtoMap(base, objFunction, objBlock);
         }
         List<Value> indexes = gep.getIndex();
         int offset = 0;
@@ -255,9 +258,9 @@ public class ObjBuilder {
                 if (canMulOpt(type.getSize())) {
                     objBlock.addInstruction(mulOptimization(tmp, objFunction, objBlock, index, new ConstInt(type.getSize())));
                     if (!trans2rd)
-                        objBlock.addInstruction(new Binary(rd, tmp, rs, Binary.BinaryType.add));
+                        objBlock.addInstruction(new Binary(rd, rs, tmp, Binary.BinaryType.add));
                     else
-                        objBlock.addInstruction(new Binary(rd, tmp, rd, Binary.BinaryType.add));
+                        objBlock.addInstruction(new Binary(rd, rd, tmp, Binary.BinaryType.add));
                 } else {
                     ObjOperand off = v2mMap.containsKey(index) ? v2mMap.get(index) : putNewVGtoMap(index, objFunction, objBlock);
                     objBlock.addInstruction(new ObjMove(tmp, new ObjImmediate(type.getSize()), false, true));
@@ -403,7 +406,7 @@ public class ObjBuilder {
             return new ObjLoad(rd, rd, ((PointerType) addr.getValueType()).getPointeeType().isFloat());
         }
         ObjOperand rs = v2mMap.containsKey(addr) ? v2mMap.get(addr) : putNewVGtoMap(addr, objFunction, objBlock);
-        return new ObjLoad(rd, rs, null, ((PointerType) addr.getValueType()).getPointeeType().isFloat());
+        return new ObjLoad(rd, rs, new ObjImmediate(0), ((PointerType) addr.getValueType()).getPointeeType().isFloat());
     }
 
     private ObjInstruction buildStore(Store store, ObjBlock objBlock, ObjFunction objFunction) {

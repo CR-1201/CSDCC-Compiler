@@ -133,4 +133,15 @@ public class Phi extends Instruction {
         }
         return s.toString();
     }
+
+    public String getHashNumbering(){
+        StringBuilder s = new StringBuilder("phi ").append(getValueType());
+        for (int i = 0; i < precursorNum; i++){
+            if (getOperator(i) == null) break;
+            s.append(" [ ").append(getOperator(i).getName()).append(", ")
+                    .append(getOperator(i + precursorNum).getName()).append(" ]");
+            if( i+1 < precursorNum )s.append(", ");
+        }
+        return s.toString();
+    }
 }

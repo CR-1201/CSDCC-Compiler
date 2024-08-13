@@ -39,7 +39,9 @@ public class ObjLoad extends ObjInstruction implements hasVFP {
         this.dst = dst;
         this.add = add;
         this.isV = isV;
+        this.off = new ObjImmediate(0);
         tryAddUseOrDefReg(dst, false);
+        tryAddUseOrDefReg(add, true);
     }
 
     public ObjMove getImmMove() {
@@ -78,15 +80,29 @@ public class ObjLoad extends ObjInstruction implements hasVFP {
         this.off = off;
     }
 
+    public void replaceOff(ObjOperand off) {
+        getUse().remove(this.off);
+        addUse((ObjRegister) off);
+        this.off = off;
+    }
+
+    public void replaceAdd(ObjOperand add) {
+        getUse().remove(this.add);
+        addUse((ObjRegister) add);
+        this.add = add;
+    }
+
     @Override
     public String toString() {
-        if (off == null) {
+        if (off instanceof ObjImmediate imm && imm.getImmediate() == 0) {
             return "\t" + (isV ? "v" : "") + "ldr" + getCond() + "\t" +
                     dst + ",\t[" + add + "]\n";
-        } else {
+        } else if (off instanceof ObjImmediate) {
             return "\t" + (isV ? "v" : "") + "ldr" + getCond() + "\t" +
                     dst + ",\t[" + add + ",\t" + off + "]\n";
-        }
+        } else
+            return "\t" + (isV ? "v" : "") + "ldr" + getCond() + "\t" +
+                    dst + ",\t[" + add + ",\t" + off + getShift() + "]\n";
     }
 
     @Override

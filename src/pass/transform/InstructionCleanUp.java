@@ -14,22 +14,21 @@ import pass.analysis.PureFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static pass.analysis.AliasAnalysis.searchRoot;
+
 /**
  @author Conroy
  this pass used after pure function mark
- 该pass思想:找到所有的critical inst,然后根据def和use反推所有有用的指令,没有用的指令全部删除
- 什么是critical inst?
- (1) 输入输出算critical inst,这里也就是call lib function
- (2) 函数 return
- (3) mem store,该mem值的是外界mem,既非本函数栈帧的空间,比如全局变量,全局数组,数组函数参数
- (4) 对于call 方法,如果该函数不是pure,则算effective inst
- (5) Branch指令,Jump指令
 */
 
 public class InstructionCleanUp implements Pass {
     private final Module module = Module.getModule();
 
     private HashMap<Function, Boolean> is_pure = new HashMap<>();
+
+    private HashMap<Function, Boolean> funcUsedFlag = new HashMap<>();
+    private HashMap<GlobalVariable,Boolean> globalUsedFlag = new HashMap<>();
+    private Function mainFunction = null;
     @Override
     public void run() {
         PureFunction pureFunction = new PureFunction();
@@ -37,10 +36,48 @@ public class InstructionCleanUp implements Pass {
         this.is_pure = pureFunction.isPure;
 
         cleanUp();
+
+        globalCleanUp(); // 没有被使用过的函数 可以被删除
     }
 
-    // 对于内存修改, 因为删除不仅影响函数内部, 还影响外部函数
-    // 比如a在内存写了一个1, b函数load出来然后输出了, 所以内存写入都不能删除
+    private void globalCleanUp() {
+        ArrayList<Function> functions = module.getFunctionsArray();
+        for (Function function : functions) {
+            funcUsedFlag.put(function, false);
+            if( function.getName().equals("@main") ){
+                mainFunction = function;
+                funcUsedFlag.put(function, true);
+            }
+        }
+
+        ArrayList<Function> work_list = new ArrayList<>();
+        work_list.add(mainFunction);
+        int i = 0;
+        while( i < work_list.size() ){
+            Function function = work_list.get(i++);
+            ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+            for (BasicBlock basicBlock : blocks) {
+                ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
+                for (Instruction instruction : instructions) {
+                    if( instruction instanceof Call call ){
+                        Function callFunction = call.getFunction();
+                        if( !funcUsedFlag.get(callFunction) ){ // 避免递归 出现死循环
+                            funcUsedFlag.put(callFunction, true);
+                            work_list.add(callFunction);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Function function : functions) {
+            if( !funcUsedFlag.get(function) ){
+                function.removeSelf();
+            }
+        }
+    }
+
+
     private void cleanUp() {
         ArrayList<Function> functions = module.getFunctionsArray();
         for (Function function : functions) {

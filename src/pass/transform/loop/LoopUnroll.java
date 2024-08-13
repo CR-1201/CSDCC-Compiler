@@ -9,17 +9,15 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import pass.Pass;
 import pass.analysis.CFG;
 import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
 import pass.utility.BlockUtil;
 import pass.utility.CloneUtil;
-import utils.IOFunc;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class LoopUnroll implements Pass {
     private final CFG cfg = new CFG();

@@ -26,4 +26,8 @@ public class Zext extends Instruction {
     public String toString(){
         return this.getName() + " = zext i1 " + getOperator(0).getName() + " to i32";
     }
+
+    public String getHashNumbering(){
+        return "zext i1 " + getOperator(0).getName() + " to i32";
+    }
 }

@@ -1,6 +1,7 @@
 package backend.instruction;
 
 import backend.operand.ObjOperand;
+import backend.operand.ObjRegister;
 import ir.instructions.binaryInstructions.*;
 
 public class Binary extends ObjInstruction {
@@ -95,6 +96,17 @@ public class Binary extends ObjInstruction {
 
     public void setRhs(ObjOperand rhs) {
         this.rhs = rhs;
+    }
+
+    public void replaceRhs(ObjOperand rhs) {
+        getUse().remove(this.rhs);
+        addUse((ObjRegister) rhs);
+        this.rhs = rhs;
+    }
+    public void replaceLhs(ObjOperand lhs) {
+        getUse().remove(this.lhs);
+        addUse((ObjRegister) lhs);
+        this.lhs = lhs;
     }
 
     public BinaryType getType() {

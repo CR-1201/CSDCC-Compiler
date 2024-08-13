@@ -38,9 +38,10 @@ public class Compiler {
 
             if ("-O1".equals(args[i])) {
                 Config.isO1 = true;
+                Config.MulOpt = true;
             }
         }
-//        Config.isO1 = true;
+        Config.isO1 = true;
 //        fileInputPath = args[0];
 //        fileOutputPath = args[1];
         // 初始化
@@ -71,12 +72,12 @@ public class Compiler {
         // 生成目标代码
         ObjBuilder.getObjBuilder().build();
 
-        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
-
         if (Config.isO1) {
             ObjPassManager objPassManager = new ObjPassManager();
             objPassManager.run();
         }
+
+        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
 
 //        IOFunc.output(ObjModule.getModule().toString(), "peephole.s");
     }

@@ -1,141 +1,229 @@
 package pass.transform.gcmgvn;
 
-import ir.*;
+import ir.BasicBlock;
+import ir.Function;
 import ir.Module;
+import ir.Value;
 import ir.instructions.Instruction;
-import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
-import pass.analysis.Dom;
-import pass.analysis.LoopAnalysis;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class GCM {
-    private final Module module = Module.getModule();
-    Dom dom = new Dom();
 
-    private final HashSet<Instruction> visited = new HashSet<>();
-    LoopAnalysis loopAnalysis = new LoopAnalysis();
+    private final Module module = Module.getModule();
+
+    private final HashMap<Function, HashSet<Instruction>> pinned = new HashMap<>();
+    private final HashMap<BasicBlock,Instruction> insertPosition = new HashMap<>();
+
+    private HashSet<Instruction> visited = new HashSet<>();
+    private BasicBlock root;
 
     // 是否是被 Pin 住的指令
     private boolean isPinnedInst(Instruction inst) {
-        return inst instanceof Br || inst instanceof Phi
-                || inst instanceof Ret || inst instanceof Store
-                || inst instanceof Load || inst instanceof Call;
+        return inst instanceof Br || inst instanceof Ret
+                || inst instanceof Store || inst instanceof Load
+                || inst instanceof Phi || inst instanceof Call;
     }
 
-    public void run(){
+    public void run() {
         ArrayList<Function> functions = module.getFunctionsArray();
-        for (Function function : functions ){
-            if (!function.getIsBuiltIn() && function.getBasicBlocksArray().size() > 1)  {
-                loopAnalysis.analyzeLoopInfo(function);
-                runGCM(function);
+        init();
+        for (Function function : functions) {
+            if (!function.getIsBuiltIn()) {
+                scheduleEarlyForFunction(function);
+            }
+        }
+        for (Function function : functions) {
+            if (!function.getIsBuiltIn()) {
+                scheduleLateForFunction(function);
+            }
+        }
+        codeMotion();
+    }
+
+    private void init() {
+        ArrayList<Function> functions = module.getFunctionsArray();
+        for (Function function : functions) {
+            // 寻找所有被 Pinned 住的指令
+            HashSet<Instruction> pinnedInsts = new HashSet<>();
+            ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+            for (BasicBlock block : blocks) {
+                ArrayList<Instruction> instructions = block.getInstructionsArray();
+                for (Instruction instruction : instructions) {
+                    if (isPinnedInst(instruction)) {
+                        pinnedInsts.add(instruction);
+                    }
+                }
+                insertPosition.put(block, block.getTailInstruction());
+            }
+            pinned.put(function, pinnedInsts);
+        }
+    }
+
+    private void scheduleEarlyForFunction(Function function) {
+        HashSet<Instruction> pinnedInsts = pinned.get(function);
+        visited = new HashSet<>();
+        root = function.getFirstBlock();
+        for (Instruction instruction : pinnedInsts) {
+            instruction.setEarliestBlock(instruction.getParent());
+            visited.add(instruction);
+        }
+        ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+        for (BasicBlock block : blocks) {
+            ArrayList<Instruction> instructions = block.getInstructionsArray();
+            for (Instruction instruction : instructions) {
+                if (!visited.contains(instruction)) {
+                    scheduleEarly(instruction);
+                } else if (pinnedInsts.contains(instruction)) {
+                    for (Value value : instruction.getOperators()) {
+                        if (value instanceof Instruction instr) {
+                            scheduleEarly(instr);
+                        }
+                    }
+                }
             }
         }
     }
 
-    private void runGCM(Function function) {
-        visited.clear();
-        ArrayList<BasicBlock> reversePostOrder = dom.getDomTreePostOrder(function);
-        Collections.reverse(reversePostOrder);
-        ArrayList<Instruction> instructions = new ArrayList<>();
-        for (BasicBlock basicBlock : reversePostOrder){
-            instructions.addAll(basicBlock.getInstructionsArray());
-        }
-        for (Instruction instruction : instructions){
-            if (isPinnedInst(instruction)){
-                visited.add(instruction);
-            } else {
-                scheduleEarly(instruction, function);
-            }
-        }
-        visited.clear();
-        Collections.reverse(instructions);
-        for (Instruction instruction : instructions){
-            if (isPinnedInst(instruction)) {
-                visited.add(instruction);
-            } else {
-                scheduleLate(instruction);
-            }
-        }
-    }
-
-    private void scheduleEarly(Instruction inst, Function function) {
-        if (visited.contains(inst) || isPinnedInst(inst)) {
+    private void scheduleEarly(Instruction instruction) {
+        if (visited.contains(instruction)){
             return;
         }
-        visited.add(inst);
-        BasicBlock entry = function.getFirstBlock();
-        inst.eraseFromParent();
-        entry.insertBefore(inst, entry.getTailInstruction());
-
-        for (Value value : inst.getOperators()) {
+        visited.add(instruction);
+        instruction.setEarliestBlock(root);
+        for (Value value : instruction.getOperators()) {
             if (value instanceof Instruction operator) {
-                scheduleEarly(operator, function);
-                if (inst.getParent().getDomLevel() < operator.getParent().getDomLevel()){
-                    inst.eraseFromParent();
-                    operator.getParent().insertBefore(inst, operator.getParent().getTailInstruction());
+                scheduleEarly(operator);
+                if (instruction.getEarliestBlock().getDomLevel() < operator.getEarliestBlock().getDomLevel()) {
+                    instruction.setEarliestBlock(operator.getEarliestBlock());
+                }
+            }
+        }
+    }
+
+    private void scheduleLateForFunction(Function function) {
+        HashSet<Instruction> pinnedInstructions = pinned.get(function);
+        visited = new HashSet<>();
+        for (Instruction instruction : pinnedInstructions) {
+            instruction.setLatestBlock(instruction.getParent());
+            visited.add(instruction);
+        }
+        for (Instruction instruction : pinnedInstructions) {
+            for (Value value : instruction.getUsers()) {
+                if (value instanceof Instruction instr) {
+                    scheduleLate(instr);
+                }
+            }
+        }
+        ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+        for (BasicBlock block : blocks) {
+            ArrayList<Instruction> instructions = block.getInstructionsArray();
+            // 倒序遍历
+            Collections.reverse(instructions);
+            for (Instruction instruction : instructions) {
+                if (!visited.contains(instruction)) {
+                    scheduleLate(instruction);
                 }
             }
         }
     }
 
     private void scheduleLate(Instruction inst) {
-        if (visited.contains(inst) || isPinnedInst(inst)) {
+        if (inst.getUsers().isEmpty()) {
+            return;
+        }
+        if (visited.contains(inst)) {
             return;
         }
         visited.add(inst);
         BasicBlock lca = null;
-        for (User user : inst.getUsers()) {
-            if (user instanceof Instruction userInst) {
-                scheduleLate(userInst);
-                BasicBlock userbb = userInst.getParent();
-                if (userInst instanceof Phi phi) {
+        for (Value user : inst.getUsers()) {
+            if (user instanceof Instruction instr) {
+                scheduleLate(instr);
+                BasicBlock usedBlock = instr.getLatestBlock();
+                if (instr instanceof Phi phi) {
                     for (int i = 0; i < phi.getPrecursorNum(); i++){
                         Value value = phi.getOperator(i);
                         if (value instanceof Instruction && value.equals(inst)){
-                            userbb = (BasicBlock) userInst.getOperator(i + phi.getPrecursorNum());
-                            lca = findLca(lca, userbb);
+                            usedBlock = (BasicBlock) phi.getOperator(i + phi.getPrecursorNum());
+                            lca = findLCA(lca, usedBlock);
+                            break;
                         }
                     }
                 } else {
-                    lca = findLca(lca, userbb);
+                    lca = findLCA(lca, usedBlock);
                 }
             }
         }
-        if (!inst.getUsers().isEmpty()) {
-            BasicBlock bestBB = lca;
-            BasicBlock curBB = lca;
-            while (curBB != inst.getParent()) {
-                curBB = curBB.getIDomer();
-                if (curBB.getLoopDepth() < bestBB.getLoopDepth()) {
-                    bestBB = curBB;
-                }
+        BasicBlock best = lca;
+        assert lca != null;
+        while (!lca.equals(inst.getEarliestBlock())) {
+            if (lca.getLoopDepth() < best.getLoopDepth()) {
+                best = lca;
             }
+            lca = lca.getIDomer();
+            assert lca != null;
+        }
+        if (lca.getLoopDepth() < best.getLoopDepth()) {
+            best = lca;
+        }
+        inst.setLatestBlock(best);
+        if (!inst.getLatestBlock().equals(inst.getParent())) {
             inst.eraseFromParent();
-            bestBB.insertBefore(inst, bestBB.getTailInstruction());
+            BasicBlock block = inst.getLatestBlock();
+            Instruction pos = findInsertPosition(inst,block);
+            block.insertBefore(inst,pos);
         }
-        BasicBlock bestBB = inst.getParent();
-        ArrayList<Instruction> instructions = bestBB.getInstructionsArray();
-        for (Instruction instruction : instructions){
-            if (instruction != inst) {
-                if (!(instruction instanceof Phi) && instruction.getOperators().contains(inst)){
-                    inst.eraseFromParent();
-                    bestBB.insertBefore(inst, instruction);
-                    break;
+    }
+
+    private Instruction findInsertPosition(Instruction instr, BasicBlock block) {
+        ArrayList<Value> users = new ArrayList<>(instr.getUsers());
+        Instruction later = null;
+        ArrayList<Instruction> instructions = block.getInstructionsArray();
+        for (Instruction pos : instructions ){
+            if (pos instanceof Phi) {
+                continue;
+            }
+            if (users.contains(pos)) {
+                later = pos;
+                break;
+            }
+        }
+        if (later != null) {
+            return later;
+        } else {
+            return block.getTailInstruction();
+        }
+    }
+
+    private void codeMotion() {
+        ArrayList<Function> functions = module.getFunctionsArray();
+        for (Function function : functions ){
+            ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+            for (BasicBlock block : blocks) {
+                ArrayList<Instruction> instructions = block.getInstructionsArray();
+                for (Instruction instruction : instructions) {
+                    if (!instruction.getLatestBlock().equals(block)) {
+                        instruction.eraseFromParent();
+                        BasicBlock basicBlock = instruction.getLatestBlock();
+                        Instruction pos = findInsertPosition(instruction,basicBlock);
+                        basicBlock.insertBefore(instruction,pos);
+                    }
                 }
             }
         }
     }
 
-    private BasicBlock findLca(BasicBlock a, BasicBlock b) {
+    private BasicBlock findLCA(BasicBlock a, BasicBlock b) {
         if (a == null)
             return b;
         while (a.getDomLevel() < b.getDomLevel()) {

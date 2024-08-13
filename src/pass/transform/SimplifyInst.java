@@ -345,11 +345,6 @@ public class SimplifyInst implements Pass {
             return v1;
         }
 
-        // x * 2 = x + x
-        if( (v2 instanceof ConstInt && ((ConstInt)v2).getValue() == 2)){
-            return builder.buildAddBeforeInstr(inst.getParent(),new IntType(32), v1, v1, inst);
-        }
-
 
         if( intFlag ){
 

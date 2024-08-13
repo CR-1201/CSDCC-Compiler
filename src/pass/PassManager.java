@@ -97,6 +97,10 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
 
+        passes.add(new Pattern.Pattern3());
+        BasicPass();
+        passes.add(new Pattern.Pattern4());
+
         passes.add(new CFG());
         passes.add(new Dom());
 

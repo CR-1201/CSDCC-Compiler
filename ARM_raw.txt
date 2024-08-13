@@ -1,337 +1,40 @@
 .arch armv7ve
 .arm
-.global	_g_A
-
-.section .bss
-.align 2
-_g_A:
-	.zero	7840000
-.global	_g_b
-
-.section .bss
-.align 2
-_g_b:
-	.zero	5600
-.global	_g_x
-
-.section .bss
-.align 2
-_g_x:
-	.zero	5600
-.global	_g_y
-
-.section .bss
-.align 2
-_g_y:
-	.zero	5600
 .section .text
 .global	main
 main:
 	push	{lr}
 	sub	sp,	sp,	#4
-b28:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	mov	r0,	v0
-	bl	getarray
-	mov	v3,	r0
-	movw	v4,	:lower16:_g_b
-	movt	v4,	:upper16:_g_b
-	mov	r0,	v4
-	bl	getarray
-	mov	v7,	r0
-	movw	v8,	:lower16:_g_x
-	movt	v8,	:upper16:_g_x
-	mov	r0,	v8
-	bl	getarray
-	mov	v11,	r0
-	movw	v12,	:lower16:_g_y
-	movt	v12,	:upper16:_g_y
-	mov	r0,	v12
-	bl	getarray
-	mov	v15,	r0
+b12:
 	bl	_sysy_starttime
-	mov	v119,	#0
-	b	b32
+	bl	getint
+	mov	v0,	r0
+	mov	v2,	#1
+	add	v1,	v0,	v2
+	mov	v4,	v1, asr #31
+	ands	v3,	v1,	#1
+	orrne	v3,	v3,	v4, lsl #1
+	vmov	vf0,	v3
+	vcvt.f32.s32	vf0,	vf0
+	vldr	vf2,	=0x3F8020C5
+	vmul.f32	vf1,	vf2,	vf0
+	vldr	vf4,	=0x3F8020C5
+	vsub.f32	vf3,	vf1,	vf4
+	vldr	vf5,	=0x0
+	vcmp.f32	vf3,	vf5
+	vmrs	APSR_nzcv, fpscr
+	beq	b13
+	b	b14
 .ltorg
-b32:
-	mov	v17,	v119
-	movw	v18,	#1400
-	cmp	v17,	v18
-	blt	b33
-	b	b46
+b13:
+	mov	r0,	#112
+	bl	putch
+	b	b14
 .ltorg
-b46:
-	mov	v126,	#0
-	b	b47
-.ltorg
-b47:
-	mov	v20,	v126
-	movw	v21,	#1400
-	cmp	v20,	v21
-	blt	b48
-	b	b52
-.ltorg
-b52:
-	movw	v129,	#1399
-	b	b53
-.ltorg
-b53:
-	mov	v23,	v129
-	mov	v24,	#0
-	cmp	v23,	v24
-	bge	b54
-	b	b58
-.ltorg
-b54:
-	movw	v12,	:lower16:_g_y
-	movt	v12,	:upper16:_g_y
-	mov	v26,	v23, lsl #2
-	add	v25,	v12,	v26
-	ldr	v27,	[v25]
-	mov	v29,	#1
-	add	v28,	v23,	v29
-	mov	v130,	v27
-	mov	v131,	v28
-	b	b55
-.ltorg
-b55:
-	mov	v31,	v131
-	mov	v41,	v130
-	movw	v32,	#1400
-	cmp	v31,	v32
-	blt	b56
-	b	b57
-.ltorg
-b56:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v34,	#5600
-	mla	v33,	v23,	v34,	v0
-	mov	v34,	v31, lsl #2
-	add	v33,	v33,	v34
-	ldr	v35,	[v33]
-	movw	v8,	:lower16:_g_x
-	movt	v8,	:upper16:_g_x
-	mov	v37,	v31, lsl #2
-	add	v36,	v8,	v37
-	ldr	v38,	[v36]
-	mul	v39,	v35,	v38
-	sub	v40,	v41,	v39
-	mov	v43,	#1
-	add	v42,	v31,	v43
-	mov	v130,	v40
-	mov	v131,	v42
-	b	b55
-.ltorg
-b57:
-	movw	v8,	:lower16:_g_x
-	movt	v8,	:upper16:_g_x
-	mov	v45,	v23, lsl #2
-	add	v44,	v8,	v45
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v47,	#5600
-	mla	v46,	v23,	v47,	v0
-	mov	v47,	v23, lsl #2
-	add	v46,	v46,	v47
-	ldr	v48,	[v46]
-	sdiv	v49,	v41,	v48
-	str	v49,	[v44]
-	mov	v51,	#1
-	sub	v50,	v23,	v51
-	mov	v129,	v50
-	b	b53
-.ltorg
-b58:
+b14:
 	bl	_sysy_stoptime
-	movw	r0,	#1400
-	mov	r1,	v8
-	bl	putarray
 	mov	r0,	#0
 	add	sp,	sp,	#4
 	pop	{pc}
 	bx	lr
-.ltorg
-b48:
-	movw	v4,	:lower16:_g_b
-	movt	v4,	:upper16:_g_b
-	mov	v53,	v20, lsl #2
-	add	v52,	v4,	v53
-	ldr	v54,	[v52]
-	mov	v127,	v54
-	mov	v128,	#0
-	b	b49
-.ltorg
-b49:
-	mov	v56,	v128
-	mov	v65,	v127
-	cmp	v56,	v20
-	blt	b50
-	b	b51
-.ltorg
-b50:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v58,	#5600
-	mla	v57,	v20,	v58,	v0
-	mov	v58,	v56, lsl #2
-	add	v57,	v57,	v58
-	ldr	v59,	[v57]
-	movw	v12,	:lower16:_g_y
-	movt	v12,	:upper16:_g_y
-	mov	v61,	v56, lsl #2
-	add	v60,	v12,	v61
-	ldr	v62,	[v60]
-	mul	v63,	v59,	v62
-	sub	v64,	v65,	v63
-	mov	v67,	#1
-	add	v66,	v56,	v67
-	mov	v127,	v64
-	mov	v128,	v66
-	b	b49
-.ltorg
-b51:
-	movw	v12,	:lower16:_g_y
-	movt	v12,	:upper16:_g_y
-	mov	v69,	v20, lsl #2
-	add	v68,	v12,	v69
-	str	v65,	[v68]
-	mov	v71,	#1
-	add	v70,	v20,	v71
-	mov	v126,	v70
-	b	b47
-.ltorg
-b33:
-	mov	v120,	#0
-	b	b34
-.ltorg
-b34:
-	mov	v73,	v120
-	cmp	v73,	v17
-	blt	b35
-	b	b39
-.ltorg
-b35:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v75,	#5600
-	mla	v74,	v17,	v75,	v0
-	mov	v75,	v73, lsl #2
-	add	v74,	v74,	v75
-	ldr	v76,	[v74]
-	mov	v121,	v76
-	mov	v122,	#0
-	b	b36
-.ltorg
-b36:
-	mov	v78,	v122
-	mov	v83,	v121
-	cmp	v78,	v73
-	blt	b38
-	b	b37
-.ltorg
-b37:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v80,	#5600
-	mla	v79,	v73,	v80,	v0
-	mov	v80,	v73, lsl #2
-	add	v79,	v79,	v80
-	ldr	v81,	[v79]
-	sdiv	v82,	v83,	v81
-	str	v82,	[v74]
-	mov	v85,	#1
-	add	v84,	v73,	v85
-	mov	v120,	v84
-	b	b34
-.ltorg
-b38:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v87,	#5600
-	mla	v86,	v17,	v87,	v0
-	mov	v87,	v78, lsl #2
-	add	v86,	v86,	v87
-	ldr	v88,	[v86]
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v90,	#5600
-	mla	v89,	v78,	v90,	v0
-	mov	v90,	v73, lsl #2
-	add	v89,	v89,	v90
-	ldr	v91,	[v89]
-	mul	v92,	v88,	v91
-	sub	v93,	v83,	v92
-	mov	v95,	#1
-	add	v94,	v78,	v95
-	mov	v121,	v93
-	mov	v122,	v94
-	b	b36
-.ltorg
-b39:
-	mov	v123,	v17
-	b	b40
-.ltorg
-b40:
-	mov	v97,	v123
-	movw	v98,	#1400
-	cmp	v97,	v98
-	blt	b41
-	b	b45
-.ltorg
-b41:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v100,	#5600
-	mla	v99,	v17,	v100,	v0
-	mov	v100,	v97, lsl #2
-	add	v99,	v99,	v100
-	ldr	v101,	[v99]
-	mov	v124,	v101
-	mov	v125,	#0
-	b	b42
-.ltorg
-b42:
-	mov	v103,	v125
-	mov	v112,	v124
-	cmp	v103,	v17
-	blt	b43
-	b	b44
-.ltorg
-b43:
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v105,	#5600
-	mla	v104,	v17,	v105,	v0
-	mov	v105,	v103, lsl #2
-	add	v104,	v104,	v105
-	ldr	v106,	[v104]
-	movw	v0,	:lower16:_g_A
-	movt	v0,	:upper16:_g_A
-	movw	v108,	#5600
-	mla	v107,	v103,	v108,	v0
-	mov	v108,	v97, lsl #2
-	add	v107,	v107,	v108
-	ldr	v109,	[v107]
-	mul	v110,	v106,	v109
-	sub	v111,	v112,	v110
-	mov	v114,	#1
-	add	v113,	v103,	v114
-	mov	v124,	v111
-	mov	v125,	v113
-	b	b42
-.ltorg
-b44:
-	str	v112,	[v99]
-	mov	v116,	#1
-	add	v115,	v97,	v116
-	mov	v123,	v115
-	b	b40
-.ltorg
-b45:
-	mov	v118,	#1
-	add	v117,	v17,	v118
-	mov	v119,	v117
-	b	b32
 .ltorg

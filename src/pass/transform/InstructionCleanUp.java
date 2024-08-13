@@ -27,7 +27,7 @@ public class InstructionCleanUp implements Pass {
     private HashMap<Function, Boolean> is_pure = new HashMap<>();
 
     private HashMap<Function, Boolean> funcUsedFlag = new HashMap<>();
-    private HashMap<GlobalVariable,Boolean> globalUsedFlag = new HashMap<>();
+
     private Function mainFunction = null;
     @Override
     public void run() {

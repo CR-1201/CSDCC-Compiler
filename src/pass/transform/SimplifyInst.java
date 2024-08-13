@@ -4,14 +4,18 @@ import ir.*;
 import ir.Module;
 import ir.constants.ConstFloat;
 import ir.constants.ConstInt;
-import ir.constants.Constant;
+
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Zext;
+import ir.types.IntType;
 import pass.Pass;
 
 import java.util.ArrayList;
+
+import static ast.Node.builder;
+
 
 /**
  @author Conroy
@@ -153,11 +157,14 @@ public class SimplifyInst implements Pass {
                 inst.replaceOperator(v1,v1_1);
                 inst.replaceOperator(v2,new ConstInt(constInt2.getValue()-constInt1.getValue()));
                 return inst;
+            } else if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
+                return builder.buildSubBeforeInstr(inst.getParent(),new IntType(32),new ConstInt(constInt1.getValue()+constInt2.getValue()),v1_2,inst);
             } else if( v1_2.equals(v2) ){
                 return v1_1;
             }
         }
 
+        // 加法是可交换的, 所以其实下面的都没用
         // const1 + (x + const2) = x + (const1 + const2)
         // const1 + (const2 + x) = x + (const1 + const2)
         if( v2 instanceof Add add ){
@@ -186,6 +193,8 @@ public class SimplifyInst implements Pass {
                 return v2_1;
             }
         }
+
+        // TODO a * b + a * c = a * (b + c)
 
         return inst;
     }
@@ -294,12 +303,15 @@ public class SimplifyInst implements Pass {
         // TODO: const1 - (const2 - x) = (const1 - const2) + x
         if( v2 instanceof Sub sub ){
             Value v2_1 = sub.getOperator(0), v2_2 = sub.getOperator(1);
-            if( v1 instanceof ConstInt constInt1 && v2_2 instanceof ConstInt constInt2){
+            if( v1 instanceof ConstInt constInt1 && v2_2 instanceof ConstInt constInt2 ){
                 inst.replaceOperator(v1,new ConstInt(constInt1.getValue()+constInt2.getValue()));
                 inst.replaceOperator(v2,v2_1);
                 return inst;
+            } else if( v1 instanceof ConstInt constInt1 && v2_1 instanceof ConstInt constInt2 ){
+                return builder.buildAddBeforeInstr(inst.getParent(),new IntType(32),v2_2,new ConstInt(constInt1.getValue()-constInt2.getValue()),inst);
             }
         }
+
         return inst;
     }
 
@@ -331,6 +343,11 @@ public class SimplifyInst implements Pass {
         if( (v2 instanceof ConstInt && ((ConstInt)v2).getValue() == 1) ||
                 (v2 instanceof ConstFloat && ((ConstFloat)v2).getValue() == 1) ){
             return v1;
+        }
+
+        // x * 2 = x + x
+        if( (v2 instanceof ConstInt && ((ConstInt)v2).getValue() == 2)){
+            return builder.buildAddBeforeInstr(inst.getParent(),new IntType(32), v1, v1, inst);
         }
 
 

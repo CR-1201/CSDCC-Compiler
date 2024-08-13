@@ -80,9 +80,12 @@ public class ObjStore extends ObjInstruction implements hasVFP {
         if (off instanceof ObjImmediate imm && imm.getImmediate() == 0) {
             return "\t" + (isV ? "v" : "") + "str" + getCond() + "\t" + src
                     + ",\t[" + add + "]\n";
-        } else
+        } else if (off instanceof ObjImmediate)
             return "\t" + (isV ? "v" : "") + "str" + getCond() + "\t" + src
                     + ",\t[" + add + ",\t" + off + "]\n";
+        else
+            return "\t" + (isV ? "v" : "") + "str" + getCond() + "\t" + src
+                    + ",\t[" + add + ",\t" + off + getShift() + "]\n";
     }
 
     @Override

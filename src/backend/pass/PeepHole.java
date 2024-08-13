@@ -203,7 +203,7 @@ public class PeepHole implements ObjPass {
                 curMB.removeInstruction(curMov);
                 return true;
             } else if (curMov.getCond() == ObjInstruction.ObjCond.any && nextInst instanceof ObjMove nextMov) {
-                if (nextMov.getDst().equals(nextMov.getRhs())) {
+                if (!nextMov.hasShift() && nextMov.getDst().equals(nextMov.getRhs())) {
                     curMB.removeInstruction(nextMov);
                     return true;
                 } else if (nextMov.getDst().equals(curMov.getDst())) {

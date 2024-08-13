@@ -238,14 +238,11 @@ public class ObjBuilder {
     private ObjInstruction buildGEP(GEP gep, ObjBlock objBlock, ObjFunction objFunction) {
         Value base = gep.getBase();
         ValueType type = gep.getBaseType();
-        ObjOperand rs;
+        ObjOperand rs = v2mMap.containsKey(base) ? v2mMap.get(base) : putNewVGtoMap(base, objFunction, objBlock);
         ObjOperand rd = createVirRegister(gep);
         if (base instanceof GlobalVariable) {
-            rs = new ObjVirRegister();
             objBlock.addInstruction(new ObjMove(rs, new ObjLabel(base.getName().substring(1), true), false, false));
 //            objBlock.addInstruction(new ObjLoad(rs, rs, base.getValueType().isFloat()));
-        } else {
-            rs = v2mMap.containsKey(base) ? v2mMap.get(base) : putNewVGtoMap(base, objFunction, objBlock);
         }
         List<Value> indexes = gep.getIndex();
         int offset = 0;

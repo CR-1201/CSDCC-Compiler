@@ -73,9 +73,10 @@ public class Compiler {
 
         IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
 
-
-        ObjPassManager objPassManager = new ObjPassManager();
-        objPassManager.run();
+        if (Config.isO1) {
+            ObjPassManager objPassManager = new ObjPassManager();
+            objPassManager.run();
+        }
 
 //        IOFunc.output(ObjModule.getModule().toString(), "peephole.s");
     }

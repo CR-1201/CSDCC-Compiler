@@ -17,15 +17,15 @@ import pass.Pass;
 import pass.analysis.SideEffect;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
-// FIXME 没有分数组考虑
 // FIXME 没有考虑全局数组和参数数组
 public class UselessArrayStoreEmit implements Pass {
 
     private final Module irModule = Module.getModule();
 
-    private final HashSet<Integer> usefulPositions = new HashSet<>();
+    private final HashMap<Value, HashSet<Integer>> usefulPositions = new HashMap<>();
 
     @Override
     public void run() {
@@ -54,7 +54,7 @@ public class UselessArrayStoreEmit implements Pass {
                 if (instruction instanceof Load loadInstr) {
                     Value address = loadInstr.getAddr();
                     if (address instanceof GEP gepInstr) {  // 只分析数组相关的io指令
-                        markIndex(gepInstr);
+                        markIndex(gepInstr.getBase(), gepInstr);
                     }
                 }
             }
@@ -66,7 +66,7 @@ public class UselessArrayStoreEmit implements Pass {
                 if (instruction instanceof Store storeInstr) {
                     Value address = storeInstr.getAddr();
                     if (address instanceof GEP gepInstr) {
-                        if (!isMarkedIndex(gepInstr)) {
+                        if (!isMarkedIndex(gepInstr.getBase(), gepInstr)) {
                             toBeDeletedStores.add(storeInstr);
                         }
                     }
@@ -79,12 +79,18 @@ public class UselessArrayStoreEmit implements Pass {
         }
     }
 
-    private void markIndex(GEP gepInstr) {
-        usefulPositions.add(getLocalArrayPosition(gepInstr));
+    private void markIndex(Value base, GEP gepInstr) {
+        if (!usefulPositions.containsKey(base)) {
+            usefulPositions.put(base, new HashSet<>());
+        }
+        usefulPositions.get(base).add(getLocalArrayPosition(gepInstr));
     }
 
-    private boolean isMarkedIndex(GEP gepInstr) {
-        return usefulPositions.contains(getLocalArrayPosition(gepInstr));
+    private boolean isMarkedIndex(Value base, GEP gepInstr) {
+        if (!usefulPositions.containsKey(base)) {
+            return false;
+        }
+        return usefulPositions.get(base).contains(getLocalArrayPosition(gepInstr));
     }
 
     private boolean hasPutArray(Function function) {

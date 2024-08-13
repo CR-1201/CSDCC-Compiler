@@ -3,6 +3,7 @@ package pass.transform.gcmgvn;
 import ir.*;
 import ir.Module;
 import ir.instructions.Instruction;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;

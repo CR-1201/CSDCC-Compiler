@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- ret <type> <value> ,ret void
  */
 public class Ret extends TerInstruction{
     // 返回值为void

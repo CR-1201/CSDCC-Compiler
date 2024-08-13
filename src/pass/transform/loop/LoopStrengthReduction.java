@@ -51,6 +51,8 @@ public class LoopStrengthReduction implements Pass {
     }
 
     private void runOnLoop(Loop loop){
+        Phi posPhi = null;boolean flag = false;
+
         if (!loop.isSimpleLoop() || !loop.isInductorVarSet()) {
             return;
         }
@@ -160,6 +162,9 @@ public class LoopStrengthReduction implements Pass {
                         Value newIncomingValue = calculateNewIncomingValue(phi,inductionMap.get(instruction));
 
                         Phi newPhi = builder.buildPhi(new IntType(32),phi.getParent(),1);
+                        if( posPhi == null ){
+                            posPhi = newPhi;
+                        }
                         newPhi.addIncoming(newIncomingValue,preHeaderBasicBlock);
                         phiMap.put(instruction,newPhi);
 
@@ -203,10 +208,13 @@ public class LoopStrengthReduction implements Pass {
         UselessPhiEmit uselessPhiEmit = new UselessPhiEmit();
         uselessPhiEmit.run();
 
+        if( posPhi == null )return;
+        else flag = true;
         ArrayList<Instruction> instructionsArray = header.getInstructionsArray();
         ArrayList<Triple<Phi,Integer,Value>> triples = new ArrayList<>();
         for (Instruction temp : instructionsArray ){
             if( temp instanceof Phi phiVal ){
+                if( !flag ) break;
                 if( phiVal.getUsers().isEmpty() ){
                     continue;
                 }
@@ -222,6 +230,9 @@ public class LoopStrengthReduction implements Pass {
                         }
                         triples.add(new Triple<>(phi,index,phiVal.getOperators().get(index)));
                     }
+                }
+                if( phiVal.equals(posPhi) ){
+                    flag = false;
                 }
             }
         }

@@ -25,9 +25,6 @@ public class ObjInstruction {
                 || (this instanceof LiteralPoolPlacement);
     }
 
-    public boolean hasShift() {
-        return shift != null;
-    }
 
     public enum ObjCond {
         any(""), // 无条件执行
@@ -150,9 +147,6 @@ public class ObjInstruction {
 
     public String getShift() {
         return shift != null ? shift.toString() : "";
-    }
-    public Shift getShiftO() {
-        return shift;
     }
 
     public void setShift(Shift shift) {

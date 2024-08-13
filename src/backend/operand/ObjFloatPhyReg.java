@@ -45,10 +45,6 @@ public class ObjFloatPhyReg extends ObjRegister {
         }
     }};
 
-    public int getNum() {
-        return num;
-    }
-
     public static ObjFloatPhyReg getRegister(int num) {
         return registerMap.get(num);
     }

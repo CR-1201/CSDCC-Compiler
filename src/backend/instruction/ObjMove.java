@@ -49,10 +49,6 @@ public class ObjMove extends ObjInstruction implements hasVFP {
         return hasImm;
     }
 
-    public boolean hasNoShiftAndCond() {
-        return getCond() == ObjCond.any && "".equals(getShift());
-    }
-
     @Override
     public String toString() {
         // vmov.f32 好像很多不支持

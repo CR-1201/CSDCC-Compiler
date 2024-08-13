@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 /**
  @author Conroy
- 函数 包括 argument, basic block,有返回值的 instruction
  */
 public class Function extends Value{
     // 运行时库函数
@@ -144,17 +143,10 @@ public class Function extends Value{
         this.finalExitBlock = finalExitBlock;
     }
 
-    /**
-     * @param value Argument | BasicBlock | Instruction(带返回值)
-     */
     public void addFunctionSymbol(Value value){
         valueSymbolTable.put(value.getName(), value);
     }
 
-    /**
-     * 部分信息被转移到了 type 中, value 实体只保留一小部分信息
-     * @return 参数个数
-     */
     public int getNumArgs(){
         return getValueType().getFormalArgs().size();
     }

@@ -24,12 +24,4 @@ public class ObjImmediate extends ObjOperand{
         return toString();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof ObjImmediate) {
-            ObjImmediate other = (ObjImmediate) obj;
-            return this.immediate == other.immediate;
-        }
-        return false;
-    }
 }

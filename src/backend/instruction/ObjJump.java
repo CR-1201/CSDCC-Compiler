@@ -29,16 +29,6 @@ public class ObjJump extends ObjInstruction{
         this.target = target;
     }
 
-    public boolean isCall() {
-        return target == null;
-    }
-    public boolean isBranch() {
-        return target != null && getCond() != ObjCond.any;
-    }
-    public boolean isJump() {
-        return target != null && getCond() == ObjCond.any;
-    }
-
     @Override
     public String toString() {
         if (target != null)

@@ -14,7 +14,6 @@ import pass.Pass;
 import pass.analysis.PureFunction;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 
 public class Peephole implements Pass {
@@ -29,7 +28,7 @@ public class Peephole implements Pass {
     public void run() {
         PureFunction pureFunction = new PureFunction();
         pureFunction.markPure();
-        this.is_pure = pureFunction.is_pure;
+        this.is_pure = pureFunction.isPure;
         // store后紧接着的load,可以消掉load
         Peephole1();
     }
@@ -53,9 +52,7 @@ public class Peephole implements Pass {
                     addr2store.clear();
                 } else addr2store.put(store.getAddr(), store);
             } else if( instruction instanceof Load load ){
-                if( mysteriousStore(load.getAddr()) ){
-                    addr2store.clear();
-                } else if( addr2store.containsKey(load.getAddr()) ){
+                if( addr2store.containsKey(load.getAddr()) ){
                     Store store = (Store) addr2store.get(load.getAddr());
                     load.replaceAllUsesWith(store.getValue());
                     load.removeSelf();

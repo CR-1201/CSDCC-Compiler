@@ -6,10 +6,7 @@ import ir.constants.Constant;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
-import ir.instructions.otherInstructions.Call;
-import ir.instructions.otherInstructions.Conversion;
-import ir.instructions.otherInstructions.Phi;
-import ir.instructions.otherInstructions.Zext;
+import ir.instructions.otherInstructions.*;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
@@ -194,6 +191,8 @@ public class FunctionClone {
             }
         } else if (srcInstr instanceof Conversion conversionInstr) {
             copyInstr = irBuilder.buildConversion(copyBlock, conversionInstr.getType(), (DataType) conversionInstr.getValueType(), findValue(conversionInstr.getConversionValue()));
+        } else if (srcInstr instanceof BitCast bitCastInstr) {
+            copyInstr = irBuilder.buildBitCast(copyBlock, (DataType) bitCastInstr.getValueType(), findValue(bitCastInstr.getConversionValue()));
         }
 
         return copyInstr;

@@ -51,12 +51,6 @@ public class ObjFunction {
     public ArrayList<ObjBlock> getBlocks() {
         return blocks;
     }
-    public ObjBlock getNextBlock(ObjBlock block) {
-        if (blocks.indexOf(block) == blocks.size() - 1) {
-            return null;
-        }
-        return blocks.get(blocks.indexOf(block) + 1);
-    }
 
     public void addAllocSize(int size) {
         allocSize += size;

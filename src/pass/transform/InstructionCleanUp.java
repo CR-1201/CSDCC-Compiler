@@ -34,7 +34,7 @@ public class InstructionCleanUp implements Pass {
     public void run() {
         PureFunction pureFunction = new PureFunction();
         pureFunction.markPure();
-        this.is_pure = pureFunction.is_pure;
+        this.is_pure = pureFunction.isPure;
 
         cleanUp();
     }

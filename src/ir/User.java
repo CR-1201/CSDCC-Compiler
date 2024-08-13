@@ -6,10 +6,6 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- value 的使用者
- 例如 Instruction “%1 = Add i32 %2, 3”中指令 %1 既是 value 的派生类 Add,
- 也是使用 指令%2 与 常数3 的 user
- Function,没有初始化的 GlobalVariable,ConstantData 不会使用 value,其他 user 会使用至少一个 value
  */
 public abstract class User extends Value {
     // 记录当前 user 使用过的 value

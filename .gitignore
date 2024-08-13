@@ -16,7 +16,6 @@ tests/ir
 tests/ir_std
 tests/asm
 tests/ans
-tests
 tests/output
 tests/error.txt
 tests/ARM_raw.txt
@@ -25,6 +24,9 @@ compiler.jar
 tests/lib/libsysy.so
 .idea/workspace.xml
 sylib.ll
+out.ll
+main.ll
+testcase.sy
 
 ### IntelliJ IDEA ###
 out/
@@ -55,3 +57,5 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+testcase.sy
+tmp.txt

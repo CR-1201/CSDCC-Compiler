@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 /**
  @author Conroy
- IntType | FloatType | ArrayType
  */
 public class ArrayType extends ValueType{
     // IntType | FloatType | ArrayType
@@ -12,10 +11,7 @@ public class ArrayType extends ValueType{
     // eg int a[2][3][4] => elementNum = 2
     private final int elementNum;
     private final int size;
-    /**
-     * @param elementType 数组元素类型,可以为数组或者基本类型
-     * @param elementNum  数组元素数量
-     */
+
     public ArrayType(ValueType elementType, int elementNum){
         this.elementType = elementType;
         this.elementNum = elementNum;
@@ -44,9 +40,6 @@ public class ArrayType extends ValueType{
         this.size = elementType.getSize() * elementNum;
     }
 
-    /**
-     * @return eg a[2][3][4] 返回2
-     */
     public int getElementNum(){
         return elementNum;
     }

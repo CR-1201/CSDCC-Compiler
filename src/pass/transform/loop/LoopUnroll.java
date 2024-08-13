@@ -15,6 +15,7 @@ import pass.analysis.Loop;
 import pass.analysis.LoopVarAnalysis;
 import pass.utility.BlockUtil;
 import pass.utility.CloneUtil;
+import utils.IOFunc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,16 +33,17 @@ public class LoopUnroll implements Pass {
     private BasicBlock exit;
     private BasicBlock latch;
 
+    private boolean uselessLoop = false;
+
     private LoopVarAnalysis loopVarAnalysis = new LoopVarAnalysis();
     public void run() {
-//        IOFunc.log("checkir/loop.ll", Module.getModule().toString());
         for (Function func : Module.getModule().getFunctionsArray()) {
             if (!func.getIsBuiltIn()) {
                 clear();
                 loopVarAnalysis.loopVarAnalysis(func);
                 runLoopUnroll(func);
                 if (isUnrolled) {
-                    cfg.setCFG(func.getBasicBlocksArray());
+                    cfg.buildCFG(func);
                 }
             }
         }
@@ -59,12 +61,34 @@ public class LoopUnroll implements Pass {
             allLoops.addAll(loop.computeDfsLoops());
         }
         for (Loop loop : allLoops) {
+            uselessLoop = false;
             constLoopUnroll(loop);
             /*
              * ATTENTION:
              * 不能在某一个循环达到限制之后，就直接return。
              * 因为函数后面其他的Top循环还需要被展开。
              */
+            // 尝试在这里删除不可进入的loop，但是遇到了一些问题。
+//            if (uselessLoop) {
+//                // 删除这个循环及其子循环以及循环中的所有的块
+//                ArrayList<BasicBlock> enterings = new ArrayList<>(loop.getEnterings());
+//                BasicBlock header = loop.getHeader();
+//                Br br = (Br) header.getTailInstruction();
+//                BasicBlock exit = null;
+//                if (br.getHasCondition()) {
+//                    if (loop.getAllBlocks().contains(br.getTrueBlock())) {
+//                        exit = br.getFalseBlock();
+//                    } else {
+//                        exit = br.getTrueBlock();
+//                    }
+//                }
+//                for (BasicBlock entering : enterings) {
+//                    Br to = (Br) entering.getTailInstruction();
+//                    to.replaceOperator(header, exit);
+//                    entering.replaceSuccessor(header, exit);
+//                }
+//                loop.removeSelf();
+//            }
         }
 //        System.out.println(allLoops);
     }
@@ -73,7 +97,6 @@ public class LoopUnroll implements Pass {
         if (!loop.isInductorVarSet()) {
             return;
         }
-        Value idcVar = loop.getIdcVar();
         Value idcEnd = loop.getIdcEnd();
         Value idcInit = loop.getIdcInit();
         BinaryInstruction idcAlu = (BinaryInstruction) loop.getIdcAlu();
@@ -91,6 +114,7 @@ public class LoopUnroll implements Pass {
         int loopTimes = loop.computeLoopTimes(init, end, step, idcAlu, cond.getCondition());
         if (loopTimes <= 0) {
             // 说明这个 loop 其实是无用的 loop，可以直接删掉
+            uselessLoop = true;
             return;
         } else {
             loop.setLoopTimes(loopTimes);

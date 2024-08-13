@@ -7,7 +7,6 @@ import ir.types.FloatType;
 
 /**
  @author Conroy
- <result> = mul <ty> <op1>, <op2>
  */
 public class Mul extends BinaryInstruction {
     // 只有 op1 && op2 都为 IntType 时, Mul 的 dataType 为 IntType;

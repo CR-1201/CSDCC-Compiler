@@ -1,7 +1,6 @@
 package ir;
 
 import ast.CompUnit;
-import ir.Module;
 import ir.constants.ConstArray;
 import ir.constants.ConstStr;
 import ir.constants.Constant;
@@ -16,7 +15,6 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -43,14 +41,6 @@ public class IrBuilder {
         root.buildIrTree();
     }
 
-    /**
-     * 全局变量初始化的时候,一定是用常量初始化的
-     * 建造一个全局变量,并将其加入 module
-     * @param ident 标识符
-     * @param initValue 初始值
-     * @param isConst 是否是常量
-     * @return 全局变量
-     */
     public GlobalVariable buildGlobalVariable(String ident, Constant initValue, boolean isConst){
         GlobalVariable globalVariable = new GlobalVariable(ident, initValue, isConst);
         module.addGlobalVariable(globalVariable);
@@ -83,7 +73,7 @@ public class IrBuilder {
         return block;
     }
 
-    public BasicBlock buildBasicBLockAfter(Function function, BasicBlock after) {
+    public BasicBlock buildBasicBlockAfter(Function function, BasicBlock after) {
         BasicBlock block = new BasicBlock(blockNumCounter++, function);
         function.insertAfter(block, after);
         return block;
@@ -113,8 +103,10 @@ public class IrBuilder {
         return mul;
     }
 
-    public Mul buildMul(DataType dataType, Value src1, Value src2) {
-        return new Mul(nameNumCounter++, dataType, null, src1, src2);
+    public Mul buildMulBeforeTail(BasicBlock parent, DataType dataType, Value src1, Value src2) {
+        Mul mul = new Mul(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBeforeTail(mul);
+        return mul;
     }
 
     public Mul buildMulBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before) {
@@ -291,6 +283,19 @@ public class IrBuilder {
         }else{
             call = new Call(nameNumCounter++, parent, function, args);
             parent.insertTail(call);
+        }
+        return call;
+    }
+
+    public Call buildCallBeforeTail(BasicBlock parent, Function function, ArrayList<Value> args){
+        Call call;
+        if (function.getReturnType() instanceof VoidType) {
+            // 没有返回值
+            call = new Call(parent, function, args);
+            parent.insertBeforeTail(call);
+        } else {
+            call = new Call(nameNumCounter++, parent, function, args);
+            parent.insertBeforeTail(call);
         }
         return call;
     }

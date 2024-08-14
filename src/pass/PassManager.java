@@ -35,7 +35,6 @@ public class PassManager {
         passes.add(new LocalArrayLift());
         passes.add(new GepFuse());
         passes.add(new ConstArrayFold()); // ConstArrayFlod 前面必须有Gep Fuse
-        passes.add(new DeadCodeEmit());
 
         passes.add(new SCCP());
         passes.add(new SimplifyInst());

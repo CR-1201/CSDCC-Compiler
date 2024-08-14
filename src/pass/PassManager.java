@@ -43,6 +43,7 @@ public class PassManager {
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
+        passes.add(new LoopMemset());
         passes.add(new InlineFunction());
         passes.add(new GlobalValueLocalize());
 
@@ -69,6 +70,7 @@ public class PassManager {
 //        passes.add(new MemSetOptimize());
         passes.add(new LoopStrengthReduction());
 
+        passes.add(new GepSplit());
         EmitSimpleBrPass();
 
         BasicPass();
@@ -79,6 +81,7 @@ public class PassManager {
 
         BasicPass();
         passes.add(new Peephole());
+        passes.add(new GepFuse());
         passes.add(new UselessArrayStoreEmit());
 
 
@@ -98,7 +101,7 @@ public class PassManager {
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
         EmitSimpleBrPass();
 
-//        passes.add(new GepFuse());
+        passes.add(new GepFuse());
         passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP,最好加一个Fuse
 
         passes.add(new InstructionCleanUp());

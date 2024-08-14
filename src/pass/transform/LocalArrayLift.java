@@ -169,9 +169,7 @@ public class LocalArrayLift implements Pass {
                         for( Instruction inst : initInstructions ){
                             if (inst instanceof GEP || inst instanceof Conversion) {
                                 if( inst.getUsers().isEmpty() ){
-                                    if( deleteList.contains(inst)){
-                                        inst.removeSelf();
-                                    }
+                                    inst.removeSelf();
                                 }
                             } else if( inst instanceof Store ){
                                 if( deleteList.contains(inst)){

@@ -65,6 +65,7 @@ public class ConstArrayFold implements Pass {
                 for (Instruction instruction : instructions) {
                     if( instruction instanceof GEP gep ){
                         Value ptr = gep.getBase();
+//                        System.out.println(gep);
                         if( ptr instanceof GlobalVariable globalVariable && globalVariableArray.contains(globalVariable) ){
 //                            System.out.println(gep);
                             ArrayList<Value> indexes = gep.getIndex();
@@ -104,6 +105,7 @@ public class ConstArrayFold implements Pass {
     }
 
     private Value getGlobalArrayValue( GlobalVariable globalVariable, ArrayList<Integer> indexes ){
+
         Constant initVal = globalVariable.getInitVal();
 
         if( initVal instanceof ZeroInitializer zeroInitializer){

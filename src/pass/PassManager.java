@@ -103,6 +103,7 @@ public class PassManager {
         passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP,最好加一个Fuse
 
         passes.add(new InstructionCleanUp());
+        passes.add(new GepSplit());
 
         BasicPass();
         EmitSimpleBrPass();
@@ -112,6 +113,7 @@ public class PassManager {
 
         passes.add(new CFG());
         passes.add(new Dom());
+
 
         for (Pass pass : passes) {
             pass.run();

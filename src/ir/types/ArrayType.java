@@ -57,6 +57,10 @@ public class ArrayType extends ValueType{
         return numList;
     }
 
+    public Integer getLength(){
+        return size/4;
+    }
+
     public ValueType getBaseType(){
         ValueType baseType = elementType;
         while (baseType instanceof ArrayType arrayType){

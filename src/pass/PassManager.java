@@ -29,6 +29,7 @@ public class PassManager {
         passes.add(new SideEffect());
         passes.add(new GlobalValueLocalize());
         passes.add(new SimpleBlockEmit());
+//        passes.add(new Sroa());
         Mem2RegPass();
         passes.add(new MemoryOptimize());
         passes.add(new LocalArrayLift());
@@ -65,6 +66,7 @@ public class PassManager {
         passes.add(new DeadCodeEmit());
 //        passes.add(new MemSetOptimize());
         passes.add(new LoopStrengthReduction());
+
         EmitSimpleBrPass();
 
         BasicPass();

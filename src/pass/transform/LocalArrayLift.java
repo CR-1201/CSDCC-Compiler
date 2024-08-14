@@ -24,6 +24,9 @@ public class LocalArrayLift implements Pass {
     private final Module module = Module.getModule();
 
     private ArrayList<Integer> dims = new ArrayList<>();
+
+    private Constant constant = null;
+
     @Override
     public void run() {
         ArrayList<Function> functions = module.getFunctionsArray();
@@ -55,11 +58,20 @@ public class LocalArrayLift implements Pass {
                         boolean constFlag = true;
 
                         if (!(arrayType.getBaseType() instanceof IntType)) {
-                            continue;
-                        }
+//                            continue;
+                            constant = new ConstFloat(0);
+                        } else constant = new ConstInt(0);
+
 
                         ArrayList<Value> originInitValues = alloca.getInitValues();
-                        if (originInitValues == null) continue;
+                        if (originInitValues == null) {
+                            String name = "lift_" + alloca.getName().replace("%", "");
+                            ZeroInitializer zeroInitializer = new ZeroInitializer(arrayType);
+                            GlobalVariable globalVariable = builder.buildGlobalVariable(name, zeroInitializer, false);
+                            alloca.replaceAllUsesWith(globalVariable);
+                            alloca.removeSelf();
+                            continue;
+                        }
 
                         ArrayList<Integer> numList = arrayType.getNumList();
                         this.dims = numList;
@@ -71,7 +83,9 @@ public class LocalArrayLift implements Pass {
                         ArrayList<Value> initValues = new ArrayList<>();
 //                        System.out.println(sum);
                         for (int j = 0; j < sum; j++) {
-                            initValues.add(new ConstInt(0));
+                            if( constant instanceof ConstFloat ) {
+                                initValues.add(new ConstFloat(0));
+                            } else initValues.add(new ConstInt(0));
                         }
 
                         ArrayList<Instruction> initInstructions = alloca.initInstructions;
@@ -95,7 +109,7 @@ public class LocalArrayLift implements Pass {
                                 continue;
                             }
 
-                            if( k < storeList.size() && storeList.get(k).getValue() instanceof ConstInt){
+                            if( k < storeList.size() ){
                                 initValues.set(j,storeList.get(k).getValue());
                                 Store store = storeList.get(k);
                                 if( store.getAddr() instanceof Conversion conversion ){
@@ -116,6 +130,9 @@ public class LocalArrayLift implements Pass {
                         boolean isAllZero = true;
                         for (Value value : initValues) {
                             if (value instanceof ConstInt constInt && constInt.getValue() != 0) {
+                                isAllZero = false;
+                                break;
+                            } else if (value instanceof ConstFloat constFloat && constFloat.getValue() != 0) {
                                 isAllZero = false;
                                 break;
                             }

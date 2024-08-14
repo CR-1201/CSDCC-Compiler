@@ -25,7 +25,7 @@ import static ast.Node.builder;
 public class LoopStrengthReduction implements Pass {
     private final Module module = Module.getModule();
 
-    private HashMap<Value, InductionVarInfo> inductionMap = new HashMap<>();
+    private LinkedHashMap<Value, InductionVarInfo> inductionMap = new LinkedHashMap<>();
 
     private HashMap<Phi, Value> preHeaderValue = new HashMap<>();
 
@@ -77,6 +77,7 @@ public class LoopStrengthReduction implements Pass {
         BasicBlock incrementBasicBlock = null;
 
         ArrayList<Instruction> instructions = header.getInstructionsArray();
+//        System.out.println(header);
         for (Instruction instruction : instructions) {
             if( instruction instanceof Phi phi ){
                 InductionVarInfo inductionVarInfo = new InductionVarInfo(instruction,0,1,true);
@@ -85,7 +86,7 @@ public class LoopStrengthReduction implements Pass {
                     BasicBlock incomingBlock = (BasicBlock) phi.getOperator(i+n);
                     if( preHeaderBasicBlock.equals(incomingBlock) ){
                         inductionVarInfo.preheaderValue = phi.getOperator(i);
-                        preHeaderValue.put(phi,phi.getOperator(i));
+                        preHeaderValue.put(phi,inductionVarInfo.preheaderValue);
                     } else {
                         incrementBasicBlock = incomingBlock;
                     }
@@ -95,11 +96,17 @@ public class LoopStrengthReduction implements Pass {
             }
         }
 
+//        System.out.println(incrementBasicBlock);
+        HashMap<Phi,ArrayList<Instruction>> usedPhiMap = new HashMap<>();
         ArrayList<BasicBlock> loopBlocks = loop.getAllBlocks();
         for (BasicBlock block : loopBlocks) {
+            if( !block.equals(incrementBasicBlock) ){
+                continue;
+            }
             ArrayList<Instruction> instrs = block.getInstructionsArray();
             for (Instruction instr : instrs) {
                 if( instr instanceof BinaryInstruction binary ){
+//                    System.out.println(instr);
                     Value left = binary.getOp1();
                     Value right = binary.getOp2();
 
@@ -116,9 +123,7 @@ public class LoopStrengthReduction implements Pass {
                             continue;
                         }
 
-                        if( variable instanceof Phi && binary instanceof Mul ){
-                            continue;
-                        }
+//                        if( variable instanceof Phi && binary instanceof Mul )continue;
 
                         InductionVarInfo idcVarOld = inductionMap.get(variable);
                         int newFactor = ((ConstInt) constant).getValue();
@@ -128,8 +133,17 @@ public class LoopStrengthReduction implements Pass {
                             newIdcVarInfo.multiplicativeStep = newFactor * idcVarOld.multiplicativeStep;
                             newIdcVarInfo.additiveStep = newFactor * idcVarOld.additiveStep;
 
-                            int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
-                            newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum * newFactor);
+                            if( variable instanceof Phi phi ){
+                                ArrayList<Instruction> temp = new ArrayList<>();
+                                temp.add(phi);
+                                usedPhiMap.put(phi,temp);
+                                newIdcVarInfo.preheaderValue = preHeaderValue.get(phi);
+                            } else {
+                                int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
+                                newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum * newFactor);
+                            }
+//                            int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
+//                            newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum * newFactor);
 
 //                            System.out.println(newIdcVarInfo.preheaderValue);
                             inductionMap.put(mul,newIdcVarInfo);
@@ -138,6 +152,9 @@ public class LoopStrengthReduction implements Pass {
                             newIdcVarInfo.multiplicativeStep = idcVarOld.multiplicativeStep;
 
                             if( variable instanceof Phi phi ){
+                                ArrayList<Instruction> temp = new ArrayList<>();
+                                temp.add(phi);
+                                usedPhiMap.put(phi,temp);
                                 newIdcVarInfo.preheaderValue = preHeaderValue.get(phi);
                             } else {
                                 int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
@@ -156,7 +173,25 @@ public class LoopStrengthReduction implements Pass {
         ArrayList<Instruction> headInsts = header.getInstructionsArray();
         for (Instruction instr : headInsts) {
             if( instr instanceof Phi phi ){
+                ArrayList<Instruction> temp = usedPhiMap.get(phi);
+                if( temp == null ) continue;
                 for(Value instruction : inductionMap.keySet()){
+                    if( instruction instanceof BinaryInstruction binary ){
+                        Value left = binary.getOp1();
+                        Value right = binary.getOp2();
+                        Value variable;
+
+                        if( left instanceof ConstInt){
+                            variable = right;
+                        } else if( right instanceof ConstInt){
+                            variable = left;
+                        } else continue;
+
+                        if( variable instanceof Instruction i && temp.contains(i) ){
+                            temp.add(binary);
+                            usedPhiMap.put(phi,temp);
+                        } else continue;
+                    }
                     if( inductionMap.get(instruction).multiplicativeStep != 1 &&
                         inductionMap.get(instruction).additiveStep != 0 ){
                         Value newIncomingValue = calculateNewIncomingValue(phi,inductionMap.get(instruction));
@@ -168,6 +203,7 @@ public class LoopStrengthReduction implements Pass {
                         newPhi.addIncoming(newIncomingValue,preHeaderBasicBlock);
                         phiMap.put(instruction,newPhi);
 
+//                        System.out.println(newPhi);
                     }
                 }
             }
@@ -185,6 +221,7 @@ public class LoopStrengthReduction implements Pass {
                             if( lhs == idcVarInfo.parent || rhs == idcVarInfo.parent ){
                                 InductionVarInfo incIdcVarInfo = inductionMap.get(instr);
                                 int newIncrement = incIdcVarInfo.additiveStep * idcVarInfo.multiplicativeStep;
+                                if( newIncrement == 0 )continue;
                                 Phi phiVal = phiMap.get(key);
 
 
@@ -245,10 +282,7 @@ public class LoopStrengthReduction implements Pass {
     }
 
     private Value calculateNewIncomingValue(Phi phi, InductionVarInfo inductionVarInfo){
-        if( preHeaderValue.get(phi) instanceof ConstInt ){
-            return inductionVarInfo.preheaderValue;
-        }
-        return preHeaderValue.get(phi);
+        return inductionVarInfo.preheaderValue;
     }
 
 

@@ -41,7 +41,7 @@ public class Compiler {
 //                Config.MulOpt = true;
 //            }
         }
-//        Config.isO1 = true;
+        Config.isO1 = true;
 //        Config.MulOpt = true;
 //        fileInputPath = args[0];
 //        fileOutputPath = args[1];
@@ -70,7 +70,7 @@ public class Compiler {
         }
         IOFunc.output(Module.getModule().toString(), Config.irOutputPath);
 
-//         生成目标代码
+        // 生成目标代码
 //        ObjBuilder.getObjBuilder().build();
 //
 //        if (Config.isO1) {

@@ -34,7 +34,6 @@ public class PassManager {
         passes.add(new MemoryOptimize());
         passes.add(new GepFuse());
         passes.add(new LocalArrayLift());
-
         passes.add(new ConstArrayFold()); // ConstArrayFlod 前面必须有Gep Fuse
 
         passes.add(new SCCP());
@@ -43,7 +42,7 @@ public class PassManager {
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
-        passes.add(new LoopMemset());
+//        passes.add(new LoopMemset()); // 记得打开
         passes.add(new InlineFunction());
         passes.add(new GlobalValueLocalize());
 
@@ -101,11 +100,14 @@ public class PassManager {
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
         EmitSimpleBrPass();
 
-        passes.add(new GepFuse());
         passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP,最好加一个Fuse
 
         passes.add(new InstructionCleanUp());
 
+        passes.add(new GepSplit());
+        BasicPass();
+        BasicPass();
+        EmitSimpleBrPass();
         passes.add(new Pattern.Pattern3());
         BasicPass();
         passes.add(new Pattern.Pattern4());

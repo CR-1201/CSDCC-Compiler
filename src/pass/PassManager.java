@@ -22,7 +22,7 @@ public class PassManager {
 
         passes.add(new Pattern.Pattern1());
         passes.add(new Pattern.Pattern2());
-        
+
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
@@ -42,7 +42,7 @@ public class PassManager {
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
-//        passes.add(new LoopMemset()); // 记得打开
+//        passes.add(new LoopMemset()); // 后端测的时候记得打开, 中端版本过低, 不要打开
         passes.add(new InlineFunction());
         passes.add(new GlobalValueLocalize());
 
@@ -104,8 +104,6 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
 
-        passes.add(new GepSplit());
-        BasicPass();
         BasicPass();
         EmitSimpleBrPass();
         passes.add(new Pattern.Pattern3());

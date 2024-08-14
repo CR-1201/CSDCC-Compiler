@@ -41,7 +41,7 @@ public class Compiler {
 //                Config.MulOpt = true;
 //            }
         }
-//        Config.isO1 = true;
+        Config.isO1 = true;
 //        Config.MulOpt = true;
 //        fileInputPath = args[0];
 //        fileOutputPath = args[1];

@@ -22,7 +22,7 @@ public class PassManager {
 
         passes.add(new Pattern.Pattern1());
         passes.add(new Pattern.Pattern2());
-
+        
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
@@ -154,6 +154,46 @@ public class PassManager {
         passes.add(new SimpleBlockEmit());
         // 由于消除简单的挑战块之后，可能会导致很多 cond 不会被使用，因此可以执行死代码删除
         passes.add(new DeadCodeEmit());
+    }
+    public void run2() {
+        passes.add(new GepFuse());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new LoopAnalysis());
+        passes.add(new GlobalValueLocalize());
+        passes.add(new Mem2reg());
+        passes.add(new SCCP());
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
+        passes.add(new CFG());
+        passes.add(new InlineFunction());
+        passes.add(new SCCP());
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
+        passes.add(new MergeBlocks());
+        passes.add(new SideEffect());
+        passes.add(new DeadCodeEmit());
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+        passes.add(new LCSSA());
+        passes.add(new MergeBlocks());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new GAVN());
+        passes.add(new SCCP());
+        passes.add(new SideEffect());
+        passes.add(new UselessPhiEmit());
+        passes.add(new SimplifyInst());
+        passes.add(new UselessStoreEmit());
+        passes.add(new MathOptimize());
+        passes.add(new InstructionCleanUp());
+        passes.add(new MathOptimize());
+        passes.add(new GepSplit());
+        passes.add(new InstructionCleanUp());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        for (Pass pass : passes) {
+            pass.run();
+        }
     }
 
 }

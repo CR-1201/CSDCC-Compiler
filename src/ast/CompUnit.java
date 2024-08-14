@@ -101,6 +101,14 @@ public class CompUnit extends Node{
 
             /*================================ stoptime ================================*/
             Function.stoptime = builder.buildFunction("_sysy_stoptime", new FunctionType(new ArrayList<>(), new VoidType()), true);
+
+            /*================================ startparallel ================================*/
+            Function.startparallel = builder.buildFunction("startparallel", new FunctionType(new ArrayList<>(), new IntType(32)), true);
+
+            /*================================ endparallel ================================*/
+            ArrayList<DataType> endParallelArgs = new ArrayList<>();
+            endParallelArgs.add(new IntType(32));
+            Function.endparallel = builder.buildFunction("endparallel", new FunctionType(endParallelArgs, new VoidType()), true);
         }
         for (Node node : childNode) {
             node.buildIrTree();

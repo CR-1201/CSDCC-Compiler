@@ -30,7 +30,7 @@ public class Compiler {
                 fileOutputPath = args[i + 1];
             }
 
-            /* 编译大赛平台提交版本 */
+//            /* 编译大赛平台提交版本 */
 //            if ("-o".equals(args[i]) && i + 2 < args.length) {
 //                fileOutputPath = args[i + 1];
 //                fileInputPath = args[i + 2];
@@ -38,9 +38,11 @@ public class Compiler {
 //
 //            if ("-O1".equals(args[i])) {
 //                Config.isO1 = true;
+//                Config.MulOpt = true;
 //            }
         }
-        Config.isO1 = true;
+//        Config.isO1 = true;
+//        Config.MulOpt = true;
 //        fileInputPath = args[0];
 //        fileOutputPath = args[1];
         // 初始化
@@ -61,15 +63,23 @@ public class Compiler {
 
         // pass
         PassManager passManager = new PassManager();
-        passManager.run();
+        if (Config.isO1) {
+            passManager.run();
+        } else {
+            passManager.run2();
+        }
         IOFunc.output(Module.getModule().toString(), Config.irOutputPath);
 
         // 生成目标代码
-//        ObjBuilder.getObjBuilder().build();
-//
-//        ObjPassManager objPassManager = new ObjPassManager();
-//        objPassManager.run();
-//
-//        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
+        ObjBuilder.getObjBuilder().build();
+
+        if (Config.isO1) {
+            ObjPassManager objPassManager = new ObjPassManager();
+            objPassManager.run();
+        }
+
+        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
+
+//        IOFunc.output(ObjModule.getModule().toString(), "peephole.s");
     }
 }

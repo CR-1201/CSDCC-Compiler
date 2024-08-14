@@ -26,8 +26,11 @@ public class Function extends Value{
     public static Function putarray = null;
     public static Function putfarray = null;
 
+    // 并行相关函数
+    public static Function startparallel = null;
+    public static Function endparallel = null;
+
     public static Function memset = null;
-//    public static Function putstr = null;
 
     public static Function starttime = null;
     public static Function stoptime = null;

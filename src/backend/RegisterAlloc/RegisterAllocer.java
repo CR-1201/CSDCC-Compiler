@@ -45,22 +45,22 @@ public class RegisterAllocer {
     private boolean type = true;    // float ?
 
     public void initDS(ObjFunction objFunction) {
-        adjList = new HashMap<>();
-        adjSet = new HashSet<>();
-        alias = new HashMap<>();
-        moveList = new HashMap<>();
-        simplifyWorklist = new HashSet<>();
-        freezeWorklist = new HashSet<>();
-        spillWorklist = new HashSet<>();
-        spilledNodes = new HashSet<>();
-        coalescedNodes = new HashSet<>();
+        adjList = new LinkedHashMap<>();
+        adjSet = new LinkedHashSet<>();
+        alias = new LinkedHashMap<>();
+        moveList = new LinkedHashMap<>();
+        simplifyWorklist = new LinkedHashSet<>();
+        freezeWorklist = new LinkedHashSet<>();
+        spillWorklist = new LinkedHashSet<>();
+        spilledNodes = new LinkedHashSet<>();
+        coalescedNodes = new LinkedHashSet<>();
         selectStack = new Stack<>();
-        worklistMoves = new HashSet<>();
-        activeMoves = new HashSet<>();
-        coalescedMoves = new HashSet<>();
-        frozenMoves = new HashSet<>();
-        constrainedMoves = new HashSet<>();
-        degree = new HashMap<>();
+        worklistMoves = new LinkedHashSet<>();
+        activeMoves = new LinkedHashSet<>();
+        coalescedMoves = new LinkedHashSet<>();
+        frozenMoves = new LinkedHashSet<>();
+        constrainedMoves = new LinkedHashSet<>();
+        degree = new LinkedHashMap<>();
         for (int i = 0; i < 16; i++) {
             degree.put(getRegister(i, type), Integer.MAX_VALUE);
             color.put(getRegister(i, type), i);
@@ -68,10 +68,10 @@ public class RegisterAllocer {
     }
 
     private void init(ObjFunction objFunction) {
-        precolored = new HashSet<>(getCanAllocRegister(type));
+        precolored = new LinkedHashSet<>(getCanAllocRegister(type));
         initial = objFunction.getRegs(type);
-        coloredNodes = new HashSet<>();
-        color = new HashMap<>();
+        coloredNodes = new LinkedHashSet<>();
+        color = new LinkedHashMap<>();
     }
 
     public RegisterAllocer(ObjModule mipsModule) {
@@ -110,7 +110,6 @@ public class RegisterAllocer {
     private void switchV2R(ObjFunction func) {
         for (ObjBlock block : func.getBlocks()) {
             for (ObjInstruction instr : block.getInstructions()) {
-                if (instr instanceof ObjCall) continue;
                 ArrayList<ObjRegister> defs = new ArrayList<>(instr.getDef());
                 ArrayList<ObjRegister> uses = new ArrayList<>(instr.getUse());
 
@@ -154,7 +153,7 @@ public class RegisterAllocer {
             HashSet<ObjRegister> live = new HashSet<>(livenessMap.get(b).getOut());
             for (int i = b.getInstructions().size() - 1; i >= 0; i--) {
                 ObjInstruction I = b.getInstructions().get(i);
-                if (I instanceof ObjMove move && !((ObjMove) I).isHasImm() && !((ObjMove) I).hasLabel()) {
+                if (I instanceof ObjMove move && !((ObjMove) I).isHasImm() && !((ObjMove) I).hasLabel() && "".equals(I.getShift())) {
                     ObjRegister dst = (ObjRegister) move.getDst();
                     ObjRegister rhs = (ObjRegister) move.getRhs();
                     if ((!type && dst.isFloat() && rhs.isFloat()) || (type && !dst.isFloat() && !rhs.isFloat())) {
@@ -182,28 +181,28 @@ public class RegisterAllocer {
     }
 
     private void AddEdge(ObjRegister u, ObjRegister v) {
-        if ((type && !u.isFloat() && !v.isFloat()) || (!type && u.isFloat() && v.isFloat())) {
-            Edge e = new Edge(u, v);
-            if (!adjSet.contains(e) && !u.equals(v)) {
-                adjSet.add(e);
-                adjSet.add(e.reverse());
-                if (!precolored.contains(u)) {
-                    adjList.putIfAbsent(u, new HashSet<>());
-                    adjList.get(u).add(v);
-                    if (degree.containsKey(u)) {
-                        degree.compute(u, (key, value) -> value + 1);
-                    } else {
-                        degree.put(u, 1);
-                    }
+        if (u.isFloat() != v.isFloat())
+            return;
+        Edge e = new Edge(u, v);
+        if (!adjSet.contains(e) && !u.equals(v)) {
+            adjSet.add(e);
+            adjSet.add(e.reverse());
+            if (!precolored.contains(u)) {
+                adjList.putIfAbsent(u, new HashSet<>());
+                adjList.get(u).add(v);
+                if (degree.containsKey(u)) {
+                    degree.compute(u, (key, value) -> value + 1);
+                } else {
+                    degree.put(u, 1);
                 }
-                if (!precolored.contains(v)) {
-                    adjList.putIfAbsent(v, new HashSet<>());
-                    adjList.get(v).add(u);
-                    if (degree.containsKey(v)) {
-                        degree.compute(v, (key, value) -> value + 1);
-                    } else {
-                        degree.put(v, 1);
-                    }
+            }
+            if (!precolored.contains(v)) {
+                adjList.putIfAbsent(v, new HashSet<>());
+                adjList.get(v).add(u);
+                if (degree.containsKey(v)) {
+                    degree.compute(v, (key, value) -> value + 1);
+                } else {
+                    degree.put(v, 1);
                 }
             }
         }
@@ -242,7 +241,7 @@ public class RegisterAllocer {
     }
 
     private void Simplify() {
-        ObjRegister n = simplifyWorklist.iterator().next();
+        ObjRegister n = simplifyWorklist.stream().findFirst().get();
         simplifyWorklist.remove(n);
         selectStack.push(n);
         for (ObjRegister m : Adjacent(n)) {
@@ -276,7 +275,7 @@ public class RegisterAllocer {
     }
 
     private void Coalesce() {
-        ObjInstruction m = worklistMoves.stream().iterator().next();
+        ObjInstruction m = worklistMoves.stream().findFirst().get();
         ObjRegister x = (ObjRegister) ((ObjMove) m).getDst();
         ObjRegister y = (ObjRegister) ((ObjMove) m).getRhs();
         x = GetAlias(x);
@@ -381,23 +380,18 @@ public class RegisterAllocer {
     }
 
     private void SelectSpill() {
-//        ObjRegister m = spillWorklist.stream().findAny().get(); // 先随便找吧
-        ObjRegister m = spillWorklist.stream().max((l, r) -> {
-            double value1 = degree.getOrDefault(l, 0).doubleValue();
-            double value2 = degree.getOrDefault(r, 0).doubleValue();
-            return Double.compare(value1, value2);
-        }).get();
+        ObjRegister m = spillWorklist.stream().findAny().get(); // 先随便找吧
         spillWorklist.remove(m);
         simplifyWorklist.add(m);
         FreezeMoves(m);
     }
 
     private void AssignColors() {
-//        Set<ObjRegister> used = ObjRegister.getAllAllocatableRegs().stream().filter(adjList::containsKey).collect(Collectors.toSet());
+        Set<ObjRegister> used = ObjRegister.getAllAllocatableRegs().stream().filter(adjList::containsKey).collect(Collectors.toSet());
         while (!selectStack.isEmpty()) {
             ObjRegister n = selectStack.pop();
-//            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type)).stream().filter(oneReg -> ObjRegister.isCalleeSave(oneReg, type) || (ObjRegister.isCallerSave(oneReg, type) && !used.contains(ObjRegister.getPhysicalRegisterById(oneReg, type)))).collect(Collectors.toSet());
-            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type));
+            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type)).stream().filter(oneReg -> ObjRegister.isCalleeSave(oneReg, type) || (ObjRegister.isCallerSave(oneReg, type) && !used.contains(ObjRegister.getPhysicalRegisterById(oneReg, type)))).collect(Collectors.toSet());
+//            Set<Integer> okColors = new HashSet<>(getCanIndexAllocRegister(type));
             for (ObjRegister w : adjList.getOrDefault(n, new HashSet<>())) {
                 ObjRegister aw = GetAlias(w);
                 if (coloredNodes.contains(aw) || precolored.contains(aw)) {
@@ -407,7 +401,7 @@ public class RegisterAllocer {
             if (okColors.isEmpty()) spilledNodes.add(n);
             else {
                 coloredNodes.add(n);
-                int c = okColors.iterator().next();
+                int c = okColors.stream().findFirst().get();
                 color.put(n, c);
             }
         }
@@ -424,7 +418,6 @@ public class RegisterAllocer {
             for (ObjBlock block : objFunction.getBlocks()) {
                 LinkedList<ObjInstruction> temp = new LinkedList<>(block.getInstructions());
                 for (ObjInstruction instr : temp) {
-                    if (instr instanceof ObjCall) continue;
                     ObjRegister vReg = null;
                     ObjInstruction firstUse = null;
                     ObjInstruction lastDef = null;

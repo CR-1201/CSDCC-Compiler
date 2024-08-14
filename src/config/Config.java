@@ -11,6 +11,7 @@ public class Config {
     public static String irOutputPath = "llvm_ir.ll";
     public static String irRawOutputPath = "llvm_ir_raw.ll";
     public static boolean isO1 = false;
+    public static boolean MulOpt = false;
 
     public static void init(String in,String llvm, String arm) throws IOException {
         fileInputPath = in;

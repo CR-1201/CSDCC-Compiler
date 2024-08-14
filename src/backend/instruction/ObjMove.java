@@ -49,6 +49,10 @@ public class ObjMove extends ObjInstruction implements hasVFP {
         return hasImm;
     }
 
+    public boolean hasNoShiftAndCond() {
+        return getCond() == ObjCond.any && "".equals(getShift());
+    }
+
     @Override
     public String toString() {
         // vmov.f32 好像很多不支持
@@ -78,7 +82,7 @@ public class ObjMove extends ObjInstruction implements hasVFP {
             } else if (rhs instanceof ObjLabel)
                 return "\tmovw" + getCond() + "\t" + dst + ",\t:lower16:" + rhs + "\n" +
                         "\tmovt" + getCond() + "\t" + dst + ",\t:upper16:" + rhs + "\n";
-            return "\tmov" + getCond() + "\t" + dst + ",\t" + rhs + "\n";
+            return "\tmov" + getCond() + "\t" + dst + ",\t" + rhs + getShift() + "\n";
 
         }
 

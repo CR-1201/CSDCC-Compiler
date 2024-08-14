@@ -1,14 +1,18 @@
 package backend.instruction;
 
 import backend.operand.ObjOperand;
+import backend.operand.ObjRegister;
 import ir.instructions.binaryInstructions.*;
 
 public class Binary extends ObjInstruction {
+    public boolean setCSPR;
+
     public enum BinaryType {
         add("add"),
         sub("sub"),
         rsb("rsb"),
         mul("mul"),
+        lmul("smmul"),
         sdiv("sdiv"),
         and("and"),
         or("orr"),
@@ -94,6 +98,17 @@ public class Binary extends ObjInstruction {
         this.rhs = rhs;
     }
 
+    public void replaceRhs(ObjOperand rhs) {
+        getUse().remove(this.rhs);
+        addUse((ObjRegister) rhs);
+        this.rhs = rhs;
+    }
+    public void replaceLhs(ObjOperand lhs) {
+        getUse().remove(this.lhs);
+        addUse((ObjRegister) lhs);
+        this.lhs = lhs;
+    }
+
     public BinaryType getType() {
         return type;
     }
@@ -104,7 +119,7 @@ public class Binary extends ObjInstruction {
 
     @Override
     public String toString() {
-        return "\t" + getType().toString() + getCond() + "\t" + dst + ",\t" +
+        return "\t" + getType().toString() + (setCSPR ? "s" : "") + getCond() + "\t" + dst + ",\t" +
                 lhs + ",\t" + rhs + getShift() + "\n";
     }
 }

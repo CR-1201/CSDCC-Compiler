@@ -17,6 +17,7 @@ import pass.Pass;
 import pass.analysis.LoopAnalysis;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import static ast.Node.builder;
 
@@ -93,7 +94,7 @@ public class LocalArrayLift implements Pass {
 
                         ArrayList<Store> storeList = new ArrayList<>();
                         for (Instruction inst : initInstructions) {
-                            if (inst instanceof Call) {
+                            if (inst instanceof Call call && call.getFunction().getName().equals("@memset")) {
                                 constFlag = false;
                             }
                             if (inst instanceof Store store) {
@@ -112,19 +113,37 @@ public class LocalArrayLift implements Pass {
 
                             if( k < storeList.size() ){
                                 initValues.set(j,storeList.get(k).getValue());
-                                if( storeList.get(k).getValue() instanceof Load ){
+                                Store store = storeList.get(k);
+
+                                if( store.getValue() instanceof Load ){
+                                    initValues.set(j,constant);
+                                    k++;
+                                    continue;
+                                } else if( store.getValue() instanceof Call ){
+                                    initValues.set(j,constant);
+                                    k++;
+                                    continue;
+                                } else if( store.getValue() instanceof Argument ){
                                     initValues.set(j,constant);
                                     k++;
                                     continue;
                                 }
-                                Store store = storeList.get(k);
-                                if( store.getAddr() instanceof Conversion conversion ){
-                                    deleteList.add(conversion);
-                                    deleteList.add(conversion.getConversionValue());
+
+                                // 保险起见
+                                if( !(store.getValue() instanceof Constant) ){
+                                    initValues.set(j,constant);
+                                    k++;
+                                    continue;
+                                }
+
+                                if( store.getAddr() instanceof Conversion ){
                                     deleteList.add(store);
-                                } else if( store.getAddr() instanceof GEP gep){
-                                    deleteList.add(gep);
+                                } else if( store.getAddr() instanceof GEP ){
                                     deleteList.add(store);
+                                } else {
+                                    initValues.set(j,constant);
+                                    k++;
+                                    continue;
                                 }
                             }
 
@@ -146,8 +165,15 @@ public class LocalArrayLift implements Pass {
 
 //                        System.out.println(initValues);
 
+                        Collections.reverse(initInstructions);
                         for( Instruction inst : initInstructions ){
-                            if( inst instanceof Store || inst instanceof GEP || inst instanceof Conversion){
+                            if (inst instanceof GEP || inst instanceof Conversion) {
+                                if( inst.getUsers().isEmpty() ){
+                                    if( deleteList.contains(inst)){
+                                        inst.removeSelf();
+                                    }
+                                }
+                            } else if( inst instanceof Store ){
                                 if( deleteList.contains(inst)){
                                     inst.removeSelf();
                                 }

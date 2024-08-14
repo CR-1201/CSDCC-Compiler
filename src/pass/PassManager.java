@@ -23,6 +23,7 @@ public class PassManager {
         passes.add(new Pattern.Pattern1());
         passes.add(new Pattern.Pattern2());
 
+        passes.add(new GepFuse());
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
@@ -33,7 +34,6 @@ public class PassManager {
         Mem2RegPass();
         passes.add(new MemoryOptimize());
         passes.add(new LocalArrayLift());
-        passes.add(new GepFuse());
         passes.add(new ConstArrayFold()); // ConstArrayFlod 前面必须有Gep Fuse
 
         passes.add(new SCCP());

@@ -33,7 +33,10 @@ public class PassManager {
         Mem2RegPass();
         passes.add(new MemoryOptimize());
         passes.add(new LocalArrayLift());
-        passes.add(new ConstArrayFold());
+        passes.add(new GepFuse());
+        passes.add(new ConstArrayFold()); // ConstArrayFlod 前面必须有Gep Fuse
+        passes.add(new DeadCodeEmit());
+
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
@@ -57,7 +60,6 @@ public class PassManager {
         BasicPass();
         passes.add(new CFG());
         passes.add(new Dom());
-        passes.add(new GepFuse());
         passes.add(new LICM());
         passes.add(new LCSSA());
         passes.add(new LoopUnroll());

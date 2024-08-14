@@ -6,6 +6,7 @@ import ir.constants.*;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
+import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.otherInstructions.Conversion;
@@ -111,6 +112,11 @@ public class LocalArrayLift implements Pass {
 
                             if( k < storeList.size() ){
                                 initValues.set(j,storeList.get(k).getValue());
+                                if( storeList.get(k).getValue() instanceof Load ){
+                                    initValues.set(j,constant);
+                                    k++;
+                                    continue;
+                                }
                                 Store store = storeList.get(k);
                                 if( store.getAddr() instanceof Conversion conversion ){
                                     deleteList.add(conversion);
@@ -172,7 +178,11 @@ public class LocalArrayLift implements Pass {
             for( int i = 0 ; i < dims.get(dim_level) ; i++ ){
                 if( flattenArray.get(i) instanceof ConstInt ){
                     temp.add((ConstInt)flattenArray.get(i));
-                } else temp.add((ConstFloat)flattenArray.get(i));
+                } else if( flattenArray.get(i) instanceof ConstFloat ) {
+                    temp.add((ConstFloat)flattenArray.get(i));
+                } else {
+                    temp.add(constant);
+                }
             }
         } else {
             int row_num = dims.get(dim_level);

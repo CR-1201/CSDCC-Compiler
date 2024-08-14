@@ -12,6 +12,8 @@ public class Config {
     public static String irRawOutputPath = "llvm_ir_raw.ll";
     public static boolean isO1 = true;
     public static boolean MulOpt = false;
+    public static boolean enableParallel = false;
+    public static int parallelProcessNum = 4;
 
     public static void init(String in,String llvm, String arm) throws IOException {
         fileInputPath = in;

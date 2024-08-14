@@ -1,5 +1,6 @@
 package pass.transform;
 
+import config.Config;
 import ir.*;
 import ir.Module;
 import ir.constants.ConstInt;
@@ -22,9 +23,9 @@ import java.util.HashSet;
 
 public class MarkParallel implements Pass {
 
-    public static final boolean ENABLE_PARALLEL = false;  // 测试ir前需要将其设置为false
+    public static final boolean ENABLE_PARALLEL = Config.enableParallel;  // 测试ir前需要将其设置为false
 
-    public static int PARALLEL_NUM;
+    public static int PARALLEL_NUM = Config.parallelProcessNum;
 
     private final Module irModule = Module.getModule();
     private final IrBuilder irBuilder = IrBuilder.getIrBuilder();
@@ -50,9 +51,7 @@ public class MarkParallel implements Pass {
 
     @Override
     public void run() {
-        if (ENABLE_PARALLEL) {
-            PARALLEL_NUM = 4;
-        } else {
+        if (!ENABLE_PARALLEL) {
             PARALLEL_NUM = 1;
         }
 

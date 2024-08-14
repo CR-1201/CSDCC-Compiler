@@ -70,15 +70,15 @@ public class Compiler {
         }
         IOFunc.output(Module.getModule().toString(), Config.irOutputPath);
 
-        // 生成目标代码
-        ObjBuilder.getObjBuilder().build();
-
-        if (Config.isO1) {
-            ObjPassManager objPassManager = new ObjPassManager();
-            objPassManager.run();
-        }
-
-        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
+//         生成目标代码
+//        ObjBuilder.getObjBuilder().build();
+//
+//        if (Config.isO1) {
+//            ObjPassManager objPassManager = new ObjPassManager();
+//            objPassManager.run();
+//        }
+//
+//        IOFunc.output(ObjModule.getModule().toString(), fileOutputPath);
 
 //        IOFunc.output(ObjModule.getModule().toString(), "peephole.s");
     }

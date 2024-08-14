@@ -22,7 +22,6 @@ public class PassManager {
 
         passes.add(new Pattern.Pattern1());
         passes.add(new Pattern.Pattern2());
-
         passes.add(new CFG());
         passes.add(new Dom());
         passes.add(new LoopAnalysis());
@@ -41,7 +40,6 @@ public class PassManager {
         passes.add(new TailRecursionElimination());
         passes.add(new InlineFunction());
         passes.add(new GlobalValueLocalize());
-
         Mem2RegPass();
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
@@ -63,44 +61,34 @@ public class PassManager {
         passes.add(new LoopFold());
         passes.add(new MergeBlocks());
         passes.add(new DeadCodeEmit());
-//        passes.add(new MemSetOptimize());
         passes.add(new LoopStrengthReduction());
         EmitSimpleBrPass();
-
         BasicPass();
         passes.add(new SCCP());
         passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
-
         BasicPass();
         passes.add(new Peephole());
         passes.add(new UselessArrayStoreEmit());
-
-        passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP
-
+        passes.add(new LoopGEPCombine());
         BasicPass();
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
         passes.add(new DeadCodeEmit());
         passes.add(new SideEffect());
-        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-
+        passes.add(new UselessStoreEmit());
         passes.add(new Peephole());
         passes.add(new DeadCodeEmit());
-
         passes.add(new SideEffect());
-        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+        passes.add(new UselessStoreEmit());
         EmitSimpleBrPass();
-
-        passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP
-
+        passes.add(new LoopGEPCombine());
         passes.add(new InstructionCleanUp());
-
         passes.add(new Pattern.Pattern3());
         BasicPass();
         passes.add(new Pattern.Pattern4());
-
+        passes.add(new MarkParallel());
         passes.add(new CFG());
         passes.add(new Dom());
 

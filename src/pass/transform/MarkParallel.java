@@ -22,7 +22,7 @@ import java.util.HashSet;
 
 public class MarkParallel implements Pass {
 
-    public static final boolean ENABLE_PARALLEL = false;
+    public static final boolean ENABLE_PARALLEL = false;  // 测试ir前需要将其设置为false
 
     public static int PARALLEL_NUM;
 

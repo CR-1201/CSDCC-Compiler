@@ -22,24 +22,24 @@ public class Compiler {
         String irOutputPath = "llvm_ir.ll";
         // 解析命令行参数
         for (int i = 0; i < args.length; i++) {
-//            if ("-f".equals(args[i]) && i + 1 < args.length) {
-//                fileInputPath = args[i + 1];
-//            } else if ("-ll".equals(args[i]) && i + 1 < args.length) {
-//                irOutputPath = args[i + 1];
-//            } else if ("-o".equals(args[i]) && i + 1 < args.length) {
-//                fileOutputPath = args[i + 1];
-//            }
-
-            /* 编译大赛平台提交版本 */
-            if ("-o".equals(args[i]) && i + 2 < args.length) {
+            if ("-f".equals(args[i]) && i + 1 < args.length) {
+                fileInputPath = args[i + 1];
+            } else if ("-ll".equals(args[i]) && i + 1 < args.length) {
+                irOutputPath = args[i + 1];
+            } else if ("-o".equals(args[i]) && i + 1 < args.length) {
                 fileOutputPath = args[i + 1];
-                fileInputPath = args[i + 2];
             }
 
-            if ("-O1".equals(args[i])) {
-                Config.isO1 = true;
-                Config.MulOpt = true;
-            }
+//            /* 编译大赛平台提交版本 */
+//            if ("-o".equals(args[i]) && i + 2 < args.length) {
+//                fileOutputPath = args[i + 1];
+//                fileInputPath = args[i + 2];
+//            }
+//
+//            if ("-O1".equals(args[i])) {
+//                Config.isO1 = true;
+//                Config.MulOpt = true;
+//            }
         }
 //        Config.isO1 = true;
 //        Config.MulOpt = true;

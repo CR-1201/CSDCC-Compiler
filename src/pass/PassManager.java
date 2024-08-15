@@ -44,7 +44,7 @@ public class PassManager {
         passes.add(new TailRecursionElimination());
 //        passes.add(new LoopMemset()); // 后端测的时候记得打开, 中端版本过低, 不要打开
         passes.add(new InlineFunction());
-        passes.add(new GlobalMemorizeFunc()); // inline后理论上只剩递归函数
+//        passes.add(new GlobalMemorizeFunc()); // inline后理论上只剩递归函数
         passes.add(new GlobalValueLocalize());
 
         Mem2RegPass();

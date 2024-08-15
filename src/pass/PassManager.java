@@ -83,6 +83,7 @@ public class PassManager {
         passes.add(new GepFuse());
         passes.add(new UselessArrayStoreEmit());
 
+        passes.add(new Pattern.Pattern5());
 
         passes.add(new LoopGEPCombine()); // 循环展开后要常数传播才能合并GEP
 

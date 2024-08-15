@@ -6,18 +6,22 @@ import ir.constants.ConstInt;
 import ir.constants.ZeroInitializer;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.Icmp;
+import ir.instructions.memoryInstructions.Alloca;
 import ir.instructions.memoryInstructions.GEP;
 import ir.instructions.memoryInstructions.Load;
+import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.terminatorInstructions.Br;
 import ir.instructions.terminatorInstructions.Ret;
 import ir.types.ArrayType;
 import ir.types.IntType;
 import pass.Pass;
+import pass.analysis.PureFunction;
 import pass.utility.CloneUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 
 import static ast.Node.builder;
@@ -32,11 +36,14 @@ public class GlobalMemorizeFunc implements Pass {
 
     private ArrayList<Function> needMemorizeFunc = new ArrayList<>();
 
+
+
     private final CloneUtil cloneUtil = new CloneUtil();
 
     @Override
     public void run() {
         ArrayList<Function> functions = module.getFunctionsArray();
+
 
         for (Function function : functions) {
             if (function.getIsBuiltIn())continue;
@@ -167,10 +174,42 @@ public class GlobalMemorizeFunc implements Pass {
                     } else { // TODO 调用一些库函数可以吗
                         return false;
                     }
+                } if( instruction instanceof Store store && store2alloca(store) == null ){
+                        return false;
+                } else if( instruction instanceof Load load && load2alloca(load) == null ){
+                    if( load.getAddr() instanceof GlobalVariable globalVariable ){
+                        return false;
+                    }
                 }
             }
         }
 
         return flag;
+    }
+
+    /**
+     * 试图还原 store 到 左值 (alloca 指令)
+     * 用于判断是否具有副作用
+     */
+    Alloca store2alloca(Store store){
+        // lval 无法转换为 alloca 指令说明是非局部的, 有副作用
+        Value lvalRunner = store.getAddr();
+        while( lvalRunner instanceof GEP){
+            lvalRunner = ((GEP)lvalRunner).getBase();
+        }
+        if( lvalRunner instanceof Alloca alloca){
+            return alloca;
+        } else return null;
+    }
+
+    Alloca load2alloca(Load load){
+        // lval 无法转换为 alloca 指令说明是非局部的, 有副作用
+        Value lvalRunner = load.getAddr();
+        while( lvalRunner instanceof GEP){
+            lvalRunner = ((GEP)lvalRunner).getBase();
+        }
+        if( lvalRunner instanceof Alloca alloca){
+            return alloca;
+        } else return null;
     }
 }

@@ -12,13 +12,14 @@ import ir.instructions.otherInstructions.Call;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 
 public class PureFunction {
 
     private final Module module = Module.getModule();
 
-    public HashMap<Function, Boolean> isPure = new HashMap<>();
-    public HashMap<Function, HashSet<Value>> globalVarStoreEffects = new HashMap<>();
+    public LinkedHashMap<Function, Boolean> isPure = new LinkedHashMap<>();
+    public LinkedHashMap<Function, HashSet<Value>> globalVarStoreEffects = new LinkedHashMap<>();
 
     public HashSet<Function> getPureFunctions() {
         HashSet<Function> pureFunctions = new HashSet<>();

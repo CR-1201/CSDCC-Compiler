@@ -133,6 +133,12 @@ public class IrBuilder {
         return srem;
     }
 
+    public Srem buildSremBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before) {
+        Srem srem = new Srem(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBefore(srem, before);
+        return srem;
+    }
+
     public Icmp buildIcmp(BasicBlock parent, Icmp.Condition condition, Value src1, Value src2) {
         Icmp icmp = new Icmp(nameNumCounter++, parent, condition, src1, src2);
         parent.insertTail(icmp);
@@ -265,6 +271,12 @@ public class IrBuilder {
     public Load buildLoad(BasicBlock parent, Value addr){
         Load load = new Load(nameNumCounter++, parent, addr);
         parent.insertTail(load);
+        return load;
+    }
+
+    public Load buildLoadBeforeInstr(BasicBlock parent, Value addr, Instruction before){
+        Load load = new Load(nameNumCounter++, parent, addr);
+        parent.insertBefore(load, before);
         return load;
     }
 

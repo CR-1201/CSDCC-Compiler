@@ -3,6 +3,7 @@ package pass;
 import ir.Module;
 import pass.analysis.*;
 import pass.transform.*;
+import pass.transform.branch.Branch2Switch;
 import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
@@ -55,46 +56,48 @@ public class PassManager {
         passes.add(new UselessStoreEmit());
         EmitSimpleBrPass();
         BasicPass();
-//        passes.add(new CFG());
-//        passes.add(new Dom());
-//        passes.add(new GepFuse());
+        passes.add(new CFG());
+        passes.add(new Dom());
+        passes.add(new GepFuse());
 //        passes.add(new LICM());
         passes.add(new LCSSA());
         passes.add(new MergeBlocks());
-//        passes.add(new LoopUnroll());
-//        passes.add(new LoopFold());
-//        passes.add(new MergeBlocks());
-//        passes.add(new DeadCodeEmit());
-////        passes.add(new MemSetOptimize());
-//
-//        passes.add(new LoopStrengthReduction());
-//        EmitSimpleBrPass();
-//
-//        passes.add(new GepSplit());
-//        BasicPass();
-//        passes.add(new SCCP());
-//        passes.add(new UselessPhiEmit());
-//        passes.add(new SimplifyInst());
-//        passes.add(new MathOptimize());
-//        BasicPass();
-//        passes.add(new Peephole());
-//        passes.add(new GepFuse());
-//        passes.add(new UselessArrayStoreEmit());
-//        BasicPass();
-//        passes.add(new SimplifyInst());
-//        passes.add(new MathOptimize());
-//        passes.add(new DeadCodeEmit());
-//        passes.add(new SideEffect());
-//        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-//
-//        passes.add(new Peephole());
-//        passes.add(new DeadCodeEmit());
-//
-//        passes.add(new SideEffect());
-//        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
-//        EmitSimpleBrPass();
-//
-//        passes.add(new InstructionCleanUp());
+        passes.add(new LoopUnroll());
+        passes.add(new LoopFold());
+        passes.add(new MergeBlocks());
+        passes.add(new DeadCodeEmit());
+        passes.add(new MemSetOptimize());
+
+        passes.add(new LoopStrengthReduction());
+        EmitSimpleBrPass();
+
+        passes.add(new GepSplit());
+        BasicPass();
+        passes.add(new SCCP());
+        passes.add(new UselessPhiEmit());
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
+        BasicPass();
+        passes.add(new Peephole());
+        passes.add(new GepFuse());
+        passes.add(new UselessArrayStoreEmit());
+        BasicPass();
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
+        passes.add(new DeadCodeEmit());
+        passes.add(new SideEffect());
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+
+        passes.add(new Peephole());
+        passes.add(new DeadCodeEmit());
+
+        passes.add(new SideEffect());
+        passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析
+        EmitSimpleBrPass();
+
+        passes.add(new InstructionCleanUp());
+        BasicPass();
+//        passes.add(new Branch2Switch());
 
         passes.add(new CFG());
         passes.add(new Dom());
@@ -136,7 +139,7 @@ public class PassManager {
 
     private void EmitSimpleBrPass() {
         passes.add(new SimpleBlockEmit());
-        // 由于消除简单的挑战块之后，可能会导致很多 cond 不会被使用，因此可以执行死代码删除
+        // 由于消除简单的跳转块之后，可能会导致很多 cond 不会被使用，因此可以执行死代码删除
         passes.add(new DeadCodeEmit());
     }
 

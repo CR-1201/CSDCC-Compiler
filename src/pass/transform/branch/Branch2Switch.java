@@ -151,7 +151,7 @@ public class Branch2Switch implements Pass {
         if (!icmp.getCondition().equals(Icmp.Condition.EQ)) {
             return false;
         }
-        if (!(icmp.getOperator(0) instanceof ConstInt) && !(icmp.getOperator(1) instanceof ConstInt)) {
+        if (!(icmp.getOperator(0) instanceof ConstInt || icmp.getOperator(1) instanceof ConstInt)) {
             return false;
         }
         Value switchCandidate = icmp.getOperator(0) instanceof ConstInt ? icmp.getOperator(1) : icmp.getOperator(0);
@@ -163,6 +163,9 @@ public class Branch2Switch implements Pass {
             }
             if (!(matchingBlock.getTailInstruction() instanceof Br tmpBr && tmpBr.getHasCondition())) {
                 break;
+            }
+            if (!(icmp.getOperator(0) instanceof ConstInt || icmp.getOperator(1) instanceof ConstInt)) {
+                matchResult = false;
             }
             icmp = (Icmp) tmpBr.getCond();
             if (icmp.getCondition().equals(Icmp.Condition.EQ) && icmp.getOperators().contains(switchCandidate)) {

@@ -377,11 +377,12 @@ public class SimplifyInst implements Pass {
             inst.replaceOperator(v1,v1_1);
             Mul mul1;
             if( v1_2.getValueType() instanceof IntType && v2.getValueType() instanceof IntType ){
-                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new IntType(32), v1_2, v2, mul);
+                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new IntType(32), v1_2, v2, inst);
             } else {
-                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new FloatType(), v1_2, v2, mul);
+                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new FloatType(), v1_2, v2, inst);
             }
             inst.replaceOperator(v2,mul1);
+            inst.replaceOperator(v1_1,v1_1);
             return inst;
         }
 
@@ -394,11 +395,12 @@ public class SimplifyInst implements Pass {
             inst.replaceOperator(v2,v2_2);
             Mul mul1;
             if( v2_1.getValueType() instanceof IntType && v1.getValueType() instanceof IntType ){
-                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new IntType(32), v1, v2_1, mul);
+                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new IntType(32), v1, v2_1, inst);
             } else {
-                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new FloatType(), v1, v2_1, mul);
+                mul1 = builder.buildMulBeforeInstr(mul.getParent(), new FloatType(), v1, v2_1, inst);
             }
             inst.replaceOperator(v1,mul1);
+            inst.replaceOperator(v2_2,v2_2);
             return inst;
         }
 

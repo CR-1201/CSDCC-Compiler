@@ -16,6 +16,7 @@ import static ast.Node.builder;
 public class GepSplit implements Pass {
 
     private final Module module = Module.getModule();
+    private ArrayList<GEP> Geps = new ArrayList<>();
 
     @Override
     public void run() {
@@ -31,9 +32,14 @@ public class GepSplit implements Pass {
                 ArrayList<Instruction> instructions = block.getInstructionsArray();
                 for (Instruction instruction : instructions) {
                     if( instruction instanceof GEP gep && gep.getIndex().size() > 2 ){
-                        split(gep);
+                        Geps.add(gep);
                     }
                 }
+            }
+        }
+        if( Geps.size() <= 700 ){
+            for (GEP gep : Geps) {
+                split(gep);
             }
         }
     }

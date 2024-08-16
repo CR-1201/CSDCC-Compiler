@@ -112,7 +112,7 @@ public class PassManager {
         BasicPass();
         passes.add(new Pattern.Pattern4());
 
-        passes.add(new MarkParallel());
+        passes.add(new ParallelMark());
 
         passes.add(new CFG());
         passes.add(new Dom());

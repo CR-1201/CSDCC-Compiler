@@ -27,6 +27,7 @@ sylib.ll
 out.ll
 main.ll
 testcase.sy
+performance
 
 ### IntelliJ IDEA ###
 out/

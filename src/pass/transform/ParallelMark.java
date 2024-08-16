@@ -30,8 +30,8 @@ import java.util.HashSet;
 public class ParallelMark implements Pass {
 
     public static final boolean ENABLE_PARALLEL = Config.enableParallel;
-
     public static int PARALLEL_NUM = Config.parallelProcessNum;
+    public static int MAX_PARALLEL_DEPTH = 1;
 
     private final Module irModule = Module.getModule();
     private final IrBuilder irBuilder = IrBuilder.getIrBuilder();
@@ -252,7 +252,7 @@ public class ParallelMark implements Pass {
         if (!loop.hasChildLoop()) {
             return true;
         }
-        if (loop.getChildren().size() > 1) {
+        if (loop.getChildren().size() > MAX_PARALLEL_DEPTH) {
             return false;
         }
 

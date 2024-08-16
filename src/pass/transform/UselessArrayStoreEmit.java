@@ -29,11 +29,63 @@ public class UselessArrayStoreEmit implements Pass {
     public void run() {
         new SideEffect().run();
         new GepFuse().run();
-
         globalEmit();
         localEmit();
-
+        neverLoadGlobalEmit();
         new DeadCodeEmit().run();
+        uselessGlobalArrayEmit();
+    }
+
+    private void uselessGlobalArrayEmit() {
+        ArrayList<Value> toBeRemovedValue = new ArrayList<>();
+        for (Value value : irModule.getGlobalVariables()) {
+            if (value.getUsers().size() == 0) {
+                toBeRemovedValue.add(value);
+            }
+        }
+        for (Value value : toBeRemovedValue) {
+            irModule.getGlobalVariables().remove(value);
+        }
+    }
+
+    private void neverLoadGlobalEmit() {
+        for (Function function : irModule.getFunctionsArray()) {
+            if (!function.getIsBuiltIn() && hasParamArray(function)) {
+                return;
+            }
+        }
+
+        HashSet<Value> usefulGlobalArrayBase = new HashSet<>();
+        for (Function function : irModule.getFunctionsArray()) {
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                for (Instruction instruction : block.getInstructionsArray()) {
+
+                    if (instruction instanceof Load loadInstr && loadInstr.getAddr() instanceof GEP loadGepInstr) {
+                        usefulGlobalArrayBase.add(loadGepInstr.getBase());
+                    }
+                    if (instruction instanceof Call callInstr && callInstr.getFunction().getName().equals("@putarray")) {
+                        GEP gepInstr = (GEP) callInstr.getParamAt(1);
+                        usefulGlobalArrayBase.add(gepInstr.getBase());
+                    }
+
+                }
+            }
+        }
+
+        ArrayList<Store> toBeDeletedStore = new ArrayList<>();
+        for (Function function : irModule.getFunctionsArray()) {
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                for (Instruction instruction : block.getInstructionsArray()) {
+                    if (instruction instanceof Store storeInstr && storeInstr.getAddr() instanceof GEP storeGepInstr && !usefulGlobalArrayBase.contains(storeGepInstr.getBase())) {
+                        toBeDeletedStore.add(storeInstr);
+                    }
+                }
+            }
+        }
+
+        for (Store storeInstr : toBeDeletedStore) {
+            storeInstr.removeSelf();
+        }
     }
 
     private void globalEmit() {

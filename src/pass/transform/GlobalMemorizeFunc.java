@@ -16,12 +16,10 @@ import ir.instructions.terminatorInstructions.Ret;
 import ir.types.ArrayType;
 import ir.types.IntType;
 import pass.Pass;
-import pass.analysis.PureFunction;
 import pass.utility.CloneUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 
 
 import static ast.Node.builder;
@@ -177,7 +175,7 @@ public class GlobalMemorizeFunc implements Pass {
                 } if( instruction instanceof Store store && store2alloca(store) == null ){
                         return false;
                 } else if( instruction instanceof Load load && load2alloca(load) == null ){
-                    if( load.getAddr() instanceof GlobalVariable globalVariable ){
+                    if( load.getAddr() instanceof GlobalVariable ){
                         return false;
                     }
                 }

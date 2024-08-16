@@ -29,6 +29,8 @@ testcase.out
 testcase.sy
 performance
 testcase.s
+performance
+tmp.txt
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/

@@ -6,6 +6,7 @@ import pass.analysis.Dom;
 import pass.analysis.LoopAnalysis;
 import pass.analysis.SideEffect;
 import pass.transform.*;
+import pass.transform.branch.Branch2Switch;
 import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
@@ -107,12 +108,13 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
         passes.add(new GepSplit());
-
         BasicPass();
         EmitSimpleBrPass();
+        passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
         passes.add(new Pattern.Pattern3());
         BasicPass();
         passes.add(new Pattern.Pattern4());
+
 
         passes.add(new MarkParallel());
 

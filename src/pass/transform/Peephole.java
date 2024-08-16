@@ -51,6 +51,7 @@ public class Peephole implements Pass {
         ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
         for (BasicBlock basicBlock : blocks) {
             stores.clear();
+            finalLoad = null;
             ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
             for (Instruction instruction : instructions) {
                 if( instruction instanceof Load load ){

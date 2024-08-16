@@ -41,7 +41,6 @@ public class Branch2Switch implements Pass {
     private HashSet<BasicBlock> visited = new HashSet<>();
     @Override
     public void run() {
-        IOFunc.log("checkir/switch.ll", Module.getModule().toString());
         for (Function function : Module.getModule().getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
                 do {

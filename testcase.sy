@@ -19,7 +19,7 @@ int main() {
     float total = 0.0;
     float a = 0.0;
     float b = 1.0;
-    //float accumulator = 0.0;
+    float accumulator = 0.0;
     starttime();
     while ( i < COUNT) {
         if (i % 10) {
@@ -32,7 +32,7 @@ int main() {
 	while ( j < len) {
 	    x[j] = a + j;
         y[j] = b + j;
-        //accumulator = accumulator + x[j] * y[j];
+        // accumulator = accumulator + (a + j) * (b + j);
 	    j = j + 1;
 	}
 	// total = total + accumulator;

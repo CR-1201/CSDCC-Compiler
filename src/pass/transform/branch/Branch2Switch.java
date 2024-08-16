@@ -151,10 +151,17 @@ public class Branch2Switch implements Pass {
         if (!icmp.getCondition().equals(Icmp.Condition.EQ)) {
             return false;
         }
-        if (!(icmp.getOperator(0) instanceof ConstInt) && !(icmp.getOperator(1) instanceof ConstInt)) {
+        if (!(icmp.getOperator(0) instanceof ConstInt || icmp.getOperator(1) instanceof ConstInt)) {
             return false;
         }
+        // 检查是否出现 case 相同的情况
+        HashSet<Number> numbers = new HashSet<>();
         Value switchCandidate = icmp.getOperator(0) instanceof ConstInt ? icmp.getOperator(1) : icmp.getOperator(0);
+        if (icmp.getOperator(0) instanceof ConstInt) {
+            numbers.add(((ConstInt) icmp.getOperator(0)).getValue());
+        } else {
+            numbers.add(((ConstInt) icmp.getOperator(1)).getValue());
+        }
         BasicBlock matchingBlock = br.getFalseBlock();
         boolean matchResult = true;
         while (true) {
@@ -163,6 +170,22 @@ public class Branch2Switch implements Pass {
             }
             if (!(matchingBlock.getTailInstruction() instanceof Br tmpBr && tmpBr.getHasCondition())) {
                 break;
+            }
+            if (!(icmp.getOperator(0) instanceof ConstInt || icmp.getOperator(1) instanceof ConstInt)) {
+                matchResult = false;
+                break;
+            }
+            int caseNumber = 0;
+            if (icmp.getOperator(0) instanceof ConstInt) {
+                caseNumber = ((ConstInt) icmp.getOperator(0)).getValue();
+            } else {
+                caseNumber = ((ConstInt) icmp.getOperator(1)).getValue();
+            }
+            if (numbers.contains(caseNumber)) {
+                matchResult = false;
+                break;
+            } else {
+                numbers.add(caseNumber);
             }
             icmp = (Icmp) tmpBr.getCond();
             if (icmp.getCondition().equals(Icmp.Condition.EQ) && icmp.getOperators().contains(switchCandidate)) {

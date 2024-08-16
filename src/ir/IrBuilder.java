@@ -85,6 +85,12 @@ public class IrBuilder {
         return add;
     }
 
+    public Add buildAddBeforeTail(BasicBlock parent, DataType dataType, Value src1, Value src2){
+        Add add = new Add(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBeforeTail(add);
+        return add;
+    }
+
     public Add buildAddBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before){
         Add add = new Add(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertBefore(add,before);
@@ -133,6 +139,12 @@ public class IrBuilder {
         return srem;
     }
 
+    public Srem buildSremBeforeInstr(BasicBlock parent, DataType dataType, Value src1, Value src2, Instruction before) {
+        Srem srem = new Srem(nameNumCounter++, dataType, parent, src1, src2);
+        parent.insertBefore(srem, before);
+        return srem;
+    }
+
     public Icmp buildIcmp(BasicBlock parent, Icmp.Condition condition, Value src1, Value src2) {
         Icmp icmp = new Icmp(nameNumCounter++, parent, condition, src1, src2);
         parent.insertTail(icmp);
@@ -163,12 +175,7 @@ public class IrBuilder {
         return bitCast;
     }
 
-    /**
-     * 为了方便 mem2reg 优化,约定所有的 Alloca 放到每个函数的入口块处
-     * @param allocatedType alloca 空间的类型
-     * @param parent 基本块
-     * @return Alloca 指令
-     */
+
     public Alloca buildALLOCA(ValueType allocatedType, BasicBlock parent){
 //        System.out.println(parent.getParent());
         BasicBlock realParent = parent.getParent().getFirstBlock();
@@ -183,14 +190,7 @@ public class IrBuilder {
         realParent.insertHead(alloca);
         return alloca;
     }
-    /**
-     * 为了方便 mem2reg 优化,约定所有的 Alloca 放到每个函数的入口块处
-     * ConstAlloca 对应的是局部的常量数组的 Alloca 这种 Alloca 会多存储一个常量数组 ConstArray
-     * 用于 a[constA[0]] 这种阴间情况,此时是没法用常量访存,其实还有很多情况,我之前使用的是 cannotCalDown 比较不本质
-     * @param allocatedType alloca 空间的类型
-     * @param parent 基本块
-     * @return Alloca 指令
-     */
+
     public Alloca buildALLOCA(ValueType allocatedType, BasicBlock parent, ConstArray initVal){
         BasicBlock realParent = parent.getParent().getFirstBlock();
         Alloca alloca = new Alloca(nameNumCounter++, allocatedType, realParent,initVal);
@@ -257,6 +257,12 @@ public class IrBuilder {
         return store;
     }
 
+    public Store buildStoreBeforeTail(BasicBlock parent, Value content, Value addr){
+        Store store = new Store(parent, content, addr);
+        parent.insertBeforeTail(store);
+        return store;
+    }
+
     public void buildStoreBeforeInstr(BasicBlock parent, Value val, Value location, Instruction before){
         Store ans = new Store(parent, val, location);
         parent.insertBefore(ans, before);
@@ -265,6 +271,24 @@ public class IrBuilder {
     public Load buildLoad(BasicBlock parent, Value addr){
         Load load = new Load(nameNumCounter++, parent, addr);
         parent.insertTail(load);
+        return load;
+    }
+
+    public Load buildLoadBeforeInstr(BasicBlock parent, Value addr, Instruction before){
+        Load load = new Load(nameNumCounter++, parent, addr);
+        parent.insertBefore(load, before);
+        return load;
+    }
+
+    public Load buildLoadBefore(BasicBlock parent, Value addr, Instruction index){
+        Load load = new Load(nameNumCounter++, parent, addr);
+        parent.insertBefore(load, index);
+        return load;
+    }
+
+    public Value buildLoadBeforeTail(BasicBlock parent, Alloca addr) {
+        Load load = new Load(nameNumCounter++, parent, addr);
+        parent.insertBeforeTail(load);
         return load;
     }
 

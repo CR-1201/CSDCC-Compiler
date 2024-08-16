@@ -6,11 +6,13 @@ import pass.analysis.Dom;
 import pass.analysis.LoopAnalysis;
 import pass.analysis.SideEffect;
 import pass.transform.*;
+import pass.transform.branch.Branch2Switch;
 import pass.transform.emituseless.SimpleBlockEmit;
 import pass.transform.emituseless.UselessPhiEmit;
 import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.*;
+import pass.transform.other.ConstFunctionReplace;
 
 import java.util.ArrayList;
 
@@ -43,7 +45,9 @@ public class PassManager {
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
 //        passes.add(new LoopMemset()); // 后端测的时候记得打开, 中端版本过低, 不要打开
+        passes.add(new ConstFunctionReplace());
         passes.add(new InlineFunction());
+        passes.add(new GlobalMemorizeFunc()); // inline后理论上只剩递归函数
         passes.add(new GlobalValueLocalize());
 
         Mem2RegPass();
@@ -108,6 +112,7 @@ public class PassManager {
 
         BasicPass();
         EmitSimpleBrPass();
+        passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
         passes.add(new Pattern.Pattern3());
         BasicPass();
         passes.add(new Pattern.Pattern4());

@@ -28,6 +28,8 @@ testcase.in
 testcase.out
 testcase.sy
 testcase.s
+performance
+tmp.txt
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/

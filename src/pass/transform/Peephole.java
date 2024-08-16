@@ -24,6 +24,9 @@ public class Peephole implements Pass {
     private final HashMap<Value,Value> addr2store = new HashMap<>();
     private HashMap<String, GEP> GEPMap = new HashMap<>();
     private HashMap<Function, Boolean> is_pure = new HashMap<>();
+
+    private Load finalLoad = null;
+    private ArrayList<Store> stores = new ArrayList<>();
     @Override
     public void run() {
         PureFunction pureFunction = new PureFunction();
@@ -31,6 +34,47 @@ public class Peephole implements Pass {
         this.is_pure = pureFunction.isPure;
         // store后紧接着的load,可以消掉load
         Peephole1();
+
+        // store的值如果和load出来的值一样,且路径上没有对该地址load,可以删除路径上所有对该地址的store
+        Peephole2();
+    }
+
+    private void Peephole2(){
+        ArrayList<Function> functions = module.getFunctionsArray();
+        for (Function function : functions) {
+            if( function.getIsBuiltIn() )continue;
+            runPeephole2OnFunction(function);
+        }
+    }
+
+    private void runPeephole2OnFunction(Function function){
+        ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
+        for (BasicBlock basicBlock : blocks) {
+            stores.clear();
+            ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
+            for (Instruction instruction : instructions) {
+                if( instruction instanceof Load load ){
+                    finalLoad = load;
+                    stores.clear();
+                } else if( instruction instanceof Store store ){
+                    if( finalLoad == null ){
+                        continue;
+                    }
+                    if( store.getAddr().equals(finalLoad.getAddr()) ){
+                        stores.add(store);
+                    }
+                    if( store.getValue().equals(finalLoad) ){
+                        deleteStore();
+                    }
+                }
+            }
+        }
+    }
+    private void deleteStore(){
+        for(Store store : stores){
+            store.removeSelf();
+        }
+        stores.clear();
     }
 
     private void Peephole1() {

@@ -98,6 +98,10 @@ public class Function extends Value{
         return arguments;
     }
 
+    public Argument getArgument(int i){
+        return arguments.get(i);
+    }
+
     public LinkedList<Value> getBasicBlocks(){
         return blocks;
     }

@@ -66,9 +66,13 @@ public class Expression {
         }
         if( instruction instanceof Icmp icmp_1 && instr.instruction instanceof Icmp icmp_2){
             if( icmp_1.getOperator(0).getValueType() instanceof FloatType && icmp_2.getOperator(0).getValueType() instanceof FloatType){
-                return icmp_1.getCondition() == icmp_2.getCondition();
+                if( icmp_1.getCondition() != icmp_2.getCondition() ){
+                    return false;
+                }
             } else if( icmp_1.getOperator(0).getValueType() instanceof IntType && icmp_2.getOperator(0).getValueType() instanceof IntType){
-                return icmp_1.getCondition() == icmp_2.getCondition();
+                if( icmp_1.getCondition() != icmp_2.getCondition() ){
+                    return false;
+                }
             } else return false;
         }
 

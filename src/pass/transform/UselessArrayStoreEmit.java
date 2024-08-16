@@ -1,9 +1,7 @@
 package pass.transform;
 
-import ir.BasicBlock;
-import ir.Function;
+import ir.*;
 import ir.Module;
-import ir.Value;
 import ir.constants.ConstInt;
 import ir.instructions.Instruction;
 import ir.instructions.memoryInstructions.Alloca;
@@ -32,19 +30,66 @@ public class UselessArrayStoreEmit implements Pass {
         new SideEffect().run();
         new GepFuse().run();
 
-        ArrayList<Function> functions = irModule.getFunctionsArray();
-        for (Function func : functions) {
-            if (!func.getIsBuiltIn()) {
-                usefulPositions.clear();
-
-                deleteUselessArrayStore(func);
-            }
-        }
+        globalEmit();
+        localEmit();
 
         new DeadCodeEmit().run();
     }
 
-    private void deleteUselessArrayStore(Function function) {
+    private void globalEmit() {
+        usefulPositions.clear();
+
+        for (Function function : irModule.getFunctionsArray()) {
+            if (!function.getIsBuiltIn() && (hasVarGep(function) || hasPutArray(function) || hasParamArray(function))) {
+                return;
+            }
+        }
+
+        for (Function function : irModule.getFunctionsArray()) {
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                for (Instruction instruction : block.getInstructionsArray()) {
+                    if (instruction instanceof Load loadInstr) {
+                        Value address = loadInstr.getAddr();
+                        if (address instanceof GEP gepInstr && isGlobalGep(gepInstr)) {
+                            markIndex(gepInstr.getBase(), gepInstr);
+                        }
+                    }
+                }
+            }
+        }
+
+        HashSet<Store> toBeDeletedStores = new HashSet<>();
+        for (Function function : irModule.getFunctionsArray()) {
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                for (Instruction instruction : block.getInstructionsArray()) {
+                    if (instruction instanceof Store storeInstr) {
+                        Value address = storeInstr.getAddr();
+                        if (address instanceof GEP gepInstr) {
+                            if (!isMarkedIndex(gepInstr.getBase(), gepInstr)) {
+                                toBeDeletedStores.add(storeInstr);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Store storeInstr : toBeDeletedStores) {
+            storeInstr.removeSelf();
+        }
+    }
+
+    private void localEmit() {
+        ArrayList<Function> functions = irModule.getFunctionsArray();
+        for (Function func : functions) {
+            if (!func.getIsBuiltIn()) {
+                usefulPositions.clear();
+                deleteUselessLocalArrayStore(func);
+            }
+        }
+    }
+
+    private void deleteUselessLocalArrayStore(Function function) {
         if (hasVarGep(function) || hasNotLocalArray(function) || hasPutArray(function))
             return;  // gep中有变量不分析 有参数数组不分析 有putarray不分析
 
@@ -91,6 +136,19 @@ public class UselessArrayStoreEmit implements Pass {
             return false;
         }
         return usefulPositions.get(base).contains(getLocalArrayPosition(gepInstr));
+    }
+
+    private boolean isGlobalGep(GEP gepInstr) {
+        return gepInstr.getBase().getName().startsWith("@");
+    }
+
+    private boolean hasParamArray(Function function) {
+        for (Argument argument : function.getArguments()) {
+            if (argument.getValueType() instanceof PointerType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasPutArray(Function function) {

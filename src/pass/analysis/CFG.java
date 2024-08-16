@@ -3,6 +3,7 @@ package pass.analysis;
 import ir.BasicBlock;
 import ir.Function;
 import ir.Module;
+import ir.Value;
 import ir.instructions.Instruction;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
+
+import ir.instructions.terminatorInstructions.Switch;
 import pass.Pass;
 
 /**
@@ -113,6 +116,23 @@ public class CFG implements Pass {
                         stack.push(falseBlock);
                     }
                 }
+            } else if (tail instanceof Switch si) {
+                BasicBlock defaultBlock = (BasicBlock) si.getOperator(1);
+                currentBlock.addSuccessor(defaultBlock);
+                defaultBlock.addPrecursor(currentBlock);
+                if (!visited.contains(defaultBlock)) {
+                    visited.add(defaultBlock);
+                    stack.push(defaultBlock);
+                }
+                HashMap<Value, BasicBlock> case2block = si.getCase2block();
+                for (BasicBlock block : case2block.values()) {
+                    currentBlock.addSuccessor(block);
+                    block.addPrecursor(currentBlock);
+                    if (!visited.contains(block)) {
+                        visited.add(block);
+                        stack.push(block);
+                    }
+                }
             }
         }
     }
@@ -162,6 +182,16 @@ public class CFG implements Pass {
                     succs.get(block).add(target);
                     precs.get(target).add(block);
                 }
+            } else if (block.getTailInstruction() instanceof Switch si) {
+                BasicBlock defaultBlock = (BasicBlock) si.getOperator(1);
+                block.addSuccessor(defaultBlock);
+                defaultBlock.addPrecursor(block);
+                HashMap<Value, BasicBlock> case2block = si.getCase2block();
+                for (BasicBlock caseBlock : case2block.values()) {
+                    block.addSuccessor(caseBlock);
+                    caseBlock.addPrecursor(block);
+                }
+
             }
         }
         for (BasicBlock block : blocks) {

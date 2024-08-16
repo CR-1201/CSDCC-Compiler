@@ -7,8 +7,6 @@
 /llvmchecker
 *.iml
 diff
-testcase.sy
-testcase.s
 llvm_ir.ll
 llvm_ir_raw.ll
 error.txt
@@ -26,8 +24,10 @@ tests/lib/libsysy.so
 sylib.ll
 out.ll
 main.ll
+testcase.in
+testcase.out
 testcase.sy
-
+testcase.s
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/
@@ -57,5 +57,3 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-testcase.sy
-tmp.txt

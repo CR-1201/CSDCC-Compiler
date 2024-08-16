@@ -57,6 +57,15 @@ public class Module extends Value{
         return result;
     }
 
+    public Function getMainFunction() {
+        for (Value functionNode : functions){
+            if (((Function) functionNode).getName().equals("@main")) {
+                return (Function) functionNode;
+            }
+        }
+        return null;
+    }
+
     public ArrayList<GlobalVariable> getGlobalVariablesArray(){
         ArrayList<GlobalVariable> result = new ArrayList<>();
         for (Value globalVariableNode : globalVariables){

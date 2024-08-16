@@ -16,18 +16,93 @@ import ir.instructions.terminatorInstructions.Ret;
 import ir.types.FloatType;
 import ir.types.IntType;
 import ir.types.PointerType;
+
+import java.awt.desktop.PreferencesEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
 import pass.Pass;
-import pass.analysis.CFG;
-import pass.analysis.Dom;
-import pass.analysis.Loop;
-import pass.analysis.LoopAnalysis;
+import pass.analysis.*;
 
 public class Pattern {
 
     private static final Module irModule = Module.getModule();
 
     private static final IrBuilder irBuilder = IrBuilder.getIrBuilder();
+
+    public static class Pattern5 implements Pass {
+
+        @Override
+        public void run() {
+            for (Function function : irModule.getFunctionsArray()) {
+                if (!function.getIsBuiltIn() && !function.getName().equals("@main")) {
+                    return;
+                }
+            }
+
+            for (Function function : irModule.getFunctionsArray()) {
+                if (!function.getIsBuiltIn()) {
+                    modify(function);
+                }
+            }
+
+            new DeadCodeEmit().run();
+        }
+
+        private void modify(Function function) {
+            ArrayList<GEP> geps = new ArrayList<>();
+            for (BasicBlock block : function.getBasicBlocksArray()) {
+                for (Instruction instruction : block.getInstructionsArray()) {
+                    if (instruction instanceof GEP gepInstr) {
+                        geps.add(gepInstr);
+                    }
+                }
+            }
+
+            if (geps.size() != 1) {
+                return;
+            }
+
+            GEP gepInstr = geps.iterator().next();
+
+            int storeCallCnt = 0;
+            Store storeInstr = null;
+            int loadCnt = 0;
+            for (User user : gepInstr.getUsers()) {
+                if (user instanceof Store store) {
+                    if (store.getParent() != store.getParent().getParent().getFirstBlock()) {
+                        return;
+                    }
+
+                    storeCallCnt ++;
+                    storeInstr = store;
+                }
+                if (user instanceof Load load) {
+                    if (load.getParent() == load.getParent().getParent().getFirstBlock()) {
+                        return;
+                    }
+
+                    loadCnt ++;
+                }
+            }
+
+            if (storeCallCnt != 1)
+                return;
+            if (storeCallCnt + loadCnt != gepInstr.getUsers().size())
+                return;
+
+            Value setValue = storeInstr.getValue();
+            for (User user : gepInstr.getUsers()) {
+                if (user instanceof Load loadInstr) {
+                    loadInstr.replaceAllUsesWith(setValue);
+                }
+            }
+
+            storeInstr.removeSelf();
+        }
+
+    }
 
     public static class Pattern4 implements Pass {
 

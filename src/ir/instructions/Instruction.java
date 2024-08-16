@@ -65,7 +65,6 @@ public class Instruction extends User {
                 if (!loop.getAllBlocks().contains(usedBlock) || !loop.getAllBlocks().contains(i.getParent())) {
                     return true;
                 }
-
             }
         }
         return false;

@@ -255,7 +255,7 @@ public class ParallelMark implements Pass {
         if (loop.getChildren().size() > 1) {
             return false;
         }
-        
+
         // 到此为拥有一个子循环的循环
         if (!loop.isSimpleLoop() || !isIdcInfoSet(loop)) {
             return false;

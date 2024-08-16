@@ -22,8 +22,6 @@ public class GCM {
     private final Module module = Module.getModule();
 
     private final HashMap<Function, HashSet<Instruction>> pinned = new HashMap<>();
-    private final HashMap<BasicBlock,Instruction> insertPosition = new HashMap<>();
-
     private HashSet<Instruction> visited = new HashSet<>();
     private BasicBlock root;
 
@@ -63,7 +61,6 @@ public class GCM {
                         pinnedInsts.add(instruction);
                     }
                 }
-                insertPosition.put(block, block.getTailInstruction());
             }
             pinned.put(function, pinnedInsts);
         }
@@ -188,8 +185,8 @@ public class GCM {
     private Instruction findInsertPosition(Instruction instr, BasicBlock block) {
         ArrayList<Value> users = new ArrayList<>(instr.getUsers());
         Instruction later = null;
-        ArrayList<Instruction> instructions = block.getInstructionsArray();
-        for (Instruction pos : instructions ){
+        ArrayList<Instruction> insts = block.getInstructionsArray();
+        for (Instruction pos : insts) {
             if (pos instanceof Phi) {
                 continue;
             }
@@ -211,12 +208,12 @@ public class GCM {
             ArrayList<BasicBlock> blocks = function.getBasicBlocksArray();
             for (BasicBlock block : blocks) {
                 ArrayList<Instruction> instructions = block.getInstructionsArray();
-                for (Instruction instruction : instructions) {
-                    if (!instruction.getLatestBlock().equals(block)) {
-                        instruction.eraseFromParent();
-                        BasicBlock basicBlock = instruction.getLatestBlock();
-                        Instruction pos = findInsertPosition(instruction,basicBlock);
-                        basicBlock.insertBefore(instruction,pos);
+                for (Instruction inst : instructions) {
+                    if (!inst.getLatestBlock().equals(block)) {
+                        inst.eraseFromParent();
+                        BasicBlock basicBlock = inst.getLatestBlock();
+                        Instruction pos = findInsertPosition(inst, basicBlock);
+                        basicBlock.insertBefore(inst, pos);
                     }
                 }
             }

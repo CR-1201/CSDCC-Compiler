@@ -99,7 +99,7 @@ public class PassManager {
 
         passes.add(new InstructionCleanUp());
         BasicPass();
-////        passes.add(new Branch2Switch());
+        passes.add(new Branch2Switch());
 //
         passes.add(new CFG());
         passes.add(new Dom());

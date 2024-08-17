@@ -1,21 +1,25 @@
-int C[2010];
+int A[9][9], B[9][9], C[9][9];
 int main(){
+    int i = 0, j = 0, k = 0;
     int n = getint();
-    int i = 0;
-    int a;
-    while (i < n) {
-
-        if (i == 1) {
+    while (k < n){
+        i = 0;
+        while (i < n){
+            if (A[i][k] == 0){
+                i = i + 1;
+                continue;
+            }
+            j = 0;
+            while (j < n){
+                C[i][j] = C[i][j] + A[i][k] * B[k][j];
+                j = j + 1;
+            }
             i = i + 1;
-            continue;
         }
-
-        a = 1;
-
-        i = i + 1;
+        k = k + 1;
     }
 
-    putint(a);
+    putarray(n, C);
 
     return 0;
 }

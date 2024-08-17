@@ -18,6 +18,7 @@ import ir.types.IntType;
 import pass.Pass;
 import pass.analysis.*;
 import pass.transform.DeadCodeEmit;
+import pass.transform.GepFuse;
 import pass.transform.LocalArrayLift;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class Parallel implements Pass {
         new LocalArrayLift().run();
         new LoopAnalysis().run();
         new DeadCodeEmit().run();
+        new GepFuse().run();
 
         for (Function function : irModule.getFunctionsArray()) {
             if (!function.getIsBuiltIn()) {
@@ -51,7 +53,7 @@ public class Parallel implements Pass {
             }
         }
 
-        new BasicMark().run();
+//        new BasicMark().run();
         new AdvancedMark().run();
     }
 

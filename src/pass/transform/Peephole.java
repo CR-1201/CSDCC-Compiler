@@ -15,6 +15,11 @@ import pass.analysis.PureFunction;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+
+import static pass.analysis.AliasAnalysis.samePointer;
+import static pass.analysis.AliasAnalysis.searchRoot;
 
 public class Peephole implements Pass {
 
@@ -27,6 +32,9 @@ public class Peephole implements Pass {
 
     private Load finalLoad = null;
     private ArrayList<Store> stores = new ArrayList<>();
+
+    private HashMap<BasicBlock,HashMap<Value,Load>> blockLoadMap = new HashMap<>();
+    private LinkedHashMap<Load,Load> load2preLoad = new LinkedHashMap<>();
     @Override
     public void run() {
         PureFunction pureFunction = new PureFunction();
@@ -37,6 +45,53 @@ public class Peephole implements Pass {
 
         // store的值如果和load出来的值一样,且路径上没有对该地址load,可以删除路径上所有对该地址的store
         Peephole2();
+
+        // 第二次 load 与第一次 load 之间所有可能的执行路径都没有 store, 弱化了一下
+        Peephole3();
+    }
+
+    private void Peephole3(){
+        ArrayList<Function> functions = module.getFunctionsArray();
+        for(Function function : functions){
+            if( function.getIsBuiltIn() )continue;
+            runPeephole3OnFunction(function);
+            ArrayList<Load> keyList = new ArrayList<>(load2preLoad.keySet());
+            for (int i = keyList.size() - 1; i >= 0; i--) {
+                Load load = keyList.get(i);
+                Load preLoad = load2preLoad.get(load);
+                load.replaceAllUsesWith(preLoad);
+                load.removeSelf();
+            }
+        }
+    }
+
+    private void runPeephole3OnFunction(Function function){
+        ArrayList<BasicBlock> blocks = getBlocksRank(function);
+        for(BasicBlock basicBlock : blocks){
+            LinkedHashMap<Value,Load> loads = new LinkedHashMap<>();
+            ArrayList<Instruction> instructions = basicBlock.getInstructionsArray();
+            for(Instruction instruction : instructions){
+                if(instruction instanceof Load load ){
+                    if( basicBlock.getPrecursors().size() == 1 ){
+                        BasicBlock preBlock = basicBlock.getPrecursors().iterator().next();
+                        if( blockLoadMap.containsKey(preBlock) ){
+                            HashMap<Value,Load> preLoads = blockLoadMap.get(preBlock);
+                            if( preLoads.containsKey(load.getAddr()) ){
+                                Load preLoad = preLoads.get(load.getAddr());
+                                load2preLoad.put(load,preLoad);
+                            }
+                        }
+                    }
+                    loads.put(load.getAddr(),load);
+                } else if( instruction instanceof Store store ){
+                    // TODO 有待加强
+                    loads.clear();
+                } else if( instruction instanceof Call call && !(is_pure.containsKey(call.getFunction()) && is_pure.get(call.getFunction()))){
+                    loads.clear();
+                }
+            }
+            blockLoadMap.put(basicBlock,loads);
+        }
     }
 
     private void Peephole2(){

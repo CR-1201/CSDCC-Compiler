@@ -9,10 +9,8 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Zext;
-import ir.types.DataType;
 import ir.types.FloatType;
 import ir.types.IntType;
-import ir.types.ValueType;
 import pass.Pass;
 
 import java.util.ArrayList;
@@ -366,6 +364,8 @@ public class SimplifyInst implements Pass {
                     return inst;
                 }
             }
+
+            // 激进的情况下,可以尝试浮点数也用乘法结合律
 
             // (x * y) * z = x * (y * z)
             if( v1 instanceof Mul mul){

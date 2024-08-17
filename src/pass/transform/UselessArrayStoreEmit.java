@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
-// FIXME 没有考虑全局数组和参数数组
+// FIXME 没有考虑参数数组
 public class UselessArrayStoreEmit implements Pass {
 
     private final Module irModule = Module.getModule();

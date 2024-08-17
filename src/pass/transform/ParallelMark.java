@@ -77,13 +77,20 @@ public class ParallelMark implements Pass {
 
             for (BasicBlock block : function.getBasicBlocksArray()) {
                 if (!knownBlocks.contains(block) && block.isLoopHeader()) {
-                    markLoop(block.getLoop());
+
+                    BasicMark(block.getLoop());
+                    AdvancedMark(block.getLoop());
+
                 }
             }
         }
     }
 
-    private void markLoop(Loop loop) {
+    private void AdvancedMark(Loop loop) {
+
+    }
+
+    private void BasicMark(Loop loop) {
         if (!isPureLoop(loop)) {
             return;
         }

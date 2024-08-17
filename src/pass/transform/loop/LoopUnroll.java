@@ -92,7 +92,7 @@ public class LoopUnroll implements Pass {
     }
 
     private void constLoopUnroll(Loop loop) {
-        if (!loop.isInductorVarSet()) {
+        if (!(loop.isSimpleLoop() && loop.isInductorVarSet())) {
             return;
         }
         Value idcEnd = loop.getIdcEnd();

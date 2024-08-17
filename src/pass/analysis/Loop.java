@@ -396,6 +396,14 @@ public class Loop {
         this.isInductorVarSet = true;
     }
 
+    public void setInductorVarPartially(Value idcVar, Value idcEnd, Value idcInit, Icmp cond) {
+        this.idcVar = idcVar;
+        this.idcEnd = idcEnd;
+        this.idcInit = idcInit;
+        this.cond = cond;
+        this.isInductorVarSet = true;
+    }
+
     public Value getIdcVar() {
         return idcVar;
     }

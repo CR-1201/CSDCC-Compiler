@@ -45,7 +45,7 @@ public class PassManager {
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
-        passes.add(new LoopMemset()); // 后端测的时候记得打开, 中端版本过低, 不要打开
+//        passes.add(new LoopMemset()); // 后端测的时候记得打开, 中端版本过低, 不要打开
         passes.add(new ConstFunctionReplace());
         passes.add(new InlineFunction());
         passes.add(new GlobalMemorizeFunc()); // inline后理论上只剩递归函数
@@ -120,12 +120,14 @@ public class PassManager {
 
         BasicPass();
         EmitSimpleBrPass();
-        passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
+
         passes.add(new Pattern.Pattern3());
         BasicPass();
         passes.add(new Pattern.Pattern4());
 
         passes.add(new Parallel());
+
+        passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
 
         passes.add(new CFG());
         passes.add(new Dom());

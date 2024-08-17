@@ -54,6 +54,9 @@ public class PassManager {
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
+        passes.add(new CSE());
+        passes.add(new CFG());
+//
         passes.add(new MergeBlocks());
         passes.add(new SideEffect());
         passes.add(new DeadCodeEmit());
@@ -81,6 +84,9 @@ public class PassManager {
         passes.add(new UselessPhiEmit());
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
+        passes.add(new GepFuse());
+        passes.add(new CSE());
+        passes.add(new CFG());
 
         BasicPass();
         passes.add(new Peephole());
@@ -94,6 +100,7 @@ public class PassManager {
         BasicPass();
         passes.add(new SimplifyInst());
         passes.add(new MathOptimize());
+
         passes.add(new DeadCodeEmit());
         passes.add(new SideEffect());
         passes.add(new UselessStoreEmit());  // UselessStoreEmit 前面，一定要进行函数副作用的分析

@@ -16,10 +16,6 @@ import pass.analysis.PureFunction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-
-import static pass.analysis.AliasAnalysis.samePointer;
-import static pass.analysis.AliasAnalysis.searchRoot;
 
 public class Peephole implements Pass {
 

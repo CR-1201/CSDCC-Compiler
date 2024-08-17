@@ -120,11 +120,11 @@ public class PassManager {
         BasicPass();
         EmitSimpleBrPass();
         passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
-        passes.add(new Pattern.Pattern3());
-        BasicPass();
-        passes.add(new Pattern.Pattern4());
-
-        passes.add(new ParallelMark());
+//        passes.add(new Pattern.Pattern3());
+//        BasicPass();
+//        passes.add(new Pattern.Pattern4());
+//
+//        passes.add(new ParallelMark());
 
         passes.add(new CFG());
         passes.add(new Dom());

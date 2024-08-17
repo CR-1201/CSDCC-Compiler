@@ -21,11 +21,17 @@ import pass.analysis.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class MarkParallel implements Pass {
+// TODO <1> 扩展循环上下界及比较符号
+// TODO <2> 带常函数的数组下标 22:43 -> 03_sort1.sy
+// TODO <3> 带循环内不变的变量的数组下标 23:01-1
+// TODO <4> 带循环内不变的数组元素的数组下标 23:01-2 -> 04_spmv1.sy
+// TODO <5> 数组下标为循环变量与循环内不变变量或常数的算术表达式  23:15 -> crypto1.sy fft0.sy
 
-    public static final boolean ENABLE_PARALLEL = Config.enableParallel;  // 测试ir前需要将其设置为false
+public class ParallelMark implements Pass {
 
+    public static final boolean ENABLE_PARALLEL = Config.enableParallel;
     public static int PARALLEL_NUM = Config.parallelProcessNum;
+    public static int MAX_PARALLEL_DEPTH = 1;
 
     private final Module irModule = Module.getModule();
     private final IrBuilder irBuilder = IrBuilder.getIrBuilder();
@@ -71,14 +77,24 @@ public class MarkParallel implements Pass {
 
             for (BasicBlock block : function.getBasicBlocksArray()) {
                 if (!knownBlocks.contains(block) && block.isLoopHeader()) {
-                    markLoop(block.getLoop());
+
+                    BasicMark(block.getLoop());
+                    AdvancedMark(block.getLoop());
+
                 }
             }
         }
     }
 
-    private void markLoop(Loop loop) {
+    private void AdvancedMark(Loop loop) {
+
+    }
+
+    private void BasicMark(Loop loop) {
         if (!isPureLoop(loop)) {
+            return;
+        }
+        if (loop.getDepth() > 1) {
             return;
         }
 
@@ -90,7 +106,7 @@ public class MarkParallel implements Pass {
 
         for (Loop tmp : loops) {
             for (Instruction instruction : tmp.getHeader().getInstructionsArray()) {
-                if (instruction instanceof Phi phiInstr && !instruction.equals(tmp.getIdcVar())) {
+                if (instruction instanceof Phi && !instruction.equals(tmp.getIdcVar())) {
                     return;  // 循环内不能有其他phi
                 }
             }
@@ -105,8 +121,6 @@ public class MarkParallel implements Pass {
                     return;
                 }
                 if (instruction instanceof GEP gepInstr) {
-                    // FIXME 为什么必须是全局数组才能并行？
-
                     for (Value idx : gepInstr.getIndex()) {
                         if (idx instanceof ConstInt constIntIdx && constIntIdx.getValue() == 0) {
                             continue;
@@ -154,7 +168,7 @@ public class MarkParallel implements Pass {
         parallelEndBlock.setLoop(loop);
         loop.addBlock(parallelEndBlock);
 
-        if (!cond.getCondition().equals(Icmp.Condition.LT)) {
+        if (!cond.getCondition().equals(Icmp.Condition.LT)) {  // FIXME <bug> consider n > i
             return;
         }
 
@@ -245,14 +259,19 @@ public class MarkParallel implements Pass {
         if (!loop.hasChildLoop()) {
             return true;
         }
-        if (loop.getChildren().size() > 1) {
+        if (loop.getChildren().size() > MAX_PARALLEL_DEPTH) {
             return false;
         }
+
         // 到此为拥有一个子循环的循环
-        if (!loop.isSimpleLoop() || !loop.isComputeInfoSet()) {
+        if (!loop.isSimpleLoop() || !isIdcInfoSet(loop)) {
             return false;
         }
         return isPureLoop(loop.getChildren().iterator().next());
+    }
+
+    private boolean isIdcInfoSet(Loop loop) {
+        return loop.getIdcEnd() != null && loop.getIdcAlu() != null && loop.getIdcStep() != null && loop.getIdcInit() != null && loop.getIdcVar() != null;
     }
 
 }

@@ -27,6 +27,7 @@ main.ll
 testcase.in
 testcase.out
 testcase.sy
+performance
 testcase.s
 performance
 tmp.txt
@@ -59,3 +60,4 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+tmp.txt

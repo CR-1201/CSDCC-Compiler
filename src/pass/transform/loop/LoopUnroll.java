@@ -116,11 +116,11 @@ public class LoopUnroll implements Pass {
             uselessLoop = true;
             return;
         } else {
-            if (loopTimes <= LOOP_MAX_COUNT) {
+//            if (loopTimes <= LOOP_MAX_COUNT) {
                 loop.setLoopTimes(loopTimes);
-            } else {
-                return;
-            }
+//            } else {
+//                return;
+//            }
         }
         if (!initUnroll(loop)) {
             return;

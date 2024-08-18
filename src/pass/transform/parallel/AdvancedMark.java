@@ -51,6 +51,7 @@ public class AdvancedMark implements Pass {
                 }
             }
         }
+        System.out.println("----------------------------------------------------------------");
         for (Loop loop : markedLoops) {
             System.out.println(">>> marked loop: " + loop.getId() + " with idcVar = " + loop.getIdcVar());
         }
@@ -101,6 +102,7 @@ public class AdvancedMark implements Pass {
         TODO <3> 非数组写操作 -> <1> 对并行循环变量的写操作的user只能唯一是并行循环变量
         TODO                   <2> 并行循环后被使用 -> 计算过程不能包含并行循环变量(循环不变表达式外提导致自动满足)，不能包含数组，不能包含自己 [ a = i + ... , a = b[1], a = a + ... ]
         TODO <4> 非数组读操作 -> 无限制 ( ... = t )
+        TODO <5> Call -> 不许并行
      */
     private boolean checkIfMark(Loop loop) {
         Phi currentLoopVar = (Phi) loop.getIdcVar();
@@ -178,6 +180,17 @@ public class AdvancedMark implements Pass {
             }
         }
         System.out.println("passed condition 3");
+        System.out.println("passed condition 4");
+
+        // TODO <5> Call -> 不许并行
+        for (BasicBlock block : loop.getAllBlocks()) {
+            for (Instruction instruction : block.getInstructionsArray()) {
+                if (instruction instanceof Call) {
+                    return false;
+                }
+            }
+        }
+        System.out.println("passed condition 5");
 
         System.out.println("---> passed mark check");
 
@@ -205,19 +218,24 @@ public class AdvancedMark implements Pass {
         idcEnd = loop.getIdcEnd();
         cond = loop.getCond();
 
-        if (!(idcInit instanceof ConstInt)) {
+        if (!(idcVar instanceof Phi phi && phi.getValueType() instanceof IntType)) {  // 循环变量为int类型
             return;
         }
-        if (((ConstInt) idcInit).getValue() != 0) {
+        if (!(idcInit instanceof ConstInt)) {  // 初始值为ConstInt
             return;
         }
-        if (idcEnd instanceof Constant) {
+        if (idcEnd instanceof ConstInt) {  // 终止值为ConstInt
+            return;
+        }
+        if (((ConstInt) idcInit).getValue() != 0) {  // 初始值为0
             return;
         }
         if (loop.getEnterings().size() > 1) {
             return;
         }
-        if (!cond.getCondition().equals(Icmp.Condition.LT)) {  // FIXME <bug> consider n > i
+        if (!(cond.getCondition().equals(Icmp.Condition.LT) &&
+                cond.getOperator(0) == idcVar &&
+                cond.getOperator(1) != idcVar)) {  // 循环条件必须为 i < n
             return;
         }
         System.out.println("passed mark conditions");

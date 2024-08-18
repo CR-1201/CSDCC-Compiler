@@ -13,6 +13,7 @@ import pass.transform.emituseless.UselessStoreEmit;
 import pass.transform.gcmgvn.GCMGVN;
 import pass.transform.loop.*;
 import pass.transform.other.ConstFunctionReplace;
+import pass.transform.parallel.Parallel;
 
 import java.util.ArrayList;
 
@@ -123,7 +124,7 @@ public class PassManager {
         BasicPass();
         passes.add(new Pattern.Pattern4());
 
-        passes.add(new ParallelMark());
+        passes.add(new Parallel());
 
         passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
         passes.add(new CFG());

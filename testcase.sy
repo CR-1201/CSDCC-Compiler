@@ -1,106 +1,82 @@
-const int base = 16;
+const int mod = 998244353;
+int d;
 
-int getMaxNum(int n, int arr[]){
-    int ret = 0;
+int multiply(int a, int b){
+    if (b == 0) return 0;
+    if (b == 1) return a % mod;
+    int cur = multiply(a, b/2);
+    cur = (cur + cur) % mod;
+    if (b % 2 == 1) return (cur + a) % mod;
+    else return cur;
+}
+
+int power(int a, int b){
+    if (b == 0) return 1;
+    int cur = power(a, b/2);
+    cur = multiply(cur, cur);
+    if (b % 2 == 1) return multiply(cur, a);
+    else return cur;
+}
+const int maxlen = 2097152;
+int temp[maxlen], a[maxlen], b[maxlen], c[maxlen];
+
+int memmove(int dst[], int dst_pos, int src[], int len){
+    int i = 0;
+    while (i < len){
+        dst[dst_pos + i] = src[i];
+        i = i + 1;
+    }
+    return i;
+}
+
+int fft(int arr[], int begin_pos, int n, int w){
+    if (n == 1) return 1;
     int i = 0;
     while (i < n){
-        if (arr[i] > ret) ret = arr[i];
+        if (i % 2 == 0) temp[i / 2] = arr[i + begin_pos];
+        else temp[n / 2 + i / 2] = arr[i + begin_pos];
         i = i + 1;
     }
-    return ret;
-}
 
-int getNumPos(int num, int pos){
-    int tmp = 1;
-    int i = 0;
-    while (i < pos){
-        num = num / base;
+    memmove(arr, begin_pos, temp, n);
+    fft(arr, begin_pos, n / 2, multiply(w, w));
+    fft(arr, begin_pos + n / 2, n / 2, multiply(w, w));
+    i = 0;
+    int wn = 1;
+    while (i < n / 2){
+        int x = arr[begin_pos + i];
+        int y = arr[begin_pos + i + n / 2];
+        arr[begin_pos + i] = (x + multiply(wn, y)) % mod;
+        arr[begin_pos + i + n / 2] = (x - multiply(wn, y) + mod) % mod;
+        wn = multiply(wn, w);
         i = i + 1;
     }
-    return num % base;
+    return 0;
 }
-
-void radixSort(int bitround, int a[], int l, int r){
-    int head[base] = {};
-    int tail[base] = {};
-    int cnt[base] = {};
-
-    if (bitround == -1 || l + 1 >= r) return;
-
-    {    
-        int i = l;
-        
-        while (i < r){
-            cnt[getNumPos(a[i], bitround)]
-                = cnt[getNumPos(a[i], bitround)] + 1;
-            i = i + 1;
-        }        
-        head[0] = l;
-        tail[0] = l + cnt[0];
-
-        i = 1;
-        while (i < base){
-            head[i] = tail[i - 1];
-            tail[i] = head[i] + cnt[i];
-            i = i + 1;
-        }
-        i = 0;
-        while (i < base){
-            while (head[i] < tail[i]){
-                int v = a[head[i]];
-                while (getNumPos(v, bitround) != i){
-                    int t = v;
-                    v = a[head[getNumPos(t, bitround)]];
-                    a[head[getNumPos(t, bitround)]] = t;
-                    head[getNumPos(t, bitround)] = head[getNumPos(t, bitround)] + 1;
-                }
-                a[head[i]] = v;
-                head[i] = head[i] + 1;
-            }
-            i = i + 1;
-        }
-    }
-
-    {
-        int i = l;
-        
-        head[0] = l;
-        tail[0] = l + cnt[0];
-
-        i = 0;
-        while (i < base){
-            if (i > 0){
-                head[i] = tail[i - 1];
-                tail[i] = head[i] + cnt[i];
-            }
-            radixSort(bitround - 1, a, head[i], tail[i]);
-            i = i + 1;
-        }
-    }
-
-    return;
-}
-
-int a[30000010];
-int ans;
 
 int main(){
     int n = getarray(a);
-
+    int m = getarray(b);
     starttime();
-
-    radixSort(8, a, 0, n);
+    d = 1;
+    while (d < n + m - 1){
+        d = d * 2;
+    }
+    fft(a, 0, d, power(3, (mod - 1) / d));
+    fft(b, 0, d, power(3, (mod - 1) / d));
 
     int i = 0;
-    while (i < n){
-        ans = ans + i * (a[i] % (2 + i));
+    while (i < d){
+        a[i] = multiply(a[i], b[i]);
         i = i + 1;
     }
-
-    if (ans < 0)
-        ans = -ans;
+    fft(a, 0, d, power(3, mod-1 - (mod-1)/d));
+    i = 0;
+    while (i < d){
+        a[i] = multiply(a[i], power(d, mod-2));
+        i = i + 1;
+    }
     stoptime();
-    putint(ans);
-    putch(10);
+    putarray(n + m - 1, a);
     return 0;
 }

@@ -3,6 +3,8 @@ package pass.transform.parallel;
 import config.Config;
 import ir.*;
 import ir.Module;
+import ir.constants.ConstInt;
+import ir.constants.Constant;
 import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.memoryInstructions.GEP;
@@ -10,9 +12,12 @@ import ir.instructions.memoryInstructions.Load;
 import ir.instructions.memoryInstructions.Store;
 import ir.instructions.otherInstructions.Call;
 import ir.instructions.otherInstructions.Phi;
+import ir.instructions.terminatorInstructions.Br;
+import ir.types.IntType;
 import pass.Pass;
 import pass.analysis.Loop;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class AdvancedMark implements Pass {
@@ -29,6 +34,7 @@ public class AdvancedMark implements Pass {
     private static final HashSet<BasicBlock> bbs = new HashSet<>();
     private static final HashSet<Value> idcVars = new HashSet<>();
     private static final HashSet<Loop> loops = new HashSet<>();
+    private static final HashSet<Loop> markedLoops = new HashSet<>();
 
     @Override
     public void run() {
@@ -45,16 +51,17 @@ public class AdvancedMark implements Pass {
                 }
             }
         }
+        for (Loop loop : markedLoops) {
+            System.out.println(">>> marked loop: " + loop.getId() + " with idcVar = " + loop.getIdcVar());
+        }
     }
 
     private void mark(Loop loop) {
+        System.out.println("=============== loop:" + loop.getId() + " ===============");
         if (checkBeforeMark(loop)) {
             init(loop);
             if (checkIfMark(loop)) {
-                System.out.println("passed");
                 modify(loop);
-            } else {
-                System.out.println("failed");
             }
         }
     }
@@ -76,6 +83,7 @@ public class AdvancedMark implements Pass {
                 return false;
             }
         }
+        System.out.println("---> passed pre check");
         return true;
     }
 
@@ -98,7 +106,6 @@ public class AdvancedMark implements Pass {
         Phi currentLoopVar = (Phi) loop.getIdcVar();
         HashSet<Value> storeGepBase = new HashSet<>();
         HashSet<GEP> storeGeps = new HashSet<>();
-        System.out.println("ready to check parallel");
 
         // TODO <1> 数组写操作 -> 数组下标必须包含直接并行循环变量 ( a[i][...][...] = ... )
         for (BasicBlock block : loop.getAllBlocks()) {
@@ -128,7 +135,7 @@ public class AdvancedMark implements Pass {
                     if (storeGepBase.contains(loadGep.getBase())) {
                         HashSet<Store> stores = load2Stores(loadInstr);
                         HashSet<GEP> geps = stores2Geps(stores);
-                        if (geps.size() > 1) {
+                        if (geps.size() != 1) {
                             return false;
                         }
                         GEP storeGep = geps.iterator().next();
@@ -172,14 +179,133 @@ public class AdvancedMark implements Pass {
         }
         System.out.println("passed condition 3");
 
+        System.out.println("---> passed mark check");
+
         return true;
     }
 
-    private void modify(Loop loop) {
+    private BasicBlock loopEntering;
+    private BasicBlock loopHeader;
+    private BasicBlock loopLatch;
+    private BasicBlock loopExiting;
+    private BasicBlock loopExit;
 
+    Value idcVar;
+    Value idcInit;
+    Value idcStep;
+    Value idcAlu;
+    Value idcEnd;
+    Icmp cond;
+
+    private void modify(Loop loop) {
+        idcVar = loop.getIdcVar();
+        idcInit = loop.getIdcInit();
+        idcStep = loop.getIdcStep();
+        idcAlu = loop.getIdcAlu();
+        idcEnd = loop.getIdcEnd();
+        cond = loop.getCond();
+
+        if (!(idcInit instanceof ConstInt)) {
+            return;
+        }
+        if (((ConstInt) idcInit).getValue() != 0) {
+            return;
+        }
+        if (idcEnd instanceof Constant) {
+            return;
+        }
+        if (loop.getEnterings().size() > 1) {
+            return;
+        }
+        if (!cond.getCondition().equals(Icmp.Condition.LT)) {  // FIXME <bug> consider n > i
+            return;
+        }
+        System.out.println("passed mark conditions");
+
+        loopEntering = loop.getEnterings().iterator().next();
+        loopHeader = loop.getHeader();
+        loopLatch = loop.getLatches().iterator().next();
+        loopExiting = loop.getExitings().iterator().next();
+        loopExit = loop.getExits().iterator().next();
+
+        Function function = loop.getHeader().getParent();
+
+        BasicBlock parallelStartBlock = irBuilder.buildBasicBlock(function);
+        BasicBlock parallelEndBlock = irBuilder.buildBasicBlock(function);
+        parallelStartBlock.setLoop(loop);
+        loop.addBlock(parallelStartBlock);
+        parallelEndBlock.setLoop(loop);
+        loop.addBlock(parallelEndBlock);
+
+        Call startCall = prepareParallelStart(parallelStartBlock);
+        prepareParallelEnd(parallelEndBlock, startCall);
+
+        knownBlocks.addAll(bbs);
+
+        markedLoops.add(loop);
+        System.out.println("---> finished mark");
     }
 
     // =========================================== below are util functions ===========================================
+
+    private Call prepareParallelStart(BasicBlock startBlock) {
+        Call startCall = null;
+        Mul mul1;
+        Add add1;
+        if (ENABLE_PARALLEL) {
+            startCall = irBuilder.buildCall(startBlock, Function.startparallel, new ArrayList<>());
+            mul1 = irBuilder.buildMul(startBlock, new IntType(32), startCall, idcEnd);
+            add1 = irBuilder.buildAdd(startBlock, new IntType(32), startCall, new ConstInt(1));
+        } else {
+            mul1 = irBuilder.buildMul(startBlock, new IntType(32), new ConstInt(0), idcEnd);
+            add1 = irBuilder.buildAdd(startBlock, new IntType(32), new ConstInt(0), new ConstInt(1));
+        }
+        Sdiv div1 = irBuilder.buildSdiv(startBlock, new IntType(32), mul1, new ConstInt(PARALLEL_NUM));
+        modifyPhi(idcVar, loopEntering, div1);
+        Mul mul2 = irBuilder.buildMul(startBlock, new IntType(32), add1, idcEnd);
+        Sdiv div2 = irBuilder.buildSdiv(startBlock, new IntType(32), mul2, new ConstInt(PARALLEL_NUM));
+        cond.setOperator(1, div2);
+        irBuilder.buildBr(startBlock, loopHeader);
+
+        modifyBr(loopEntering, loopHeader, startBlock);
+        loopEntering.addSuccessor(startBlock);
+        loopEntering.removeSuccessor(loopHeader);
+        startBlock.addPrecursor(loopEntering);
+        startBlock.addSuccessor(loopHeader);
+        loopHeader.addPrecursor(startBlock);
+        loopHeader.removePrecursor(loopEntering);
+
+        return startCall;
+    }
+
+    private void prepareParallelEnd(BasicBlock endBlock, Call startCall) {
+        if (ENABLE_PARALLEL) {
+            ArrayList<Value> args = new ArrayList<>();
+            args.add(startCall);
+            irBuilder.buildCall(endBlock, Function.endparallel, args);
+        }
+        irBuilder.buildBr(endBlock, loopExit);
+
+        modifyBr(loopExiting, loopExit, endBlock);
+        loopExiting.addSuccessor(endBlock);
+        loopExiting.removeSuccessor(loopExit);
+        endBlock.addPrecursor(loopExiting);
+        endBlock.addSuccessor(loopExit);
+        loopExit.addPrecursor(endBlock);
+        loopExit.removePrecursor(loopExiting);
+    }
+
+    private void modifyPhi(Value instr, BasicBlock fromBlock, Value toValue) {
+        Phi phiInstr = (Phi) instr;
+        Value fromValue = phiInstr.getIncomingFrom(fromBlock);
+        phiInstr.replaceOperator(fromValue, toValue, (BasicBlock) toValue.getParent());
+    }
+
+    private void modifyBr(BasicBlock block, BasicBlock from, BasicBlock to) {
+        Br br = (Br) block.getTailInstruction();
+        int index = br.getOperators().indexOf(from);
+        br.setOperator(index, to);
+    }
 
     private HashSet<GEP> stores2Geps(HashSet<Store> stores) {
         HashSet<GEP> res = new HashSet<>();

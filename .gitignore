@@ -15,6 +15,7 @@ tests/ir_std
 tests/asm
 tests/ans
 tests/output
+testcase.sy
 tests/error.txt
 tests/ARM_raw.txt
 tests/llvm_ir_raw.txt

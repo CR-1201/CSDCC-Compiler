@@ -1,4 +1,4 @@
-package pass.transform;
+package pass.transform.parallel;
 
 import config.Config;
 import ir.*;
@@ -17,84 +17,62 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.IntType;
 import pass.Pass;
 import pass.analysis.*;
+import pass.transform.DeadCodeEmit;
+import pass.transform.LocalArrayLift;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-// TODO <1> 扩展循环上下界及比较符号
-// TODO <2> 带常函数的数组下标 22:43 -> 03_sort1.sy
-// TODO <3> 带循环内不变的变量的数组下标 23:01-1
-// TODO <4> 带循环内不变的数组元素的数组下标 23:01-2 -> 04_spmv1.sy
-// TODO <5> 数组下标为循环变量与循环内不变变量或常数的算术表达式  23:15 -> crypto1.sy fft0.sy
-
-public class ParallelMark implements Pass {
+public class BasicMark implements Pass {
 
     public static final boolean ENABLE_PARALLEL = Config.enableParallel;
     public static int PARALLEL_NUM = Config.parallelProcessNum;
-    public static int MAX_PARALLEL_DEPTH = 1;
+    public static int MAX_PARALLEL_DEPTH = Config.maxParallelDepth;
 
-    private final Module irModule = Module.getModule();
-    private final IrBuilder irBuilder = IrBuilder.getIrBuilder();
+    private static final Module irModule = Module.getModule();
+    private static final IrBuilder irBuilder = IrBuilder.getIrBuilder();
 
-    private final HashSet<BasicBlock> knownBlocks = new HashSet<>();
+    private static final HashSet<BasicBlock> knownBlocks = new HashSet<>();
 
-    private final HashSet<BasicBlock> bbs = new HashSet<>();
-    private final HashSet<Value> idcVars = new HashSet<>();
-    private final HashSet<Loop> loops = new HashSet<>();
+    private static final HashSet<BasicBlock> bbs = new HashSet<>();
+    private static final HashSet<Value> idcVars = new HashSet<>();
+    private static final HashSet<Loop> loops = new HashSet<>();
 
-    private Value idcVar;
-    private Value idcInit;
-    private Value idcStep;
-    private Value idcAlu;
-    private Value idcEnd;
-    private Icmp cond;
+    private static Value idcVar;
+    private static Value idcInit;
+    private static Value idcStep;
+    private static Value idcAlu;
+    private static Value idcEnd;
+    private static Icmp cond;
 
-    private BasicBlock loopEntering;
-    private BasicBlock loopHeader;
-    private BasicBlock loopLatch;
-    private BasicBlock loopExiting;
-    private BasicBlock loopExit;
+    private static BasicBlock loopEntering;
+    private static BasicBlock loopHeader;
+    private static BasicBlock loopLatch;
+    private static BasicBlock loopExiting;
+    private static BasicBlock loopExit;
 
     @Override
     public void run() {
-        if (!ENABLE_PARALLEL) {
-            PARALLEL_NUM = 1;
-        }
-
-        new CFG().run();
-        new Dom().run();
-        new LocalArrayLift().run();
-        new LoopAnalysis().run();
-
         for (Function function : irModule.getFunctionsArray()) {
             if (function.getIsBuiltIn()) {
                 continue;
             }
 
-            new LoopVarAnalysis().loopVarAnalysis(function);
-
             knownBlocks.clear();
 
             for (BasicBlock block : function.getBasicBlocksArray()) {
                 if (!knownBlocks.contains(block) && block.isLoopHeader()) {
-
-                    BasicMark(block.getLoop());
-                    AdvancedMark(block.getLoop());
-
+                    mark(block.getLoop());
                 }
             }
         }
     }
 
-    private void AdvancedMark(Loop loop) {
-
-    }
-
-    private void BasicMark(Loop loop) {
+    private void mark(Loop loop) {
         if (!isPureLoop(loop)) {
             return;
         }
-        if (loop.getDepth() > 1) {
+        if (loop.getDepth() > MAX_PARALLEL_DEPTH) {
             return;
         }
 
@@ -270,7 +248,7 @@ public class ParallelMark implements Pass {
         return isPureLoop(loop.getChildren().iterator().next());
     }
 
-    private boolean isIdcInfoSet(Loop loop) {
+    private static boolean isIdcInfoSet(Loop loop) {
         return loop.getIdcEnd() != null && loop.getIdcAlu() != null && loop.getIdcStep() != null && loop.getIdcInit() != null && loop.getIdcVar() != null;
     }
 

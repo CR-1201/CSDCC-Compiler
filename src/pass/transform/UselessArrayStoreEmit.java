@@ -63,7 +63,8 @@ public class UselessArrayStoreEmit implements Pass {
                     if (instruction instanceof Load loadInstr && loadInstr.getAddr() instanceof GEP loadGepInstr) {
                         usefulGlobalArrayBase.add(loadGepInstr.getBase());
                     }
-                    if (instruction instanceof Call callInstr && callInstr.getFunction().getName().equals("@putarray")) {
+                    if (instruction instanceof Call callInstr &&
+                            (callInstr.getFunction().getName().equals("@putarray") || callInstr.getFunction().getName().equals("@putfarray"))) {
                         GEP gepInstr = (GEP) callInstr.getParamAt(1);
                         usefulGlobalArrayBase.add(gepInstr.getBase());
                     }
@@ -206,7 +207,8 @@ public class UselessArrayStoreEmit implements Pass {
     private boolean hasPutArray(Function function) {
         for (BasicBlock block : function.getBasicBlocksArray()) {
             for (Instruction instruction : block.getInstructionsArray()) {
-                if (instruction instanceof Call callInstr && callInstr.getFunction().getName().equals("@putarray")) {
+                if (instruction instanceof Call callInstr &&
+                        (callInstr.getFunction().getName().equals("@putarray") || callInstr.getFunction().getName().equals("@putfarray"))) {
                     return true;
                 }
             }

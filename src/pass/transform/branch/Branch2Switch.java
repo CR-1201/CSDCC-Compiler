@@ -28,7 +28,7 @@ public class Branch2Switch implements Pass {
      * Pair<BasicBlock, BasicBlock>： 前一个 BasicBlock 代表 Equal 时跳转的块，后一个 BasicBlock 代表被忽略的块，但是由于可能涉及到提前需要计算一些东西，所以需要暂时存储记录
      */
     private final HashMap<Value, Pair<BasicBlock, BasicBlock>> caseChain = new HashMap<>();
-    private final HashMap<Value, Pair<BasicBlock, BasicBlock>> caseCandidateChain = new HashMap<>();
+    private final HashSet<Pair<BasicBlock, BasicBlock>> caseCandidateChain = new HashSet<>();
     private Value switchCase = null;
     /**
      * if-else 终止的块
@@ -103,14 +103,18 @@ public class Branch2Switch implements Pass {
         // 先删除两个指令
         ArrayList<Instruction> insts = block.getInstructionsArray();
         int size = insts.size();
-        for (int i = size - 2; i < size; i++) {
-            Instruction inst = insts.get(i);
-            if (!(inst instanceof Br || inst instanceof Icmp)) {
-                continue;
-            } else if (inst instanceof Icmp icmp1 && icmp1 != (Icmp) br.getCond()) {
-                continue;
+        if (size == 1) {
+            insts.get(0).removeSelf();
+        } else {
+            for (int i = size - 2; i < size; i++) {
+                Instruction inst = insts.get(i);
+                if (!(inst instanceof Br || inst instanceof Icmp)) {
+                    continue;
+                } else if (inst instanceof Icmp icmp1 && icmp1 != (Icmp) br.getCond()) {
+                    continue;
+                }
+                inst.removeSelf();
             }
-            inst.removeSelf();
         }
         HashMap<Value, BasicBlock> case2block = new HashMap<>();
         for (Map.Entry<Value, Pair<BasicBlock, BasicBlock>> entry : caseChain.entrySet()) {
@@ -136,10 +140,10 @@ public class Branch2Switch implements Pass {
     private Boolean canSwitch(BasicBlock block) {
         caseCandidateChain.clear();
         findCaseCandidate(block);
-        for (Map.Entry<Value, Pair<BasicBlock, BasicBlock>> entry : caseCandidateChain.entrySet()) {
-            visited.add(((Icmp) entry.getKey()).getParent());
-            visited.add(entry.getValue().getFirst());
-            visited.add(entry.getValue().getSecond());
+        visited.add(block);
+        for (Pair<BasicBlock, BasicBlock> entry : caseCandidateChain) {
+            visited.add(entry.getFirst());
+            visited.add(entry.getSecond());
         }
         if (block.isLoopHeader()) {
             return false;
@@ -171,6 +175,7 @@ public class Branch2Switch implements Pass {
             if (!(matchingBlock.getTailInstruction() instanceof Br tmpBr && tmpBr.getHasCondition())) {
                 break;
             }
+            icmp = (Icmp) tmpBr.getCond();
             if (!(icmp.getOperator(0) instanceof ConstInt || icmp.getOperator(1) instanceof ConstInt)) {
                 matchResult = false;
                 break;
@@ -187,7 +192,6 @@ public class Branch2Switch implements Pass {
             } else {
                 numbers.add(caseNumber);
             }
-            icmp = (Icmp) tmpBr.getCond();
             if (icmp.getCondition().equals(Icmp.Condition.EQ) && icmp.getOperators().contains(switchCandidate)) {
                 matchingBlock = tmpBr.getFalseBlock();
             } else if (!icmp.getCondition().equals(Icmp.Condition.EQ)) {
@@ -210,7 +214,7 @@ public class Branch2Switch implements Pass {
         }
         Icmp icmp = (Icmp) br.getCond();
         BasicBlock matchingBlock = br.getFalseBlock();
-        caseCandidateChain.put(icmp, new Pair<>(br.getTrueBlock(), br.getFalseBlock()));
+        caseCandidateChain.add(new Pair<>(br.getTrueBlock(), br.getFalseBlock()));
         while (true) {
             if (!matchingBlock.getPhis().isEmpty()) {
                 break;
@@ -220,7 +224,7 @@ public class Branch2Switch implements Pass {
             }
             matchingBlock = tmpBr.getFalseBlock();
             icmp = (Icmp) tmpBr.getCond();
-            caseCandidateChain.put(icmp, new Pair<>(tmpBr.getTrueBlock(), tmpBr.getFalseBlock()));
+            caseCandidateChain.add(new Pair<>(tmpBr.getTrueBlock(), tmpBr.getFalseBlock()));
         }
     }
 }

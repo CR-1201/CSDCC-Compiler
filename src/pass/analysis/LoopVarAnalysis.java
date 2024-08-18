@@ -7,6 +7,8 @@ import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Phi;
 import ir.instructions.terminatorInstructions.Br;
 
+import java.util.HashSet;
+
 /**
  * 循环归纳变量分析
  */
@@ -19,13 +21,17 @@ public class LoopVarAnalysis {
     }
     private void analyzeInductionVar(Loop loop) {
         if (!loop.isSimpleLoop()) {
-            return;
+            analyzeNormalLoopInductionVar(loop);
+        } else {
+            analyzeSimpleLoopInductionVar(loop);
         }
+    }
+
+    private void analyzeSimpleLoopInductionVar(Loop loop) {
         BasicBlock header = loop.getHeader();
-        if (!(header.getTailInstruction() instanceof Br)) {
+        if (!(header.getTailInstruction() instanceof Br headBr && headBr.getHasCondition())) {
             return;
         }
-        Br headBr = (Br) header.getTailInstruction();
         Icmp cond = (Icmp) headBr.getCond();
         Phi idcVar = null;
         Value idcEnd = null;
@@ -74,6 +80,47 @@ public class LoopVarAnalysis {
 //                System.out.println(idcStep);
 //                System.out.println(cond);
             }
+        }
+    }
+
+    private void analyzeNormalLoopInductionVar(Loop loop) {
+        BasicBlock header = loop.getHeader();
+        if (!(header.getTailInstruction() instanceof Br headBr && headBr.getHasCondition())) {
+            return;
+        }
+        Icmp cond = (Icmp) headBr.getCond();
+        Phi idcVar = null;
+        Value idcEnd = null;
+        Value idcAlu = null, idcInit = null;
+        if (cond.getOperator(0) instanceof Phi phi) {
+            idcVar = phi;
+            idcEnd = cond.getOperator(1);
+        } else if (cond.getOperator(1) instanceof Phi phi) {
+            idcVar = phi;
+            idcEnd = cond.getOperator(0);
+        } else {
+            return;
+        }
+        if (idcVar.getParent() != header) {
+            return;
+        }
+        if (loop.getEnterings().size() != 1) {
+            return;
+        }
+        BasicBlock entering = loop.getEnterings().iterator().next();
+        for (BasicBlock prec : header.getPrecursors()) {
+            if (prec == entering) {
+                int index = idcVar.getOperators().indexOf(prec) - idcVar.getPrecursorNum();
+                idcInit = idcVar.getOperator(index);
+            }
+        }
+        if (idcVar != null && idcInit != null && idcEnd != null) {
+            loop.setInductorVarPartially(idcVar, idcEnd, idcInit, cond);
+//                System.out.println("======= loop : " + loop.getId() + " =======");
+//                System.out.println(idcVar);
+//                System.out.println(idcEnd);
+//                System.out.println(idcInit);
+//                System.out.println(cond);
         }
     }
 }

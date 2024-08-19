@@ -37,7 +37,7 @@ public class PassManager {
         passes.add(new MemoryOptimize());
         passes.add(new GepFuse());
         passes.add(new LocalArrayLift());
-        passes.add(new ConstArrayFold()); // ConstArrayFlod 前面必须有Gep Fuse
+        passes.add(new ConstArrayFold()); // ConstArrayFold 前面必须有Gep Fuse
 
         passes.add(new SCCP());
         passes.add(new SimplifyInst());
@@ -45,6 +45,8 @@ public class PassManager {
         passes.add(new CSE());
         passes.add(new CFG());
         passes.add(new TailRecursionElimination());
+        passes.add(new Peephole());
+        passes.add(new ADCE());
 //        passes.add(new LoopMemset()); // 后端测的时候记得打开, 中端版本过低, 不要打开
         passes.add(new ConstFunctionReplace());
         passes.add(new InlineFunction());
@@ -124,9 +126,18 @@ public class PassManager {
         BasicPass();
         passes.add(new Pattern.Pattern4());
 
-        passes.add(new Parallel());
+        // passes.add(new Parallel());
 
-        passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
+        /* 针对-1 */
+        passes.add(new SimplifyInst());
+        passes.add(new MathOptimize());
+        passes.add(new MergeBlocks());
+        passes.add(new DeadCodeEmit());
+
+        passes.add(new GepSplit());
+        BasicPass();
+
+//        passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
         passes.add(new CFG());
         passes.add(new Dom());
 

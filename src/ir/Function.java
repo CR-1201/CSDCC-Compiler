@@ -26,6 +26,8 @@ public class Function extends Value{
     public static Function putarray = null;
     public static Function putfarray = null;
 
+    public static Function llmmod = null;
+
     // 并行相关函数
     public static Function startparallel = null;
     public static Function endparallel = null;

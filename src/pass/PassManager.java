@@ -126,6 +126,8 @@ public class PassManager {
         passes.add(new Pattern.Pattern4());
 
         passes.add(new Parallel());
+        passes.add(new GepSplit());
+        BasicPass();
 
         passes.add(new Branch2Switch()); // Branch2Switch 前面一定要有一个 SCCP / BasicPass
 

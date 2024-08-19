@@ -24,6 +24,7 @@ public class LoopUnroll implements Pass {
     private final BlockUtil blockUtil = new BlockUtil();
     private final CloneUtil cloneUtil = new CloneUtil();
     private boolean isUnrolled = false;
+    private final int LOOP_MAX_COUNT = 128;
     private final int LOOP_MAX_LINE = 8000;
 
     private BasicBlock header;
@@ -115,7 +116,11 @@ public class LoopUnroll implements Pass {
             uselessLoop = true;
             return;
         } else {
-            loop.setLoopTimes(loopTimes);
+            if (loopTimes <= LOOP_MAX_COUNT) {
+                loop.setLoopTimes(loopTimes);
+            } else {
+                return;
+            }
         }
         if (!initUnroll(loop)) {
             return;

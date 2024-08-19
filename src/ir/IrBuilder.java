@@ -330,7 +330,7 @@ public class IrBuilder {
         return call;
     }
 
-    public void buildCallBeforeInstr(BasicBlock parent, Function function, ArrayList<Value> args, Instruction before){
+    public Call buildCallBeforeInstr(BasicBlock parent, Function function, ArrayList<Value> args, Instruction before){
         Call call;
         if (function.getReturnType() instanceof VoidType) {
             // 没有返回值
@@ -340,6 +340,7 @@ public class IrBuilder {
             call = new Call(nameNumCounter++, parent, function, args);
             parent.insertBefore(call, before);
         }
+        return call;
     }
 
     public Br buildBr(BasicBlock parent, BasicBlock target){

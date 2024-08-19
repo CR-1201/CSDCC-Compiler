@@ -20,10 +20,14 @@ public class Icmp extends BinaryInstruction {
     }
 
     // icmp 的类型
-    private final Condition condition;
+    private Condition condition;
 
     public Condition getCondition(){
         return condition;
+    }
+
+    public void setCondition(Condition condition) {
+        this.condition = condition;
     }
 
     public String getConditionString(boolean flag,Condition condition){

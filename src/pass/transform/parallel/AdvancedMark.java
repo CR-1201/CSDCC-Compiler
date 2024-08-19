@@ -16,6 +16,7 @@ import ir.instructions.terminatorInstructions.Br;
 import ir.types.IntType;
 import pass.Pass;
 import pass.analysis.Loop;
+import pass.analysis.LoopVarAnalysis;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -96,6 +97,7 @@ public class AdvancedMark implements Pass {
         idcVars.clear();
         loops.clear();
         dfs(loop);
+        preModifyEndCondition(loop);
     }
 
     /*
@@ -235,9 +237,9 @@ public class AdvancedMark implements Pass {
         if (idcEnd instanceof ConstInt) {  // 终止值为ConstInt
             return;
         }
-        if (((ConstInt) idcInit).getValue() != 0) {  // 初始值为0
-            return;
-        }
+//        if (((ConstInt) idcInit).getValue() != 0) {  // 初始值为0
+//            return;
+//        }
         if (loop.getEnterings().size() > 1) {
             return;
         }
@@ -278,19 +280,24 @@ public class AdvancedMark implements Pass {
         Call startCall = null;
         Mul mul1;
         Add add1;
+        Sub endSubInit = irBuilder.buildSub(startBlock, new IntType(32), idcEnd, idcInit);
         if (ENABLE_PARALLEL) {
-            startCall = irBuilder.buildCall(startBlock, Function.startparallel, new ArrayList<>());
-            mul1 = irBuilder.buildMul(startBlock, new IntType(32), startCall, idcEnd);
+            startCall = irBuilder.buildCallBeforeInstr(startBlock, Function.startparallel, new ArrayList<>(), endSubInit);
+            mul1 = irBuilder.buildMul(startBlock, new IntType(32), startCall, endSubInit);
             add1 = irBuilder.buildAdd(startBlock, new IntType(32), startCall, new ConstInt(1));
         } else {
             mul1 = irBuilder.buildMul(startBlock, new IntType(32), new ConstInt(0), idcEnd);
             add1 = irBuilder.buildAdd(startBlock, new IntType(32), new ConstInt(0), new ConstInt(1));
         }
+
         Sdiv div1 = irBuilder.buildSdiv(startBlock, new IntType(32), mul1, new ConstInt(PARALLEL_NUM));
-        modifyPhi(idcVar, loopEntering, div1);
-        Mul mul2 = irBuilder.buildMul(startBlock, new IntType(32), add1, idcEnd);
+        Add parallelInitVal = irBuilder.buildAdd(startBlock, new IntType(32), div1, idcInit);  // 并行循环初始值
+        modifyPhi(idcVar, loopEntering, parallelInitVal);
+
+        Mul mul2 = irBuilder.buildMul(startBlock, new IntType(32), add1, endSubInit);
         Sdiv div2 = irBuilder.buildSdiv(startBlock, new IntType(32), mul2, new ConstInt(PARALLEL_NUM));
-        cond.setOperator(1, div2);
+        Add parallelEndVal = irBuilder.buildAdd(startBlock, new IntType(32), div2, idcInit);  // 并行循环终止值
+        cond.setOperator(1, parallelEndVal);
         irBuilder.buildBr(startBlock, loopHeader);
 
         modifyBr(loopEntering, loopHeader, startBlock);
@@ -374,6 +381,31 @@ public class AdvancedMark implements Pass {
 
     private static boolean isSoftIdcInfoSet(Loop loop) {
         return loop.getIdcEnd() != null && loop.getIdcInit() != null && loop.getIdcVar() != null;
+    }
+
+    private void preModifyEndCondition(Loop loop) {
+        Value var = loop.getIdcVar();
+        Value end = loop.getIdcEnd();
+        Icmp comp = loop.getCond();
+        if (var == null || end == null || comp == null) {
+            return;
+        }
+        if (!(var instanceof Phi phiVar) || !(phiVar.getValueType() instanceof IntType) || !(end.getValueType() instanceof IntType)) {
+            return;
+        }
+        if (comp.getCondition().equals(Icmp.Condition.LE)) { // 把 <= 改成 <
+            if (!(end.getParent() instanceof BasicBlock endDefineBlock)) {
+                return;
+            }
+            Function curFunction = endDefineBlock.getParent();
+            if (curFunction == null) {
+                return;
+            }
+            Add endAddInstr = irBuilder.buildAddBeforeTail(endDefineBlock, new IntType(32), end, new ConstInt(1));
+            comp.setOperator(1, endAddInstr);
+            comp.setCondition(Icmp.Condition.LT);
+            new LoopVarAnalysis().loopVarAnalysis(curFunction);
+        }
     }
 
 }

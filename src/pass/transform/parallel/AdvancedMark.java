@@ -184,7 +184,7 @@ public class AdvancedMark implements Pass {
         }
         for (BasicBlock block : loop.getAllBlocks()) {
             for (Instruction instruction : block.getInstructionsArray()) {
-                if (instruction instanceof Phi phiInstr && !idcVars.contains(phiInstr)) {
+                if (instruction instanceof Phi phiInstr && !idcVars.contains(phiInstr) && !isWithinLoop(phiInstr, loop)) {
                     return false;  // TODO 需要加强
                 }
             }
@@ -275,6 +275,17 @@ public class AdvancedMark implements Pass {
     }
 
     // =========================================== below are util functions ===========================================
+
+    private boolean isWithinLoop(Instruction instruction, Loop loop) {
+        for (User user : instruction.getUsers()) {
+            if (user.getParent() instanceof BasicBlock userBlock) {
+                if (!loop.getAllBlocks().contains(userBlock)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     private Call prepareParallelStart(BasicBlock startBlock) {
         Call startCall = null;

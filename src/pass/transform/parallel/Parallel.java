@@ -53,7 +53,7 @@ public class Parallel implements Pass {
             }
         }
 
-//        new BasicMark().run();
+        new BasicMark().run();
         new AdvancedMark().run();
     }
 

@@ -61,12 +61,29 @@ public class Loop {
     private Value initValue = null;
     private HashSet<Instruction> extras = null;
 
+    // ========================= parallel =========================
+    private boolean isMarkedParallel;
+
     public void setArrayInitInfo(int arrayInitDims, Value initArray, Value initValue, HashSet<Instruction> extras) {
         this.isArrayInit = true;
         this.arrayInitDims = arrayInitDims;
         this.initArray = initArray;
         this.initValue = initValue;
         this.extras = extras;
+    }
+
+    public boolean getParallel() {
+        return isMarkedParallel;
+    }
+
+    public void setParallel() {
+        helper(this);
+    }
+    private void helper(Loop loop) {
+        loop.isMarkedParallel = true;
+        for (Loop subLoop : loop.getChildren()) {
+            helper(subLoop);
+        }
     }
 
     public HashSet<Instruction> getExtras() {

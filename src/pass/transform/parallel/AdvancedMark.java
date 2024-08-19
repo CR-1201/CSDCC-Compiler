@@ -68,6 +68,9 @@ public class AdvancedMark implements Pass {
     }
 
     private boolean checkBeforeMark(Loop loop) {
+        if (loop.getParallel()) {
+            return false;
+        }
         if (loop.getDepth() > MAX_PARALLEL_DEPTH) {  // 限制并行的循环深度
             return false;
         }
@@ -158,11 +161,16 @@ public class AdvancedMark implements Pass {
         for (User user : currentLoopVar.getUsers()) {
             if (user instanceof Add || user instanceof Sub || user instanceof Mul || user instanceof Sdiv) {
                 Instruction instruction = (Instruction) user;
-                if (instruction.getUsers().size() != 1) {
-                    return false;
-                }
-                if (instruction.getUsers().iterator().next() != currentLoopVar) {
-                    return false;
+//                if (instruction.getUsers().size() != 1) {
+//                    return false;
+//                }
+//                if (instruction.getUsers().iterator().next() != currentLoopVar) {
+//                    return false;
+//                }
+                for (User user1 : instruction.getUsers()) {
+                    if (user1 != currentLoopVar && !(user1 instanceof GEP)) {
+                        return false;
+                    }
                 }
             } else if (user instanceof Store storeInstr) {
                 if (!(storeInstr.getAddr() instanceof GEP)) {
@@ -336,16 +344,20 @@ public class AdvancedMark implements Pass {
     }
 
     HashSet<Store> storeSet = new HashSet<>();
+    HashSet<User> visitedUsers = new HashSet<>();
     private HashSet<Store> load2Stores(Load loadInstr) {
+        storeSet.clear();
+        visitedUsers.clear();
         helper1(loadInstr);
         return storeSet;
     }
     private void helper1(Instruction instruction) {
         for (User user : instruction.getUsers()) {
-            if (user instanceof Instruction instruction1) {
+            if (!visitedUsers.contains(user) && user instanceof Instruction instruction1) {
                 if (user instanceof Store storeInstr) {
                     storeSet.add(storeInstr);
                 }
+                visitedUsers.add(user);
                 helper1(instruction1);
             }
         }

@@ -153,6 +153,8 @@ public class BasicMark implements Pass {
         Call startCall = prepareParallelStart(parallelStartBlock);
         prepareParallelEnd(parallelEndBlock, startCall);
 
+        loop.setParallel();
+
         knownBlocks.addAll(bbs);
     }
 

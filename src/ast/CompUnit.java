@@ -91,6 +91,13 @@ public class CompUnit extends Node{
             memsetArgs.add(new IntType(32));
             Function.memset = builder.buildFunction("memset", new FunctionType(memsetArgs, new VoidType()), true);
 
+            /*================================ llmmod ================================*/
+            ArrayList<DataType> llmmodArgs = new ArrayList<>();
+            llmmodArgs.add(new IntType(32));
+            llmmodArgs.add(new IntType(32));
+            llmmodArgs.add(new IntType(32));
+            Function.llmmod = builder.buildFunction("llmmod",new FunctionType(llmmodArgs, new IntType(32)),true);
+
             /*================================ putstr ================================*/
 //            ArrayList<DataType> printfArgs = new ArrayList<>();
 //            printfArgs.add(new PointerType(new IntType(8)));

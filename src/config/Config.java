@@ -16,6 +16,8 @@ public class Config {
     public static int parallelProcessNum = 4;
     public static int maxParallelDepth = 1;
 
+    public static boolean enableLLMMod = false;
+
     public static void init(String in,String llvm, String arm) throws IOException {
         fileInputPath = in;
         irOutputPath = llvm;

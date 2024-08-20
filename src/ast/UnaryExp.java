@@ -171,6 +171,7 @@ public class UnaryExp extends Node{
             case "starttime" -> Function.starttime;
             case "stoptime" -> Function.stoptime;
             case "memset" -> Function.memset;
+            case "llmmod" -> Function.llmmod;
             default -> null;
         };
     }

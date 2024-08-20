@@ -79,6 +79,12 @@ public class IrBuilder {
         return block;
     }
 
+    public BasicBlock buildBasicBlockBefore(Function function, BasicBlock before) {
+        BasicBlock block = new BasicBlock(blockNumCounter++, function);
+        function.insertBefore(block, before);
+        return block;
+    }
+
     public Add buildAdd(BasicBlock parent, DataType dataType, Value src1, Value src2){
         Add add = new Add(nameNumCounter++, dataType, parent, src1, src2);
         parent.insertTail(add);

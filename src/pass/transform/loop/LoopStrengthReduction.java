@@ -85,8 +85,14 @@ public class LoopStrengthReduction implements Pass {
                 for ( int i = 0 ; i < n ; i++ ) {
                     BasicBlock incomingBlock = (BasicBlock) phi.getOperator(i+n);
                     if( preHeaderBasicBlock.equals(incomingBlock) ){
-                        inductionVarInfo.preheaderValue = phi.getOperator(i);
-                        preHeaderValue.put(phi,inductionVarInfo.preheaderValue);
+                        Value temp = phi.getOperator(i);
+                        while( temp instanceof Phi p ){ // 这里很激进
+                            temp = p.getOperator(i);
+                        }
+                        if( temp instanceof ConstInt ){
+                            inductionVarInfo.preheaderValue = temp;
+                            preHeaderValue.put(phi,inductionVarInfo.preheaderValue);
+                        }
                     } else {
                         incrementBasicBlock = incomingBlock;
                     }
@@ -142,8 +148,6 @@ public class LoopStrengthReduction implements Pass {
                                 int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
                                 newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum * newFactor);
                             }
-//                            int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
-//                            newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum * newFactor);
 
 //                            System.out.println(newIdcVarInfo.preheaderValue);
                             inductionMap.put(mul,newIdcVarInfo);
@@ -157,6 +161,8 @@ public class LoopStrengthReduction implements Pass {
                                 usedPhiMap.put(phi,temp);
                                 newIdcVarInfo.preheaderValue = preHeaderValue.get(phi);
                             } else {
+//                                System.out.println(variable);
+//                                System.out.println(idcVarOld.preheaderValue);
                                 int idcVarOldNum = ((ConstInt)idcVarOld.preheaderValue).getValue();
                                 newIdcVarInfo.preheaderValue = new ConstInt(idcVarOldNum + newFactor);
                             }
@@ -181,9 +187,9 @@ public class LoopStrengthReduction implements Pass {
                         Value right = binary.getOp2();
                         Value variable;
 
-                        if( left instanceof ConstInt){
+                        if( left instanceof ConstInt ){
                             variable = right;
-                        } else if( right instanceof ConstInt){
+                        } else if( right instanceof ConstInt ){
                             variable = left;
                         } else continue;
 

@@ -9,10 +9,8 @@ import ir.instructions.Instruction;
 import ir.instructions.binaryInstructions.*;
 import ir.instructions.otherInstructions.Conversion;
 import ir.instructions.otherInstructions.Zext;
-import ir.types.DataType;
 import ir.types.FloatType;
 import ir.types.IntType;
-import ir.types.ValueType;
 import pass.Pass;
 
 import java.util.ArrayList;
@@ -351,24 +349,56 @@ public class SimplifyInst implements Pass {
 
         if( intFlag ){
 
+
+            // ( x + const1 ) * const2 = x * const2 + const1 * const2
+            // ( const1 + x ) * const2 = x * const2 + const1 * const2
+            if( v1 instanceof Add add ){
+                Value v1_1 = add.getOperator(0), v1_2 = add.getOperator(1);
+                Add a;
+                if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2 ){
+                    Mul mul = builder.buildMulBeforeInstr(inst.getParent(),new IntType(32),v1_1,constInt2,inst);
+                    return builder.buildAddBeforeInstr(inst.getParent(),new IntType(32),mul,new ConstInt(constInt1.getValue() * constInt2.getValue()),inst);
+                } else if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2 ){
+                    Mul mul = builder.buildMulBeforeInstr(inst.getParent(),new IntType(32),v1_2,constInt2,inst);
+                    return builder.buildAddBeforeInstr(inst.getParent(),new IntType(32),mul,new ConstInt(constInt1.getValue() * constInt2.getValue()),inst);
+                }
+                return inst;
+            }
+
+            // ( x - const1 ) * const2 = x * const2 - const1 * const2
+            // ( const1 - x ) * const2 = const1 * const2 - x * const2
+            if( v1 instanceof Sub sub ){
+                Value v1_1 = sub.getOperator(0), v1_2 = sub.getOperator(1);
+                Sub s;
+                if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2 ){
+                    Mul mul = builder.buildMulBeforeInstr(inst.getParent(),new IntType(32),v1_1,constInt2,inst);
+                    return builder.buildSubBeforeInstr(inst.getParent(),new IntType(32),mul,new ConstInt(constInt1.getValue() * constInt2.getValue()),inst);
+                } else if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2 ){
+                    Mul mul = builder.buildMulBeforeInstr(inst.getParent(),new IntType(32),v1_2,constInt2,inst);
+                    return builder.buildSubBeforeInstr(inst.getParent(),new IntType(32),new ConstInt(constInt1.getValue() * constInt2.getValue()),mul,inst);
+                }
+                return inst;
+            }
+
             // (x * const1) * const2 = x * (const1 * const2)
             // (const1 * x) * const2 = x * (const1 * const2)
-            if( v1 instanceof Mul mul){
+            if( v1 instanceof Mul mul ){
                 Value v1_1 = mul.getOperator(0), v1_2 = mul.getOperator(1);
                 if( v1_2 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
                     inst.replaceOperator(v1,v1_1);
-                    inst.replaceOperator(v2,new ConstInt(constInt1.getValue()*constInt2.getValue()));
+                    inst.replaceOperator(v2,new ConstInt(constInt1.getValue() * constInt2.getValue()));
                     return inst;
                 }
                 if( v1_1 instanceof ConstInt constInt1 && v2 instanceof ConstInt constInt2){
                     inst.replaceOperator(v1,v1_2);
-                    inst.replaceOperator(v2,new ConstInt(constInt1.getValue()*constInt2.getValue()));
+                    inst.replaceOperator(v2,new ConstInt(constInt1.getValue() * constInt2.getValue()));
                     return inst;
                 }
             }
 
+            // 激进的情况下,可以尝试浮点数也用乘法结合律
             // (x * y) * z = x * (y * z)
-            if( v1 instanceof Mul mul){
+            if( v1 instanceof Mul mul ){
                 if( v1.getUsers().size() > 1 ){ //如果已经是公共子表达式
                     return inst;
                 }
@@ -376,9 +406,9 @@ public class SimplifyInst implements Pass {
                 inst.replaceOperator(v1,v1_1);
                 Mul mul1;
                 if( v1_2.getValueType() instanceof IntType && v2.getValueType() instanceof IntType ){
-                    mul1 = builder.buildMulBeforeInstr(mul.getParent(), new IntType(32), v1_2, v2, inst);
+                    mul1 = builder.buildMulBeforeInstr(inst.getParent(), new IntType(32), v1_2, v2, inst);
                 } else {
-                    mul1 = builder.buildMulBeforeInstr(mul.getParent(), new FloatType(), v1_2, v2, inst);
+                    mul1 = builder.buildMulBeforeInstr(inst.getParent(), new FloatType(), v1_2, v2, inst);
                 }
                 inst.replaceOperator(v2,mul1);
                 inst.replaceOperator(v1_1,v1_1);
@@ -394,15 +424,16 @@ public class SimplifyInst implements Pass {
                 inst.replaceOperator(v2,v2_2);
                 Mul mul1;
                 if( v2_1.getValueType() instanceof IntType && v1.getValueType() instanceof IntType ){
-                    mul1 = builder.buildMulBeforeInstr(mul.getParent(), new IntType(32), v1, v2_1, inst);
+                    mul1 = builder.buildMulBeforeInstr(inst.getParent(), new IntType(32), v1, v2_1, inst);
                 } else {
-                    mul1 = builder.buildMulBeforeInstr(mul.getParent(), new FloatType(), v1, v2_1, inst);
+                    mul1 = builder.buildMulBeforeInstr(inst.getParent(), new FloatType(), v1, v2_1, inst);
                 }
                 inst.replaceOperator(v1,mul1);
                 inst.replaceOperator(v2_2,v2_2);
                 return inst;
             }
         }
+
 
 
         return inst;
